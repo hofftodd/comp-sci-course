@@ -117,4 +117,5 @@ relying on it for teaching.
 
 ## License
 
-This repository does not include a license yet.
+[MIT](LICENSE), covering the code and the lesson content in this repository. The works listed on
+the Sources page are not part of this repository and keep their own licenses.
