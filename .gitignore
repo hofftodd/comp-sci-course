@@ -1,0 +1,9 @@
+# Self-hosted server: local settings and student data
+server/config.json
+server/data/
+
+# Editors and OS
+.DS_Store
+.vscode/
+.idea/
+node_modules/

@@ -1,0 +1,52 @@
+{
+  "_comment": "Copy to config.json and edit. A provider is offered only if its API key environment variable is set (local providers need none). Model ids change often: check each provider's current model list.",
+  "host": "127.0.0.1",
+  "port": 8080,
+  "siteDir": "..",
+  "dataDir": "./data",
+  "trustProxy": false,
+  "maxOutputTokens": 1500,
+  "maxOutputTokensDraft": 4000,
+  "rateLimit": { "perMinute": 10, "perDay": 300 },
+  "default": { "provider": "anthropic", "model": "claude-sonnet-5-5" },
+  "providers": [
+    {
+      "id": "anthropic", "type": "anthropic", "label": "Anthropic", "apiKeyEnv": "ANTHROPIC_API_KEY",
+      "models": [
+        { "id": "claude-sonnet-5-5", "label": "Claude Sonnet 5.5" },
+        { "id": "claude-haiku-5-5", "label": "Claude Haiku 5.5 (fast)" },
+        { "id": "claude-opus-5-5", "label": "Claude Opus 5.5 (most capable)" }
+      ]
+    },
+    {
+      "id": "openai", "type": "openai", "label": "OpenAI", "apiKeyEnv": "OPENAI_API_KEY",
+      "baseUrl": "https://api.openai.com/v1", "maxTokensField": "max_completion_tokens", "jsonMode": true,
+      "models": [
+        { "id": "gpt-5-mini", "label": "GPT-5 mini" },
+        { "id": "gpt-5", "label": "GPT-5" }
+      ]
+    },
+    {
+      "id": "google", "type": "google", "label": "Google", "apiKeyEnv": "GEMINI_API_KEY",
+      "models": [
+        { "id": "gemini-2.5-flash", "label": "Gemini 2.5 Flash" },
+        { "id": "gemini-2.5-pro", "label": "Gemini 2.5 Pro" }
+      ]
+    },
+    {
+      "id": "ollama", "type": "openai", "label": "Local (Ollama)", "baseUrl": "http://localhost:11434/v1",
+      "enabled": false,
+      "models": [
+        { "id": "llama3.1:8b", "label": "Llama 3.1 8B" },
+        { "id": "qwen2.5-coder:7b", "label": "Qwen 2.5 Coder 7B" }
+      ]
+    },
+    {
+      "id": "lmstudio", "type": "openai", "label": "Local (LM Studio)", "baseUrl": "http://localhost:1234/v1",
+      "enabled": false,
+      "models": [
+        { "id": "local-model", "label": "Model loaded in LM Studio" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,774 @@
+<title>First Principles CS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a course-catalog shell. Fixed left index of the term (courses → units),
+   reading column on the right; sidebars sit in a rail beside the notes on wide screens. */
+:root {
+  --bg: #f4f5f2;
+  --surface: #ffffff;
+  --sunk: #eceee9;
+  --ink: #18222b;
+  --muted: #59646d;
+  --rule: #d8dcd5;
+  --accent: #1d6a63;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcebe8;
+  --mark: #e7b04a;
+  --good: #2e7d4f;
+  --good-soft: #def0e4;
+  --bad: #b23b3b;
+  --bad-soft: #f6e0df;
+  --k-history: #8a5a24;
+  --k-history-soft: #f4ebdd;
+  --k-ethics: #7d3b6f;
+  --k-ethics-soft: #f2e3ee;
+  --k-lang: #1d6a63;
+  --k-lang-soft: #dcebe8;
+  --k-practice: #39577e;
+  --k-practice-soft: #e1e8f2;
+  --k-deep: #4b5563;
+  --k-deep-soft: #e7e9ec;
+  --code-bg: #eef1ed;
+  --f-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem; --s-6: 2rem; --s-7: 3rem;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171a; --surface: #182024; --sunk: #1e272c; --ink: #e5e9e6; --muted: #9aa6ad; --rule: #2c373d;
+    --accent: #5fbcb1; --accent-ink: #0d1a18; --accent-soft: #1d3634; --mark: #e7b04a;
+    --good: #6cc48f; --good-soft: #1b3326; --bad: #ec8b84; --bad-soft: #3a2222;
+    --k-history: #d9a866; --k-history-soft: #2f271c; --k-ethics: #d79ac6; --k-ethics-soft: #33222f;
+    --k-lang: #5fbcb1; --k-lang-soft: #1d3634; --k-practice: #94b4dc; --k-practice-soft: #1f2a38;
+    --k-deep: #b4bcc6; --k-deep-soft: #262d33; --code-bg: #1d2529;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171a; --surface: #182024; --sunk: #1e272c; --ink: #e5e9e6; --muted: #9aa6ad; --rule: #2c373d;
+  --accent: #5fbcb1; --accent-ink: #0d1a18; --accent-soft: #1d3634; --mark: #e7b04a;
+  --good: #6cc48f; --good-soft: #1b3326; --bad: #ec8b84; --bad-soft: #3a2222;
+  --k-history: #d9a866; --k-history-soft: #2f271c; --k-ethics: #d79ac6; --k-ethics-soft: #33222f;
+  --k-lang: #5fbcb1; --k-lang-soft: #1d3634; --k-practice: #94b4dc; --k-practice-soft: #1f2a38;
+  --k-deep: #b4bcc6; --k-deep-soft: #262d33; --code-bg: #1d2529;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.6; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, input:focus-visible + span, summary:focus-visible, select:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+code { font-family: var(--f-mono); font-size: 0.88em; background: var(--code-bg); padding: 0.08em 0.3em; border-radius: 3px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+
+/* Top bar */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--rule);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: var(--s-3); }
+.topbar-in { display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap; max-width: 1320px; margin: 0 auto; }
+.brand { display: flex; align-items: baseline; gap: var(--s-2); text-decoration: none; color: var(--ink); margin-right: auto; }
+.brand b { font-family: var(--f-display); font-size: 1.3rem; font-weight: 700; }
+.brand span { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.lang-pick { display: flex; align-items: center; gap: var(--s-2); font-size: 0.85rem; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.seg button { font: inherit; font-size: 0.82rem; font-weight: 600; border: 0; background: transparent; color: var(--ink); padding: 0.3rem 0.7rem; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.toplink { font-size: 0.88rem; font-weight: 600; text-decoration: none; }
+.menu-btn { display: none; font: inherit; font-size: 0.85rem; font-weight: 600; background: var(--sunk); color: var(--ink); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.3rem 0.7rem; cursor: pointer; }
+
+/* Shell */
+.shell { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: var(--s-6); max-width: 1320px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: var(--s-5) calc(var(--s-7) + 4.5rem + env(safe-area-inset-bottom, 0px)); }
+.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); align-self: start; max-height: calc(100vh - 96px); overflow-y: auto; font-size: 0.9rem; padding-right: var(--s-2); }
+.index h2 { font-family: var(--f-body); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: var(--s-2); }
+.index details { border-top: 1px solid var(--rule); padding-block: var(--s-2); }
+.index summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: auto 1fr auto; gap: var(--s-2); align-items: baseline; }
+.index summary::-webkit-details-marker { display: none; }
+.index summary .code { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); }
+.index summary .t { font-weight: 600; }
+.index summary .pct { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.index ol { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: 1px; }
+.index li a { display: grid; grid-template-columns: 1.1rem 1fr; gap: var(--s-2); padding: 0.25rem 0.4rem; border-radius: 4px; text-decoration: none; color: var(--ink); }
+.index li a:hover { background: var(--sunk); }
+.index li a[aria-current="page"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.index .tick { color: var(--muted); font-size: 0.8rem; }
+.index .tick.done { color: var(--good); }
+.index .sub { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: var(--s-2) 0.4rem 0; }
+
+main { min-width: 0; }
+
+/* Shared bits */
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.crumbs { font-size: 0.85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.crumbs a { color: var(--muted); }
+.chip { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.12rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; line-height: 1.5; }
+.chip.req { color: var(--accent); }
+.chip.opt { color: var(--muted); }
+.chip.k-history { color: var(--k-history); background: var(--k-history-soft); border-color: transparent; }
+.chip.k-ethics { color: var(--k-ethics); background: var(--k-ethics-soft); border-color: transparent; }
+.chip.k-lang { color: var(--k-lang); background: var(--k-lang-soft); border-color: transparent; }
+.chip.k-practice { color: var(--k-practice); background: var(--k-practice-soft); border-color: transparent; }
+.chip.k-deep { color: var(--k-deep); background: var(--k-deep-soft); border-color: transparent; }
+.bar { height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.btn { font: inherit; font-weight: 600; font-size: 0.92rem; border-radius: var(--radius); padding: 0.5rem 1rem; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn.done { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+
+/* Home */
+.hero { display: grid; gap: var(--s-3); padding-bottom: var(--s-5); border-bottom: 1px solid var(--rule); margin-bottom: var(--s-5); }
+.hero h1 { font-size: clamp(2rem, 4.4vw, 3.1rem); font-weight: 700; letter-spacing: -0.01em; }
+.hero p { max-width: 62ch; margin: 0; color: var(--muted); font-size: 1.05rem; }
+.hero .stats { display: flex; flex-wrap: wrap; gap: var(--s-5); margin-top: var(--s-2); font-size: 0.9rem; }
+.hero .stats b { font-family: var(--f-display); font-size: 1.5rem; display: block; font-variant-numeric: tabular-nums; }
+.section-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; margin-bottom: var(--s-4); }
+.section-h h2 { font-size: 1.5rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-4); margin-bottom: var(--s-7); }
+.card { display: grid; gap: var(--s-2); align-content: start; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4); text-decoration: none; color: var(--ink); }
+.card:hover { border-color: var(--accent); }
+.card .row { display: flex; justify-content: space-between; align-items: center; gap: var(--s-2); }
+.card .code { font-family: var(--f-mono); font-size: 0.8rem; color: var(--muted); }
+.card h3 { font-size: 1.25rem; }
+.card p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.card .meta { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card.planned { background: transparent; border-style: dashed; }
+
+.plan { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); margin-bottom: var(--s-5); }
+.term { border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-3); font-size: 0.85rem; display: grid; gap: var(--s-2); align-content: start; }
+.term.open { border-color: var(--accent); background: var(--surface); }
+.term h3 { font-family: var(--f-body); font-size: 0.82rem; font-weight: 700; display: flex; justify-content: space-between; gap: var(--s-2); }
+.term h3 small { font-weight: 500; color: var(--muted); }
+.term ul { margin: 0; padding-left: 1.1rem; color: var(--muted); }
+.term.open ul { color: var(--ink); }
+.term a { text-decoration: none; }
+.note { font-size: 0.9rem; color: var(--muted); max-width: 70ch; }
+
+/* Course page */
+.course-head { display: grid; gap: var(--s-3); margin-bottom: var(--s-5); }
+.course-head h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+.course-head .lede { font-size: 1.05rem; max-width: 66ch; margin: 0; }
+.course-head .facts { display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-5); font-size: 0.88rem; color: var(--muted); }
+.course-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s-6); }
+.unit-list { list-style: none; padding: 0; margin: 0 0 var(--s-6); border-top: 1px solid var(--rule); }
+.unit-list li { border-bottom: 1px solid var(--rule); }
+.unit-list a { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) auto; gap: var(--s-3); padding: var(--s-3) var(--s-2); text-decoration: none; color: var(--ink); align-items: start; }
+.unit-list a:hover { background: var(--surface); }
+.unit-list .n { font-family: var(--f-display); font-size: 1.3rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.unit-list .n.done { color: var(--good); }
+.unit-list b { display: block; font-weight: 600; }
+.unit-list span.s { display: block; font-size: 0.88rem; color: var(--muted); }
+.unit-list .m { font-size: 0.8rem; color: var(--muted); white-space: nowrap; text-align: right; display: grid; gap: 4px; justify-items: end; }
+.unit-list .chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 220px; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4); font-size: 0.9rem; display: grid; gap: var(--s-3); align-content: start; }
+.panel h3 { font-family: var(--f-body); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.panel ul { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--s-1); }
+.empty { border: 1px dashed var(--rule); border-radius: var(--radius); padding: var(--s-5); color: var(--muted); }
+
+/* Unit page */
+.unit-head { display: grid; gap: var(--s-3); margin-bottom: var(--s-5); max-width: 72ch; }
+.unit-head h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.unit-head .lede { margin: 0; font-size: 1.08rem; color: var(--muted); }
+.unit-head .facts { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); align-items: center; font-size: 0.85rem; color: var(--muted); }
+.unit-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s-6); align-items: start; }
+.notes { max-width: 72ch; min-width: 0; }
+.notes > * + * { margin-top: var(--s-4); }
+.notes h3 { font-size: 1.35rem; margin-top: var(--s-6); }
+.notes [data-only]:not(.langnote) { display: grid; gap: var(--s-4); }
+.notes [data-only]:not(.langnote) > * { margin: 0; }
+.notes h4 { font-family: var(--f-display); font-size: 1.12rem; margin: var(--s-5) 0 0; }
+.notes p, .notes ul, .notes ol { margin-bottom: 0; }
+.notes ul, .notes ol { padding-left: 1.3rem; }
+.notes li + li { margin-top: var(--s-1); }
+.notes .math { font-family: var(--f-display); font-size: 1.12rem; text-align: center; padding: var(--s-2); }
+.notes table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.tbl { overflow-x: auto; }
+.notes th, .notes td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.notes th { font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.callout { background: var(--accent-soft); border-radius: var(--radius); padding: var(--s-3) var(--s-4); }
+pre { margin: 0; background: var(--code-bg); border-radius: var(--radius); padding: var(--s-3) var(--s-4); overflow-x: auto; font-size: 0.86rem; line-height: 1.55; }
+pre code { background: none; padding: 0; font-size: inherit; }
+.codebox { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.codebox pre { border-radius: 0; }
+.codebox .tabs { display: flex; gap: 0; background: var(--sunk); border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+.codebox .tabs button { font: inherit; font-size: 0.78rem; font-weight: 600; border: 0; background: transparent; color: var(--muted); padding: 0.35rem 0.8rem; cursor: pointer; border-bottom: 2px solid transparent; }
+.codebox .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.codebox .missing { font-size: 0.78rem; color: var(--muted); padding: 0.35rem 0.8rem; background: var(--sunk); border-top: 1px solid var(--rule); }
+.pyonly, .labeled { position: relative; }
+.labeled::before { content: attr(data-label); }
+.pyonly::before { content: "Python"; }
+.pyonly::before, .labeled::before { position: absolute; top: 6px; right: 8px; font-family: var(--f-body); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.langnote { background: var(--k-lang-soft); border-radius: var(--radius); padding: var(--s-2) var(--s-3); font-size: 0.92rem; }
+
+.rail { display: grid; gap: var(--s-4); position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); max-height: calc(100vh - 96px); overflow-y: auto; }
+.rail-h { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.aside { border-radius: var(--radius); padding: var(--s-3) var(--s-4); font-size: 0.88rem; display: grid; gap: var(--s-2); background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--k-deep); }
+.aside.k-history { border-top-color: var(--k-history); }
+.aside.k-ethics { border-top-color: var(--k-ethics); }
+.aside.k-lang { border-top-color: var(--k-lang); }
+.aside.k-practice { border-top-color: var(--k-practice); }
+.aside h4 { margin: 0; font-family: var(--f-display); font-size: 1.05rem; line-height: 1.25; }
+.aside p { margin: 0; }
+.aside .src { font-size: 0.78rem; color: var(--muted); }
+
+.block { margin-top: var(--s-7); max-width: 72ch; }
+.block > h2 { font-size: 1.45rem; margin-bottom: var(--s-3); }
+.terms { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-2) var(--s-4); margin: 0; font-size: 0.93rem; }
+.terms dt { font-weight: 700; }
+.terms dd { margin: 0; color: var(--muted); }
+
+.quiz { display: grid; gap: var(--s-4); }
+.q { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4); display: grid; gap: var(--s-3); }
+.q.right { border-color: var(--good); }
+.q.wrong { border-color: var(--bad); }
+.q legend { font-weight: 600; padding: 0; }
+.q fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s-2); min-width: 0; }
+.q label { display: flex; gap: var(--s-2); align-items: flex-start; padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
+.q label:hover { background: var(--sunk); }
+.q label.is-answer { background: var(--good-soft); border-color: var(--good); }
+.q label.is-wrong { background: var(--bad-soft); border-color: var(--bad); }
+.q input { margin-top: 0.35rem; accent-color: var(--accent); }
+.q .why { font-size: 0.9rem; padding: var(--s-2) var(--s-3); border-radius: 4px; background: var(--sunk); }
+.quiz-foot { display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap; }
+.score { font-weight: 700; font-variant-numeric: tabular-nums; }
+.srcs { padding-left: 1.2rem; display: grid; gap: var(--s-2); font-size: 0.92rem; margin: 0; }
+.srcs .lic { color: var(--muted); font-size: 0.82rem; }
+.pager { display: flex; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--rule); max-width: 72ch; }
+.pager a { text-decoration: none; display: grid; font-size: 0.85rem; color: var(--muted); }
+.pager a b { color: var(--accent); font-size: 1rem; }
+.pager .next { text-align: right; margin-left: auto; }
+.finish { display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap; margin-top: var(--s-6); max-width: 72ch; }
+
+/* Sources page */
+.biblio { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.biblio li { padding: var(--s-3) 0; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-1) var(--s-4); }
+.biblio .by { color: var(--muted); font-size: 0.9rem; }
+.biblio .side { font-size: 0.8rem; color: var(--muted); text-align: right; display: grid; gap: 2px; }
+
+
+/* Lesson feedback, clarifications */
+.clarity-row { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
+.clarity-row > span { margin-right: var(--s-2); }
+.clarity-row .btn[aria-pressed="true"] { background: var(--accent-soft); }
+.clar { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--k-practice); border-radius: var(--radius); padding: var(--s-3) var(--s-4); display: grid; gap: var(--s-2); }
+.clar .chip { justify-self: start; }
+.clar h4 { margin: 0; font-family: var(--f-display); font-size: 1.1rem; }
+.clar p, .clar ul, .clar ol { margin: 0; }
+.clar pre.pyonly::before { content: none; }
+
+/* Professor */
+.prof-fab { position: fixed; z-index: 15; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  font: inherit; font-weight: 700; font-size: 0.95rem; padding: 0.7rem 1.1rem; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--ink); color: var(--bg); box-shadow: 0 6px 20px rgb(0 0 0 / 0.18); display: flex; gap: 0.5rem; align-items: center; }
+.prof-fab .dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--mark); }
+.prof { position: fixed; z-index: 20; top: env(safe-area-inset-top, 0px); right: 0; bottom: 0; width: min(440px, 100vw); background: var(--surface); border-left: 1px solid var(--rule);
+  box-shadow: -12px 0 32px rgb(0 0 0 / 0.12); display: flex; flex-direction: column; padding-right: env(safe-area-inset-right, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.prof-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--rule); }
+.prof-head b { font-family: var(--f-display); font-size: 1.25rem; display: block; }
+.prof-head span { font-size: 0.82rem; color: var(--muted); }
+.prof-head span { display: block; }
+.prof-model { display: flex; align-items: center; gap: var(--s-2); margin-top: var(--s-2); }
+.prof-model span { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+.prof-model select, .field { font: inherit; font-size: 0.85rem; padding: 0.3rem 0.5rem; border-radius: var(--radius); border: 1px solid var(--rule); background: var(--bg); color: var(--ink); max-width: 100%; }
+.field { font-size: 0.95rem; padding: 0.45rem 0.6rem; min-width: 0; }
+.icon-btn { font: inherit; font-size: 1.3rem; line-height: 1; background: transparent; border: 1px solid var(--rule); color: var(--ink); border-radius: var(--radius); width: 2rem; height: 2rem; cursor: pointer; flex: none; }
+.prof-log { flex: 1; overflow-y: auto; padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); }
+.msg { max-width: 92%; border-radius: 10px; padding: var(--s-2) var(--s-3); font-size: 0.93rem; line-height: 1.55; min-width: 0; }
+.msg > * + * { margin-top: var(--s-2); }
+.msg p, .msg ul, .msg ol, .msg h5 { margin: 0; }
+.msg ul, .msg ol { padding-left: 1.2rem; }
+.msg h5 { font-size: 0.95rem; }
+.msg pre { font-size: 0.8rem; }
+.msg.me { align-self: flex-end; background: var(--accent-soft); white-space: pre-wrap; }
+.msg.pr { align-self: flex-start; background: var(--sunk); }
+.msg.pr.thinking { color: var(--muted); font-style: italic; }
+.msg.sys { align-self: center; background: transparent; color: var(--muted); font-size: 0.82rem; text-align: center; }
+.prof-empty { color: var(--muted); font-size: 0.9rem; display: grid; gap: var(--s-2); }
+.prof-empty b { color: var(--ink); font-family: var(--f-display); font-size: 1.1rem; }
+.prof-quick { display: flex; flex-wrap: wrap; gap: var(--s-2); padding: 0 var(--s-4) var(--s-2); }
+.prof-quick button { font: inherit; font-size: 0.8rem; padding: 0.3rem 0.65rem; border-radius: 999px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); cursor: pointer; }
+.prof-quick button:hover { border-color: var(--accent); }
+.prof-form { display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-top: 1px solid var(--rule); }
+.prof-form textarea { font: inherit; font-size: 0.95rem; resize: vertical; min-height: 3.2rem; max-height: 12rem; padding: var(--s-2) var(--s-3); border-radius: var(--radius); border: 1px solid var(--rule); background: var(--bg); color: var(--ink); }
+.prof-actions { display: flex; justify-content: space-between; align-items: center; gap: var(--s-2); }
+.prof-fine { font-size: 0.74rem; color: var(--muted); margin: 0; }
+.prof-actions .btns { display: flex; gap: var(--s-2); }
+
+/* Instructor view */
+.teach-sum { display: flex; flex-wrap: wrap; gap: var(--s-5); margin: var(--s-3) 0 var(--s-5); font-size: 0.9rem; }
+.teach-sum b { font-family: var(--f-display); font-size: 1.5rem; display: block; font-variant-numeric: tabular-nums; }
+.trow { border-top: 1px solid var(--rule); }
+.trow:last-child { border-bottom: 1px solid var(--rule); }
+.trow > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 6.5rem 6.5rem 9rem; gap: var(--s-3); align-items: center; padding: var(--s-3) var(--s-2); font-size: 0.9rem; }
+.trow > summary::-webkit-details-marker { display: none; }
+.trow > summary:hover { background: var(--surface); }
+.trow .num { font-variant-numeric: tabular-nums; color: var(--muted); }
+.trow .num b { color: var(--ink); }
+.thead { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 6.5rem 6.5rem 9rem; gap: var(--s-3); padding: var(--s-2); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.pill { white-space: nowrap; display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.55rem; border-radius: 999px; }
+.pill.warn { background: var(--bad-soft); color: var(--bad); }
+.pill.ok { background: var(--good-soft); color: var(--good); }
+.pill.none { background: var(--sunk); color: var(--muted); }
+.tdetail { padding: var(--s-3) var(--s-2) var(--s-5); display: grid; gap: var(--s-4); font-size: 0.92rem; }
+.tdetail h4 { margin: 0 0 var(--s-2); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-family: var(--f-body); }
+.tdetail ul { margin: 0; padding-left: 1.2rem; display: grid; gap: var(--s-1); }
+.qstat { display: grid; grid-template-columns: minmax(0, 1fr) 9rem; gap: var(--s-1) var(--s-3); align-items: center; padding: var(--s-2) 0; border-bottom: 1px dashed var(--rule); }
+.qstat .bar { height: 8px; }
+.qstat .bar i.low { background: var(--bad); }
+.qstat small { color: var(--muted); grid-column: 1 / -1; }
+.proposal { border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-3) var(--s-4); background: var(--surface); display: grid; gap: var(--s-2); }
+.proposal .why-p { font-size: 0.85rem; color: var(--muted); }
+.proposal .acts { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+.proposal ol.ch { margin: 0; padding-left: 1.4rem; }
+.proposal ol.ch li.ans { font-weight: 700; color: var(--good); }
+.live-rev { display: flex; justify-content: space-between; gap: var(--s-3); align-items: center; padding: var(--s-2) 0; border-bottom: 1px dashed var(--rule); }
+.btn.small { font-size: 0.8rem; padding: 0.3rem 0.7rem; }
+@media (max-width: 760px) {
+  .trow > summary, .thead { grid-template-columns: minmax(0, 1fr) auto; }
+  .trow > summary .hide-n, .thead .hide-n { display: none; }
+  .qstat { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1180px) {
+  .unit-body, .course-grid { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; max-height: none; overflow: visible; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .rail-h { grid-column: 1 / -1; }
+}
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-block; }
+  .index { position: static; max-height: none; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); padding: var(--s-3); }
+  .plan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .plan { grid-template-columns: minmax(0, 1fr); }
+  .lang-pick > span { display: none; }
+  .brand span { display: none; }
+  .unit-list a { grid-template-columns: 2rem minmax(0, 1fr); }
+  .unit-list .m { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; text-align: left; }
+  .unit-list .chips { justify-content: flex-start; max-width: none; }
+  .terms { grid-template-columns: minmax(0, 1fr); }
+  .terms dd { margin-bottom: var(--s-2); }
+  .biblio li { grid-template-columns: minmax(0, 1fr); }
+  .biblio .side { text-align: left; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card, .unit-list a, .index li a { transition: background-color 120ms, border-color 120ms; }
+}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#home"><b>First Principles CS</b><span>B.S. Computer Science</span></a>
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="index">Course menu</button>
+    <div class="lang-pick"><span>Code examples in</span>
+      <div class="seg" role="group" aria-label="Programming language for code examples" id="lang-seg">
+        <button data-lang="python">Python</button><button data-lang="java">Java</button><button data-lang="cpp">C++</button>
+      </div>
+    </div>
+    <a class="toplink" href="#teach" id="teach-link" hidden>Instructor</a>
+    <a class="toplink" href="#sources">Sources</a>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="index" id="index" aria-label="Term index"></nav>
+  <main id="view"></main>
+</div>
+
+<script src="data/program.js"></script>
+<script src="data/cs101.js"></script>
+<script src="data/cs101-extras.js"></script>
+<script src="data/math120.js"></script>
+<script src="data/math130.js"></script>
+<script src="data/cs100.js"></script>
+<script src="data/writ100.js"></script>
+<script>
+(() => {
+  const D = window.CSA;
+  const LANGS = { python: "Python", java: "Java", cpp: "C++" };
+  const KIND = { history: "History", ethics: "Ethics", lang: "Language evolution", practice: "In practice", deep: "Deep dive" };
+  const ACCESS = { open: "Open license", pd: "Public domain", free: "Free to read", library: "Library access" };
+  const KSHORT = { history: "History", ethics: "Ethics", lang: "Languages", practice: "Practice", deep: "Deep dive" };
+
+  /* ---------- per-viewer storage (best effort) ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("fpcs:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("fpcs:" + k, JSON.stringify(v)); } catch {} }
+  };
+  /* pref is the viewer's chosen language; lang is the one in use on this page, limited to
+     the languages the course or term allows (Year 1 is Python only). */
+  let pref = store.get("lang", "python");
+  if (!LANGS[pref]) pref = "python";
+  let lang = pref, allowed = Object.keys(LANGS);
+  let done = new Set(store.get("done", []));
+  let scores = store.get("scores", {});
+  const key = (c, u) => c + "-" + u;
+  const saveDone = () => store.set("done", [...done]);
+  /* Live features (professor chat, signals, approved revisions) are in app/live.js and plug in through these hooks. */
+  const FPCS = window.FPCS = { D, LANGS, KIND, store, revisions: {}, hooks: {} };
+  const hook = (name, ...args) => { try { return FPCS.hooks[name] && FPCS.hooks[name](...args); } catch (e) { console.error(e); } };
+  const quizFor = (c, u) => {
+    const base = (u.quiz || []).map(q => q.langs && q.langs[lang] ? { ...q, ...q.langs[lang] } : q);
+    const r = FPCS.revisions[key(c.id, u.id)];
+    if (!r || !r.quiz) return base;
+    return base.map((q, i) => r.quiz[i] && Array.isArray(r.quiz[i].choices) ? { ...r.quiz[i], revised: true } : q);
+  };
+
+  /* ---------- helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  const termOf = id => D.program.terms.find(t => t.id === id);
+  const termLabel = t => `Year ${t.year} · ${t.term}`;
+  const courseList = t => (t.courses || []).map(id => D.courses[id]).filter(Boolean);
+  const lessons = c => c.units.map((u, i) => ({ ...u, core: true, n: i + 1 })).concat(c.optional.map(o => ({ ...o, core: false })));
+  const progress = c => {
+    if (!c.units.length) return { n: 0, of: 0, pct: 0 };
+    const n = c.units.filter(u => done.has(key(c.id, u.id))).length;
+    return { n, of: c.units.length, pct: Math.round(100 * n / c.units.length) };
+  };
+  const srcLine = ids => (ids || []).map(id => D.sources[id]).filter(Boolean)
+    .map(s => s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : esc(s.title)).join("; ");
+
+  /* ---------- index (left nav) ---------- */
+  function renderIndex(route) {
+    const t = D.program.terms.find(t => t.open);
+    let h = `<h2>${termLabel(t)} · ${esc(t.theme)}</h2>`;
+    for (const c of courseList(t)) {
+      const p = progress(c);
+      const open = route.course === c.id;
+      h += `<details ${open ? "open" : ""}><summary><span class="code">${esc(c.code)}</span><span class="t">${esc(c.title)}</span><span class="pct">${c.units.length ? p.pct + "%" : "soon"}</span></summary>`;
+      if (c.units.length) {
+        h += `<ol><li><a href="#c-${c.id}" ${open && !route.unit ? 'aria-current="page"' : ""}><span class="tick">◇</span><span>Course overview</span></a></li>`;
+        c.units.forEach((u, i) => {
+          const isDone = done.has(key(c.id, u.id));
+          h += `<li><a href="#c-${c.id}-${u.id}" ${open && route.unit === u.id ? 'aria-current="page"' : ""}><span class="tick ${isDone ? "done" : ""}">${isDone ? "✓" : i + 1}</span><span>${esc(u.title)}</span></a></li>`;
+        });
+        if (c.optional.length) {
+          h += `<li class="sub">Optional</li>`;
+          for (const o of c.optional) {
+            const isDone = done.has(key(c.id, o.id));
+            h += `<li><a href="#c-${c.id}-${o.id}" ${open && route.unit === o.id ? 'aria-current="page"' : ""}><span class="tick ${isDone ? "done" : ""}">${isDone ? "✓" : "+"}</span><span>${esc(o.title)}</span></a></li>`;
+          }
+        }
+        h += `</ol>`;
+      } else {
+        h += `<ol><li><a href="#c-${c.id}"><span class="tick">◇</span><span>Course overview</span></a></li></ol>`;
+      }
+      h += `</details>`;
+    }
+    $("#index").innerHTML = h;
+  }
+
+  /* ---------- views ---------- */
+  function viewHome() {
+    const t = D.program.terms.find(t => t.open);
+    const cs = courseList(t);
+    const core = cs.reduce((a, c) => a + c.units.length, 0);
+    const opt = cs.reduce((a, c) => a + c.optional.length, 0);
+    const qs = cs.reduce((a, c) => a + lessons(c).reduce((b, u) => b + (u.quiz || []).length, 0), 0);
+    const doneCore = cs.reduce((a, c) => a + progress(c).n, 0);
+    let h = `<section class="hero">
+      <div class="eyebrow">${termLabel(t)} is open</div>
+      <h1>A complete computer science education, one term at a time.</h1>
+      <p>Four years of coursework modeled on the strongest undergraduate programs, with notes, sidebars on history, ethics and the evolution of programming languages, and quizzes after every lesson.</p>
+      <div class="stats">
+        <div><b>${core}</b>core units</div>
+        <div><b>${opt}</b>optional lessons</div>
+        <div><b>${qs}</b>quiz questions</div>
+        <div><b>${doneCore}/${core}</b>units you've completed</div>
+      </div>
+    </section>
+    <div class="section-h"><h2>${termLabel(t)}: ${esc(t.theme)}</h2><span class="note">${t.languages && t.languages.length === 1 ? `Taught in ${LANGS[t.languages[0]]}. ` : ""}Pick a course to begin.</span></div>
+    <div class="cards">`;
+    for (const c of cs) {
+      const p = progress(c);
+      const planned = !c.units.length;
+      h += `<a class="card ${planned ? "planned" : ""}" href="#c-${c.id}">
+        <div class="row"><span class="code">${esc(c.code)} · ${c.credits} credits</span><span class="chip ${c.kind === "required" ? "req" : "opt"}">${c.kind === "required" ? "Required" : "Optional"}</span></div>
+        <h3>${esc(c.title)}</h3>
+        <p>${esc(c.summary.split(". ")[0].replace(/\.$/, ""))}.</p>
+        ${planned ? `<div class="meta">Notes not written yet</div>` : `<div class="meta">${c.units.length} units · ${c.optional.length} optional lessons · ${p.n}/${p.of} done</div><div class="bar"><i style="width:${p.pct}%"></i></div>`}
+      </a>`;
+    }
+    h += `</div>
+    <div class="section-h"><h2>The four-year plan</h2><span class="note">Later terms open as their notes are written.</span></div>
+    <div class="plan">`;
+    for (const term of D.program.terms) {
+      const items = term.open ? courseList(term).map(c => `<li><a href="#c-${c.id}">${esc(c.title)}</a></li>`) : term.planned.map(p => `<li>${esc(p)}</li>`);
+      h += `<div class="term ${term.open ? "open" : ""}"><h3>${termLabel(term)} <small>${term.open ? "Open" : "Planned"}</small></h3><ul>${items.join("")}</ul></div>`;
+    }
+    h += `</div>
+    <p class="note">Years 3 and 4 include five courses in a chosen track: AI &amp; Machine Learning, Systems, Theory, Security, Data Science, HCI, Graphics/Vision/Robotics, Software Engineering, Quantum Computing, or Computational Science. A two-year M.S. follows the same structure.</p>`;
+    return h;
+  }
+
+  function viewCourse(c) {
+    const t = termOf(c.term);
+    const p = progress(c);
+    let h = `<div class="course-head">
+      <div class="crumbs"><a href="#home">${termLabel(t)}</a><span>›</span><span>${esc(c.code)}</span></div>
+      <div class="facts"><span class="chip ${c.kind === "required" ? "req" : "opt"}">${c.kind === "required" ? "Required" : "Optional elective"}</span><span>${esc(c.code)}</span><span>${c.credits} credits</span>${langsFor({ view: "course", course: c.id }).length === 1 && c.units.length ? `<span>Taught in ${LANGS[langsFor({ view: "course", course: c.id })[0]]}</span>` : ""}${c.units.length ? `<span>${p.n} of ${p.of} units complete</span>` : ""}</div>
+      <h1>${esc(c.title)}</h1>
+      <p class="lede">${esc(c.summary)}</p>
+      ${c.units.length ? `<div class="bar" style="max-width:420px"><i style="width:${p.pct}%"></i></div>` : ""}
+    </div>
+    <div class="course-grid"><div>`;
+    if (!c.units.length) {
+      h += `<div class="empty">The notes for this course are not written yet. It is listed so the term's full schedule is visible.</div>`;
+    } else {
+      h += `<div class="section-h"><h2>Core units</h2></div><ol class="unit-list">`;
+      c.units.forEach((u, i) => {
+        const isDone = done.has(key(c.id, u.id));
+        const sc = scores[key(c.id, u.id)];
+        const kinds = [...new Set((u.asides || []).map(a => a.kind))];
+        h += `<li><a href="#c-${c.id}-${u.id}"><span class="n ${isDone ? "done" : ""}">${isDone ? "✓" : String(i + 1).padStart(2, "0")}</span>
+          <span><b>${esc(u.title)}</b><span class="s">${esc(u.summary)}</span></span>
+          <span class="m"><span>${u.minutes} min</span>${sc != null ? `<span>Quiz best ${sc}%</span>` : ""}<span class="chips">${kinds.map(k => `<span class="chip k-${k}" title="Includes a ${KIND[k]} sidebar">${KSHORT[k]}</span>`).join(" ")}</span></span></a></li>`;
+      });
+      h += `</ol>`;
+      if (c.optional.length) {
+        h += `<div class="section-h"><h2>Optional lessons</h2><span class="note">Not required. Each has its own quiz.</span></div><ol class="unit-list">`;
+        for (const o of c.optional) {
+          const isDone = done.has(key(c.id, o.id));
+          h += `<li><a href="#c-${c.id}-${o.id}"><span class="n ${isDone ? "done" : ""}">${isDone ? "✓" : "+"}</span>
+            <span><b>${esc(o.title)}</b><span class="s">${esc(o.summary)}</span></span>
+            <span class="m"><span class="chip k-${o.kind}">${KIND[o.kind]}</span><span>${o.minutes} min</span></span></a></li>`;
+        }
+        h += `</ol>`;
+      }
+    }
+    h += `</div><aside class="panel"><h3>You will be able to</h3><ul>${c.outcomes.map(o => `<li>${esc(o)}</li>`).join("")}</ul>
+      <h3>Prerequisites</h3><p style="margin:0">${c.prereqs.length ? c.prereqs.map(esc).join(", ") : "None"}</p>
+      ${c.units.length ? `<h3>Main references</h3><p style="margin:0">${srcLine([...new Set(c.units.flatMap(u => u.sources || []))].slice(0, 4))}</p>` : ""}
+    </aside></div>`;
+    return h;
+  }
+
+  function viewUnit(c, uid) {
+    const all = lessons(c);
+    const idx = all.findIndex(u => u.id === uid);
+    const u = all[idx];
+    if (!u) return viewCourse(c);
+    const t = termOf(c.term);
+    const k = key(c.id, u.id);
+    const isDone = done.has(k);
+    const label = u.core ? `Unit ${u.n} of ${c.units.length}` : `Optional · ${KIND[u.kind]}`;
+    let h = `<div class="unit-head">
+      <div class="crumbs"><a href="#home">${termLabel(t)}</a><span>›</span><a href="#c-${c.id}">${esc(c.code)} ${esc(c.title)}</a></div>
+      <div class="facts"><span class="${u.core ? "eyebrow" : "chip k-" + u.kind}">${label}</span><span>${u.minutes} min</span>${isDone ? `<span style="color:var(--good);font-weight:600">✓ Completed</span>` : ""}</div>
+      <h1>${esc(u.title)}</h1>
+      <p class="lede">${esc(u.summary)}</p>
+    </div>
+    <div class="unit-body"><article class="notes" id="notes">${u.notes}</article>`;
+    if (u.asides && u.asides.length) {
+      h += `<aside class="rail" aria-label="Sidebars"><div class="rail-h">Sidebars</div>`;
+      for (const a of u.asides) {
+        h += `<section class="aside k-${a.kind}"${a.only ? ` data-only="${a.only}"` : ""}><span class="chip k-${a.kind}" style="justify-self:start">${KIND[a.kind]}</span><h4>${esc(a.title)}</h4>${a.html}${a.sources ? `<div class="src">Source: ${srcLine(a.sources)}</div>` : ""}</section>`;
+      }
+      h += `</aside>`;
+    }
+    h += `</div>`;
+    if (u.terms && u.terms.length) {
+      h += `<section class="block"><h2>Key terms</h2><dl class="terms">${u.terms.map(([a, b]) => `<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join("")}</dl></section>`;
+    }
+    h += `<section class="block clarity" id="clarity"><h2>How was this lesson?</h2>
+      <div class="clarity-row"><span>Was the explanation clear?</span><button class="btn ghost" type="button" data-clear="1">Yes, clear</button><button class="btn ghost" type="button" data-clear="-1">Not really</button><button class="btn ghost ask-prof" type="button" hidden>Ask the professor</button></div>
+      <p class="note" id="clarity-note" aria-live="polite"></p></section>`;
+    const quiz = quizFor(c, u);
+    if (quiz.length) {
+      h += `<section class="block"><h2>Check your understanding</h2><form class="quiz" id="quiz" novalidate>`;
+      quiz.forEach((q, qi) => {
+        h += `<div class="q" data-q="${qi}"><fieldset><legend>${qi + 1}. ${q.q}${q.revised ? ` <span class="chip k-practice" title="This question was rewritten based on student results">Revised</span>` : ""}</legend>${q.choices.map((ch, ci) =>
+          `<label><input type="radio" name="q${qi}" id="q-${k}-${qi}-${ci}" value="${ci}"><span>${ch}</span></label>`).join("")}</fieldset><div class="why" hidden></div></div>`;
+      });
+      h += `<div class="quiz-foot"><button class="btn" type="submit">Check answers</button><button class="btn ghost" type="button" id="quiz-reset" hidden>Try again</button><span class="score" id="quiz-score" aria-live="polite">${scores[k] != null ? "Best score so far: " + scores[k] + "%" : ""}</span></div></form></section>`;
+    }
+    if (u.sources && u.sources.length) {
+      h += `<section class="block"><h2>Sources and further reading</h2><ol class="srcs">${u.sources.map(id => D.sources[id]).filter(Boolean).map(s =>
+        `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : `<i>${esc(s.title)}</i>`}. ${esc(s.author)}.${s.license ? ` <span class="lic">License: ${esc(s.license)}</span>` : ""}</li>`).join("")}</ol>
+        <p class="note">These notes are original summaries written for this curriculum. The sources above cover the same material in more depth and are recommended reading.</p></section>`;
+    }
+    h += `<div class="finish"><button class="btn ${isDone ? "done" : ""}" id="mark">${isDone ? "✓ Marked complete" : "Mark lesson complete"}</button></div>`;
+    const prev = all[idx - 1], next = all[idx + 1];
+    h += `<nav class="pager" aria-label="Lesson navigation">${prev ? `<a href="#c-${c.id}-${prev.id}"><span>Previous</span><b>← ${esc(prev.title)}</b></a>` : `<a href="#c-${c.id}"><span>Back to</span><b>← Course overview</b></a>`}
+      ${next ? `<a class="next" href="#c-${c.id}-${next.id}"><span>${next.core ? "Next" : "Next · optional"}</span><b>${esc(next.title)} →</b></a>` : `<a class="next" href="#c-${c.id}"><span>Finished the course?</span><b>Course overview →</b></a>`}</nav>`;
+    return h;
+  }
+
+  function viewSources() {
+    const cites = {};
+    for (const c of Object.values(D.courses)) for (const u of lessons(c)) {
+      const ids = new Set([...(u.sources || []), ...(u.asides || []).flatMap(a => a.sources || [])]);
+      for (const id of ids) (cites[id] = cites[id] || new Set()).add(c.code);
+    }
+    const list = Object.entries(D.sources).sort((a, b) => a[1].title.localeCompare(b[1].title));
+    return `<div class="course-head"><div class="crumbs"><a href="#home">Home</a><span>›</span><span>Sources</span></div>
+      <h1>Sources and attribution</h1>
+      <p class="lede">The notes, sidebars and quizzes on this site are original writing. They were not copied from the works below. Each lesson lists the sources it draws on for facts and recommends for deeper study. If you reuse a source's own material, follow its license.</p>
+      <div class="teach-sum">${Object.entries(ACCESS).map(([k, label]) => `<div><b>${Object.values(D.access).filter(v => v === k).length}</b>${label}</div>`).join("")}</div>
+      <p class="note"><b>Open license</b>: may be shared and adapted under the stated license (several forbid commercial use). <b>Public domain</b>: free of copyright. <b>Free to read</b>: available online at no cost, but copyrighted. <b>Library access</b>: journal articles usually reached through a library or the publisher.</p></div>
+      <ul class="biblio">${list.map(([id, s]) => `<li><div>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener"><b>${esc(s.title)}</b></a>` : `<b>${esc(s.title)}</b>`}<div class="by">${esc(s.author)}</div></div>
+        <div class="side"><span class="pill ${D.access[id] === "open" || D.access[id] === "pd" ? "ok" : "none"}" style="justify-self:end">${ACCESS[D.access[id]] || "Free to read"}</span><span>${esc(s.kind)}</span>${s.license ? `<span>${esc(s.license)}</span>` : ""}<span>${cites[id] ? "Cited in " + [...cites[id]].join(", ") : ""}</span></div></li>`).join("")}</ul>`;
+  }
+
+  /* ---------- code tabs & language notes ---------- */
+  function enhanceNotes(root) {
+    root.querySelectorAll("table").forEach(t => { if (!t.parentElement.classList.contains("tbl")) { const w = document.createElement("div"); w.className = "tbl"; t.replaceWith(w); w.appendChild(t); } });
+    root.querySelectorAll(".multi").forEach(m => {
+      const all = [...m.querySelectorAll(":scope > pre[data-lang]")];
+      const ok = all.filter(p => allowed.includes(p.dataset.lang));
+      const pres = ok.length ? ok : all;
+      if (pres.length === 1) {
+        const only = pres[0];
+        only.dataset.label = LANGS[only.dataset.lang] || only.dataset.lang;
+        m.replaceWith(only);
+        return;
+      }
+      const box = document.createElement("div"); box.className = "codebox";
+      const tabs = document.createElement("div"); tabs.className = "tabs"; tabs.setAttribute("role", "tablist");
+      const miss = document.createElement("div"); miss.className = "missing"; miss.hidden = true;
+      for (const p of pres) {
+        const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.dataset.lang = p.dataset.lang; b.textContent = LANGS[p.dataset.lang] || p.dataset.lang;
+        b.addEventListener("click", () => setLang(p.dataset.lang));
+        tabs.appendChild(b);
+      }
+      box.append(tabs, ...pres, miss);
+      m.replaceWith(box);
+    });
+    root.querySelectorAll("pre").forEach(p => { if (!p.closest(".codebox")) p.classList.add(p.dataset.label ? "labeled" : "pyonly"); });
+    applyLang(root);
+  }
+  function applyLang(root = document) {
+    root.querySelectorAll(".codebox").forEach(box => {
+      const pres = [...box.querySelectorAll("pre[data-lang]")];
+      const has = pres.some(p => p.dataset.lang === lang);
+      const show = has ? lang : pres[0].dataset.lang;
+      pres.forEach(p => p.hidden = p.dataset.lang !== show);
+      box.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.lang === show)));
+      const miss = box.querySelector(".missing");
+      miss.hidden = has; if (!has) miss.textContent = `No ${LANGS[lang]} version of this example yet. Showing ${LANGS[show]}.`;
+    });
+    root.querySelectorAll("[data-only]").forEach(n => n.hidden = !n.dataset.only.split(" ").includes(lang));
+    document.querySelectorAll("#lang-seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  }
+  function langsFor(r) {
+    const c = (r.view === "course" || r.view === "unit") && D.courses[r.course];
+    const t = c ? termOf(c.term) : D.program.terms.find(x => x.open);
+    const list = (c && c.languages) || (t && t.languages) || Object.keys(LANGS);
+    return list.filter(l => LANGS[l]);
+  }
+  function setActive(r) {
+    allowed = langsFor(r);
+    lang = allowed.includes(pref) ? pref : allowed[0];
+    $(".lang-pick").hidden = allowed.length < 2;
+    document.querySelectorAll("#lang-seg button").forEach(b => { b.hidden = !allowed.includes(b.dataset.lang); });
+  }
+  function setLang(l) {
+    pref = l; store.set("lang", l);
+    lang = allowed.includes(pref) ? pref : allowed[0];
+    const r = parse();
+    const u = r.view === "unit" && D.courses[r.course] && lessons(D.courses[r.course]).find(x => x.id === r.unit);
+    if (u && (u.quiz || []).some(q => q.langs)) render(true); else applyLang();
+  }
+
+  /* ---------- quiz & completion ---------- */
+  function wireUnit(c, u) {
+    const k = key(c.id, u.id);
+    const form = $("#quiz");
+    const quiz = quizFor(c, u);
+    document.querySelectorAll("#clarity [data-clear]").forEach(b => b.addEventListener("click", () => {
+      const val = Number(b.dataset.clear);
+      document.querySelectorAll("#clarity [data-clear]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      $("#clarity-note").textContent = val > 0 ? "Thanks. Glad it worked." : "Thanks. Your instructors will see that this lesson needs work. The professor can explain it another way.";
+      hook("onClarity", c, u, val);
+    }));
+    if (form) {
+      const reset = $("#quiz-reset"), out = $("#quiz-score");
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        let right = 0, answered = 0;
+        const picks = [];
+        quiz.forEach((q, qi) => {
+          const box = form.querySelector(`[data-q="${qi}"]`);
+          const sel = form.querySelector(`input[name="q${qi}"]:checked`);
+          const why = box.querySelector(".why");
+          box.classList.remove("right", "wrong");
+          box.querySelectorAll("label").forEach((l, ci) => { l.classList.remove("is-answer", "is-wrong"); if (sel && ci === q.answer) l.classList.add("is-answer"); });
+          if (!sel) { why.hidden = false; why.innerHTML = "Choose an answer to check this question."; return; }
+          answered++;
+          picks[qi] = Number(sel.value);
+          const ok = Number(sel.value) === q.answer;
+          if (ok) right++; else sel.closest("label").classList.add("is-wrong");
+          box.classList.add(ok ? "right" : "wrong");
+          why.hidden = false; why.innerHTML = `<strong>${ok ? "Correct." : "Not quite."}</strong> ${q.why}`;
+        });
+        if (answered < quiz.length) { out.textContent = `${quiz.length - answered} question${quiz.length - answered > 1 ? "s" : ""} still unanswered.`; return; }
+        hook("onQuiz", c, u, picks, quiz);
+        const pct = Math.round(100 * right / quiz.length);
+        const best = Math.max(pct, scores[k] ?? 0);
+        scores[k] = best; store.set("scores", scores);
+        out.textContent = `${right} of ${quiz.length} correct (${pct}%)${best > pct ? ` · best ${best}%` : ""}`;
+        reset.hidden = false;
+      });
+      reset.addEventListener("click", () => {
+        form.reset();
+        form.querySelectorAll(".q").forEach(b => { b.classList.remove("right", "wrong"); b.querySelector(".why").hidden = true; b.querySelectorAll("label").forEach(l => l.classList.remove("is-answer", "is-wrong")); });
+        reset.hidden = true; out.textContent = `Best score so far: ${scores[k]}%`;
+      });
+    }
+    $("#mark").addEventListener("click", e => {
+      if (done.has(k)) done.delete(k); else done.add(k);
+      saveDone();
+      const b = e.currentTarget, on = done.has(k);
+      b.classList.toggle("done", on); b.textContent = on ? "✓ Marked complete" : "Mark lesson complete";
+      renderIndex(parse());
+    });
+  }
+
+  /* ---------- routing ---------- */
+  function parse() {
+    const h = location.hash.replace(/^#/, "");
+    if (h === "sources") return { view: "sources" };
+    if (h === "teach") return { view: "teach" };
+    const m = h.match(/^c-([a-z0-9]+)(?:-([a-z0-9]+))?$/);
+    if (m && D.courses[m[1]]) return { view: m[2] ? "unit" : "course", course: m[1], unit: m[2] };
+    return { view: "home" };
+  }
+  function render(keepScroll) {
+    const r = parse();
+    setActive(r);
+    const v = $("#view");
+    renderIndex(r);
+    if (r.view === "sources") v.innerHTML = viewSources();
+    else if (r.view === "teach") { v.innerHTML = `<div id="teach"><div class="empty">The instructor view needs a signed-in instructor account. Loading…</div></div>`; hook("teach", $("#teach")); }
+    else if (r.view === "course") v.innerHTML = viewCourse(D.courses[r.course]);
+    else if (r.view === "unit") {
+      const c = D.courses[r.course];
+      v.innerHTML = viewUnit(c, r.unit);
+      const u = lessons(c).find(x => x.id === r.unit);
+      if (u) { hook("beforeEnhance", c, u, v); enhanceNotes(v); wireUnit(c, u); }
+    } else v.innerHTML = viewHome();
+    applyLang();
+    hook("onRoute", r);
+    if (!keepScroll) window.scrollTo(0, 0);
+    if (window.matchMedia("(max-width: 860px)").matches) { $("#index").hidden = true; $("#menu-btn").setAttribute("aria-expanded", "false"); }
+  }
+
+  document.querySelectorAll("#lang-seg button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  $("#menu-btn").addEventListener("click", e => { const ix = $("#index"); ix.hidden = !ix.hidden; e.currentTarget.setAttribute("aria-expanded", String(!ix.hidden)); });
+  const mq = window.matchMedia("(max-width: 860px)");
+  const syncMenu = () => { $("#index").hidden = mq.matches; };
+  mq.addEventListener ? mq.addEventListener("change", syncMenu) : mq.addListener(syncMenu);
+  window.addEventListener("hashchange", () => render());
+  Object.assign(FPCS, { lessons, key, esc, parse, quizFor, render, termOf, getLang: () => lang, getScore: k => scores[k] });
+  render();
+  syncMenu();
+})();
+</script>
+<script src="app/live.js"></script>
