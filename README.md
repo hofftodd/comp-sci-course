@@ -12,13 +12,17 @@ instructor approves each change before students see it.
 
 | Course | Credits | Core units | Optional lessons |
 |---|---|---|---|
-| CS 101 Programming I (Python) | 4 | 7 | How programming languages evolved · When software fails people · How Python actually runs your code |
+| CS 101 Programming I (Python) | 4 | 11 | How programming languages evolved · When software fails people · How Python actually runs your code |
 | MATH 120 Discrete Mathematics I | 4 | 6 | From Boole to Shannon · Proof assistants and verified software |
-| MATH 130 Calculus I | 4 | 6 | Calculus inside machine learning · Two thousand years of calculus |
+| MATH 130 Calculus I | 4 | 8 | Calculus inside machine learning · Two thousand years of calculus |
 | CS 100 Computing in Society | 2 | 6 | The hidden history of computing · Risk scores and the math of fairness |
 | WRIT 100 Writing for Technical Audiences (elective) | 3 | planned | |
 
-Every lesson has notes, key terms, a quiz with explanations, and a list of sources. Many lessons
+Every course opens with a **rubric**: what is graded and how much it counts, the criteria with four
+performance levels, the grade scale, and policies. Each core lesson is designed for about 90 minutes:
+notes with worked examples and diagrams, key terms, 5–8 **practice problems** with optional hints and
+worked solutions (discussion questions and a writing assignment in the seminar), a quiz with
+explanations, and a list of sources. Many lessons
 also have **sidebars** on history, ethics, the evolution of programming languages, and how the
 idea is used in practice. Year 1 is taught in Python.
 

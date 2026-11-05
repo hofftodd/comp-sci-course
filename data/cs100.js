@@ -5,8 +5,48 @@ CSA.addCourse({
   credits: 2,
   kind: "required",
   term: "y1f",
-  summary: "A seminar on where computing came from, what the field covers, and the responsibilities that come with building technology. Discussion-based, with short weekly writing.",
+  summary: "A seminar on where computing came from, what the field covers, and the responsibilities that come with building technology. Each unit pairs a reading with discussion questions and a short writing assignment.",
   prereqs: [],
+  practiceLabels: { title: "Discussion and writing", intro: "Prepare notes on each discussion question before the seminar meeting, and submit the writing assignment by the due date. Open the guidance only after you have drafted your own answer.", answer: "What a strong response does" },
+  rubric: {
+    criteriaFor: "written reflections and the case analysis",
+    assessments: [
+      { name: "Seminar participation", weight: 20, desc: "Coming prepared, contributing to each week's discussion questions, and responding to classmates' points. Quality matters more than quantity." },
+      { name: "Weekly writing", weight: 30, desc: "The short writing assignment at the end of each unit, 300–500 words. Graded with the criteria below; your lowest score is dropped." },
+      { name: "Lesson quizzes", weight: 10, desc: "The quiz at the end of each lesson. Your best attempt counts." },
+      { name: "Case analysis", weight: 25, desc: "A 1,500-word analysis of a real computing controversy of your choice, using at least two ethical frameworks and at least four credible sources. A draft gets peer feedback before the final version." },
+      { name: "Final presentation", weight: 15, desc: "A 7-minute presentation of your case analysis to the seminar, followed by questions." }
+    ],
+    criteria: [
+      { name: "Argument", desc: "Is there a clear position?", levels: [
+        "States a clear, specific position and develops it step by step to a conclusion.",
+        "Has a position, but it is broad or some steps are weak.",
+        "Describes the issue without taking or defending a position.",
+        "No discernible argument." ] },
+      { name: "Evidence", desc: "Is it grounded in facts and sources?", levels: [
+        "Uses accurate, relevant facts from credible sources, cited correctly.",
+        "Mostly accurate evidence; a citation is missing or a source is weak.",
+        "Relies on opinion or a single source; some claims are inaccurate.",
+        "No evidence, or evidence that is wrong." ] },
+      { name: "Ethical reasoning", desc: "Are perspectives weighed fairly?", levels: [
+        "Identifies the stakeholders, applies frameworks accurately, and answers the strongest objection.",
+        "Applies a framework but misses an important stakeholder or objection.",
+        "Mentions ethics in general terms without real analysis.",
+        "Ignores the ethical dimension." ] },
+      { name: "Clarity", desc: "Can a reader follow it easily?", levels: [
+        "Organized, concise and precise; technical terms are explained for a general reader.",
+        "Generally clear, with some wordiness or unexplained jargon.",
+        "Hard to follow in places; ideas are out of order.",
+        "Disorganized and unclear." ] }
+    ],
+    scale: [["A", "93–100"], ["A−", "90–92"], ["B+", "87–89"], ["B", "83–86"], ["B−", "80–82"], ["C+", "77–79"], ["C", "73–76"], ["C−", "70–72"], ["D", "60–69"], ["F", "below 60"]],
+    policies: [
+      "<b>Respectful disagreement:</b> discussions cover contested topics. Challenge ideas, not people, and assume good faith.",
+      "<b>Sources:</b> cite everything you use. Prefer primary sources, peer-reviewed research, and established journalism; check any claim an AI tool gives you before using it.",
+      "<b>AI assistants:</b> you may use them to brainstorm or get feedback, and must say how. The argument and the writing must be your own.",
+      "<b>Late work:</b> weekly writing is accepted up to three days late for half credit, because it feeds each week's discussion."
+    ]
+  },
   outcomes: [
     "Describe the major milestones in the history of computing",
     "Name the main areas of computer science and how they connect",
@@ -19,7 +59,7 @@ CSA.addCourse({
     {
       id: "u1",
       title: "A short history of computing",
-      minutes: 75,
+      minutes: 90,
       summary: "Six eras, from gears to neural networks: what each generation of machines made possible, and the ideas that carried forward.",
       notes: `
 <p>The history of computing is easier to remember as a story than as a list of dates. Each era solved a problem the previous one left behind, and a few big ideas keep coming back. A six-word hook keeps the eras in order:</p>
@@ -101,12 +141,34 @@ CSA.addCourse({
         { q: "Why was the stored-program design such an improvement over ENIAC?", choices: ["It used less electricity", "Changing the program meant loading new numbers instead of rewiring", "It replaced vacuum tubes with transistors", "It connected computers into a network"], answer: 1, why: "ENIAC was reprogrammed with cables and switches, which could take days. A stored program is just data in memory." },
         { q: "Which two developments let deep learning take off around 2012?", choices: ["Punched cards and relays", "Large datasets and GPUs", "Expert systems and logic rules", "Time-sharing and Unix"], answer: 1, why: "The internet supplied huge datasets, and GPUs made training large neural networks fast enough." }
       ],
+      practice: [
+        {
+          "q": "<p><strong>Discuss.</strong> The six-word hook is <em>Gears → Cards → Tubes → Chips → Nets → Neural nets</em>. Which transition changed ordinary people's lives the most, and why?</p>",
+          "a": "<p>Picks one transition and argues for it with specifics, such as who could use computers before and after, what became possible, and what it cost. Strong answers compare it against at least one other transition rather than just praising one.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Lovelace argued in 1843 that a computing machine could work with music and symbols, not just numbers. What made that idea so far ahead of its time, and what would she find most surprising about computers today?</p>",
+          "a": "<p>Connects her idea to the lesson's second big idea, instructions separate from the machine, and to the stored-program design. Notes that her view anticipated general-purpose computing a century early.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Colossus stayed secret until the 1970s and had little influence. What does that suggest about how history gets written, and whose contributions get remembered?</p>",
+          "a": "<p>Recognizes that recognition depends on publicity, publication and secrecy as well as merit, and connects to the ENIAC programmers and the hidden-history lesson.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Each era made computing cheaper and more personal. Is the AI era continuing that pattern, or reversing it by concentrating power in a few companies that can afford to train large models?</p>",
+          "a": "<p>Takes a position and weighs evidence on both sides: cheap access to AI tools for individuals versus the cost of training frontier models and who controls it.</p>"
+        },
+        {
+          "q": "<p><strong>Write (300–500 words).</strong> Choose one device or service you used today. Trace its history back through at least three of the six eras, explaining which earlier idea it depends on at each step.</p>",
+          "a": "<p>Names specific ideas (for a phone: transistors and integrated circuits, stored programs, packet networks), explains the dependency rather than listing dates, and ends with a point about what the chain reveals.</p>"
+        }
+      ],
       sources: ["chm", "chmrev", "eniac"]
     },
     {
       id: "u2",
       title: "The map of computer science",
-      minutes: 45,
+      minutes: 90,
       summary: "Theory, systems, AI, software, human-centered computing and more: what each area studies and how they connect.",
       notes: `
 <p>Computer science studies what can be computed, how to compute it efficiently, and how to build computing systems that are reliable and useful to people. The ACM/IEEE/AAAI CS2023 curriculum guidelines organize the field into knowledge areas. Grouped broadly:</p>
@@ -140,12 +202,34 @@ CSA.addCourse({
         { q: "\"Is there an efficient algorithm for this problem?\" belongs mainly to which area?", choices: ["HCI", "Theory", "Graphics", "Databases"], answer: 1, why: "Questions about the cost and limits of computation are theory." },
         { q: "Designing an interface that older adults can use easily is mainly:", choices: ["Human-computer interaction", "Compilers", "Distributed systems", "Cryptography"], answer: 0, why: "HCI studies how people interact with technology." }
       ],
+      practice: [
+        {
+          "q": "<p><strong>Discuss.</strong> Before this lesson, what did you think computer science was? Which area on the map surprised you most?</p>",
+          "a": "<p>Is honest about earlier assumptions (often \"it's programming\") and explains specifically what changed.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Pick an everyday app and identify at least four areas of computer science it depends on.</p>",
+          "a": "<p>Goes beyond the obvious. A maps app uses algorithms (shortest paths), systems (servers), data (traffic), HCI (the interface), security (location privacy) and AI (traffic prediction).</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> If AI tools write more and more routine code, which areas of computer science become more important, and which less?</p>",
+          "a": "<p>Argues from the lesson's point that precise thinking and judging correctness last. Might say theory, systems, security and human-centered computing gain importance as code becomes cheaper to produce.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Which area appeals to you most right now, and what question in it would you most like to be able to answer?</p>",
+          "a": "<p>Names a concrete question rather than an area in general, and links it to courses on the four-year plan.</p>"
+        },
+        {
+          "q": "<p><strong>Write (300–500 words).</strong> Find a news story from the past year about a computing development. Explain which areas of computer science it involves and what someone would need to study to work on it.</p>",
+          "a": "<p>Uses a real, cited story, maps it accurately onto several areas, and identifies specific courses or skills rather than generic advice.</p>"
+        }
+      ],
       sources: ["chm"]
     },
     {
       id: "u3",
       title: "Ethical frameworks and the ACM Code",
-      minutes: 60,
+      minutes: 90,
       summary: "Four questions for reasoning about right and wrong in technology, the profession's own code of conduct, and a method you can use on any case.",
       notes: `
 <p>Ethics is not a list of rules to memorize. It is a set of tools for reasoning when good values pull in different directions. This lesson follows one made-up case from start to finish so you can watch the tools work.</p>
@@ -185,12 +269,34 @@ CSA.addCourse({
         { q: "\"Who carries the risk of this feature, and were they part of the decision?\" Which framework's question is this?", choices: ["Consequentialism", "Deontology", "Virtue ethics", "Justice"], answer: 3, why: "Justice asks who's left out: how benefits and burdens are shared, especially for people with less power." },
         { q: "In the four W's method, why list options beyond the two on the table?", choices: ["To delay the decision", "Because a better option, like opt-in sharing, often resolves the conflict", "Because the code requires exactly four options", "To make the analysis longer"], answer: 1, why: "Many ethical dilemmas look like either/or choices until someone proposes a third design." }
       ],
+      practice: [
+        {
+          "q": "<p><strong>Discuss.</strong> Apply the four questions (What happens? What's owed? Who would I be? Who's left out?) to a different feature: an app that shows students' class rankings to everyone by default.</p>",
+          "a": "<p>Works through each question separately, names stakeholders such as struggling students, and proposes a better design rather than only a verdict.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> When do the frameworks disagree? Describe a technology decision where consequentialism and deontology point in different directions.</p>",
+          "a": "<p>Gives a concrete case, such as scanning private messages to catch abuse, and explains clearly why each framework reaches its conclusion.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> The ACM Code says to raise concerns about risks. What makes that hard to do as an intern or a junior engineer, and what could organizations do to make it easier?</p>",
+          "a": "<p>Recognizes real pressures (power, job security, uncertainty) and proposes concrete practices, such as anonymous reporting, design reviews with ethics questions, and protection for whistleblowers.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Is it enough for an engineer to follow the law and the company's rules? Use one example where something legal was arguably wrong.</p>",
+          "a": "<p>Distinguishes legal from ethical, uses a specific example, and acknowledges that ethics sometimes leads law, which later catches up.</p>"
+        },
+        {
+          "q": "<p><strong>Write (300–500 words).</strong> Use the four W's to analyze a real ethical decision involving technology that you, a friend or a well-documented company faced. End with what you would do and what would change your mind.</p>",
+          "a": "<p>Covers Who, What, Why and Which explicitly, considers at least three options, applies at least two frameworks, and states a decision with a genuine condition for changing it.</p>"
+        }
+      ],
       sources: ["acm", "sep"]
     },
     {
       id: "u4",
       title: "Privacy, data and surveillance",
-      minutes: 60,
+      minutes: 90,
       summary: "Three common beliefs about privacy, the real cases that disproved them, and what the law and engineers do about it.",
       notes: `
 <p>People often dismiss privacy with one of three beliefs: "I have nothing to hide", "the data is anonymous", and "users agreed to it". Each one has been tested by real events. This lesson takes them in turn.</p>
@@ -226,12 +332,34 @@ CSA.addCourse({
         { q: "Which three facts did Sweeney show identify most Americans?", choices: ["Name, email and phone", "ZIP code, sex and date of birth", "Height, weight and eye color", "Car, employer and school"], answer: 1, why: "Her 2000 study estimated about 87% of the U.S. population is unique on those three facts." },
         { q: "The Strava heatmap revealed military bases even though it contained no names. What does this show?", choices: ["Fitness apps should be banned", "Aggregated data can still expose sensitive information", "GPS is inaccurate", "Soldiers broke the law"], answer: 1, why: "Patterns in combined data can reveal places and routes that no single record shows." }
       ],
+      practice: [
+        {
+          "q": "<p><strong>Discuss.</strong> Which of the three beliefs (nothing to hide, it's anonymous, users agreed) did you hold before this lesson? Which case changed your mind most?</p>",
+          "a": "<p>Engages honestly with the belief and explains the mechanism of the case, such as how combinations of ordinary details identify people.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Apply contextual integrity to a fitness app sharing your running routes with your friends, then with your employer, then with an insurance company.</p>",
+          "a": "<p>Identifies the norms of each context and explains which flows violate them and why, not just which feel uncomfortable.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Should a university use students' campus card swipes and Wi-Fi logins to identify students who might be struggling and offer them help?</p>",
+          "a": "<p>Weighs the real benefit against consent, data minimization, how long data is kept, who can see it, and the risk of the data being used for something else.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> GDPR gives people the right to have their data deleted. What makes that hard to implement technically?</p>",
+          "a": "<p>Thinks like an engineer: backups, copies in logs and analytics, data shared with partners, and data already used to train models.</p>"
+        },
+        {
+          "q": "<p><strong>Write (300–500 words).</strong> Download or request the data a service you use holds about you (most large services offer this). Describe what you found, what surprised you, and which of the four words (less, locked, limited, gone) the service seems to follow or not.</p>",
+          "a": "<p>Reports specifics from the real export, connects them to the lesson's principles, and makes a reasoned judgment. (Remove anything you don't want to share before discussing it in class.)</p>"
+        }
+      ],
       sources: ["gdpr", "sep"]
     },
     {
       id: "u5",
       title: "AI in society",
-      minutes: 75,
+      minutes: 90,
       summary: "Four questions to ask about any AI system, the real cases behind them, and how to use AI tools well as a student.",
       notes: `
 <p>AI systems now help decide who gets a loan, which job applicants get an interview, what news people see and how students study. You don't need to be an AI researcher to judge them. Four questions go a long way, and each one has a real story behind it:</p>
@@ -269,12 +397,34 @@ CSA.addCourse({
         { q: "A company reports its system is 95% accurate overall. Which follow-up question matters most?", choices: ["How fast is it?", "How accurate is it for each group it affects?", "What programming language is it in?", "How many engineers built it?"], answer: 1, why: "An overall number can hide large gaps, as Gender Shades showed." },
         { q: "Why did the lawyers in the 2023 New York case get fined?", choices: ["They used a computer in court", "They filed a brief citing cases an AI tool had invented", "They refused to use AI", "They leaked client data"], answer: 1, why: "They relied on the tool without checking, and even asked the tool itself to confirm the fake cases." }
       ],
+      practice: [
+        {
+          "q": "<p><strong>Discuss.</strong> Pick an AI system you've used. Ask the four questions about it: accurate for whom, how does it fail, who answers for it, at what cost?</p>",
+          "a": "<p>Answers each question with specifics about that system, admits where the answer is unknown, and says how one could find out.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> In Gender Shades, an overall accuracy number hid large gaps between groups. What other kinds of systems could have the same problem?</p>",
+          "a": "<p>Generalizes the lesson, for example to speech recognition and accents, medical algorithms and skin tones, or hiring tools and résumé styles, and suggests testing results separately for each group.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Who should be responsible when an AI tool gives harmful advice: the company that trained the model, the company that built the app on it, or the user?</p>",
+          "a": "<p>Recognizes that responsibility can be shared, distinguishes foreseeable from unforeseeable misuse, and connects to the EU AI Act's approach of scaling duties with risk.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Where is the line between using AI to learn and using it to avoid learning? Describe a use that is clearly fine, one that clearly isn't, and one you're unsure about.</p>",
+          "a": "<p>Gives concrete examples and a principle for telling them apart, such as whether you could now do the task yourself.</p>"
+        },
+        {
+          "q": "<p><strong>Write (300–500 words).</strong> Find a real case where an AI system's mistake affected people. Analyze it with the four questions and propose one technical and one policy change that would have helped.</p>",
+          "a": "<p>Uses a documented case with sources, applies all four questions, and makes proposals specific enough to implement.</p>"
+        }
+      ],
       sources: ["gendershades", "euaiact", "nistrmf", "acm"]
     },
     {
       id: "u6",
       title: "Accessibility and inclusive design",
-      minutes: 50,
+      minutes: 90,
       summary: "How four different people use the same web page, the standard that describes what they need, and the small coding habits that make the difference.",
       notes: `
 <p>About 1.3 billion people, roughly one in six worldwide, live with a significant disability, according to the World Health Organization. Many more have a temporary or situational limitation: a broken wrist, a phone in bright sunlight, a video in a quiet library. Accessible design is about all of them.</p>
@@ -316,6 +466,28 @@ CSA.addCourse({
         { q: "What does the O in POUR stand for?", choices: ["Open", "Operable", "Optimized", "Ordered"], answer: 1, why: "Interfaces must be operable by everyone, for example by keyboard." },
         { q: "Why does a clickable <code>div</code> fail keyboard users?", choices: ["It is too small", "It isn't focusable, so Tab skips it and Enter does nothing", "It loads slowly", "It can't be styled"], answer: 1, why: "A real <code>&lt;button&gt;</code> is focusable and responds to Enter and Space automatically." },
         { q: "Captions were made for deaf viewers but are now used by people in noisy places and language learners. What is this called?", choices: ["The curb-cut effect", "Moore's law", "Data minimization", "Graceful degradation"], answer: 0, why: "Like sidewalk ramps, accessibility features often help far more people than intended." }
+      ],
+      practice: [
+        {
+          "q": "<p><strong>Discuss.</strong> Try using a website you know well with only the keyboard for five minutes. What worked and what didn't?</p>",
+          "a": "<p>Reports specific problems (focus disappearing, controls that can't be reached, focus trapped in a menu) and links each one to a POUR principle.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Turn on your phone's screen reader (VoiceOver or TalkBack) and try to send a message. How did it feel, and what would you change about an app you use?</p>",
+          "a": "<p>Describes the experience honestly and connects problems to missing labels, unclear headings or unlabeled buttons, the same issues as in the lesson's code example.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Give an example of the curb-cut effect in technology that the lesson didn't mention.</p>",
+          "a": "<p>Examples include text-to-speech for audiobooks, autocomplete, voice assistants, high-contrast modes in sunlight, or captions in social media videos, each with a clear account of who it was first designed for.</p>"
+        },
+        {
+          "q": "<p><strong>Discuss.</strong> Accessibility work is often left until the end of a project and then cut for time. Why does that happen, and how could a team prevent it?</p>",
+          "a": "<p>Identifies causes (no one owns it, it isn't tested, it's seen as optional) and proposes concrete practices: requirements from the start, automated checks, testing with disabled users, including it in the definition of done.</p>"
+        },
+        {
+          "q": "<p><strong>Write (300–500 words).</strong> Audit one page of a website you use, such as your university's course registration page, against the four POUR principles. Report at least three specific problems and how to fix each.</p>",
+          "a": "<p>Finds real, specific issues (missing alt text, unlabeled form fields, color-only error messages, poor keyboard support) and gives concrete fixes, ideally with the HTML change needed.</p>"
+        }
       ],
       sources: ["wcag"]
     }

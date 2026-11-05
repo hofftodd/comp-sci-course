@@ -516,14 +516,16 @@ pre code { background: none; padding: 0; font-size: inherit; }
     const core = cs.reduce((a, c) => a + c.units.length, 0);
     const opt = cs.reduce((a, c) => a + c.optional.length, 0);
     const qs = cs.reduce((a, c) => a + lessons(c).reduce((b, u) => b + (u.quiz || []).length, 0), 0);
+    const ps = cs.reduce((a, c) => a + lessons(c).reduce((b, u) => b + (u.practice || []).length, 0), 0);
     const doneCore = cs.reduce((a, c) => a + progress(c).n, 0);
     let h = `<section class="hero">
       <div class="eyebrow">${termLabel(t)} is open</div>
       <h1>A complete computer science education, one term at a time.</h1>
-      <p>Four years of coursework modeled on the strongest undergraduate programs, with notes, sidebars on history, ethics and the evolution of programming languages, and quizzes after every lesson.</p>
+      <p>Four years of coursework modeled on the strongest undergraduate programs, Each lesson is about 90 minutes: notes with worked examples, sidebars on history, ethics and the evolution of programming languages, practice problems with worked solutions, and a quiz. Every course opens with a clear grading rubric.</p>
       <div class="stats">
         <div><b>${core}</b>core units</div>
         <div><b>${opt}</b>optional lessons</div>
+        <div><b>${ps}</b>practice problems</div>
         <div><b>${qs}</b>quiz questions</div>
         <div><b>${doneCore}/${core}</b>units you've completed</div>
       </div>
@@ -657,8 +659,9 @@ pre code { background: none; padding: 0; font-size: inherit; }
       h += `<div class="quiz-foot"><button class="btn" type="submit">Check answers</button><button class="btn ghost" type="button" id="quiz-reset" hidden>Try again</button><span class="score" id="quiz-score" aria-live="polite">${scores[k] != null ? "Best score so far: " + scores[k] + "%" : ""}</span></div></form></section>`;
     }
     if (u.practice && u.practice.length) {
-      h += `<section class="block"><h2>Practice</h2><p class="note">Work each problem on paper or in your editor before you open the solution. Struggling a little first is how the ideas stick.</p><ol class="practice">${u.practice.map(pr =>
-        `<li><div class="pq">${pr.q}</div>${pr.hint ? `<details><summary>Hint</summary><div class="pa">${pr.hint}</div></details>` : ""}<details><summary>Solution</summary><div class="pa">${pr.a}</div></details></li>`).join("")}</ol></section>`;
+      const pl = { title: "Practice", intro: "Work each problem on paper or in your editor before you open the solution. Struggling a little first is how the ideas stick.", answer: "Solution", ...(c.practiceLabels || {}) };
+      h += `<section class="block"><h2>${esc(pl.title)}</h2><p class="note">${esc(pl.intro)}</p><ol class="practice">${u.practice.map(pr =>
+        `<li><div class="pq">${pr.q}</div>${pr.hint ? `<details><summary>Hint</summary><div class="pa">${pr.hint}</div></details>` : ""}<details><summary>${esc(pl.answer)}</summary><div class="pa">${pr.a}</div></details></li>`).join("")}</ol></section>`;
     }
     if (u.sources && u.sources.length) {
       h += `<section class="block"><h2>Sources and further reading</h2><ol class="srcs">${u.sources.map(id => D.sources[id]).filter(Boolean).map(s =>

@@ -74,12 +74,21 @@ CSA.addAsides("cs101", {                 // sidebars inside core units
   u1: [{ kind: "history", title: "...", html: `<p>...</p>`, sources: ["..."], only: "python" }]
 });
 
+CSA.addUnits("cs101", [ /* more units */ ]);   // append units; lets a long course span several parts
+
 CSA.addOptional("cs101", [{              // optional lessons: a unit plus a kind
   id: "lang", kind: "history", title: "...", minutes: 75, summary: "...",
   notes: `...`, terms: [], quiz: [], sources: []
 }]);
 ```
 
+- **Rubric** (`course.rubric`), shown first on the course page: `assessments` (name, weight, desc;
+  weights should total 100), `criteria` (name, desc, and four `levels` from Excellent to Beginning),
+  `criteriaFor`, `scale` (grade, range pairs) and `policies` (HTML strings).
+- **Practice** (`unit.practice`): a list of `{ q, hint?, a }` with HTML. Students see the problem and
+  can reveal the hint and the answer. `course.practiceLabels` (`title`, `intro`, `answer`) renames the
+  section, as the seminar does for discussion questions. The professor sees the problems and solutions
+  and is told to give hints before solutions.
 - **Sidebar kinds:** `history`, `ethics`, `lang` (language evolution), `practice`.
 - **Optional lesson kinds:** `history`, `ethics`, `deep` (deep dive).
 - **Sources:** every id must exist in `CSA.sources` in `program.js`. `CSA.access` labels each
@@ -98,6 +107,7 @@ CSA.addOptional("cs101", [{              // optional lessons: a unit plus a kind
 | `<table>` | Wrapped automatically so wide tables scroll on phones. |
 | `<pre><code>` | Code block labeled "Python". |
 | `<pre data-label="Shell"><code>` | Code block with its own label (Terminal, Lean 4, HTML, ...). |
+| `<figure class="fig"><svg>…</svg><figcaption>` | A diagram that follows light and dark mode. Inside the SVG use the classes `ax` (axes), `ln`, `cv` (main curve), `hl` (highlight), `dash`, `box`, `soft`, `warm`, `shade`, `bgf`, `outline`, `dot`, `hole`, and `text` with `m` (muted) or `code`. Give each figure's marker and clip-path ids a unique suffix. On phones a figure keeps a readable size and scrolls sideways. |
 | `<div class="multi">` with `<pre data-lang="python">`, `"java"`, `"cpp"` | One example in several languages, shown as tabs. |
 | `data-only="java cpp"` on any element | Shown only when one of the listed languages is active. |
 
