@@ -1,57 +1,120 @@
 # First Principles CS
 
-An interactive learning site for a four-year computer science curriculum. Year 1 Fall is written.
+An interactive learning platform for a complete four-year computer science degree, modeled on
+what the strongest undergraduate programs teach. Students read lessons, check their understanding
+with quizzes, and ask an AI professor questions in plain language. The lessons improve over time:
+the platform notices where students struggle, drafts clearer explanations or questions, and an
+instructor approves each change before students see it.
 
-## Layout
-- `index.html`: the app (routing, rendering, quizzes, progress, language switcher).
-- `data/program.js`: the four-year plan, the source registry (`sources`), and helpers.
-- `data/<course>.js`: one file per course, registered with `CSA.addCourse({...})`.
-- `CSA.addAsides(courseId, { unitId: [...] })`: sidebars inside units. Kinds: `history`, `ethics`, `lang`, `practice`.
-- `CSA.addOptional(courseId, [...])`: optional lessons. Kinds: `history`, `ethics`, `deep`.
+**Status:** Year 1 Fall is written. The other seven terms are planned and shown on the home page.
 
-## Course languages
-Year 1 (both terms) is taught in Python only: `languages: ["python"]` on the term in
-`data/program.js`. A term or a course can list several languages (`"python"`, `"java"`, `"cpp"`);
-then the language switcher appears and the multi-language content below is shown.
+## What's in Year 1 Fall
 
-## Multi-language code
-Wrap variants in `<div class="multi">` with one `<pre data-lang="python|java|cpp">` each.
-Any element with `data-only="java cpp"` shows only when one of the listed languages is active
-(used for whole explanation blocks as well as short notes). Sidebars take `only: "python"`, and quiz
-questions take `langs: { java: {...}, cpp: {...} }` to override their text per language.
-Lesson 1 of Programming I already has full Java and C++ versions, hidden while Year 1 is Python-only.
-A plain `<pre>` is labeled "Python".
+| Course | Credits | Core units | Optional lessons |
+|---|---|---|---|
+| CS 101 Programming I (Python) | 4 | 7 | How programming languages evolved · When software fails people · How Python actually runs your code |
+| MATH 120 Discrete Mathematics I | 4 | 6 | From Boole to Shannon · Proof assistants and verified software |
+| MATH 130 Calculus I | 4 | 6 | Calculus inside machine learning · Two thousand years of calculus |
+| CS 100 Computing in Society | 2 | 6 | The hidden history of computing · Risk scores and the math of fairness |
+| WRIT 100 Writing for Technical Audiences (elective) | 3 | planned | |
 
-## Attribution
-All lesson text is original. Each lesson lists `sources` (ids in `data/program.js`).
-Licenses are recorded only where the source states one on its own site.
+Every lesson has notes, key terms, a quiz with explanations, and a list of sources. Many lessons
+also have **sidebars** on history, ethics, the evolution of programming languages, and how the
+idea is used in practice. Year 1 is taught in Python.
 
-## Live features (app/live.js)
-- **Ask the professor**: a chat drawer that calls Claude via the artifact `sample` capability, grounded in the current lesson, quiz and chosen language. Runs on each viewer's own Claude account.
-- **Learning signals**: each student's questions (last 8 per lesson), clarity rating and first-try quiz picks are stored in `signals/<user id>` (db). Only instructors (Editors) can read them; names are never shown.
-- **Revisions**: approved clarifications and quiz rewrites live in `revisions/<course>-<lesson>`; the page merges them into lessons. Only Editors can write them.
-- **Instructor view** (`#teach`): lesson health, and "Draft improvements with Claude", which proposes changes that an instructor approves one at a time.
-- To fold approved revisions into the source files permanently, ask Claude Code to read the `revisions` collection and edit `data/*.js`.
+## Features
 
-## Self-hosting with a choice of model providers (server/)
-The claude.ai page can only reach Claude. To offer Anthropic, Google, OpenAI or local models,
-run the bundled server (Node.js 18+, no dependencies). It serves the same site, keeps API keys
-on the server, and stores student signals and approved revisions in `server/data/`.
+- **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
+  the student's browser.
+- **Ask the professor**: an office-hours chat on every page. It sees the current lesson, sidebars
+  and quiz, explains ideas another way, gives examples, and quizzes students one question at a
+  time. It gives hints rather than quiz answers until the student has submitted the quiz.
+- **Lessons that improve**: the platform records, without names, the questions students ask, how
+  they rate each lesson's clarity, and their first-try quiz answers. The **Instructor view** ranks
+  lessons by need, and an AI model drafts added clarifications and clearer quiz questions from that
+  evidence. Nothing reaches students until an instructor approves it, and every change can be removed.
+- **Choice of AI model** (self-hosted): Anthropic, Google, OpenAI, or a local model through Ollama,
+  LM Studio or any OpenAI-compatible server.
+- **Attribution**: all lesson text is original. A Sources page lists every reference, its license
+  where the source states one, and whether it is openly licensed, public domain, free to read, or
+  usually reached through a library.
+
+## Running it
+
+There are three ways to use the platform. They share the same code.
+
+### 1. Read it locally (no AI features)
+
+Open `index.html` in a browser. Lessons, quizzes and progress work. The professor and the
+instructor view stay hidden, because there is no AI model or shared storage.
+
+### 2. On claude.ai
+
+The page can be published as a claude.ai artifact. There, the professor uses Claude on each
+viewer's own Claude account, and student activity and approved revisions are stored in the
+artifact's database. Give students **Contributor** access so their activity is recorded;
+instructors need **Editor** access to open the Instructor view. Only Claude is available there,
+because claude.ai pages cannot contact other servers.
+
+### 3. Self-hosted, with any model provider
+
+The bundled server needs Node.js 18 or newer and has no dependencies. It serves the site, keeps
+API keys on the server, and stores student activity and revisions as JSON files.
 
 ```bash
-cp server/config.example.json server/config.json   # pick providers and models
-export ANTHROPIC_API_KEY=...   # any provider whose key is set is offered
-export OPENAI_API_KEY=...
-export GEMINI_API_KEY=...
-export INSTRUCTOR_KEY=a-long-random-secret   # enables the Instructor view
-node server/server.mjs                        # http://127.0.0.1:8080
+cp server/config.example.json server/config.json
 ```
 
-- **Local models:** set `"enabled": true` on the Ollama or LM Studio entry and list the models you
-  have pulled. Any OpenAI-compatible server works (`"type": "openai"` plus `baseUrl`).
-- **Choosing models:** students pick from the models you list; the default is `default` in the config.
-  Model ids change often, so check each provider's current list.
-- **Limits:** `rateLimit` caps questions per student IP (instructors are exempt). `maxOutputTokens` caps answer length.
-- **Deploying:** the server listens on 127.0.0.1. Put it behind HTTPS (Caddy, nginx) and set
-  `"host": "0.0.0.0"` and `"trustProxy": true` when a reverse proxy forwards requests.
-- **Data:** `server/data/signals.json` (anonymous per-browser ids) and `server/data/revisions.json`. Back them up.
+Edit `server/config.json` to choose providers and models, then set the keys for the providers
+you want. Any provider whose key is set is offered to students.
+
+```bash
+export ANTHROPIC_API_KEY=...
+export OPENAI_API_KEY=...
+export GEMINI_API_KEY=...
+export INSTRUCTOR_KEY=choose-a-long-random-secret
+```
+
+```bash
+node server/server.mjs
+```
+
+Then open http://127.0.0.1:8080. The Instructor view asks for `INSTRUCTOR_KEY`.
+
+**Configuration notes**
+
+- **Local models:** set `"enabled": true` on the Ollama or LM Studio entry and list models you
+  have installed. Any OpenAI-compatible server works with `"type": "openai"` and a `baseUrl`.
+- **Model ids** change often. The OpenAI and Google entries in the example config are examples;
+  check each provider's current model list.
+- **Limits:** `rateLimit` caps questions per student IP address (instructors are exempt), and
+  `maxOutputTokens` caps answer length.
+- **Deploying:** the server listens on `127.0.0.1`. Put it behind HTTPS (for example Caddy or
+  nginx), and set `"host": "0.0.0.0"` and `"trustProxy": true` when a reverse proxy forwards requests.
+- **Data:** `server/data/signals.json` and `server/data/revisions.json`. Back them up. Both are
+  excluded from git.
+
+## Adding and editing content
+
+Course content lives in `data/`, one file per course, written as plain JavaScript objects with HTML
+notes. No build step is needed: edit a file and reload the page. See
+[ARCHITECTURE.md](ARCHITECTURE.md) for the content format, including sidebars, optional lessons,
+quizzes, multi-language code examples and per-term languages.
+
+## Privacy
+
+Student questions, clarity ratings and first-try quiz answers are linked to an anonymous ID, never a
+name. On claude.ai only page editors can read them; on the self-hosted server only someone with the
+instructor key can. The professor panel tells students their questions are shared with instructors.
+If you run this for a school, check your obligations for student records (in the U.S., FERPA)
+before collecting this data.
+
+## AI accuracy
+
+The professor and the drafting tool use AI models, which can be wrong. The lesson notes were
+written with care, but they have not yet been reviewed by subject experts. Review the content before
+relying on it for teaching.
+
+## License
+
+This repository does not include a license yet.
