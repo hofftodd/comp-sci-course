@@ -266,6 +266,7 @@ How to teach:
       if (asides) t += `\nSIDEBARS:\n${asides}\n`;
       if (clar) t += `\nADDED CLARIFICATIONS:\n${clar}\n`;
       if (x.u.quiz && x.u.quiz.length) t += `\nLESSON QUIZ (reference only):\n${quizText(x.c, x.u)}\n`;
+      if (x.u.practice && x.u.practice.length) t += `\nPRACTICE PROBLEMS WITH SOLUTIONS (reference only: give hints first, and share a full solution only after the student has made a real attempt or explicitly asks to check their answer):\n${x.u.practice.map((pr, i) => `P${i + 1}. ${plain(pr.q)}\n   Solution: ${plain(pr.a)}`).join("\n").slice(0, 12000)}\n`;
     } else if (x.c) {
       t += `\nThe student is on the overview page of ${x.c.code} ${x.c.title}: ${x.c.summary}\nLearning outcomes: ${x.c.outcomes.join("; ")}\n`;
     }

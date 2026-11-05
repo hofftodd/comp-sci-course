@@ -18,8 +18,10 @@ CSA.addAsides("cs101", {
     { kind: "lang", title: "Not every language allowed recursion", html: `<p>The original FORTRAN (1957) stored each function's variables at a fixed memory address, so a function could not call itself. Standard Fortran did not allow recursion until Fortran 90. LISP (1958) was built around recursion, and ALGOL 60 required it, which pushed compilers to use a call stack. That design is now universal.</p>`, sources: ["mccarthy60", "hopl"] },
     { kind: "practice", title: "Python deliberately has no tail-call optimization", html: `<p>Some languages, such as Scheme, reuse the current frame when a function's last action is a recursive call, so that recursion uses no extra stack space. Guido van Rossum declined to add this to Python in 2009, arguing that it would hide frames from tracebacks and make debugging harder. In Python, write deep or unbounded repetition as a loop.</p>`, sources: ["pyhistory"] }
   ],
+  str: [
+    { kind: "lang", title: "Why indexes start at zero", html: `<p>In BCPL and then C, an array name is a memory address and <code>a[i]</code> means "the item <code>i</code> steps past the start", so the first item is at offset 0. Dijkstra argued for zero-based numbering on separate grounds in a 1982 note: half-open ranges like <code>0 ≤ i &lt; n</code> have length <code>n</code> and join without gaps. Python's <code>range</code> and slices follow the same convention. Fortran, MATLAB, Lua and R start at 1.</p>` }
+  ],
   u5: [
-    { kind: "lang", title: "Why indexes start at zero", html: `<p>In BCPL and then C, an array name is a memory address and <code>a[i]</code> means "the item <code>i</code> steps past the start", so the first item is at offset 0. Dijkstra argued for zero-based numbering on separate grounds in a 1982 note: half-open ranges like <code>0 ≤ i &lt; n</code> have length <code>n</code> and join without gaps. Python's <code>range</code> and slices follow the same convention. Fortran, MATLAB, Lua and R start at 1.</p>` },
     { kind: "practice", title: "Dictionaries remember insertion order", html: `<p>Since Python 3.7, the language guarantees that a dict iterates its keys in the order they were inserted. Before 3.6 the order looked random. The change came from a more compact hash table design, and order was then made part of the language specification so that programs could rely on it.</p>` }
   ],
   u6: [
@@ -188,7 +190,7 @@ for (int i = 1; i &lt;= 10; i++) {
 
 <h3>Patriot missile at Dhahran (1991): number representation</h3>
 <p>The Patriot system counted time in tenths of a second and converted to seconds using a 24-bit fixed-point value of 0.1, which cannot be represented exactly in binary. The error grew the longer the system ran. After about 100 hours, the clock was off by about a third of a second, enough to shift the tracking window by hundreds of meters. On February 25, 1991, a battery failed to intercept an incoming Scud missile, which struck a U.S. Army barracks and killed 28 soldiers. A software fix was already on its way.</p>
-<p><strong>Connection:</strong> Unit 1's floating-point sidebar. Small representation errors add up.</p>
+<p><strong>Connection:</strong> the floating-point sidebar in the Values, types and expressions lesson. Small representation errors add up.</p>
 
 <h3>Ariane 5 Flight 501 (1996): reused code and assumptions</h3>
 <p>About 37 seconds after launch, Europe's new rocket veered off course and broke apart. Navigation code reused from Ariane 4 converted a 64-bit floating-point velocity into a 16-bit integer. Ariane 5 flew faster, the value no longer fit, and the conversion raised an unhandled exception that shut down both the primary and the backup navigation computers, which ran the same code. Nobody was hurt, but the launch and its payload were lost.</p>

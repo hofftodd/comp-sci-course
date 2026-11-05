@@ -84,7 +84,10 @@ window.CSA = {
   },
 
   courses: {},
-  addCourse(c) { c.optional = c.optional || []; this.courses[c.id] = c; },
+  addCourse(c) { c.optional = c.optional || []; c.units = c.units || []; this.courses[c.id] = c; },
+
+  /* Append units to a course, in order. Lets a long course be written in several parts. */
+  addUnits(courseId, units) { this.courses[courseId].units.push(...units); },
 
   /* Sidebars inside core units: { unitId: [{ kind, title, html, sources }] }.
      kind is one of: history, ethics, lang (language evolution), practice. */
