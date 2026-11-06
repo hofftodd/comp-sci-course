@@ -106,3 +106,54 @@ I'm a first-year student. Before this term I had high-school algebra and trigono
 
 31. MATH 130 u2 says "1/x on [−1, 1] has no maximum because it isn't continuous at 0", and its Q4 asks about applying the IVT to 1/x on [−1, 1]. MATH 120 u5 says "A rule that gives some input no output, like 1/x on ℝ (nothing at 0), isn't a function on that domain." If 1/x isn't even a function on [−1, 1], I don't see how it can be "not continuous at 0" there.
 32. CS 101 u1 says a float holds "about 15 to 17 significant digits". MATH 130 (u1 P6 and u3 Numerical derivatives) says it "keeps only about 16 significant digits" and "keeps about 16 significant digits". The ranges differ, and I couldn't tell which figure to use when reasoning about rounding error in MATH 130 u1 P6 and u3 P7.
+
+## Professor's response
+
+Thank you for a precise review. Every item led to a change except where a line says otherwise. Five items found real inconsistencies, now fixed: block structure credited to both ALGOL 60 and ABC (14), 1/x called "not continuous at 0" on an interval where it isn't even a function (31), two different figures for a float's significant digits (32), a sidebar that skipped Python 3.6 (4), and a quiz answer the lesson didn't support (28). The blocking item (21) now has a worked example that teaches the difference-function recipe step by step, and the hiker's answer follows it. One item partly rested on a misreading (6, explained in its line), but the prompt was still too thin. Every number and code output I added was checked by running Python 3. No programming problem's tests, starter or solution changed.
+
+### CS 101 Programming I
+
+1. u2, Comparisons: Now shows `"Zebra".lower()` giving `"zebra"` and the case-insensitive comparison giving `False`, and says in one sentence that `.lower()` after a value calls a *method*, with a pointer to the Strings lesson.
+2. str, String methods: The `split()` row now says that with no argument it splits at any run of spaces, tabs or new lines and ignores them at the ends: `"  to   be ".split()` is `['to', 'be']`.
+3. u5, Copying a list of lists: Added a sentence after the code: the `g3` line is a list comprehension, explained in the next section, and it means the same as an empty list plus a `for` loop that appends `row.copy()`.
+4. u5 sidebar "Dictionaries remember insertion order": **Inaccuracy fixed.** Now says: up to 3.5 the order looked random; 3.6 (2016) kept insertion order as a side effect of a more compact design, not yet a promise; 3.7 (2018) made it an official rule.
+5. u4, Memoization: Removed the stray definition of "wraps". The sentence now just says `cache` returns a new function that sits around the old one, like a wrapper.
+6. u6, CODE last_n: The prompt now shows the buggy function, says it's the one from Practice 5, and lists the four tests with their expected results. (A partial misreading: the function is preloaded in the editor and the tests run when you press Check, but the prompt didn't say so, and the extraction doesn't show the starter.)
+7. files, The standard library: Added a short paragraph and example on `Counter`: it counts any sequence, including a list of words; `most_common(k)` returns the top k `(item, count)` tuples; a missing item counts as 0.
+8. u7, .gitignore: `__pycache__` is now explained where it's named: Python stores translated copies of imported modules there to load faster, and rebuilds them automatically.
+9. u7, GitHub and remotes: Defined API (a set of functions one program offers others, often over the internet) and API key (a secret code, like a password, identifying your program to a service).
+10. u7, The three places: Added a paragraph defining *tracked* and *untracked* files, and the `git status` comment now mentions untracked files. Practice 2 can now be fully explained.
+11. lang (optional): Garbage collection now explains what freeing memory means and what goes wrong without it. Memory-safety errors are defined with an example: in C, `a[10]` on a 10-item array reads whatever comes next, where Python raises `IndexError`.
+12. lang (optional), family tree: Closures are glossed in the table (functions that remember variables from where they were defined), with a note that CS 102 teaches them.
+13. lang (optional): Glossed concurrency, null safety (using Python's `None` as the example) and type hints (with a one-line example), and added "You don't need any of these terms yet."
+14. u2 sidebar, lang lesson and its Quiz 4: **Contradiction fixed.** Both claims were partly right. ALGOL 60 gave Python nested blocks and lexical scope; ABC gave Python indentation as the way to *mark* blocks. The sidebar and the ALGOL bullet (which now says ALGOL used `begin` and `end`) say this. The quiz now asks where the blocks and scope come from, not the indentation, and its explanation separates the two.
+15. ethics (optional) and u6 sidebar: *Race condition* is defined at both places (a bug whose result depends on which of two simultaneous activities finishes first), and the Therac-25 account now says what raced: the setup routine and the keyboard reader.
+16. ethics (optional), Patriot: Added binary fractions in brief: places worth ½, ¼, ⅛, …, so 0.11 is 0.75, and the doubling method that produces 0.000110011… for 0.1 (1/16 + 1/32 = 0.09375 already).
+
+### MATH 120 Discrete Mathematics I
+
+17. history (optional), Gödel: Added a parenthesis defining a formal system (axioms plus mechanical rules) and consistency (never proving a statement and its negation).
+18. deep (optional), Lean proof: Explained `Nat.succ k` as k + 1 and what `rfl`, `congrArg Nat.succ ih` and `exact` do, step by step through the goal 0 + (k + 1) = k + 1, with a note that you don't need to learn Lean's commands.
+
+### MATH 130 Calculus I
+
+19. pre, Exponential functions: e is now defined: the base whose graph has slope exactly 1 at (0, 1). It includes a numerical check: (bʰ − 1)/h at h = 0.000001 is 0.693… for 2, 1.0986… for 3, and 1.0000005 for 2.718281828. It also says that this is why (eˣ)′ = eˣ, linking to the derivation (23).
+20. u1, Rationalize: Defined *conjugate* (a − b and a + b, product a² − b², which squares a root away) and noted it works for a root in the denominator too, like √x − 2 in Practice 1(c).
+21. u2, The Intermediate Value Theorem: **Blocking item.** New worked example, "comparing two quantities": two towns' temperatures from 6:00 to 14:00, solved in four labeled steps (name both as functions of time, subtract, check signs at the ends, apply the IVT and translate back). The hiker's hint and answer now follow those steps. The answer now uses distance along the path instead of height, since a path that goes up and down can reach the same height at two places.
+22. u4: The derivation of (sin x)′ = cos x is now written out: the angle-addition formula, the companion limit (cos h − 1)/h → 0 (proved with the conjugate cos h + 1), and the split of the difference quotient. A sentence covers cos x the same way.
+23. u4: New paragraph "Why eˣ is its own derivative": (eˣ⁺ʰ − eˣ)/h = eˣ · (eʰ − 1)/h, and the second factor → 1 by the definition of e in Lesson 1 (checked numerically in Lesson 2, Practice 6). The aˣ and ln x derivations now rest on a stated fact.
+24. history (optional): Explained what the total of an endless sum means (the number the running sums 1, 1.25, 1.3125, … approach) and how to get 4/3 (S/4 = S − 1).
+
+### CS 100 Computing in Society
+
+25. u1, A short history: Defined time-sharing, terminal (a keyboard with a printer or screen wired to a distant computer) and hypertext.
+26. u1, AI: Expert systems are glossed as programs of hundreds or thousands of if-then rules gathered by interviewing human experts, so they are one kind of the rule-based AI just described.
+27. u2: Defined *corpora* (huge collections of text a model learns from; Latin *corpus*, "body").
+28. u5, Gender Shades: **Quiz now supported.** The lesson now says the researchers pointed to data as a main cause. It defines training data and *benchmarks* (standard test collections) and says the two widely used benchmarks they examined were about 80% and 86% lighter-skinned, which is why the study built its own balanced test set.
+29. u6, Four students: Glossed div (with a pointer to the section below), click handler and focus outline where Daniel's example uses them.
+30. u6, POUR: Explained WCAG's three levels: A is the minimum, AA is the usual target (for example color contrast) and AAA is the strictest. Meeting AA means meeting every A and AA requirement.
+
+### Across courses
+
+31. MATH 130 u2 and MATH 120 u5: **Inconsistency fixed.** You were right. MATH 130 now has a short "note on wording" after the kinds of discontinuity: 1/x² is a function on the reals except 0, continuous on that domain, and "discontinuity at 0" only means 0 is a gap where the first condition of continuity fails. The EVT sentence now says 1/x has no value at 0, so it isn't a function on all of [−1, 1], and on [−1, 1] without 0 it has no maximum. Quiz 4 now says "defined for x ≠ 0", and its answer reads "f has no value at 0, so it isn't continuous on [−1, 1]".
+32. CS 101 u1 and MATH 130: **Made consistent.** CS 101 now says "about 16 significant digits", the figure MATH 130 uses. A parenthesis explains where the 15 and 17 come from (53 bits of digits, 2⁵³ ≈ 9.0 × 10¹⁵; any 15-digit decimal survives, and 17 digits always suffice to write a float exactly) and says to use 16 in both courses.

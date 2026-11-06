@@ -299,7 +299,7 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
     <tr><td>64</td><td>2<sup>64</sup> = 18,446,744,073,709,551,616</td><td>1.8 × 10<sup>19</sup></td></tr>
   </tbody>
 </table>
-<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 15 to 17 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. That limit is where the surprises below come from.</p>
+<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 16 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. (Precisely: 53 of the 64 bits hold the digits, and 2<sup>53</sup> ≈ 9.0 × 10<sup>15</sup>, which is just under 16 decimal digits' worth. Any decimal number with 15 significant digits is stored faithfully, and 17 digits are always enough to write a float out exactly. "About 16" is the figure to use in this course and in MATH 130.) That limit is where the surprises below come from.</p>
 
 <h3>Floats are approximate</h3>
 <p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Two consequences:</p>
@@ -795,7 +795,7 @@ CSA.addUnits("cs101", [
   </tbody>
 </table>
 <p>Don't confuse <code>=</code> (assignment: make a name refer to a value) with <code>==</code> (comparison: are these equal?). Python lets you <em>chain</em> comparisons the way math does: <code>0 &lt;= score &lt;= 100</code> means "score is between 0 and 100".</p>
-<p>Strings compare alphabetically, character by character, using each character's code number. Every character is stored as a number: <code>A</code> to <code>Z</code> are 65 to 90, and <code>a</code> to <code>z</code> are 97 to 122 (the Strings lesson shows how to look these up with <code>ord</code>). So all uppercase letters come before all lowercase ones, so <code>"Zebra" &lt; "apple"</code> is <code>True</code>. Use <code>.lower()</code> on both sides when case shouldn't matter.</p>
+<p>Strings compare alphabetically, character by character, using each character's code number. Every character is stored as a number: <code>A</code> to <code>Z</code> are 65 to 90, and <code>a</code> to <code>z</code> are 97 to 122 (the Strings lesson shows how to look these up with <code>ord</code>). So all uppercase letters come before all lowercase ones, so <code>"Zebra" &lt; "apple"</code> is <code>True</code>. When case shouldn't matter, convert both sides to lowercase first: <code>"Zebra".lower()</code> gives <code>"zebra"</code>, and <code>"Zebra".lower() &lt; "apple".lower()</code> is <code>False</code>. Writing <code>.lower()</code> after a string calls a <em>method</em>, a function that belongs to the value; the Strings lesson covers methods properly.</p>
 
 <h3>Combining conditions: and, or, not</h3>
 <p><code>and</code> is true only when both sides are true; <code>or</code> is true when at least one side is; <code>not</code> flips a value. These are the logical connectives ∧, ∨ and ¬ from Discrete Mathematics.</p>
@@ -1356,7 +1356,7 @@ s = "j" + s[1:]     # build a new string instead: 'jython'</code></pre>
     <tr><td><code>lower()</code>, <code>upper()</code></td><td><code>"Ada".upper()</code></td><td><code>'ADA'</code></td></tr>
     <tr><td><code>strip()</code></td><td><code>"  hi \\n".strip()</code></td><td><code>'hi'</code> (removes surrounding spaces and new lines)</td></tr>
     <tr><td><code>replace(old, new)</code></td><td><code>"a-b-c".replace("-", "+")</code></td><td><code>'a+b+c'</code></td></tr>
-    <tr><td><code>split()</code></td><td><code>"to be or not".split()</code></td><td><code>['to', 'be', 'or', 'not']</code></td></tr>
+    <tr><td><code>split()</code></td><td><code>"to be or not".split()</code></td><td><code>['to', 'be', 'or', 'not']</code>. With no argument it splits at any run of spaces, tabs or new lines and ignores them at the ends, so <code>"  to   be ".split()</code> is also <code>['to', 'be']</code></td></tr>
     <tr><td><code>split(sep)</code></td><td><code>"3,14,15".split(",")</code></td><td><code>['3', '14', '15']</code></td></tr>
     <tr><td><code>sep.join(items)</code></td><td><code>"-".join(["a", "b", "c"])</code></td><td><code>'a-b-c'</code></td></tr>
     <tr><td><code>find(sub)</code></td><td><code>"banana".find("na")</code></td><td><code>2</code> (or <code>-1</code> if not found)</td></tr>
@@ -1596,6 +1596,7 @@ grid = [[1, 2], [3, 4]]
 g3 = [row.copy() for row in grid]   # copy each row too
 g3[0].append(99)
 print(grid)           # [[1, 2], [3, 4]]  unchanged</code></pre>
+<p>The line that makes <code>g3</code> is a one-line loop called a <em>list comprehension</em>, explained in the next section. It means the same as starting with <code>g3 = []</code> and running <code>for row in grid: g3.append(row.copy())</code>.</p>
 <p>Copying every level is a <strong>deep copy</strong>. For lists nested more than one level, <code>import copy</code> and use <code>copy.deepcopy(grid)</code>.</p>
 
 <h3>Building lists and comprehensions</h3>
@@ -1907,7 +1908,7 @@ def fib(n):
     return fib(n - 1) + fib(n - 2)
 
 fib(100)   # 354224848179261915075, instantly</code></pre>
-<p>The line <code>@cache</code> is a <strong>decorator</strong>. Writing <code>@cache</code> above <code>def fib</code> is shorthand for <code>fib = cache(fib)</code> after the definition: <code>cache</code> is a function that takes your function and returns a new one. "Wraps" means that the new function sits around the old one. When you call <code>fib(k)</code>, the new function first looks in a dictionary of answers it has saved; if <code>k</code> is there, it returns the saved answer, and if not, it calls your original <code>fib</code>, saves the result and returns it. Because the recursive calls inside <code>fib</code> also use the name <code>fib</code>, they go through the saved answers too. You'll write your own decorators in <a href="#c-cs102-c5">CS 102, Lesson 5</a>; for now, using <code>@cache</code> is enough. Now each <code>fib(k)</code> is computed only once, so <code>fib(n)</code> takes about <em>n</em> steps. Without memoization, <code>fib(100)</code> would take longer than the age of the universe.</p>
+<p>The line <code>@cache</code> is a <strong>decorator</strong>. Writing <code>@cache</code> above <code>def fib</code> is shorthand for <code>fib = cache(fib)</code> after the definition: <code>cache</code> is a function that takes your function and returns a new one that sits around the old one, like a wrapper. When you call <code>fib(k)</code>, the new function first looks in a dictionary of answers it has saved; if <code>k</code> is there, it returns the saved answer, and if not, it calls your original <code>fib</code>, saves the result and returns it. Because the recursive calls inside <code>fib</code> also use the name <code>fib</code>, they go through the saved answers too. You'll write your own decorators in <a href="#c-cs102-c5">CS 102, Lesson 5</a>; for now, using <code>@cache</code> is enough. Now each <code>fib(k)</code> is computed only once, so <code>fib(n)</code> takes about <em>n</em> steps. Without memoization, <code>fib(100)</code> would take longer than the age of the universe.</p>
 `,
     terms: [
       ["Recursion", "Defining a function in terms of itself on smaller inputs."],
@@ -2295,6 +2296,11 @@ g.circle_area(1)                 # a shorter nickname</code></pre>
     <tr><td><code>pathlib</code>, <code>csv</code>, <code>json</code></td><td>Files and data formats</td><td>See above</td></tr>
   </tbody>
 </table>
+<p>A <code>Counter</code>, from <code>collections</code> (bring it in with <code>from collections import Counter</code>), is a dictionary that counts. Give it any sequence, such as a string or a list of words, and it maps each item to how many times it appears. <code>c.most_common(k)</code> returns the <code>k</code> most frequent items as a list of <code>(item, count)</code> tuples, highest count first, and a missing item counts as 0 instead of raising <code>KeyError</code>:</p>
+<pre><code>from collections import Counter
+c = Counter(["to", "be", "or", "not", "to", "be"])
+print(c.most_common(2))   # [('to', 2), ('be', 2)]
+print(c["to"], c["xyz"])  # 2 0</code></pre>
 <p>Before writing something general, such as counting, sorting or parsing dates, check whether the standard library already does it. Its code has been tested by millions of users.</p>
 `,
     terms: [
@@ -2641,10 +2647,11 @@ assert not two_sum([3, 9, 14, 5], 4)</code></pre>` },
 <figcaption>You edit files in the working folder, choose which changes to include with <code>git add</code>, record them as a commit, and copy commits to a server such as GitHub with <code>git push</code>.</figcaption>
 </figure>
 <p>The <strong>staging area</strong> confuses most beginners, so here's why it exists: you might change five files but want to record only two of them in this commit, because the other three are part of a different, unfinished change. <code>git add</code> picks what goes into the next snapshot; <code>git commit</code> takes the snapshot.</p>
+<p>Git only keeps history for files you have added at least once; those are <strong>tracked</strong>. A new file in the folder that you have never added is <strong>untracked</strong>: Git notices it and lists it under "Untracked files" in <code>git status</code>, but ignores its contents until you <code>git add</code> it.</p>
 
 <h3>The everyday commands</h3>
 <pre data-label="Terminal"><code>git init                       # start tracking the current folder (once per project)
-git status                     # what has changed? what is staged?
+git status                     # what has changed? what is staged? what is untracked?
 git diff                       # show the exact lines changed
 git add stats.py               # stage one file  (git add . stages everything)
 git commit -m "Handle empty list in mean()"
@@ -2652,7 +2659,7 @@ git log --oneline              # list past commits
 git restore stats.py           # throw away uncommitted changes to a file</code></pre>
 <p>A typical cycle is: edit, run your tests, <code>git status</code> and <code>git diff</code> to review, <code>git add</code>, <code>git commit</code>. Commit small working steps, each with a message that says <em>why</em>, in the present tense: "Handle empty list in mean()" rather than "changes" or "fixed stuff". Your commit history becomes a lab notebook of the project.</p>
 <p>If you type <code>git commit</code> without <code>-m</code>, Git opens a text editor for you to write the message, and on many systems that editor is <strong>Vim</strong>, which doesn't respond to the keys you expect. To get out: press <strong>Esc</strong>, then type <code>:wq</code> and press Enter to save the message and commit, or type <code>:q!</code> and press Enter to quit without saving (with an empty message, Git cancels the commit). To choose a friendlier editor once and for all, run <code>git config --global core.editor "code --wait"</code> for VS Code, or <code>git config --global core.editor nano</code> on macOS and Linux.</p>
-<p>Some files shouldn't be tracked: temporary files, the <code>__pycache__</code> folder Python creates, virtual environments, and anything containing passwords. List them in a file called <code>.gitignore</code>:</p>
+<p>Some files shouldn't be tracked: temporary files, the <code>__pycache__</code> folder (Python creates it next to modules you import, to store a translated copy that loads faster next time; it is rebuilt automatically, so it never needs saving), virtual environments (explained below), and anything containing passwords. List them in a file called <code>.gitignore</code>:</p>
 <pre data-label=".gitignore"><code>__pycache__/
 .venv/
 *.log
@@ -2660,7 +2667,7 @@ secrets.txt</code></pre>
 
 <h3>GitHub and remotes</h3>
 <p>Git works entirely on your computer. A <strong>remote</strong> is a copy of the repository on a server, such as GitHub, GitLab or your university's server, that you and others can share. <code>git clone URL</code> copies a remote repository to your computer; <code>git push</code> sends your new commits up; <code>git pull</code> brings down commits others have made. GitHub also serves as a portfolio: employers and graduate programs often look at students' public projects.</p>
-<p>Never commit passwords or API keys. Even if you delete them in a later commit, they remain in the history, and public repositories are scanned by bots looking for leaked keys.</p>
+<p>Never commit passwords or API keys. (An <em>API</em>, application programming interface, is a set of functions one program offers to others; online services offer theirs over the internet, and an <em>API key</em> is a secret code, like a password, that identifies your program to the service and is often tied to your account or credit card.) Even if you delete them in a later commit, they remain in the history, and public repositories are scanned by bots looking for leaked keys.</p>
 
 <h3>Packages, pip and virtual environments</h3>
 <p>Beyond the standard library, hundreds of thousands of third-party <strong>packages</strong> are published on the Python Package Index (PyPI). <strong>pip</strong> installs them: <code>python3 -m pip install requests</code>.</p>

@@ -378,7 +378,8 @@ Total: $57.23</code></pre>`,
     {
       id: "last_n",
       title: "Fix the off-by-one bug",
-      prompt: `<p>This function should return the last <code>n</code> items of a list, but it has a bug. Find it with the tests, then fix it. Make sure <code>n = 0</code> returns an empty list.</p>`,
+      prompt: `<p>This function, already in the editor, should return the last <code>n</code> items of a list, but it has a bug (it's the one from Practice 5 of this lesson):</p><pre><code>def last_n(xs, n):
+    return xs[len(xs) - n - 1:]</code></pre><p>Press <strong>Check</strong> to run the four tests. They call <code>last_n([1, 2, 3, 4], 2)</code>, which should give <code>[3, 4]</code>; <code>last_n([1, 2, 3], 0)</code>, which should give <code>[]</code>; <code>last_n([1, 2, 3], 3)</code>, which should give <code>[1, 2, 3]</code>; and <code>last_n([1, 2], 5)</code>, which should give the whole list <code>[1, 2]</code>. Use the failing tests to find the bug, then fix it so that all four pass.</p>`,
       starter: `def last_n(xs, n):\n    return xs[len(xs) - n - 1:]\n`,
       hint: `<p>Trace <code>last_n([1, 2, 3, 4], 2)</code> by hand: what is the start index? Also, watch out: <code>xs[-0:]</code> is the whole list, not an empty one.</p>`,
       solution: `def last_n(xs, n):\n    if n <= 0:\n        return []\n    return xs[max(len(xs) - n, 0):]\n`,
