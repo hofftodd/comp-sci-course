@@ -117,6 +117,7 @@ cd ..           # move up one level, to the parent folder</code></pre>
 'Hello, world'
 &gt;&gt;&gt; print("Hello, world")
 Hello, world</code></pre>
+<p>Python's arithmetic symbols are <code>+</code>, <code>-</code>, <code>*</code> (multiply) and <code>/</code> (divide), with multiplication and division done before addition and subtraction, as in algebra. <code>**</code> means "to the power of", so <code>2 ** 100</code> is 2<sup>100</sup>. <code>+</code> also joins two strings (pieces of text in quotes), and <code>*</code> between a string and a whole number repeats the string: <code>"ab" * 2</code> is <code>'abab'</code>. The next lesson covers all of these properly.</p>
 <p>The console is perfect for trying small things. Everything disappears when you leave it, which you do with <code>exit()</code>, or Ctrl+D on macOS and Linux, or Ctrl+Z then Enter on Windows.</p>
 
 <h3>Your first program</h3>
@@ -273,12 +274,40 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
 </table>
 <p>When in doubt, add parentheses. <code>(2 + 3) * 4</code> is clearer than relying on a reader to remember the rules.</p>
 
+<h3>Binary numbers, bits and bytes</h3>
+<p>Computers store every number as a pattern of <strong>bits</strong>. A bit (short for <em>binary digit</em>) is a 0 or a 1, like a switch that is off or on. Writing numbers with only these two digits is called <strong>binary</strong>, or base 2.</p>
+<p>In ordinary decimal, each place is worth ten times the place to its right: 1, 10, 100, 1000. In binary, each place is worth <em>two</em> times the place to its right: 1, 2, 4, 8, 16, and so on. So binary <code>1101</code> means</p>
+<p class="math">1×8 + 1×4 + 0×2 + 1×1 = 13.</p>
+<p>To go the other way, from 13 to binary, divide by 2 again and again and write down each remainder. The remainders, read from the last one back to the first, are the binary digits:</p>
+<table>
+  <thead><tr><th>Number</th><th>÷ 2 gives</th><th>Remainder (a binary digit)</th></tr></thead>
+  <tbody>
+    <tr><td>13</td><td>6</td><td>1 (the last digit)</td></tr>
+    <tr><td>6</td><td>3</td><td>0</td></tr>
+    <tr><td>3</td><td>1</td><td>1</td></tr>
+    <tr><td>1</td><td>0</td><td>1 (the first digit)</td></tr>
+  </tbody>
+</table>
+<p>Reading the remainders from the bottom up gives <code>1101</code>. In Python, <code>13 % 2</code> is the last digit and <code>13 // 2</code> is the number with that digit removed, exactly as <code>% 10</code> and <code>// 10</code> work for decimal digits. Python can check your work: <code>bin(13)</code> gives <code>'0b1101'</code> (the <code>0b</code> just marks it as binary), and <code>int("1101", 2)</code> gives <code>13</code>.</p>
+<p>With <em>n</em> bits there are 2<sup><em>n</em></sup> different patterns, because each bit doubles the number of choices. A <strong>byte</strong> is 8 bits, so it holds 2<sup>8</sup> = 256 patterns, the whole numbers 0 to 255. Sizes you'll meet often:</p>
+<table>
+  <thead><tr><th>Bits</th><th>Patterns</th><th>Roughly</th></tr></thead>
+  <tbody>
+    <tr><td>8 (one byte)</td><td>2<sup>8</sup> = 256</td><td>256</td></tr>
+    <tr><td>16</td><td>2<sup>16</sup> = 65,536</td><td>65 thousand</td></tr>
+    <tr><td>32</td><td>2<sup>32</sup> = 4,294,967,296</td><td>4.3 billion</td></tr>
+    <tr><td>64</td><td>2<sup>64</sup> = 18,446,744,073,709,551,616</td><td>1.8 × 10<sup>19</sup></td></tr>
+  </tbody>
+</table>
+<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 15 to 17 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. That limit is where the surprises below come from.</p>
+
 <h3>Floats are approximate</h3>
 <p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Two consequences:</p>
 <ul>
-  <li>Never test floats with <code>==</code>. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table near the end of this lesson shows where modules fit, and the Files and modules lesson explains <code>import</code> fully.</li>
-  <li>Use <code>round(x, 2)</code> or an f-string such as <code>f"{x:.2f}"</code> to show a sensible number of decimal places.</li>
+  <li>Don't test floats with <code>==</code>: two calculations that should agree can differ in the last digit. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table near the end of this lesson shows where modules fit, and the Files and modules lesson explains <code>import</code> fully. This applies throughout the course: when a result is a float, check it with <code>math.isclose</code> unless you know it is exact. <code>==</code> is fine for ints and strings, and for floats that are whole numbers or simple halves and quarters, such as <code>6 / 3 == 2</code> or <code>1 / 4 == 0.25</code>, which binary stores exactly. When in doubt, use <code>math.isclose</code>.</li>
+  <li>Use <code>round(x, 2)</code> to show a sensible number of decimal places: <code>round(0.1 + 0.2, 2)</code> is <code>0.3</code>. (An <em>f-string</em> such as <code>f"{x:.2f}"</code> does the same job when printing; it is explained in the output section at the end of this lesson.)</li>
 </ul>
+<p>Very large and very small floats are written in <strong>scientific notation</strong> with an <code>e</code>, meaning "times ten to the power": <code>2.5e3</code> is 2.5 × 10<sup>3</sup> = <code>2500.0</code>, and <code>1e-10</code> is 1 × 10<sup>−10</sup> = 0.0000000001. Python prints tiny or huge floats this way too, and you can type them this way. You'll see <code>1e-10</code> used as "a very small tolerance" in later lessons and in MATH 130.</p>
 
 <h3>Strings, a first look</h3>
 <p>Strings support <code>+</code> (joining, called <em>concatenation</em>) and <code>*</code> (repetition), and <code>len()</code> gives their length. You can't add a string and a number directly; convert first:</p>
@@ -349,7 +378,7 @@ b = b - 1</code></pre>
 <p>One surprise: <code>round(2.5)</code> is <code>2</code>, not 3. Python rounds exact halves to the nearest <em>even</em> number, which avoids bias when rounding many values. So <code>round(3.5)</code> is <code>4</code>, and <code>round(0.125, 2)</code> is <code>0.12</code> (0.125 is exactly 1/8, a true half-way case, and 2 is even). A second, different surprise comes from binary floats: <code>round(2.675, 2)</code> gives <code>2.67</code>. The decimal 2.675 can't be stored exactly; the float actually stored is 2.67499999999999982…, which is slightly <em>below</em> half-way, so it rounds down. Neither result means you misunderstood rounding.</p>
 
 <h3>Talking to the user: output and input</h3>
-<p>Programs communicate with people through <em>output</em>, showing text, and <em>input</em>, reading what the user types. Every language provides a way to do both. Here is a complete program that asks two questions and replies. Choose your language at the top of the page.</p>
+<p>Programs communicate with people through <em>output</em>, showing text, and <em>input</em>, reading what the user types. Every language provides a way to do both. Here is a complete program that asks two questions and replies.</p>
 <div class="multi">
 <pre data-lang="python"><code># greet.py
 name = input("What's your name? ")
@@ -496,7 +525,7 @@ Type something: 42
 &lt;class 'str'&gt;
 &gt;&gt;&gt; int(answer) + 1
 43</code></pre>
-<p>It also works inside editors such as IDLE, Thonny and VS Code, where you type your answer into the editor's terminal or console panel.</p>
+<p>It also works inside editors such as Thonny and VS Code (and IDLE, the simple editor that comes with Python), where you type your answer into the editor's terminal or console panel.</p>
 <p>Where <code>input()</code> does need care is when <strong>no one is at the keyboard</strong>. Technically, <code>input()</code> reads from <strong>standard input</strong>, the program's incoming text stream. Normally that stream is connected to your keyboard, but it can be connected to a file instead. Automated graders use this to test your program without a person present:</p>
 <pre data-label="Terminal"><code>$ python3 greet.py &lt; answers.txt</code></pre>
 <p>Here each call to <code>input()</code> reads the next line of <code>answers.txt</code>. If the program asks for more lines than the file has, <code>input()</code> raises an <code>EOFError</code> ("end of file"). You can cause the same thing yourself by pressing Ctrl+D (macOS and Linux) or Ctrl+Z then Enter (Windows) at an input prompt.</p>
@@ -766,7 +795,7 @@ CSA.addUnits("cs101", [
   </tbody>
 </table>
 <p>Don't confuse <code>=</code> (assignment: make a name refer to a value) with <code>==</code> (comparison: are these equal?). Python lets you <em>chain</em> comparisons the way math does: <code>0 &lt;= score &lt;= 100</code> means "score is between 0 and 100".</p>
-<p>Strings compare alphabetically, character by character, using each character's code number. All uppercase letters come before all lowercase ones, so <code>"Zebra" &lt; "apple"</code> is <code>True</code>. Use <code>.lower()</code> on both sides when case shouldn't matter.</p>
+<p>Strings compare alphabetically, character by character, using each character's code number. Every character is stored as a number: <code>A</code> to <code>Z</code> are 65 to 90, and <code>a</code> to <code>z</code> are 97 to 122 (the Strings lesson shows how to look these up with <code>ord</code>). So all uppercase letters come before all lowercase ones, so <code>"Zebra" &lt; "apple"</code> is <code>True</code>. Use <code>.lower()</code> on both sides when case shouldn't matter.</p>
 
 <h3>Combining conditions: and, or, not</h3>
 <p><code>and</code> is true only when both sides are true; <code>or</code> is true when at least one side is; <code>not</code> flips a value. These are the logical connectives ∧, ∨ and ¬ from Discrete Mathematics.</p>
@@ -841,6 +870,7 @@ print(f"Correct! You took {guesses} guesses.")</code></pre>
 <p>The stop value is never included. <code>range(5)</code> has five numbers, starting at 0. A <code>for</code> loop also works directly on a string, one character at a time:</p>
 <pre><code>for ch in "loop":
     print(ch)      # prints l, o, o, p on separate lines</code></pre>
+<p>The word <code>in</code> also works as a test on its own: <code>ch in "aeiou"</code> is <code>True</code> when the character <code>ch</code> appears in the string <code>"aeiou"</code>, so it's a short way to write <code>ch == "a" or ch == "e" or ...</code>. And when a loop just needs to repeat and never uses its variable, programmers name the variable <code>_</code> (an underscore), which signals "I don't use this value": <code>for _ in range(3): print("hi")</code> prints <code>hi</code> three times.</p>
 <p>Use <code>for</code> when you know what you are iterating over (each number in a range, each character). Use <code>while</code> when you are waiting for a condition to change (until the guess is right).</p>
 
 <h3>The accumulator pattern</h3>
@@ -1138,6 +1168,7 @@ print(count)   # 1</code></pre>
     if month in (4, 6, 9, 11):
         return 30
     return 31</code></pre>
+<p>Two small pieces of new notation here. <code>29 if is_leap_year(year) else 28</code> is a one-line choice: it gives 29 when the condition is true and 28 otherwise. <code>(4, 6, 9, 11)</code> is a <em>tuple</em>, a fixed group of values in parentheses (the Lists lesson covers tuples), and <code>month in (4, 6, 9, 11)</code> is <code>True</code> when <code>month</code> is one of them, just as <code>ch in "aeiou"</code> tests a character in Lesson 3.</p>
 <p>This is <strong>decomposition</strong>: breaking a problem into small functions, each with one clear job. A useful test: if describing a function needs the word "and", or if it's longer than your screen, split it.</p>
 
 <h3>Functions are values</h3>
@@ -1161,7 +1192,7 @@ apply_twice(triple, 2)   # triple(triple(2)) = 18</code></pre>
     return (lo + hi) / 2
 
 print(bisect(lambda x: x**2 - 2, 0, 2))   # 1.414213562355144, close to √2</code></pre>
-<p>The lambda <code>lambda x: x**2 - 2</code> is the function whose zero we want; writing it inline saves defining a named function just for this call.</p>
+<p>The lambda <code>lambda x: x**2 - 2</code> is the function whose zero we want; writing it inline saves defining a named function just for this call. <code>tol=1e-10</code> is a default argument: the loop stops once the interval is narrower than 10<sup>−10</sup> (<code>1e-10</code> is scientific notation, from <a href="#c-cs101-u1">Lesson 2</a>).</p>
 
 <h3>Checking functions with assert</h3>
 <p>Because functions take inputs and return outputs, they are easy to check:</p>
@@ -1206,7 +1237,7 @@ def count_evens(a, b):
     return count
 
 assert count_evens(1, 10) == 5</code></pre><p>Note <code>return n % 2 == 0</code>: the comparison is already a boolean, so there's no need for <code>if ...: return True else: return False</code>.</p>` },
-      { q: `<p>Write <code>c_to_f(c)</code> and <code>f_to_c(f)</code> to convert between Celsius and Fahrenheit (F = C × 9/5 + 32). Check with <code>assert</code> that converting 100 °C to F and back gives 100.</p>`, a: `<pre><code>import math
+      { q: `<p>Write <code>c_to_f(c)</code> and <code>f_to_c(f)</code> to convert between Celsius and Fahrenheit (F = C × 9/5 + 32). Check with <code>assert</code> that converting 100 °C to F and back gives 100. The results are floats, so compare them with <code>math.isclose</code>, not <code>==</code> (<a href="#c-cs101-u1">Lesson 2, Floats are approximate</a>).</p>`, a: `<pre><code>import math
 
 def c_to_f(c):
     return c * 9 / 5 + 32
@@ -1214,8 +1245,8 @@ def c_to_f(c):
 def f_to_c(f):
     return (f - 32) * 5 / 9
 
-assert c_to_f(100) == 212
-assert math.isclose(f_to_c(c_to_f(100)), 100)</code></pre><p>Using <code>math.isclose</code> for the round trip guards against tiny floating-point errors.</p>` },
+assert math.isclose(c_to_f(100), 212)
+assert math.isclose(f_to_c(c_to_f(100)), 100)</code></pre><p>Using <code>math.isclose</code> for the round trip guards against tiny floating-point errors. For 100 the round trip happens to come back exactly, but try 1: <code>f_to_c(c_to_f(1))</code> is <code>0.9999999999999984</code>, so <code>== 1</code> would fail even though the functions are correct.</p>` },
       { q: `<p>This program is supposed to print the average of two test scores, but it prints <code>None</code>. Explain the bug and fix it.</p><pre><code>def average(a, b):
     print((a + b) / 2)
 
@@ -1332,10 +1363,11 @@ s = "j" + s[1:]     # build a new string instead: 'jython'</code></pre>
     <tr><td><code>count(sub)</code></td><td><code>"banana".count("a")</code></td><td><code>3</code></td></tr>
     <tr><td><code>startswith</code>, <code>endswith</code></td><td><code>"report.pdf".endswith(".pdf")</code></td><td><code>True</code></td></tr>
     <tr><td><code>isdigit()</code>, <code>isalpha()</code></td><td><code>"2024".isdigit()</code></td><td><code>True</code></td></tr>
+    <tr><td><code>isupper()</code>, <code>islower()</code></td><td><code>"A".isupper()</code>, <code>"a".isupper()</code></td><td><code>True</code>, <code>False</code></td></tr>
     <tr><td><code>isalnum()</code></td><td><code>"R2D2".isalnum()</code>, <code>"R2-D2".isalnum()</code></td><td><code>True</code>, <code>False</code> (letters or digits only: "alphanumeric")</td></tr>
   </tbody>
 </table>
-<p><code>split</code> and <code>join</code> are opposites: <code>split</code> breaks a string into a <em>list</em> of pieces (lists are the next lesson), and <code>join</code> glues a list of strings together with a separator. The <code>in</code> operator checks for a substring: <code>"ana" in "banana"</code> is <code>True</code>.</p>
+<p><code>split</code> and <code>join</code> are opposites: <code>split</code> breaks a string into a <em>list</em> of pieces (lists are the next lesson; for now, a list is a sequence of values in square brackets, such as <code>['to', 'be']</code>, and it can be indexed and sliced just like a string, so <code>['to', 'be'][::-1]</code> is <code>['be', 'to']</code>), and <code>join</code> glues a list of strings together with a separator. The <code>in</code> operator checks for a substring: <code>"ana" in "banana"</code> is <code>True</code>.</p>
 
 <h3>Looping over strings</h3>
 <p>A <code>for</code> loop visits each character. When you also need each position, use <code>enumerate</code>, which gives pairs of (index, character):</p>
@@ -1509,7 +1541,8 @@ len(scores)        # 3
     <tr><td><code>xs.sort()</code></td><td><code>[1, 2, 3]</code></td><td><code>None</code></td></tr>
     <tr><td><code>sorted(xs)</code></td><td>unchanged</td><td>a new sorted list <code>[1, 2, 3]</code></td></tr>
     <tr><td><code>xs + [7]</code></td><td>unchanged</td><td>a new list <code>[3, 1, 2, 7]</code></td></tr>
-    <tr><td><code>xs += [7]</code></td><td><code>[3, 1, 2, 7]</code> (changed in place, like <code>extend</code>)</td><td>(a statement; no value)</td></tr>
+    <tr><td><code>xs += [7]</code></td><td><code>[3, 1, 2, 7]</code> (changed in place)</td><td>(a statement; no value)</td></tr>
+    <tr><td><code>xs.extend([7, 8])</code></td><td><code>[3, 1, 2, 7, 8]</code> (appends every item of another list, in place; same effect as <code>xs += [7, 8]</code>)</td><td><code>None</code></td></tr>
   </tbody>
 </table>
 <p>Notice the pattern: methods that change a list in place, like <code>append</code> and <code>sort</code>, return <code>None</code>. So <code>xs = xs.sort()</code> is a bug: it sorts the list, then replaces it with <code>None</code>. Use either <code>xs.sort()</code> on its own line, or <code>ys = sorted(xs)</code> to get a new list and keep the original.</p>
@@ -1630,7 +1663,13 @@ b = {"Grace", "Linus"}
 a | b      # union:        {'Ada', 'Alan', 'Grace', 'Linus'}
 a &amp; b      # intersection: {'Grace'}
 a - b      # difference:   {'Ada', 'Alan'}
-set([3, 1, 3, 2, 1])   # remove duplicates: {1, 2, 3}</code></pre>
+set([3, 1, 3, 2, 1])   # remove duplicates: {1, 2, 3}
+
+seen = set()
+seen.add("Ada")        # add one item: {'Ada'}
+seen.add("Ada")        # already there, so no change
+"Ada" in seen          # True</code></pre>
+<p><code>.add(x)</code> puts one item into a set, much as <code>.append(x)</code> does for a list. A common pattern starts with an empty set and adds items as a loop meets them, so that <code>x in seen</code> answers "have I met this before?" quickly.</p>
 
 <h3>Sorting with a key</h3>
 <p><code>sorted</code> takes an optional <code>key</code>: a function applied to each item to decide the order. This is where lambdas earn their keep.</p>
@@ -1641,6 +1680,17 @@ sorted(words, key=len)           # ['fig', 'banana', 'cherry'] (by length)
 students = [("Ada", 91), ("Alan", 85), ("Grace", 97)]
 sorted(students, key=lambda s: s[1], reverse=True)
 # [('Grace', 97), ('Ada', 91), ('Alan', 85)]</code></pre>
+<h4>Sorting by two things at once</h4>
+<p>Often you want to sort by one thing and break ties with another: most common word first, and words with the same count in alphabetical order. Two facts make this easy.</p>
+<p>First, <strong>tuples compare item by item</strong>, like words in a dictionary: Python compares the first items, and only if they are equal does it look at the second. So <code>(2, "z") &lt; (3, "a")</code> is <code>True</code> (2 &lt; 3 settles it), and <code>(3, "b") &lt; (3, "c")</code> is <code>True</code> (a tie on 3, so "b" &lt; "c" settles it). A key function can therefore return a tuple: the main thing to sort by, then the tie-breaker.</p>
+<p>Second, <code>reverse=True</code> reverses <em>everything</em>, tie-breakers included, so it can't give "count high to low, but names A to Z". Instead, sort by the <em>negative</em> count: the largest count has the smallest negative, so it comes first, while the names still sort A to Z.</p>
+<pre><code>pairs = [("fig", 2), ("banana", 3), ("cherry", 2), ("apple", 3)]
+
+sorted(pairs, key=lambda p: p[1], reverse=True)
+# [('banana', 3), ('apple', 3), ('fig', 2), ('cherry', 2)]   ties not alphabetical
+
+sorted(pairs, key=lambda p: (-p[1], p[0]))
+# [('apple', 3), ('banana', 3), ('cherry', 2), ('fig', 2)]   count high to low, then A to Z</code></pre>
 
 <h3>Choosing a structure</h3>
 <table>
@@ -1845,8 +1895,9 @@ hanoi(3, "A", "B", "C")    # prints 7 moves</code></pre>
     if n &lt; 2:
         return n
     return fib(n - 1) + fib(n - 2)</code></pre>
-<p><code>fib(5)</code> calls <code>fib(4)</code> and <code>fib(3)</code>, but <code>fib(4)</code> also calls <code>fib(3)</code>, and so on: the same values are computed over and over. <code>fib(30)</code> makes about 2.7 million calls. The number of calls grows roughly like 1.6<sup>n</sup>, so each extra step makes it about 60% slower.</p>
+<p><code>fib(5)</code> calls <code>fib(4)</code> and <code>fib(3)</code>, but <code>fib(4)</code> also calls <code>fib(3)</code>, and so on: the same values are computed over and over. <code>fib(30)</code> makes about 2.7 million calls. The number of calls grows roughly like 1.6<sup>n</sup> (more precisely 1.618…<sup>n</sup>), so each extra step makes about 1.6 times as many calls, about 60% more work. Growth by a fixed factor at every step is called <strong>exponential</strong>. You'll sometimes see naive Fibonacci described as O(2<sup>n</sup>) instead: each call makes at most two more, so 2<sup>n</sup> is an easy <em>upper bound</em> (the count never exceeds it), while 1.6<sup>n</sup> is the closer estimate. Both say the same important thing: exponential, and hopeless for large <em>n</em>. <a href="#c-cs101-algo">The efficiency lesson</a> explains this O notation.</p>
 <p>The fix is <strong>memoization</strong>: store each answer the first time it's computed and reuse it after that.</p>
+<p>The first line below uses a new form of <code>import</code>. <code>from functools import cache</code> brings in just one name, <code>cache</code>, from the standard module <code>functools</code>, so you can write <code>cache</code> instead of <code>functools.cache</code>. (<a href="#c-cs101-files">Files and modules</a> covers both forms.)</p>
 <pre><code>from functools import cache
 
 @cache
@@ -1902,7 +1953,7 @@ fib(100)   # 354224848179261915075, instantly</code></pre>
     if n == 0:
         return 0
     return n + add_up(n)</code></pre>`, a: `<p>The recursive call uses <code>n</code> again instead of a smaller value, so it never gets closer to the base case. Change it to <code>return n + add_up(n - 1)</code>. Every recursive call must make progress toward a base case.</p>` },
-      { q: `<p>Write <code>binary(n)</code> that returns the binary representation of a non-negative whole number as a string: <code>binary(13)</code> returns <code>"1101"</code>.</p>`, hint: `<p>The last binary digit is <code>n % 2</code>. The digits before it are the binary representation of <code>n // 2</code>.</p>`, a: `<pre><code>def binary(n):
+      { q: `<p>Write <code>binary(n)</code> that returns the binary representation of a non-negative whole number as a string: <code>binary(13)</code> returns <code>"1101"</code>. (<a href="#c-cs101-u1">Lesson 2, Binary numbers, bits and bytes</a> shows how to convert by hand; turn that method into a recursive function.)</p>`, hint: `<p>The last binary digit is <code>n % 2</code>. The digits before it are the binary representation of <code>n // 2</code>.</p>`, a: `<pre><code>def binary(n):
     if n &lt; 2:
         return str(n)
     return binary(n // 2) + str(n % 2)
@@ -1959,7 +2010,7 @@ def test_negative_numbers():
 def test_empty_list_raises():
     with pytest.raises(ValueError):
         mean([])</code></pre>
-<p>The line <code>from stats import mean</code> loads a function from another file; the Files and modules lesson explains imports properly. Run all the tests from the terminal:</p>
+<p>The line <code>from stats import mean</code> loads a function from another file; the Files and modules lesson explains imports properly. The last test checks that something <em>fails</em> correctly: <code>with pytest.raises(ValueError):</code> means "the indented lines below must raise <code>ValueError</code>". If <code>mean([])</code> raises it, the test passes; if it raises nothing, the test fails. (<code>with</code> sets something up around a block of code; you'll see it again for opening files in the Files lesson.) Run all the tests from the terminal:</p>
 <pre data-label="Terminal"><code>$ python3 -m pytest
 ==================== 4 passed in 0.01s ====================</code></pre>
 <p>If a test fails, pytest shows which one, the line that failed, and the values involved. A failing test is good news: it found a bug before a user did.</p>
@@ -1979,7 +2030,7 @@ ZeroDivisionError: division by zero</code></pre>
 <ol>
   <li>The last line says <em>what</em> went wrong: dividing by zero.</li>
   <li>The line above says <em>where</em>: line 4 of <code>stats.py</code>, inside <code>mean</code>.</li>
-  <li>Going up shows <em>how we got there</em>: <code>summary</code> called <code>mean</code>, and the main program called <code>summary</code>.</li>
+  <li>Going up shows <em>how we got there</em>: <code>summary</code> called <code>mean</code>, and the main program called <code>summary</code>. In a traceback, <code>in &lt;module&gt;</code> means "in the main program": code at the top level of the file, not inside any function.</li>
 </ol>
 <p>The crash is in <code>mean</code>, but the real mistake may be higher up: <code>summary</code> passed an empty list. The traceback tells you where to start looking, not necessarily where the fix goes.</p>
 
@@ -2396,9 +2447,10 @@ def save_scores(path, scores):
     <tr><td>O(<em>n</em>)</td><td>linear</td><td>Linear search</td><td>10</td><td>1,000</td><td>1,000,000</td></tr>
     <tr><td>O(<em>n</em> log <em>n</em>)</td><td>linearithmic</td><td>Merge sort</td><td>33</td><td>10,000</td><td>20,000,000</td></tr>
     <tr><td>O(<em>n</em>²)</td><td>quadratic</td><td>Selection sort</td><td>100</td><td>1,000,000</td><td>1,000,000,000,000</td></tr>
-    <tr><td>O(2<sup>n</sup>)</td><td>exponential</td><td>Naive Fibonacci</td><td>1,024</td><td>a 302-digit number</td><td>hopeless</td></tr>
+    <tr><td>O(2<sup>n</sup>)</td><td>exponential</td><td>Trying every subset of <em>n</em> items</td><td>1,024</td><td>a 302-digit number</td><td>hopeless</td></tr>
   </tbody>
 </table>
+<p>Naive Fibonacci from <a href="#c-cs101-u4">the Recursion lesson</a> is exponential too. Its number of calls grows like about 1.6<sup>n</sup>, which is always less than 2<sup>n</sup>, so O(2<sup>n</sup>) is a correct upper bound for it, though not a tight one. (Big-O promises only "grows no faster than".) Any growth like <em>b</em><sup>n</sup> with <em>b</em> &gt; 1 belongs in the hopeless row: 1.6<sup>1000</sup> has 205 digits.</p>
 <p>At a billion simple steps per second, the quadratic algorithm on a million items takes about 17 minutes; the linearithmic one takes a fiftieth of a second. Choosing a better algorithm usually matters far more than a faster computer.</p>
 
 <h3>Reading the order from code</h3>
@@ -2458,7 +2510,7 @@ start = time.perf_counter()
 for _ in range(100):
     (n - 1) in as_set
 print("set: ", time.perf_counter() - start)</code></pre>
-<p>On a typical laptop the list version takes around a second and the set version well under a millisecond. (The underscores in <code>1_000_000</code> are just for readability.)</p>
+<p>On a typical laptop the list version takes around a second and the set version well under a millisecond. (The underscores in <code>1_000_000</code> are just for readability. The loop variable <code>_</code> is the "I don't use this value" name from <a href="#c-cs101-u2">Lesson 3, for loops</a>: the loop just repeats 100 times.)</p>
 
 <h3>Sorting: selection sort</h3>
 <p>Sorting is one of the most studied problems in computer science, because so much else depends on it, binary search included. The simplest method, <strong>selection sort</strong>, repeatedly finds the smallest remaining item and moves it to the front:</p>

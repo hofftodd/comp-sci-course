@@ -103,7 +103,7 @@ CSA.addUnits("math130", [
 <p>The last two rows matter for derivatives: before differentiating 1/<em>x</em>³ or √<em>x</em>, rewrite them as <em>x</em><sup>−3</sup> and <em>x</em><sup>1/2</sup>. A common mistake: (<em>a</em> + <em>b</em>)² is <em>not</em> <em>a</em>² + <em>b</em>²; it's <em>a</em>² + 2<em>ab</em> + <em>b</em>².</p>
 
 <h3>Exponential functions and logarithms</h3>
-<p>An <strong>exponential function</strong> has the variable in the exponent: <em>f</em>(<em>x</em>) = <em>b</em><sup>x</sup> with <em>b</em> &gt; 0. It grows by the same <em>factor</em> every time <em>x</em> increases by 1, which is how populations, compound interest, and naive Fibonacci's running time grow. The most important base is <strong><em>e</em> ≈ 2.71828</strong>, for reasons you'll see when we differentiate: <em>e</em><sup>x</sup> is its own derivative.</p>
+<p>An <strong>exponential function</strong> has the variable in the exponent: <em>f</em>(<em>x</em>) = <em>b</em><sup>x</sup> with <em>b</em> &gt; 0. It grows by the same <em>factor</em> every time <em>x</em> increases by 1, which is how populations, compound interest, and naive Fibonacci's running time grow (by a factor of about 1.6 per step; <a href="#c-cs101-algo">CS 101, Searching, sorting and efficiency</a> explains why it is also listed as O(2<sup>n</sup>), an upper bound). The most important base is <strong><em>e</em> ≈ 2.71828</strong>, for reasons you'll see when we differentiate: <em>e</em><sup>x</sup> is its own derivative.</p>
 <p>A <strong>logarithm</strong> undoes an exponential: log<sub>b</sub> <em>x</em> = <em>y</em> means <em>b</em><sup>y</sup> = <em>x</em>. So log₂ 8 = 3 because 2³ = 8, and log₁₀ 1000 = 3. The natural logarithm ln <em>x</em> is log<sub>e</sub> <em>x</em>.</p>
 <table>
   <thead><tr><th>Rule</th><th>Example</th></tr></thead>
@@ -115,7 +115,7 @@ CSA.addUnits("math130", [
     <tr><td>log<sub>b</sub> <em>x</em> = ln <em>x</em> / ln <em>b</em></td><td>log₂ 10 = ln 10 / ln 2 ≈ 3.32</td></tr>
   </tbody>
 </table>
-<p>Logarithms are everywhere in computer science: binary search takes about log₂ <em>n</em> steps, a number <em>n</em> needs about log₂ <em>n</em> bits, and the depth of a balanced tree with <em>n</em> items is about log₂ <em>n</em>. Exponentials and logs are inverse functions: <em>e</em><sup>ln <em>x</em></sup> = <em>x</em> and ln(<em>e</em><sup>x</sup>) = <em>x</em>.</p>
+<p>Logarithms are everywhere in computer science: binary search takes about log₂ <em>n</em> steps, writing a number <em>n</em> in binary takes about log₂ <em>n</em> bits (binary digits; 1000 needs 10 bits because 2<sup>10</sup> = 1024 is just above it; see <a href="#c-cs101-u1">CS 101, Values, types and expressions</a>), and a tournament of <em>n</em> players where half are knocked out each round takes about log₂ <em>n</em> rounds. Exponentials and logs are inverse functions: <em>e</em><sup>ln <em>x</em></sup> = <em>x</em> and ln(<em>e</em><sup>x</sup>) = <em>x</em>.</p>
 
 <h3>Trigonometric functions, in radians</h3>
 <p>Calculus measures angles in <strong>radians</strong>, not degrees: an angle's radian measure is the length of the arc it cuts from a circle of radius 1. A full turn is 2π radians, so 180° = π and 90° = π/2. Calculus formulas, such as "the derivative of sin <em>x</em> is cos <em>x</em>", are only true in radians, and Python's <code>math.sin</code> expects radians too.</p>
@@ -141,7 +141,7 @@ CSA.addUnits("math130", [
 <p>So (<em>x</em> − 2)² + 1 is the parabola <em>x</em>² moved right 2 and up 1, with its lowest point at (2, 1).</p>
 <h3>Inverse functions and inverse trigonometric functions</h3>
 <p>The <strong>inverse</strong> of a function <em>f</em>, written <em>f</em><sup>−1</sup>, undoes it: if <em>f</em>(<em>a</em>) = <em>b</em>, then <em>f</em><sup>−1</sup>(<em>b</em>) = <em>a</em>. You have already met one pair: ln undoes <em>e</em><sup>x</sup>. An inverse exists only if <em>f</em> never gives two inputs the same output; otherwise the inverse wouldn't know which input to return. The graph of <em>f</em><sup>−1</sup> is the graph of <em>f</em> reflected in the line <em>y</em> = <em>x</em>, because reflecting swaps each point (<em>a</em>, <em>b</em>) with (<em>b</em>, <em>a</em>).</p>
-<p>Sine, cosine and tangent repeat, so they give many inputs the same output (sin 0 = sin π = 0). To invert them we restrict each to one stretch where it takes every value exactly once:</p>
+<p>Sine, cosine and tangent repeat, so they give many inputs the same output (sin 0 = sin π = 0). To invert them we restrict each to one stretch where it takes every value exactly once. The table uses <strong>interval notation</strong>: [<em>a</em>, <em>b</em>] means all numbers from <em>a</em> to <em>b</em> <em>including</em> both ends, and (<em>a</em>, <em>b</em>) means all numbers strictly between them, <em>excluding</em> both ends. So [−1, 1] includes −1 and 1, while (−π/2, π/2) does not include ±π/2.</p>
 <table>
   <thead><tr><th>Inverse</th><th>Means</th><th>Accepts <em>x</em> in</th><th>Returns an angle in</th><th>Examples</th></tr></thead>
   <tbody>
@@ -166,7 +166,7 @@ CSA.addUnits("math130", [
 </svg>
 <figcaption>arctan takes any real number and returns an angle strictly between −π/2 and π/2. As <em>x</em> grows, the angle approaches π/2 but never reaches it.</figcaption>
 </figure>
-<p>arctan matters most in calculus. It is defined for every real number, and its graph has two horizontal asymptotes, so arctan <em>x</em> → π/2 as <em>x</em> → ∞ and → −π/2 as <em>x</em> → −∞. In <a href="#c-math130-u4">Lesson 5</a> you'll see that its derivative is 1/(1 + <em>x</em>²), which is why arctan appears whenever you integrate 1/(1 + <em>x</em>²) in MATH 131.</p>
+<p>arctan matters most in calculus. It is defined for every real number, and its graph has two horizontal <strong>asymptotes</strong>, the dashed lines in the figure: lines that the curve gets closer and closer to without reaching. In symbols, arctan <em>x</em> → π/2 as <em>x</em> → ∞ (read "arctan <em>x</em> approaches π/2 as <em>x</em> grows without bound") and → −π/2 as <em>x</em> → −∞. <a href="#c-math130-u1">Lesson 2</a> makes this notation precise. In <a href="#c-math130-u4">Lesson 5</a> you'll see that its derivative is 1/(1 + <em>x</em>²), which is why arctan appears whenever you integrate 1/(1 + <em>x</em>²) in MATH 131.</p>
 <p class="note">Notation: many books and calculators write sin<sup>−1</sup> <em>x</em> for arcsin <em>x</em>. This −1 means "inverse function", not a power: sin<sup>−1</sup> <em>x</em> is not 1/sin <em>x</em> (that's csc <em>x</em>). In Python, the inverses are <code>math.asin</code>, <code>math.acos</code> and <code>math.atan</code>, and they return radians: <code>math.atan(1)</code> is <code>0.7853981633974483</code>, which is π/4.</p>
 
 <h3>Floor and ceiling</h3>
@@ -179,6 +179,21 @@ CSA.addUnits("math130", [
   </tbody>
 </table>
 <p>Watch the negative numbers: rounding down −2.3 goes to −3, further from zero. The graph of ⌊<em>x</em>⌋ is a staircase: flat at height <em>n</em> for <em>n</em> ≤ <em>x</em> &lt; <em>n</em> + 1, then jumping up by 1 at each integer. In Python, <code>math.floor</code> and <code>math.ceil</code> compute them, and for integers <code>a // b</code> is ⌊<em>a</em>/<em>b</em>⌋, so <code>-7 // 2</code> is <code>-4</code>.</p>
+<figure class="fig">
+<svg viewBox="0 0 440 220" role="img" aria-label="Graph of y = floor of x for x from −3 to 3: a staircase of horizontal steps, each one unit long, at heights −3, −2, −1, 0, 1 and 2. Each step has a filled dot at its left end, which belongs to the step, and an open circle at its right end, which does not; at each integer the graph jumps up by 1.">
+  <line x1="20" y1="110" x2="425" y2="110" class="ax"/><line x1="220" y1="10" x2="220" y2="212" class="ax"/>
+  <line x1="40" y1="107" x2="40" y2="113" class="ax"/><line x1="100" y1="107" x2="100" y2="113" class="ax"/><line x1="160" y1="107" x2="160" y2="113" class="ax"/><line x1="280" y1="107" x2="280" y2="113" class="ax"/><line x1="340" y1="107" x2="340" y2="113" class="ax"/><line x1="400" y1="107" x2="400" y2="113" class="ax"/><line x1="217" y1="200" x2="223" y2="200" class="ax"/><line x1="217" y1="170" x2="223" y2="170" class="ax"/><line x1="217" y1="140" x2="223" y2="140" class="ax"/><line x1="217" y1="80" x2="223" y2="80" class="ax"/><line x1="217" y1="50" x2="223" y2="50" class="ax"/><line x1="217" y1="20" x2="223" y2="20" class="ax"/>
+  <text x="31" y="126" class="m">−3</text><text x="91" y="126" class="m">−2</text><text x="151" y="126" class="m">−1</text><text x="275" y="126" class="m">1</text><text x="335" y="126" class="m">2</text><text x="395" y="126" class="m">3</text><text x="206" y="54" class="m">2</text><text x="206" y="84" class="m">1</text><text x="234" y="144" class="m">−1</text><text x="234" y="174" class="m">−2</text>
+  <line x1="40" y1="200" x2="100" y2="200" class="cv"/><circle cx="40" cy="200" r="4" class="dot"/><circle cx="100" cy="200" r="4" class="hole"/>
+  <line x1="100" y1="170" x2="160" y2="170" class="cv"/><circle cx="100" cy="170" r="4" class="dot"/><circle cx="160" cy="170" r="4" class="hole"/>
+  <line x1="160" y1="140" x2="220" y2="140" class="cv"/><circle cx="160" cy="140" r="4" class="dot"/><circle cx="220" cy="140" r="4" class="hole"/>
+  <line x1="220" y1="110" x2="280" y2="110" class="cv"/><circle cx="220" cy="110" r="4" class="dot"/><circle cx="280" cy="110" r="4" class="hole"/>
+  <line x1="280" y1="80" x2="340" y2="80" class="cv"/><circle cx="280" cy="80" r="4" class="dot"/><circle cx="340" cy="80" r="4" class="hole"/>
+  <line x1="340" y1="50" x2="400" y2="50" class="cv"/><circle cx="340" cy="50" r="4" class="dot"/><circle cx="400" cy="50" r="4" class="hole"/>
+  <text x="292" y="35">y = ⌊x⌋</text>
+</svg>
+<figcaption>The floor function is a staircase. A filled dot marks a point on the graph and an open circle marks a point that is not: ⌊1⌋ = 1, not 0, so at <em>x</em> = 1 the graph is on the upper step.</figcaption>
+</figure>
 
 <p class="note">Throughout this course, you can check any calculation in Python. <code>import math</code> gives <code>math.exp</code>, <code>math.log</code> (natural log), <code>math.log2</code>, <code>math.sin</code>, <code>math.cos</code>, <code>math.atan</code>, <code>math.floor</code>, <code>math.pi</code> and <code>math.e</code>.</p>
 `,
@@ -270,9 +285,15 @@ CSA.addUnits("math130", [
 <p>because 5/<em>x</em> and 7/<em>x</em>² go to 0. In general, comparing the degrees of the top and bottom gives the answer: if the bottom's degree is larger the limit is 0; if they're equal it's the ratio of the leading coefficients; if the top's is larger the limit is ±∞. Only the dominant terms matter for large inputs, which is exactly the reasoning behind big-O notation in CS 101.</p>
 
 <h3>The squeeze theorem</h3>
-<p>If <em>g</em>(<em>x</em>) ≤ <em>f</em>(<em>x</em>) ≤ <em>h</em>(<em>x</em>) near <em>a</em>, and <em>g</em> and <em>h</em> have the same limit <em>L</em> at <em>a</em>, then <em>f</em> is squeezed to <em>L</em> too.</p>
+<p>If <em>g</em>(<em>x</em>) ≤ <em>f</em>(<em>x</em>) ≤ <em>h</em>(<em>x</em>) near <em>a</em>, and <em>g</em> and <em>h</em> have the same limit <em>L</em> at <em>a</em>, then <em>f</em> is squeezed to <em>L</em> too. The same theorem holds for limits as <em>x</em> → ∞: there, "near <em>a</em>" becomes "for all sufficiently large <em>x</em>".</p>
 <p><strong>Example.</strong> <em>x</em>² sin(1/<em>x</em>) oscillates wildly near 0, but since −1 ≤ sin(1/<em>x</em>) ≤ 1, we have −<em>x</em>² ≤ <em>x</em>² sin(1/<em>x</em>) ≤ <em>x</em>². Both outer functions go to 0, so lim<sub><em>x</em>→0</sub> <em>x</em>² sin(1/<em>x</em>) = 0.</p>
-<p><strong>The most important trigonometric limit.</strong> A geometric argument comparing a triangle, a sector and a larger triangle in the unit circle shows that for small positive <em>x</em> (in radians), cos <em>x</em> ≤ (sin <em>x</em>)/<em>x</em> ≤ 1. Since cos <em>x</em> → 1, the squeeze theorem gives</p>
+<p><strong>The most important trigonometric limit.</strong> Take an angle <em>x</em> between 0 and π/2 (in radians) at the center <em>O</em> of the unit circle, with one side along the <em>x</em>-axis to <em>A</em> = (1, 0) and the other meeting the circle at <em>P</em> = (cos <em>x</em>, sin <em>x</em>). Three regions, each inside the next, have these areas:</p>
+<ul>
+  <li>the triangle <em>OAP</em>: base 1, height sin <em>x</em>, so area ½ sin <em>x</em>;</li>
+  <li>the sector (pie slice) <em>OAP</em>: a fraction <em>x</em>/(2π) of the circle's area π, so area ½<em>x</em>;</li>
+  <li>the larger triangle with base <em>OA</em> and height reaching the tangent line at <em>A</em>, where the extended side <em>OP</em> meets it: base 1, height tan <em>x</em>, so area ½ tan <em>x</em>.</li>
+</ul>
+<p>So sin <em>x</em> ≤ <em>x</em> ≤ tan <em>x</em>. Dividing by sin <em>x</em> (positive) gives 1 ≤ <em>x</em>/sin <em>x</em> ≤ 1/cos <em>x</em>, and flipping each fraction reverses the inequalities: cos <em>x</em> ≤ (sin <em>x</em>)/<em>x</em> ≤ 1. (For negative <em>x</em> the same holds, because both cos <em>x</em> and (sin <em>x</em>)/<em>x</em> are unchanged when <em>x</em> is replaced by −<em>x</em>.) Since cos <em>x</em> → 1, the squeeze theorem gives</p>
 <p class="math">lim<sub>x→0</sub> (sin x)/x = 1</p>
 <p>This limit is why the derivative of sin <em>x</em> is cos <em>x</em>, and it only holds in radians. Numerically:</p>
 <div class="multi">
@@ -319,10 +340,10 @@ for h in [0.1, 0.01, 0.001, 0.0001]:
       { q: `<p>Find: (a) lim<sub><em>x</em>→∞</sub> (4<em>x</em>³ − <em>x</em>)/(2<em>x</em>³ + 9). (b) lim<sub><em>x</em>→∞</sub> (5<em>x</em> + 2)/(<em>x</em>² + 1). (c) lim<sub><em>x</em>→∞</sub> (<em>x</em>² + 1)/(<em>x</em> − 3).</p>`, a: `<p>(a) Equal degrees: ratio of leading coefficients, 4/2 = 2. (b) Bottom degree is larger: 0. (c) Top degree is larger: ∞.</p>` },
       { q: `<p>Find lim<sub><em>x</em>→0⁺</sub> 1/<em>x</em>, lim<sub><em>x</em>→0⁻</sub> 1/<em>x</em>, and lim<sub><em>x</em>→3</sub> 1/(<em>x</em> − 3)². Describe the graphs near those points.</p>`, a: `<p>∞, −∞, and ∞. 1/<em>x</em> has a vertical asymptote at 0, shooting up on the right and down on the left. 1/(<em>x</em> − 3)² has a vertical asymptote at 3 and shoots up on both sides, because the square is always positive.</p>` },
       { q: `<p>Use the squeeze theorem to find lim<sub><em>x</em>→∞</sub> (sin <em>x</em>)/<em>x</em>.</p>`, a: `<p>For <em>x</em> &gt; 0, −1/<em>x</em> ≤ (sin <em>x</em>)/<em>x</em> ≤ 1/<em>x</em>, since −1 ≤ sin <em>x</em> ≤ 1. Both bounds go to 0, so the limit is 0. Compare with lim<sub><em>x</em>→0</sub> (sin <em>x</em>)/<em>x</em> = 1: the same expression has different limits at different points.</p>` },
-      { q: `<p>Write a Python loop that estimates lim<sub><em>x</em>→0</sub> (<em>e</em><sup>x</sup> − 1)/<em>x</em> by evaluating at <em>x</em> = 10<sup>−1</sup>, 10<sup>−2</sup>, …, 10<sup>−12</sup>. What happens at the smallest values, and why?</p>`, a: `<pre><code>import math
+      { q: `<p>Write a Python loop that estimates lim<sub><em>x</em>→0</sub> (<em>e</em><sup>x</sup> − 1)/<em>x</em> by evaluating at <em>x</em> = 10<sup>−1</sup>, 10<sup>−2</sup>, …, 10<sup>−12</sup>. What happens at the smallest values, and why? (In Python, 10<sup>−<em>k</em></sup> is <code>10 ** -k</code>; 10<sup>−12</sup> can also be typed as <code>1e-12</code>. For the "why", recall from <a href="#c-cs101-u1">CS 101, Values, types and expressions</a> that a float keeps only about 16 significant digits.)</p>`, a: `<pre><code>import math
 for k in range(1, 13):
     x = 10 ** -k
-    print(x, (math.exp(x) - 1) / x)</code></pre><p>The values approach 1 at first, which is the true limit. For the tiniest <em>x</em>, <code>math.exp(x)</code> is so close to 1 that subtracting 1 loses most of the significant digits, and the estimates get worse. Floating-point rounding limits how far numerical estimation can go. (Python's <code>math.expm1(x)</code> computes <em>e</em><sup>x</sup> − 1 accurately for exactly this reason.)</p>` },
+    print(x, (math.exp(x) - 1) / x)</code></pre><p>The values approach 1 at first, which is the true limit. For the tiniest <em>x</em>, <code>math.exp(x)</code> is so close to 1 that subtracting 1 loses most of the significant digits, and the estimates get worse: at 10<sup>−7</sup> the output is 1.0000000494336803, at 10<sup>−9</sup> it is 1.000000082740371, and at 10<sup>−12</sup> it is 1.000088900582341, wrong in the fifth digit. Here is why. <em>e</em><sup>10<sup>−12</sup></sup> = 1.000000000001000…, but a float stores only about 16 significant digits, so after the leading 1.00000000000 only about four digits of the part we care about survive. Subtracting 1 throws away the leading 1 and keeps just those few digits, plus their rounding error, and dividing by 10<sup>−12</sup> magnifies that error. This effect, <em>loss of significance</em> when subtracting nearly equal numbers, comes back in <a href="#c-math130-u3">Lesson 4, The derivative</a>. Floating-point rounding limits how far numerical estimation can go. (Python's <code>math.expm1(x)</code> computes <em>e</em><sup>x</sup> − 1 accurately for exactly this reason.)</p>` },
       { q: `<p>Prove using the ε–δ definition: lim<sub><em>x</em>→3</sub> (4<em>x</em> − 5) = 7.</p>`, a: `<p><strong>Proof.</strong> Let ε &gt; 0 and choose δ = ε/4. If 0 &lt; |<em>x</em> − 3| &lt; δ, then |(4<em>x</em> − 5) − 7| = |4<em>x</em> − 12| = 4|<em>x</em> − 3| &lt; 4δ = ε. ∎</p>` }
     ],
     sources: ["openstaxcalc", "eoc"]
@@ -416,7 +437,7 @@ bisect(x -&gt; x * x * x - x - 1, 1, 2);   // 1.3247179...</code></pre>
 }
 bisect([](double x) { return x * x * x - x - 1; }, 1, 2);   // 1.3247179...</code></pre>
 </div>
-<p><code>f(lo) * f(mid) &lt;= 0</code> is a compact test for "<em>f</em>(lo) and <em>f</em>(mid) have different signs, or one is zero". Each pass halves the interval, so about 34 passes shrink an interval of width 1 below 10<sup>−10</sup>. (The <code>tol=1e-10</code> in the definition is a default argument, from CS 101's functions lesson.)</p>
+<p><code>f(lo) * f(mid) &lt;= 0</code> is a compact test for "<em>f</em>(lo) and <em>f</em>(mid) have different signs, or one is zero". Each pass halves the interval, so about 34 passes shrink an interval of width 1 below 10<sup>−10</sup>. (The <code>tol=1e-10</code> in the definition is a default argument, from CS 101's functions lesson, and <code>1e-10</code> is Python's scientific notation for 10<sup>−10</sup>, from <a href="#c-cs101-u1">CS 101, Values, types and expressions</a>.)</p>
 
 <h3>The Extreme Value Theorem</h3>
 <p><strong>Theorem (EVT).</strong> A function continuous on a closed interval [<em>a</em>, <em>b</em>] reaches both a maximum and a minimum value somewhere on that interval.</p>
@@ -440,9 +461,22 @@ bisect([](double x) { return x * x * x - x - 1; }, 1, 2);   // 1.3247179...</cod
       { q: `<p>Where is each function discontinuous, and what kind of discontinuity is it? (a) (<em>x</em> − 2)/(<em>x</em>² − 4). (b) 1/(<em>x</em> − 5). (c) ⌊<em>x</em>⌋ on [0, 3].</p>`, a: `<p>(a) (<em>x</em> − 2)/((<em>x</em> − 2)(<em>x</em> + 2)) = 1/(<em>x</em> + 2) for <em>x</em> ≠ 2: removable at <em>x</em> = 2 (the limit is 1/4) and infinite at <em>x</em> = −2. (b) Infinite at <em>x</em> = 5. (c) Jumps at <em>x</em> = 1, 2 and 3 (at 3 the left limit is 2 but the value is 3).</p>` },
       { q: `<p>Find <em>k</em> so that <em>f</em> is continuous everywhere: <em>f</em>(<em>x</em>) = <em>kx</em>² for <em>x</em> ≤ 3, and <em>f</em>(<em>x</em>) = 2<em>x</em> + <em>k</em> for <em>x</em> &gt; 3.</p>`, a: `<p>At <em>x</em> = 3 the left side gives 9<em>k</em> and the right side's limit is 6 + <em>k</em>. Set 9<em>k</em> = 6 + <em>k</em>, so 8<em>k</em> = 6 and <em>k</em> = 3/4.</p>` },
       { q: `<p>Use the IVT to show that cos <em>x</em> = <em>x</em> has a solution between 0 and π/2.</p>`, a: `<p>Let <em>g</em>(<em>x</em>) = cos <em>x</em> − <em>x</em>, which is continuous. <em>g</em>(0) = 1 &gt; 0 and <em>g</em>(π/2) = 0 − π/2 &lt; 0. By the IVT, <em>g</em>(<em>c</em>) = 0 for some <em>c</em> in between, so cos <em>c</em> = <em>c</em>. (Turning an equation <em>f</em> = <em>g</em> into a root-finding problem <em>f</em> − <em>g</em> = 0 is a standard trick.)</p>` },
-      { q: `<p>Use the <code>bisect</code> function to solve cos <em>x</em> = <em>x</em> to 10 decimal places. How many passes of the loop does it take?</p>`, a: `<pre><code>import math
+      { q: `<p>Use the <code>bisect</code> function, with its default <code>tol=1e-10</code>, to solve cos <em>x</em> = <em>x</em> on [0, π/2]. The answer is then within 10<sup>−10</sup> of the true root, which is what "about 10 decimal places" means here. How many passes of the loop does it take? Work it out on paper first, then check by adding a counter to <code>bisect</code>: set <code>passes = 0</code> before the loop, add 1 inside it, and print it before returning.</p>`, a: `<pre><code>import math
+
+def bisect(f, lo, hi, tol=1e-10):
+    passes = 0
+    while hi - lo &gt; tol:
+        passes += 1
+        mid = (lo + hi) / 2
+        if f(lo) * f(mid) &lt;= 0:
+            hi = mid
+        else:
+            lo = mid
+    print("passes:", passes)
+    return (lo + hi) / 2
+
 root = bisect(lambda x: math.cos(x) - x, 0, math.pi / 2)
-print(root)   # 0.7390851332...</code></pre><p>The starting width is π/2 ≈ 1.57, and each pass halves it. We need 1.57 / 2ⁿ &lt; 10⁻¹⁰, so 2ⁿ &gt; 1.57 × 10¹⁰, which gives <em>n</em> = 34.</p>` },
+print(root)   # passes: 34, then 0.7390851332452747</code></pre><p>On paper: the starting width is π/2 ≈ 1.57, and each pass halves it. We need 1.57 / 2<sup><em>n</em></sup> &lt; 10<sup>−10</sup>, so 2<sup><em>n</em></sup> &gt; 1.57 × 10<sup>10</sup>. Since log₂(1.57 × 10<sup>10</sup>) ≈ 33.9, the smallest whole <em>n</em> is 34, which the counter confirms.</p>` },
       { q: `<p>A hiker starts up a mountain at 7:00 one morning and reaches the top at 5:00 pm. The next day she starts down at 7:00 am by the same path and reaches the bottom at 5:00 pm. Show there's a point on the path that she passes at the same time of day on both days.</p>`, hint: `<p>Let <em>u</em>(<em>t</em>) and <em>d</em>(<em>t</em>) be her height at time <em>t</em> going up and coming down. Consider <em>u</em>(<em>t</em>) − <em>d</em>(<em>t</em>).</p>`, a: `<p>Let <em>h</em>(<em>t</em>) = <em>u</em>(<em>t</em>) − <em>d</em>(<em>t</em>), continuous on [7, 17]. At 7:00, <em>h</em> = bottom − top &lt; 0; at 17:00, <em>h</em> = top − bottom &gt; 0. By the IVT, <em>h</em>(<em>t</em>) = 0 at some time <em>t</em>: she is at the same height at the same time on both days, so (on the same path) at the same point. Notice the IVT tells us this time exists without telling us when it is.</p>` },
       { q: `<p>Give an example of a function on [0, 1] that has no maximum, and explain which condition of the Extreme Value Theorem it breaks.</p>`, a: `<p>For example, <em>f</em>(<em>x</em>) = 1/<em>x</em> for <em>x</em> &gt; 0 and <em>f</em>(0) = 0. It grows without bound near 0, so it has no maximum. It breaks continuity at 0. Another: <em>f</em>(<em>x</em>) = <em>x</em> for <em>x</em> &lt; 1 and <em>f</em>(1) = 0, which approaches 1 but never reaches it, again because of a discontinuity at 1.</p>` }
     ],
@@ -511,16 +545,17 @@ print(root)   # 0.7390851332...</code></pre><p>The starting width is π/2 ≈ 1.
 <p>The derivative of <em>f</em>′ is the <strong>second derivative</strong> <em>f</em>″ (or <em>d</em>²<em>y</em>/<em>dx</em>²), the rate of change of the rate of change. For the falling stone, <em>s</em>(<em>t</em>) = 16<em>t</em>², velocity is <em>s</em>′(<em>t</em>) = 32<em>t</em> and acceleration is <em>s</em>″(<em>t</em>) = 32 ft/s², the constant acceleration of gravity. The second derivative also describes how a graph bends, which <a href="#c-math130-u5">Lesson 6</a> uses.</p>
 
 <h3>Where derivatives don't exist</h3>
-<p>If <em>f</em>′(<em>a</em>) exists, then <em>f</em> is continuous at <em>a</em>: a function can't have a well-defined slope at a point where it jumps. But a continuous function can still fail to have a derivative:</p>
+<p>We say <em>f</em> is <strong>differentiable</strong> at <em>a</em> when <em>f</em>′(<em>a</em>) exists, that is, when the limit of the difference quotient is a finite number. "Differentiable on (<em>a</em>, <em>b</em>)" means differentiable at every point of that interval. If <em>f</em>′(<em>a</em>) exists, then <em>f</em> is continuous at <em>a</em>: a function can't have a well-defined slope at a point where it jumps. But a continuous function can still fail to have a derivative:</p>
 <ul>
   <li>A <strong>corner</strong>: |<em>x</em>| at 0 has slope −1 from the left and 1 from the right, so the difference quotient has no limit.</li>
   <li>A <strong>vertical tangent</strong>: ∛<em>x</em> at 0 becomes vertical, and the slope is infinite.</li>
-  <li>A <strong>cusp</strong> or wild oscillation, such as <em>x</em> sin(1/<em>x</em>) at 0.</li>
+  <li>A <strong>cusp</strong>: a sharp point where both sides of the graph turn vertical, like <em>x</em><sup>2/3</sup> at 0, whose slope goes to −∞ from the left and +∞ from the right.</li>
+  <li><strong>Wild oscillation</strong>: <em>x</em> sin(1/<em>x</em>) isn't defined at 0 as written, so define <em>f</em>(0) = 0 to fill the gap. This <em>f</em> is continuous at 0 (it is squeezed between −|<em>x</em>| and |<em>x</em>|), but its difference quotient at 0 is (<em>f</em>(<em>h</em>) − 0)/<em>h</em> = sin(1/<em>h</em>), which keeps swinging between −1 and 1 as <em>h</em> → 0 and has no limit.</li>
 </ul>
 <p>The ReLU function, max(0, <em>x</em>), used in most modern neural networks, has a corner at 0. Machine learning libraries simply pick a value for the derivative there, and it works fine in practice.</p>
 
 <h3>Numerical derivatives</h3>
-<p>A computer can estimate <em>f</em>′(<em>a</em>) by evaluating the difference quotient with a small <em>h</em>. The <strong>central difference</strong> (<em>f</em>(<em>a</em> + <em>h</em>) − <em>f</em>(<em>a</em> − <em>h</em>))/(2<em>h</em>) is much more accurate than the one-sided version, because its errors on the two sides largely cancel.</p>
+<p>A computer can estimate <em>f</em>′(<em>a</em>) by evaluating the difference quotient with a small <em>h</em>. The <strong>central difference</strong> (<em>f</em>(<em>a</em> + <em>h</em>) − <em>f</em>(<em>a</em> − <em>h</em>))/(2<em>h</em>) is much more accurate than the one-sided version, because its errors on the two sides largely cancel. In the code, <code>h=1e-5</code> makes <em>h</em> default to 10<sup>−5</sup> (<code>1e-5</code> is Python's way of writing 1 × 10<sup>−5</sup>).</p>
 <pre><code>import math
 
 def derivative(f, a, h=1e-5):
@@ -528,7 +563,7 @@ def derivative(f, a, h=1e-5):
 
 derivative(math.sin, 0)            # 0.99999999998... (cos 0 = 1)
 derivative(lambda x: x**2, 3)      # 6.00000000004... (exact: 6)</code></pre>
-<p>But making <em>h</em> too small backfires: <em>f</em>(<em>a</em> + <em>h</em>) and <em>f</em>(<em>a</em> − <em>h</em>) become nearly equal, and subtracting them loses most of the significant digits. A value of <em>h</em> around 10<sup>−5</sup> to 10<sup>−6</sup> is a good compromise in double precision.</p>
+<p>But making <em>h</em> too small backfires: <em>f</em>(<em>a</em> + <em>h</em>) and <em>f</em>(<em>a</em> − <em>h</em>) become nearly equal, and subtracting them loses most of the significant digits. (Python floats use <em>double precision</em>, 64 bits, which keeps about 16 <em>significant digits</em>, the digits that carry information; see <a href="#c-cs101-u1">CS 101, Values, types and expressions</a>. If two numbers agree in their first 12 digits, their difference has only about 4 trustworthy digits left.) Try it: <code>derivative(lambda x: x**2, 3, h=1e-15)</code> gives 5.329070518200751 instead of 6. A value of <em>h</em> around 10<sup>−5</sup> to 10<sup>−6</sup> is a good compromise in double precision.</p>
 `,
     terms: [
       ["Average rate of change", "(f(b) − f(a))/(b − a): the slope of the secant line."],
@@ -540,7 +575,7 @@ derivative(lambda x: x**2, 3)      # 6.00000000004... (exact: 6)</code></pre>
       ["Central difference", "A numerical derivative using points on both sides of a."]
     ],
     quiz: [
-      ...[{"q": "Using the definition, what is the derivative of f(x) = 3x + 5?", "choices": ["3x", "3", "5", "8"], "answer": 1, "why": "[3(x + h) + 5 − 3x − 5]/h = 3h/h = 3."}, {"q": "Is f(x) = |x| differentiable at 0?", "choices": ["Yes, f′(0) = 0", "Yes, f′(0) = 1", "No, the left and right slopes differ"], "answer": 2, "why": "The slope is −1 from the left and +1 from the right, so the limit does not exist."}, {"q": "Why not use h = 10⁻¹⁵ for a numerical derivative in double precision?", "choices": ["It is too slow", "Rounding error in f(a + h) − f(a) dominates", "Computers cannot store it", "It always gives 0 exactly"], "answer": 1, "why": "The two function values agree in almost every digit, so their difference is mostly rounding noise."}],
+      ...[{"q": "Using the definition, what is the derivative of f(x) = 3x + 5?", "choices": ["3x", "3", "5", "8"], "answer": 1, "why": "[3(x + h) + 5 − 3x − 5]/h = 3h/h = 3."}, {"q": "Is f(x) = |x| differentiable at 0?", "choices": ["Yes, f′(0) = 0", "Yes, f′(0) = 1", "No, the left and right slopes differ"], "answer": 2, "why": "The slope is −1 from the left and +1 from the right, so the limit does not exist."}, {"q": "Why not use h = 10⁻¹⁵ for a numerical derivative in double precision?", "choices": ["It is too slow", "Rounding error in the subtraction f(a + h) − f(a − h) dominates", "Computers cannot store it", "It always gives 0 exactly"], "answer": 1, "why": "The two function values agree in almost every digit, so their difference is mostly rounding noise. (The one-sided f(a + h) − f(a) has the same problem.)"}],
       { q: "What is the tangent line to y = x² at x = −2?", choices: ["y = −4x − 4", "y = 4x + 4", "y = −4x + 4", "y = −2x"], answer: 0, why: "The point is (−2, 4) and the slope is 2(−2) = −4, so y = 4 − 4(x + 2) = −4x − 4." },
       { q: "C(n) is the cost in dollars of making n phones, and C′(1000) = 52. What does that mean?", choices: ["1000 phones cost $52", "The 1000th phone is the cheapest", "Making one more phone, at 1000, costs about $52", "Each phone costs $52 on average"], answer: 2, why: "The derivative is the marginal cost: the approximate cost of one more unit at that production level." }
     ],
@@ -611,6 +646,7 @@ CSA.addUnits("math130", [
     <tr><td><em>e</em><sup>x</sup></td><td><em>e</em><sup>x</sup></td><td>Its own derivative; this is what makes <em>e</em> special</td></tr>
     <tr><td><em>a</em><sup>x</sup></td><td><em>a</em><sup>x</sup> ln <em>a</em></td><td>(2<sup>x</sup>)′ = 2<sup>x</sup> ln 2 ≈ 0.693 · 2<sup>x</sup></td></tr>
     <tr><td>ln <em>x</em></td><td>1/<em>x</em></td><td>For <em>x</em> &gt; 0</td></tr>
+    <tr><td>log<sub><em>b</em></sub> <em>x</em></td><td>1/(<em>x</em> ln <em>b</em>)</td><td>Since log<sub><em>b</em></sub> <em>x</em> = ln <em>x</em> / ln <em>b</em> (change of base), and 1/ln <em>b</em> is a constant</td></tr>
     <tr><td>sin <em>x</em></td><td>cos <em>x</em></td><td>Radians only</td></tr>
     <tr><td>cos <em>x</em></td><td>−sin <em>x</em></td><td>Note the minus sign</td></tr>
     <tr><td>tan <em>x</em></td><td>sec² <em>x</em> = 1/cos² <em>x</em></td><td>From the quotient rule on sin/cos</td></tr>
@@ -839,6 +875,7 @@ print(x)   # about 3.0</code></pre><p><em>f</em>′(<em>x</em>) = 2<em>x</em> �
 <p><strong>Example: the sliding ladder.</strong> A 10 ft ladder leans against a wall. Its bottom slides away from the wall at 1 ft/s. How fast is the top sliding down when the bottom is 6 ft from the wall?</p>
 <p>Let <em>x</em> be the distance from the wall to the bottom and <em>y</em> the height of the top. At every moment, <em>x</em>² + <em>y</em>² = 100. Differentiate with respect to <em>t</em>: 2<em>x</em> · <em>dx</em>/<em>dt</em> + 2<em>y</em> · <em>dy</em>/<em>dt</em> = 0. At the moment in question, <em>x</em> = 6, so <em>y</em> = 8, and <em>dx</em>/<em>dt</em> = 1. Then 12 + 16 · <em>dy</em>/<em>dt</em> = 0, so <em>dy</em>/<em>dt</em> = −0.75 ft/s. The top slides down at 0.75 ft/s, and it speeds up as the ladder falls further.</p>
 <p><strong>Example: the balloon.</strong> Air is pumped into a spherical balloon at 100 cm³/s. How fast is the radius growing when <em>r</em> = 5 cm? <em>V</em> = (4/3)π<em>r</em>³, so <em>dV</em>/<em>dt</em> = 4π<em>r</em>² · <em>dr</em>/<em>dt</em>. Substituting, 100 = 4π · 25 · <em>dr</em>/<em>dt</em>, so <em>dr</em>/<em>dt</em> = 1/π ≈ 0.32 cm/s. As the balloon grows, the same airflow makes the radius grow more slowly.</p>
+<p><strong>When a formula has one variable too many.</strong> A cone's volume ⅓π<em>r</em>²<em>h</em> involves both <em>r</em> and <em>h</em>, but in a cone-shaped cup the water's radius and depth are tied together. The water forms a smaller cone with the same shape as the whole cup, so by <em>similar triangles</em> (matching triangles of the same shape have sides in the same ratio) <em>r</em>/<em>h</em> is the same as the cup's top radius over its height. For a cup 12 cm tall with top radius 4 cm, <em>r</em>/<em>h</em> = 4/12, so <em>r</em> = <em>h</em>/3 at every moment, and <em>V</em> = ⅓π(<em>h</em>/3)²<em>h</em> = π<em>h</em>³/27 depends on <em>h</em> alone. Make this substitution in step 2, before differentiating.</p>
 
 <h3>Linear approximation</h3>
 <p>Near <em>x</em> = <em>a</em>, a differentiable function is close to its tangent line:</p>
@@ -900,7 +937,7 @@ newton_sqrt(2)   # 1.4142135623730951</code></pre>
     return x;
 }</code></pre>
 </div>
-<p>Starting from 1, the guesses are 1.5, 1.41667, 1.4142157, 1.41421356237469, … Near a root, the number of correct digits roughly <em>doubles</em> each step, compared with one extra binary digit per step for bisection. This speed is why Newton's method (and its relatives) runs inside calculators, graphics engines and scientific software.</p>
+<p>Starting from 1, the guesses are 1.5, 1.41667, 1.4142157, 1.41421356237469, … Near a root, the number of correct digits roughly <em>doubles</em> each step, compared with one extra binary digit per step for bisection (each halving pins down one more bit of the answer, about 0.3 of a decimal digit, which is why 10 decimal places took 34 passes in <a href="#c-math130-u2">Lesson 3</a>). This speed is why Newton's method (and its relatives) runs inside calculators, graphics engines and scientific software.</p>
 <p>But Newton's method can fail where bisection can't: if <em>f</em>′(<em>x</em><sub>n</sub>) = 0 the update divides by zero, and from a bad starting guess the iterates can jump far away or bounce back and forth forever. Practical software often combines the two: bisection for safety, Newton for speed.</p>
 `,
     terms: [
@@ -1169,7 +1206,7 @@ std::cout &lt;&lt; w &lt;&lt; "\\n";   // approaches 3.0</code></pre>
     summary: "From Archimedes' polygons to Newton and Leibniz to the ε–δ definition: the long road to the course you are taking.",
     notes: `
 <h3>Ancient roots</h3>
-<p>Greek mathematicians avoided the infinite but found ways around it. Eudoxus and Archimedes computed areas and volumes by squeezing shapes between simpler ones. Archimedes found the area of a parabolic segment with what amounts to a geometric series.</p>
+<p>Greek mathematicians avoided the infinite but found ways around it. Eudoxus and Archimedes computed areas and volumes by squeezing shapes between simpler ones. Archimedes found the area of a parabolic segment with what amounts to a <em>geometric series</em>: an endless sum in which each term is a fixed fraction of the one before, here 1 + ¼ + 1/16 + 1/64 + ⋯, whose total is 4/3.</p>
 
 <h3>Medieval and early modern steps</h3>
 <p>Mathematicians in Kerala, India, led by Madhava of Sangamagrama (14th century), found infinite series for sine, cosine and π, centuries before they were known in Europe. In the 1600s Fermat found tangents and maxima with a method close to differentiation, and Cavalieri computed areas by summing "indivisibles".</p>
@@ -1181,7 +1218,7 @@ std::cout &lt;&lt; w &lt;&lt; "\\n";   // approaches 3.0</code></pre>
 <p>Calculus worked, but its foundations were shaky. Cauchy (1820s) and Weierstrass (1860s) defined limits precisely, and Riemann defined the integral as a limit of sums. In the 1960s Abraham Robinson showed that infinitesimals could be made rigorous after all, in "nonstandard analysis".</p>
 
 <h3>Calculus and computers</h3>
-<p>The first electronic computers were built largely to solve differential equations: ENIAC's first jobs included artillery tables and calculations for nuclear weapons. Numerical calculus remains one of the largest uses of computing, from weather forecasts to training AI models.</p>
+<p>The first electronic computers were built largely to solve <em>differential equations</em>, equations that describe how a quantity changes by giving its derivative (for example, a shell's velocity changes according to gravity and air resistance) and ask for the quantity itself: ENIAC's first jobs included artillery tables and calculations for nuclear weapons. Numerical calculus remains one of the largest uses of computing, from weather forecasts to training AI models.</p>
 `,
     terms: [
       ["Method of exhaustion", "Approximating an area by inscribed and circumscribed shapes."],
