@@ -151,7 +151,7 @@ list(product("ab", repeat=2))   # [('a', 'a'), ('a', 'b'), ('b', 'a'), ('b', 'b'
 import string
 chars = string.ascii_uppercase + string.digits
 count = sum(1 for p in product(chars, repeat=3) if any(c.isdigit() for c in p))
-print(count, 36**3 - 26**3)   # 29080 29080</code></pre>` }
+print(count, 36**3 - 26**3)   # 29080 29080</code></pre><p>Both <code>sum(1 for p in … if …)</code> and <code>any(c.isdigit() for c in p)</code> use <em>generator expressions</em> (<a href="#c-cs101-str">CS 101, Strings</a>; more in <a href="#c-cs102-c5">CS 102, Lesson 5</a>): the first adds 1 for each password that passes the test, and <code>any</code> is <code>True</code> if at least one character is a digit. A plain loop with a counter does the same job.</p>` }
     ],
     sources: ["mcs", "levin", "keller"]
   },
@@ -194,7 +194,7 @@ print(count, 36**3 - 26**3)   # 29080 29080</code></pre>` }
   <li><strong>Check</strong> that the second count is exactly the other side, and test both sides on small numbers.</li>
 </ol>
 <p><strong>Example.</strong> Prove <em>k</em> · C(<em>n</em>, <em>k</em>) = <em>n</em> · C(<em>n</em> − 1, <em>k</em> − 1). Step 1: the left side reads "choose a committee of <em>k</em> from <em>n</em> people, then choose one of its <em>k</em> members as chair". So we count committees with a chair. Step 2: choose the chair first, any of the <em>n</em> people, then the other <em>k</em> − 1 members from the remaining <em>n</em> − 1 people: <em>n</em> · C(<em>n</em> − 1, <em>k</em> − 1). Both count the same chaired committees, so they're equal. ∎ Step 3: with <em>n</em> = 5, <em>k</em> = 3, both sides are 30.</p>
-<p>Pascal's identity is also a recursive algorithm, and a classic example of why <strong>memoization</strong> matters. Memoization means remembering each result the first time you compute it (say, in a dictionary keyed by (<em>n</em>, <em>k</em>)) and looking it up instead of recomputing it when it's needed again. Computed naively, C(<em>n</em>, <em>k</em>) recomputes the same smaller values over and over and makes exponentially many calls; with memoization, or by building the triangle row by row, each of the O(<em>n</em>²) entries is computed once. (<a href="#c-cs102-c5">CS 102, Lesson 5</a> shows how to add memoization to any Python function with <code>@functools.cache</code>; you don't need it for this course.)</p>
+<p>Pascal's identity is also a recursive algorithm, and a classic example of why <strong>memoization</strong> matters. Memoization means remembering each result the first time you compute it (say, in a dictionary keyed by (<em>n</em>, <em>k</em>)) and looking it up instead of recomputing it when it's needed again. Computed naively, C(<em>n</em>, <em>k</em>) recomputes the same smaller values over and over and makes exponentially many calls; with memoization, or by building the triangle row by row, each of the O(<em>n</em>²) entries is computed once. A dictionary is all you need for this course, as in Practice 6. (<a href="#c-cs102-c5">CS 102, Lesson 5</a> later shows a one-line shortcut, <code>@functools.cache</code>, that adds memoization to any Python function; you may use it once you've seen it, but you never have to.)</p>
 
 <h3>The binomial theorem</h3>
 <p class="math">(<em>x</em> + <em>y</em>)<sup><em>n</em></sup> = Σ<sub><em>k</em>=0</sub><sup><em>n</em></sup> C(<em>n</em>, <em>k</em>) <em>x</em><sup><em>n</em>−<em>k</em></sup> <em>y</em><sup><em>k</em></sup></p>
@@ -205,7 +205,7 @@ print(count, 36**3 - 26**3)   # 29080 29080</code></pre>` }
 <ul>
   <li>Among 367 people, two share a birthday (there are at most 366 birthdays).</li>
   <li>Among any 5 integers, two leave the same remainder when divided by 4.</li>
-  <li><strong>No lossless compression algorithm can shrink every file.</strong> There are 2<sup><em>n</em></sup> files of exactly <em>n</em> bits but only 2<sup><em>n</em></sup> − 1 files shorter than <em>n</em> bits. If every <em>n</em>-bit file were compressed to something shorter, two would compress to the same output, and decompression couldn't tell them apart.</li>
+  <li><strong>No lossless compression algorithm can shrink every file.</strong> There are 2<sup><em>n</em></sup> files of exactly <em>n</em> bits but only 2<sup><em>n</em></sup> − 1 files shorter than <em>n</em> bits: counting lengths 0 (the empty file), 1, …, <em>n</em> − 1 gives 1 + 2 + 4 + … + 2<sup><em>n</em>−1</sup>, a geometric sum equal to 2<sup><em>n</em></sup> − 1. (For <em>n</em> = 2: the four files 00, 01, 10, 11, but only three shorter ones: the empty file, 0 and 1.) If every <em>n</em>-bit file were compressed to something shorter, two would compress to the same output, and decompression couldn't tell them apart.</li>
   <li><strong>Hash functions have collisions.</strong> A hash function mapping arbitrary strings to 64-bit values maps infinitely many inputs into 2⁶⁴ boxes, so many inputs share each hash value. Hash tables must handle collisions; they can't avoid them.</li>
 </ul>
 <p>A subtler example: in any sequence of 10 distinct integers, there's an increasing or decreasing subsequence of length 4 (the Erdős–Szekeres theorem says any sequence of <em>n</em>² + 1 distinct numbers has a monotone subsequence of length <em>n</em> + 1). Pigeonhole arguments often hinge on choosing clever "holes". This proof is a good example; it's here for interest and won't be on the exam.</p>
@@ -239,15 +239,21 @@ print(count, 36**3 - 26**3)   # 29080 29080</code></pre>` }
       { q: `<p>Prove that among any 6 integers, two have a difference divisible by 5.</p>`, a: `<p>Each integer leaves one of 5 remainders (0 to 4) when divided by 5. Six integers into five remainder "boxes": by the pigeonhole principle, two have the same remainder <em>r</em>. Write them as 5<em>a</em> + <em>r</em> and 5<em>b</em> + <em>r</em>; their difference is 5(<em>a</em> − <em>b</em>), divisible by 5. ∎</p>` },
       { q: `<p>How many integers from 1 to 1000 are divisible by neither 3 nor 7?</p>`, a: `<p>Divisible by 3: 333. By 7: 142. By 21: 47. Divisible by 3 or 7: 333 + 142 − 47 = 428. Neither: 1000 − 428 = 572.</p>` },
       { q: `<p>How many bit strings of length 8 start with 1 or end with 00?</p>`, a: `<p>Start with 1: 2⁷ = 128. End with 00: 2⁶ = 64. Both: 2⁵ = 32. Total: 128 + 64 − 32 = 160.</p>` },
-      { q: `<p>Write a Python function <code>binom(n, k)</code> using Pascal's identity with <code>@functools.cache</code>, and check it against <code>math.comb</code> for all <em>n</em> ≤ 30.</p>`, a: `<pre><code>import functools, math
+      { q: `<p>Write a Python function <code>binom(n, k)</code> using Pascal's identity, memoized with a dictionary as described above, and check it against <code>math.comb</code> for all <em>n</em> ≤ 30. (<code>math.comb(n, k)</code> is Python's built-in C(<em>n</em>, <em>k</em>): after <code>import math</code>, <code>math.comb(5, 2)</code> is 10.)</p>`, a: `<pre><code>import math
 
-@functools.cache
+memo = {}
+
 def binom(n, k):
     if k == 0 or k == n:
         return 1
-    return binom(n - 1, k - 1) + binom(n - 1, k)
+    if (n, k) not in memo:
+        memo[(n, k)] = binom(n - 1, k - 1) + binom(n - 1, k)
+    return memo[(n, k)]
 
-assert all(binom(n, k) == math.comb(n, k) for n in range(31) for k in range(n + 1))</code></pre><p>Without the cache, <code>binom(30, 15)</code> would make over 300 million calls.</p>` }
+for n in range(31):
+    for k in range(n + 1):
+        assert binom(n, k) == math.comb(n, k)
+print(binom(30, 15))   # 155117520</code></pre><p>Without the memo, <code>binom(30, 15)</code> would make over 300 million calls (2 × 155,117,520 − 1). If you've reached CS 102 Lesson 5, putting <code>@functools.cache</code> above a plain recursive <code>binom</code> does the same job.</p>` }
     ],
     sources: ["mcs", "levin", "keller"]
   },
@@ -315,7 +321,7 @@ assert all(binom(n, k) == math.comb(n, k) for n in range(31) for k in range(n + 
 </figure>
 <p>The tree shows the solution: level <em>i</em> has 2<sup><em>i</em></sup> subproblems of size <em>n</em>/2<sup><em>i</em></sup>, so each level does <em>n</em> work in total, and there are log₂ <em>n</em> levels. <em>T</em>(<em>n</em>) = <em>n</em> log₂ <em>n</em> (for <em>n</em> a power of 2 and <em>T</em>(1) = 0).</p>
 <p><strong>What if <em>n</em> isn't a power of 2?</strong> Then the halves are unequal: 7 items split into 4 and 3. The exact recurrence is <em>T</em>(<em>n</em>) = <em>T</em>(⌈<em>n</em>/2⌉) + <em>T</em>(⌊<em>n</em>/2⌋) + <em>n</em>, using the ceiling and floor from Lesson 2. We assume a power of 2 only to keep the algebra clean, and the answer barely changes. <em>T</em> never decreases as <em>n</em> grows (more items never means less work, which you can prove by induction), so <em>n</em> is sandwiched between two powers of 2, 2<sup><em>k</em></sup> ≤ <em>n</em> &lt; 2<sup><em>k</em>+1</sup>, and <em>T</em>(<em>n</em>) is sandwiched between their values: <em>T</em>(<em>n</em>) ≤ <em>T</em>(2<sup><em>k</em>+1</sup>) = 2<sup><em>k</em>+1</sup>(<em>k</em> + 1) ≤ 2<em>n</em>(log₂ <em>n</em> + 1). From below, <em>T</em>(<em>n</em>) ≥ <em>T</em>(2<sup><em>k</em></sup>) = 2<sup><em>k</em></sup><em>k</em> &gt; (<em>n</em>/2)(log₂ <em>n</em> − 1), since 2<sup><em>k</em></sup> &gt; <em>n</em>/2 and <em>k</em> &gt; log₂ <em>n</em> − 1. So <em>T</em>(<em>n</em>) is trapped between two constant multiples of <em>n</em> log <em>n</em>.</p>
-<p>There is a name for that. Big-O, from <a href="#c-cs101-algo">CS 101</a>, is only an upper bound: <em>f</em>(<em>n</em>) = O(<em>g</em>(<em>n</em>)) means <em>f</em>(<em>n</em>) ≤ <em>c</em> · <em>g</em>(<em>n</em>) for some constant <em>c</em> and all large enough <em>n</em>. (Strictly, merge sort is also O(<em>n</em>²), which is true but unhelpful.) <strong>Big-Theta</strong> is a two-sided bound: <em>f</em>(<em>n</em>) = Θ(<em>g</em>(<em>n</em>)) means <em>c</em>₁ · <em>g</em>(<em>n</em>) ≤ <em>f</em>(<em>n</em>) ≤ <em>c</em>₂ · <em>g</em>(<em>n</em>) for some positive constants <em>c</em>₁, <em>c</em>₂ and all large enough <em>n</em>; that is, <em>f</em> grows exactly as fast as <em>g</em>, up to constant factors. So <em>T</em>(<em>n</em>) is still Θ(<em>n</em> log <em>n</em>): for <em>n</em> ≥ 4, say, <em>c</em>₁ = 1/4 and <em>c</em>₂ = 3 work with base-2 logarithms. In fact it stays very close: computing the exact recurrence gives <em>T</em>(1000) = 9976, against 1000 log₂ 1000 ≈ 9966.</p>
+<p>There is a name for that. Big-O, from <a href="#c-cs101-algo">CS 101</a>, is only an upper bound: <em>f</em>(<em>n</em>) = O(<em>g</em>(<em>n</em>)) means <em>f</em>(<em>n</em>) ≤ <em>c</em> · <em>g</em>(<em>n</em>) for some constant <em>c</em> and all large enough <em>n</em>. (Strictly, merge sort is also O(<em>n</em>²), which is true but unhelpful.) <strong>Big-Theta</strong> is a two-sided bound: <em>f</em>(<em>n</em>) = Θ(<em>g</em>(<em>n</em>)) means <em>c</em>₁ · <em>g</em>(<em>n</em>) ≤ <em>f</em>(<em>n</em>) ≤ <em>c</em>₂ · <em>g</em>(<em>n</em>) for some positive constants <em>c</em>₁, <em>c</em>₂ and all large enough <em>n</em>; that is, <em>f</em> grows exactly as fast as <em>g</em>, up to constant factors. So <em>T</em>(<em>n</em>) is still Θ(<em>n</em> log <em>n</em>). To find constants, write <em>L</em> = log₂ <em>n</em> and turn each sandwich bound into a multiple of <em>nL</em>. Upper: 2<em>n</em>(<em>L</em> + 1) = 2<em>nL</em> + 2<em>n</em>, and 2<em>n</em> ≤ <em>nL</em> once <em>L</em> ≥ 2, so the bound is at most 3<em>nL</em>. Lower: (<em>n</em>/2)(<em>L</em> − 1) = <em>nL</em>/4 + <em>n</em>(<em>L</em> − 2)/4, and the second term is ≥ 0 once <em>L</em> ≥ 2, so the bound is at least <em>nL</em>/4. Both steps need <em>L</em> ≥ 2, that is <em>n</em> ≥ 4. So <em>c</em>₁ = 1/4 and <em>c</em>₂ = 3 work for all <em>n</em> ≥ 4 (other choices work too; any valid pair proves Θ). In fact it stays very close: computing the exact recurrence gives <em>T</em>(1000) = 9976, against 1000 log₂ 1000 ≈ 9966.</p>
 <p>The general pattern <em>T</em>(<em>n</em>) = <em>aT</em>(<em>n</em>/<em>b</em>) + <em>f</em>(<em>n</em>) is solved by the <strong>master theorem</strong>. You don't need it yet; it comes in Algorithms, and the recursion trees in this lesson are all you need here. The idea is always this tree: compare the work at the top with the number of leaves at the bottom.</p>
 `,
     terms: [
@@ -513,6 +519,7 @@ CSA.addUnits("math121", [
 <p>How does a text message become a number? A computer already stores text as bytes, each a number from 0 to 255 (the encoding UTF-8 does this; "H" is byte 72 and "i" is 105). Read the bytes as the digits of one number in base 256: "Hi" becomes 72 · 256 + 105 = 18537. Python does this in both directions:</p>
 <pre><code>m = int.from_bytes("Hi".encode("utf-8"), "big")   # 18537
 m.to_bytes(2, "big").decode("utf-8")              # 'Hi'</code></pre>
+<p><code>"big"</code> says which end of the number comes first. Big-endian puts the most significant byte first, the way we write digits, so the first byte (72) is the 256s digit. (<code>"little"</code> reverses that and would give 105 · 256 + 72 = 26952.) <code>.encode("utf-8")</code> turns the string into its bytes and <code>.decode("utf-8")</code> turns bytes back into a string. Going back, <code>to_bytes</code> needs to be told how many bytes to produce, here 2, because a number alone doesn't say whether it was 2 bytes or, say, 3 with a leading zero byte.</p>
 <p>A 2048-bit <em>n</em> has room for a message of up to 255 bytes. In practice RSA doesn't encrypt long messages at all: it encrypts a short random key, and that key encrypts the actual message with a fast symmetric cipher such as AES. This is called <em>hybrid encryption</em>, and it's how secure web connections have worked.</p>
 <p><strong>Decryption</strong>: <em>m</em> = <em>c<sup>d</sup></em> mod <em>n</em>.</p>
 <h4>A worked example with small numbers</h4>
@@ -635,15 +642,27 @@ assert pow(c, d, n) == 65</code></pre>
 <pre><code>import random
 
 def play(switch):
-    prize, pick = random.randrange(3), random.randrange(3)
-    opened = next(d for d in range(3) if d != pick and d != prize)
+    prize = random.randrange(3)        # doors are 0, 1, 2
+    pick = random.randrange(3)
+    # The host opens a door that is neither yours nor the prize.
+    # If there are two such doors, he picks one of them at random.
+    allowed = [d for d in range(3) if d != pick and d != prize]
+    opened = random.choice(allowed)
     if switch:
-        pick = next(d for d in range(3) if d != pick and d != opened)
+        # switch to the one door that is neither yours nor opened
+        pick = [d for d in range(3) if d != pick and d != opened][0]
     return pick == prize
 
-trials = 100_000
-print(sum(play(True) for _ in range(trials)) / trials)    # about 0.667
-print(sum(play(False) for _ in range(trials)) / trials)   # about 0.333</code></pre>
+def win_rate(switch, trials=100_000):
+    wins = 0
+    for _ in range(trials):
+        if play(switch):
+            wins += 1
+    return wins / trials
+
+print(win_rate(True))    # about 0.667
+print(win_rate(False))   # about 0.333</code></pre>
+<p>The code needs only list comprehensions from CS 101 and two functions from the <code>random</code> module: <code>random.randrange(3)</code> gives 0, 1 or 2 with equal chances, and <code>random.choice(allowed)</code> picks one item of the list at random. When your first pick is right, <code>allowed</code> has two doors and the host's choice between them is random; otherwise it has exactly one.</p>
 <p><strong>The answer depends on the host's rules.</strong> The 2/3 relies on four assumptions, all built into <code>play</code>: the host <em>always</em> opens a door, never opens your door, <em>always</em> opens one with no prize (he knows where it is), and, when both other doors are empty, picks one at random. Change the rules and the answer changes. If the host opens one of the other two doors at random, without knowing where the prize is, then in the games where that door happens to be empty, switching wins only 1/2 of the time: his choice could have revealed the prize, so seeing an empty door now carries information about your own door too. (Change <code>opened</code> in the simulation to a random other door and discard the games where it reveals the prize; you'll get about 0.5.) And a host who offers the switch only when your first pick is right would make switching lose every time. Probability puzzles are only well defined once the process that produced the information is stated.</p>
 `,
     terms: [
@@ -720,7 +739,7 @@ print(est, exact)   # both about 0.706</code></pre>` }
 <p>The first form is the definition: the average squared distance from the mean. The second is easier to compute, and follows by linearity. Write μ = E[<em>X</em>], which is just a number. Expand the square, then take expectations term by term (constants come out of E, and E[μ²] = μ²):</p>
 <p class="math">E[(<em>X</em> − μ)²] = E[<em>X</em>² − 2μ<em>X</em> + μ²] = E[<em>X</em>²] − 2μE[<em>X</em>] + μ² = E[<em>X</em>²] − 2μ² + μ² = E[<em>X</em>²] − μ²</p>
 <p>The <strong>standard deviation</strong> is σ = √Var[<em>X</em>], in the same units as <em>X</em>. One die: E[<em>X</em>²] = (1 + 4 + 9 + 16 + 25 + 36)/6 = 91/6, so Var = 91/6 − 3.5² = 35/12 ≈ 2.92, and σ ≈ 1.71. For independent variables, variances add: a binomial has variance <em>np</em>(1 − <em>p</em>).</p>
-<p>Variance matters in engineering: two web servers with the same average response time of 100 ms are very different if one is always 100 ms and the other is usually 10 ms but occasionally 5 seconds. That's why performance engineers report percentiles (the 99th-percentile latency) as well as averages.</p>
+<p>Variance matters in engineering: two web servers with the same average response time of 100 ms are very different if one is always 100 ms and the other is usually 10 ms but occasionally 5 seconds. That's why performance engineers report <strong>percentiles</strong> as well as averages. The 99th percentile is the value that 99% of measurements fall at or below: a 99th-percentile latency of 800 ms means 1 request in 100 takes longer than 800 ms. The 50th percentile is the <strong>median</strong>, the middle value when the measurements are sorted (for 3, 7, 100 the median is 7, while the mean is about 37).</p>
 
 <h3>Randomized algorithms</h3>
 <p>Randomness is a tool, not just something to analyze. <strong>Randomized quicksort</strong> picks its pivot at random. For any input, its expected number of comparisons is about 2<em>n</em> ln <em>n</em> ≈ 1.39 <em>n</em> log₂ <em>n</em>; there's no "bad input" an adversary can construct, only rare unlucky random choices. The proof uses exactly this lesson's technique. Call the items, in sorted order, <em>z</em>₁ &lt; <em>z</em>₂ &lt; … &lt; <em>z<sub>n</sub></em>, and give each pair <em>i</em> &lt; <em>j</em> an indicator for "<em>z<sub>i</sub></em> and <em>z<sub>j</sub></em> are compared". They are compared exactly when one of them is the first pivot chosen from the block <em>z<sub>i</sub></em>, …, <em>z<sub>j</sub></em>; any pivot strictly between them would send them to different sides, never to meet. Each of those <em>j</em> − <em>i</em> + 1 items is equally likely to be first, so the probability is 2/(<em>j</em> − <em>i</em> + 1). By linearity, the expected total is the sum of 2/(<em>j</em> − <em>i</em> + 1) over all pairs. That sum works out to exactly 2(<em>n</em> + 1)<em>H<sub>n</sub></em> − 4<em>n</em>, whose leading term is 2<em>n H<sub>n</sub></em> ≈ 2<em>n</em> ln <em>n</em>. For <em>n</em> = 1000 it's about 10,986 comparisons. (The 1.39 is 2 ln 2, from converting ln <em>n</em> = ln 2 · log₂ <em>n</em>.) You'll do the full calculation in Algorithms; for now, the idea is what matters.</p>
