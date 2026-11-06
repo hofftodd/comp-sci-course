@@ -279,9 +279,12 @@ async function api(req, res, url) {
 }
 
 /* ---------- static site ---------- */
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon" };
-const ALLOWED = /^\/(index\.html|data\/[\w.-]+\.js|app\/[\w.-]+\.js)$/;
-const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'";
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".py": "text/plain; charset=utf-8", ".wasm": "application/wasm", ".zip": "application/zip" };
+// Served paths: the page, course data, app scripts and the grading harness, and the Python runtime
+// (vendor/pyodide, fetched by scripts/get-pyodide.sh).
+const ALLOWED = /^\/(index\.html|data\/[\w.-]+\.js|app\/[\w.-]+\.(js|py)|vendor\/pyodide\/[\w.-]+\.(js|wasm|zip|json))$/;
+// 'wasm-unsafe-eval' lets the Python runtime (WebAssembly) start; it doesn't allow eval of JavaScript.
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'";
 // The page is written as an artifact body; wrap it in a full document, as claude.ai does.
 function wrap(page) {
   const cut = page.indexOf("<style>");
@@ -301,6 +304,8 @@ async function serveStatic(req, res, url) {
   const type = TYPES[path.extname(file)] || "application/octet-stream";
   const headers = { "content-type": type, "x-content-type-options": "nosniff", "referrer-policy": "no-referrer", "cache-control": "no-cache" };
   if (rel === "/index.html") { headers["content-security-policy"] = CSP; buf = wrap(buf.toString("utf8")); }
+  if (rel.startsWith("/app/") || rel.startsWith("/vendor/")) headers["content-security-policy"] = CSP;   // applies to the worker
+  if (rel.startsWith("/vendor/")) headers["cache-control"] = "public, max-age=604800";
   res.writeHead(200, headers);
   res.end(buf);
 }
@@ -320,4 +325,5 @@ http.createServer(async (req, res) => {
   console.log(`First Principles CS on http://${HOST}:${PORT}  (config: ${path.relative(process.cwd(), cfgPath)})`);
   if (!INSTRUCTOR_KEY) console.log("Instructor view disabled: set INSTRUCTOR_KEY to enable it.");
   if (!PROVIDERS.length) console.log("No model providers enabled: office hours will be hidden.");
+  if (!existsSync(path.join(SITE, "vendor", "pyodide", "pyodide.asm.wasm"))) console.log("Programming problems need the Python runtime: run  bash scripts/get-pyodide.sh");
 });

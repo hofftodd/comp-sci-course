@@ -40,13 +40,70 @@ flowchart LR
 | `data/program.js` | Defines `window.CSA`: the four-year plan, the source registry, source access labels, and the registration helpers. Loads first. |
 | `data/<course>.js` | One file per course: `CSA.addCourse({...})`. |
 | `data/cs101-extras.js` | Sidebars and optional lessons for CS 101, kept separate because they are long. Other courses keep theirs in the course file. |
+| `data/cs101-code.js` | CS 101's auto-graded programming problems: `CSA.addCode("cs101", { unitId: [...] })`. |
+| `app/code.js` | Programming problems: editor, Check/Run, results, solution and hint reveal, export script. |
+| `app/pyworker.js` | Web Worker that loads Pyodide and runs the harness. |
+| `app/harness.py` | The grader: runs student code and checks one test at a time. Also embedded in exported check scripts. |
+| `vendor/pyodide/` | The Pyodide runtime, fetched by `scripts/get-pyodide.sh`; git-ignored. |
+| `scripts/` | `get-pyodide.sh`, and `export_problems.js` + `check_problems.py`, which verify every problem. |
 | `app/live.js` | Live features. Detects which backend is available and plugs into the app through hooks. |
 | `server/server.mjs` | Self-hosted server: static files, model-provider proxy, JSON storage, instructor auth. |
 | `server/config.example.json` | Template for `server/config.json` (git-ignored). |
 
 Scripts load in this order: `data/program.js`, the course files, the inline app script in
-`index.html`, then `app/live.js`. The app renders immediately; live features appear once
-`live.js` finds a backend.
+`index.html`, then `app/live.js` and `app/code.js`. The app renders immediately; live features
+appear once `live.js` finds a backend, and Python starts the first time a student checks or runs code.
+
+## Programming problems
+
+A problem in `data/cs101-code.js`:
+
+```js
+{
+  id: "leap_year", title: "Leap years",
+  prompt: `<p>Write <code>is_leap_year(year)</code> ...</p>`,
+  starter: `def is_leap_year(year):\n    pass\n`,
+  hint: `<p>...</p>`,
+  solution: `def is_leap_year(year): ...`,
+  tests: [
+    { label: "2024 is a leap year", call: "is_leap_year(2024)", expect: "True" },
+    { label: "2100 is not", call: "is_leap_year(2100)", expect: "False", hidden: true }
+  ]
+}
+```
+
+| Test `type` | Fields | Passes when |
+|---|---|---|
+| `call` (default) | `call`, `expect` (Python expressions) | The call's result equals the expected value (floats compared with a tolerance, also inside lists, tuples and dicts) |
+| `io` | `stdin` (list of lines), `expect` | The whole program, with `input()` fed from `stdin`, prints exactly `expect` (trailing spaces and blank lines ignored; prompts aren't counted) |
+| `raises` | `call`, `error` | The call raises that exception type |
+| `assert` | `code` | The Python in `code`, run with the student's names in scope, raises no AssertionError; its message is shown on failure |
+| `source` | `code` | Same, but only `__source__` (the program text) is available and the program isn't run: "doesn't use `max`" checks |
+
+Any test can add `setup` (Python run first, for example to create a file), `hidden: true` (the
+student sees that it failed but not the details) and `limit` (seconds, default 5).
+
+**How a check runs.** `code.js` starts `app/pyworker.js` on the first Check or Run. The worker loads
+Pyodide from `vendor/pyodide/` (or, if that's missing, from the jsDelivr CDN), writes `harness.py`
+into Python's virtual file system and imports it. Each test is sent separately with a timer; if a
+test exceeds its limit, the worker is terminated, the test is reported as too slow or an infinite
+loop, and a fresh worker starts for the next test. Tests are visible in the page source, so this
+is for practice, not for graded exams.
+
+**Results** are kept per browser (`fpcs:solved`, and the code itself in `fpcs:draft:<course>-<id>`),
+and reported to the improvement loop: each student's signal document records, per problem, the
+number of checks until solved and whether it was solved. The instructor view shows each problem's
+solve rate, and flags a lesson when fewer than half of at least three students solve a problem.
+The professor sees the problems and reference solutions, with instructions never to write out a
+solution, and each problem has an "Ask the professor" button that sends the student's code and the
+failing tests.
+
+**Run on my computer** builds a single Python file: the harness, the student's current code and the
+tests, with time limits enforced after each test. It needs only Python 3.
+
+**Checking the problems themselves:** `node scripts/export_problems.js > /tmp/p.json` then
+`python3 scripts/check_problems.py /tmp/p.json` verifies that every reference solution passes every
+test and every starter fails at least one.
 
 ## Content model
 
@@ -318,7 +375,9 @@ student on two devices counts as two.
 - Quiz results are stored by question position. Language variants of a question share statistics,
   and an approved rewrite replaces every language's version of that question.
 - Lesson progress and scores live in each browser and do not follow a student between devices.
-- The professor does not run code. Programming problems with automatic checking are not built yet.
+- The professor does not run code itself; it sees the student's code only when they use "Ask the professor" on a problem.
+- On claude.ai, programming problems depend on the page being allowed to start WebAssembly in a worker. If it isn't, each problem's "Run on my computer" script still works.
+- Tests for programming problems are in the page, so a determined student can read them.
 - Provider adapters were tested against mock APIs that follow each provider's documented streaming
   format. Test each provider with real keys before relying on it.
 
@@ -331,5 +390,9 @@ There is no automated test suite yet. Changes so far were checked by:
 - Driving the page in headless Chromium with Playwright, including a mock `window.claude` runtime
   for the claude.ai backend.
 - Running the server against mock Anthropic, OpenAI, Gemini and local-model APIs.
+- `scripts/check_problems.py` for every programming problem, and driving the problems in Chromium
+  through the self-hosted server (its Content Security Policy included): starter fails, solution
+  passes, an infinite loop is stopped, a slow algorithm fails its speed test, input programs and
+  file problems work, and the exported script reports the same results.
 
 Turning these checks into committed tests is a good next step.

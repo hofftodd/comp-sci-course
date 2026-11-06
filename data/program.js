@@ -96,6 +96,12 @@ window.CSA = {
     for (const u of c.units) if (byUnit[u.id]) u.asides = (u.asides || []).concat(byUnit[u.id]);
   },
 
+  /* Auto-graded programming problems: { unitId: [problem, ...] }. See data/cs101-code.js. */
+  addCode(courseId, byUnit) {
+    const c = this.courses[courseId];
+    for (const u of c.units) if (byUnit[u.id]) u.code = (u.code || []).concat(byUnit[u.id]);
+  },
+
   /* Optional lessons: same shape as a unit plus kind (history, ethics, deep). */
   addOptional(courseId, lessons) {
     const c = this.courses[courseId];

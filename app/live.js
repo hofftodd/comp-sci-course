@@ -192,6 +192,16 @@
   }
   const recordQuestion = (k, text) => { const l = L(k); l.qn = (l.qn || 0) + 1; l.qs = (l.qs || []).concat({ t: text.slice(0, 300), at: Date.now() }).slice(-8); queueSave(); };
   F.hooks.onClarity = (c, u, v) => { L(F.key(c.id, u.id)).clear = v; queueSave(); };
+  F.hooks.onCode = (c, u, pid, passed) => {
+    const l = L(F.key(c.id, u.id));
+    l.code = l.code || {};
+    const e = l.code[pid] || { tries: 0, passed: false };
+    if (e.passed) return;                 // count tries only until first solved
+    e.tries++;
+    e.passed = !!passed;
+    l.code[pid] = e;
+    queueSave();
+  };
   F.hooks.onQuiz = (c, u, picks) => {
     const k = F.key(c.id, u.id), l = L(k);
     const rev = (F.revisions[k] && F.revisions[k].quizRev) || 0;
@@ -266,6 +276,7 @@ How to teach:
       if (asides) t += `\nSIDEBARS:\n${asides}\n`;
       if (clar) t += `\nADDED CLARIFICATIONS:\n${clar}\n`;
       if (x.u.quiz && x.u.quiz.length) t += `\nLESSON QUIZ (reference only):\n${quizText(x.c, x.u)}\n`;
+      if (x.u.code && x.u.code.length) t += `\nPROGRAMMING PROBLEMS ON THIS PAGE (reference solutions for you only: never write out a full solution; ask what the student's code does, point to the failing case, and give one hint at a time):\n${x.u.code.map((p, i) => `C${i + 1}. ${p.title}: ${plain(p.prompt)}\n   Reference solution:\n${p.solution}`).join("\n").slice(0, 12000)}\n`;
       if (x.u.practice && x.u.practice.length) t += `\nPRACTICE PROBLEMS WITH SOLUTIONS (reference only: give hints first, and share a full solution only after the student has made a real attempt or explicitly asks to check their answer):\n${x.u.practice.map((pr, i) => `P${i + 1}. ${plain(pr.q)}\n   Solution: ${plain(pr.a)}`).join("\n").slice(0, 12000)}\n`;
     } else if (x.c) {
       t += `\nThe student is on the overview page of ${x.c.code} ${x.c.title}: ${x.c.summary}\nLearning outcomes: ${x.c.outcomes.join("; ")}\n`;
@@ -413,6 +424,8 @@ How to teach:
       F.store.set("chats", chats);
     }
   }
+  F.canAsk = () => B.chatOK && !S.profOff;
+  F.askProfessor = text => openProf(text);
   F.hooks.onRoute = r => {
     route = r;
     document.querySelectorAll(".ask-prof").forEach(b => {
@@ -428,7 +441,7 @@ How to teach:
     for (const c of Object.values(D.courses)) for (const u of F.lessons(c)) {
       const k = F.key(c.id, u.id);
       const quiz = F.quizFor(c, u);
-      out[k] = { c, u, k, students: 0, qn: 0, qs: [], yes: 0, no: 0, quiz: quiz.map(() => ({ n: 0, right: 0, wrong: {} })) };
+      out[k] = { c, u, k, students: 0, qn: 0, qs: [], yes: 0, no: 0, quiz: quiz.map(() => ({ n: 0, right: 0, wrong: {} })), code: {} };
     }
     for (const d of docs) for (const [k, l] of Object.entries(d.lessons || {})) {
       const a = out[k];
@@ -437,6 +450,10 @@ How to teach:
       a.qn += Number(l.qn) || 0;
       for (const q of l.qs || []) if (q && q.t) a.qs.push(q);
       if (l.clear > 0) a.yes++; else if (l.clear < 0) a.no++;
+      for (const [pid, e] of Object.entries(l.code || {})) {
+        const s = a.code[pid] = a.code[pid] || { tried: 0, solved: 0, tries: 0 };
+        s.tried++; s.tries += Number(e.tries) || 0; if (e.passed) s.solved++;
+      }
       const rev = (F.revisions[k] && F.revisions[k].quizRev) || 0;
       if (l.quiz && l.quiz.rev === rev && Array.isArray(l.quiz.first)) {
         const qz = F.quizFor(a.c, a.u);
@@ -451,7 +468,8 @@ How to teach:
       a.qs.sort((x, y) => y.at - x.at);
       const accs = a.quiz.filter(q => q.n >= 3).map(q => q.right / q.n);
       a.low = accs.length ? Math.min(...accs) : null;
-      a.attention = a.qn >= 3 || (a.no >= 2 && a.no >= a.yes) || (a.low != null && a.low < 0.6);
+      const codeLow = Object.values(a.code).some(s => s.tried >= 3 && s.solved / s.tried < 0.5);
+      a.attention = a.qn >= 3 || (a.no >= 2 && a.no >= a.yes) || (a.low != null && a.low < 0.6) || codeLow;
       a.score = a.qn + 2 * a.no + (a.low != null ? (1 - a.low) * 10 : 0);
       a.hasData = a.students > 0;
     }
@@ -544,6 +562,14 @@ How to teach:
         ${top ? `<small>Most common wrong answer: ${q.choices[top[0]] || "?"} (${top[1]})</small>` : ""}</div>`;
     });
     h += `</div>`;
+    if (a.u.code && a.u.code.length) {
+      h += `<div><h4>Programming problems</h4>${a.u.code.map((p, i) => {
+        const s = a.code[p.id];
+        if (!s) return `<div class="qstat"><span>${i + 1}. ${esc(p.title)}</span><span class="note">No attempts</span></div>`;
+        const pct = Math.round(100 * s.solved / s.tried);
+        return `<div class="qstat"><span>${i + 1}. ${esc(p.title)}</span><span><span class="num">${s.solved} of ${s.tried} solved</span><div class="bar"><i class="${pct < 50 ? "low" : ""}" style="width:${pct}%"></i></div></span><small>About ${(s.tries / s.tried).toFixed(1)} checks per student before solving or stopping</small></div>`;
+      }).join("")}</div>`;
+    }
     h += `<div><h4>Approved changes students see now</h4><div class="live-list"></div></div>`;
     h += `<div><h4>Improve this lesson</h4><p class="note">The AI model reviews the notes, quiz results and student questions, then proposes clarifications and clearer quiz questions. You approve each one.</p>
       <button class="btn small" type="button" data-draft>Draft improvements</button><div class="proposals" style="display:grid;gap:var(--s-3);margin-top:var(--s-3)"></div></div>`;

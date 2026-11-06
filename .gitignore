@@ -7,3 +7,7 @@ server/data/
 .vscode/
 .idea/
 node_modules/
+
+# Python runtime for programming problems (fetch with scripts/get-pyodide.sh)
+vendor/
+__pycache__/

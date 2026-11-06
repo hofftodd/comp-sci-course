@@ -30,6 +30,12 @@ idea is used in practice. Year 1 is taught in Python.
 
 - **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
   the student's browser.
+- **Auto-graded programming problems** (CS 101): 31 problems, about three per lesson, each with
+  starter code, a hint, a reference solution and automatic tests: edge cases, hidden tests, speed
+  tests that catch slow algorithms, and checks such as "don't use the built-in `max`". Students
+  write real Python in the page; it runs in their browser with Pyodide (CPython compiled to
+  WebAssembly), in a background worker that stops infinite loops. A "Run on my computer" button
+  exports a self-contained check script for when the browser can't run Python.
 - **Ask the professor**: an office-hours chat on every page. It sees the current lesson, sidebars
   and quiz, explains ideas another way, gives examples, and quizzes students one question at a
   time. It gives hints rather than quiz answers until the student has submitted the quiz.
@@ -50,7 +56,10 @@ There are three ways to use the platform. They share the same code.
 ### 1. Read it locally (no AI features)
 
 Open `index.html` in a browser. Lessons, quizzes and progress work. The professor and the
-instructor view stay hidden, because there is no AI model or shared storage.
+instructor view stay hidden, because there is no AI model or shared storage. Programming problems
+need the page to be served over HTTP, because browsers don't start workers from local files: run
+`bash scripts/get-pyodide.sh` once, then `python3 -m http.server` in the repository and open
+http://localhost:8000. Without that, use each problem's "Run on my computer" button.
 
 ### 2. On claude.ai
 
@@ -64,6 +73,12 @@ because claude.ai pages cannot contact other servers.
 
 The bundled server needs Node.js 18 or newer and has no dependencies. It serves the site, keeps
 API keys on the server, and stores student activity and revisions as JSON files.
+
+The programming problems need the Python runtime, which isn't stored in git (about 14 MB):
+
+```bash
+bash scripts/get-pyodide.sh
+```
 
 ```bash
 cp server/config.example.json server/config.json

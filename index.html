@@ -281,6 +281,33 @@ pre code { background: none; padding: 0; font-size: inherit; }
 .fig text { fill: var(--ink); font-family: var(--f-body); font-size: 13px; }
 .fig text.m { fill: var(--muted); font-size: 12px; }
 .fig text.code { font-family: var(--f-mono); font-size: 12.5px; }
+/* Programming problems */
+.code-block { max-width: 820px; }
+.cps { display: grid; gap: var(--s-5); }
+.py-status { margin: 0; font-size: 0.9rem; color: var(--accent); min-height: 1.2em; }
+.cp { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); padding: var(--s-4); display: grid; gap: var(--s-3); min-width: 0; }
+.cp-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.cp-head h3 { font-size: 1.15rem; }
+.cp-prompt > * + * { margin-top: var(--s-2); }
+.cp-prompt p { margin: 0; }
+.cp-ed, .cp-in textarea { font-family: var(--f-mono); font-size: 0.86rem; line-height: 1.5; width: 100%; padding: var(--s-2) var(--s-3); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--code-bg); color: var(--ink); tab-size: 4; resize: vertical; white-space: pre; overflow-x: auto; }
+.cp-ed:focus, .cp-in textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cp-in summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+.cp-in { display: grid; gap: var(--s-1); }
+.cp-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.cp-actions .btn:disabled { opacity: 0.55; cursor: progress; }
+.cp-hint, .cp-sol, .cp-export, .cp-out { border-top: 1px dashed var(--rule); padding-top: var(--s-3); display: grid; gap: var(--s-2); min-width: 0; }
+.cp-hint p, .cp-sol p, .cp-export p, .cp-out p { margin: 0; }
+.cp-script { max-height: 280px; overflow: auto; }
+.tests { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); font-size: 0.92rem; }
+.tests li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: var(--s-1) var(--s-2); align-items: start; }
+.tests .mark { font-weight: 700; text-align: center; }
+.tests li.pass .mark { color: var(--good); }
+.tests li.fail .mark { color: var(--bad); }
+.tests li.pending .mark { color: var(--muted); }
+.tests .msg { grid-column: 2; color: var(--muted); font-size: 0.88rem; display: grid; gap: var(--s-1); min-width: 0; }
+.tests .msg pre { font-size: 0.8rem; margin: 0; }
+.cp-sum { margin: var(--s-2) 0 0; font-weight: 600; }
 .srcs { padding-left: 1.2rem; display: grid; gap: var(--s-2); font-size: 0.92rem; margin: 0; }
 .srcs .lic { color: var(--muted); font-size: 0.82rem; }
 .pager { display: flex; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--rule); max-width: 72ch; }
@@ -428,6 +455,7 @@ pre code { background: none; padding: 0; font-size: inherit; }
 <script src="data/program.js"></script>
 <script src="data/cs101.js"></script>
 <script src="data/cs101-extras.js"></script>
+<script src="data/cs101-code.js"></script>
 <script src="data/math120.js"></script>
 <script src="data/math130.js"></script>
 <script src="data/cs100.js"></script>
@@ -663,6 +691,7 @@ pre code { background: none; padding: 0; font-size: inherit; }
       h += `<section class="block"><h2>${esc(pl.title)}</h2><p class="note">${esc(pl.intro)}</p><ol class="practice">${u.practice.map(pr =>
         `<li><div class="pq">${pr.q}</div>${pr.hint ? `<details><summary>Hint</summary><div class="pa">${pr.hint}</div></details>` : ""}<details><summary>${esc(pl.answer)}</summary><div class="pa">${pr.a}</div></details></li>`).join("")}</ol></section>`;
     }
+    if (u.code && u.code.length) h += `<section class="block code-block" id="code-problems"></section>`;
     if (u.sources && u.sources.length) {
       h += `<section class="block"><h2>Sources and further reading</h2><ol class="srcs">${u.sources.map(id => D.sources[id]).filter(Boolean).map(s =>
         `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : `<i>${esc(s.title)}</i>`}. ${esc(s.author)}.${s.license ? ` <span class="lic">License: ${esc(s.license)}</span>` : ""}</li>`).join("")}</ol>
@@ -826,7 +855,7 @@ pre code { background: none; padding: 0; font-size: inherit; }
       const c = D.courses[r.course];
       v.innerHTML = viewUnit(c, r.unit);
       const u = lessons(c).find(x => x.id === r.unit);
-      if (u) { hook("beforeEnhance", c, u, v); enhanceNotes(v); wireUnit(c, u); }
+      if (u) { hook("beforeEnhance", c, u, v); enhanceNotes(v); wireUnit(c, u); hook("afterUnit", c, u, v); }
     } else v.innerHTML = viewHome();
     applyLang();
     hook("onRoute", r);
@@ -846,3 +875,4 @@ pre code { background: none; padding: 0; font-size: inherit; }
 })();
 </script>
 <script src="app/live.js"></script>
+<script src="app/code.js"></script>
