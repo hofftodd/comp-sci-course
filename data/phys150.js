@@ -83,7 +83,14 @@ CSA.addUnits("phys150", [
 <h3>Simulation: stepping through time</h3>
 <p>A simulation stores the current state (position and velocity) and updates it by a small time step Δ<em>t</em>, using the definitions of velocity and acceleration as approximations:</p>
 <p class="math"><em>v</em> ← <em>v</em> + <em>a</em> Δ<em>t</em>,   <em>x</em> ← <em>x</em> + <em>v</em> Δ<em>t</em></p>
-<p>This is Euler's method from MATH 131, applied to the pair of equations <em>dx</em>/<em>dt</em> = <em>v</em>, <em>dv</em>/<em>dt</em> = <em>a</em>. Updating <em>v</em> first and then using the new <em>v</em> to update <em>x</em> is called <strong>semi-implicit</strong> (or symplectic) Euler; it behaves much better than the plain version for physics, for reasons Lesson 4 explains.</p>
+<p>This is Euler's method from <a href="#c-math131-k6">MATH 131, Lesson 6</a>, applied to the pair of equations <em>dx</em>/<em>dt</em> = <em>v</em>, <em>dv</em>/<em>dt</em> = <em>a</em>. There are two ways to order the two updates, and the difference is only which velocity moves the position:</p>
+<pre><code># explicit ("plain") Euler: both updates use the OLD values
+x, v = x + v * dt, v + a * dt
+
+# semi-implicit Euler: update v first, then move x with the NEW v
+v = v + a * dt
+x = x + v * dt</code></pre>
+<p>In the explicit version, the tuple assignment computes both right-hand sides before changing anything, so <em>x</em> moves with the velocity from the start of the step. In the semi-implicit (or symplectic) version, <em>x</em> moves with the velocity from the end of the step. For a falling ball over a few seconds, both give nearly the same answer when Δ<em>t</em> is small. For things that swing or orbit, run for a long time, the semi-implicit version is far better: the explicit one slowly gains energy that doesn't exist. Lesson 4 shows this and explains why. <strong>In this course, always use the semi-implicit order</strong>, as in the code below and in practice 4: the velocity line comes first.</p>
 <pre><code>g = 9.8
 dt = 0.001                  # seconds
 t, y, v = 0.0, 0.0, 20.0    # thrown upward at 20 m/s
@@ -131,7 +138,7 @@ while y &gt;= 0:
     y += v * dt
     t += dt
 for (t1, _, v1), (t2, _, v2) in zip(log, log[1:]):
-    assert abs((v1 - v2) - 0.98) &lt; 1e-6</code></pre>` },
+    assert abs((v1 - v2) - 0.98) &lt; 1e-6</code></pre><p>The loop body is semi-implicit Euler: <code>v</code> is updated first, and the new <code>v</code> moves <code>y</code>. (Here the velocity check would pass with either order, because <em>v</em> changes by exactly <em>g</em> Δ<em>t</em> each step whatever <em>y</em> does.)</p>` },
       { q: `<p>Your simulation of the thrown ball gives a maximum height of 20.4 m with Δ<em>t</em> = 0.001 but 19.4 m with Δ<em>t</em> = 0.1. Which do you trust, and how would you decide in a problem with no exact answer?</p>`, a: `<p>Trust the smaller step, which agrees with <em>v</em>₀²/(2<em>g</em>) = 20.4 m. In general, halve Δ<em>t</em> repeatedly until the answer stops changing to the precision you need; the remaining change estimates the error.</p>` }
     ],
     sources: ["openstaxphys", "feynman"]
@@ -147,7 +154,22 @@ for (t1, _, v1), (t2, _, v2) in zip(log, log[1:]):
 <h3>Vectors</h3>
 <p>A <strong>vector</strong> has a magnitude and a direction: displacement, velocity, acceleration and force are vectors; mass, time and temperature are <strong>scalars</strong>. In two dimensions, write a vector by its components, <strong>v</strong> = (<em>v<sub>x</sub></em>, <em>v<sub>y</sub></em>). Converting between components and magnitude-and-angle:</p>
 <p class="math"><em>v<sub>x</sub></em> = <em>v</em> cos θ,  <em>v<sub>y</sub></em> = <em>v</em> sin θ;   <em>v</em> = √(<em>v<sub>x</sub></em>² + <em>v<sub>y</sub></em>²),  θ = atan2(<em>v<sub>y</sub></em>, <em>v<sub>x</sub></em>)</p>
-<p>Vectors add component by component (tip to tail, geometrically), and multiplying by a scalar scales each component. This is exactly the <code>Vector2</code> class you built in CS 102; physics engines in games are built on such classes. (Use <code>math.atan2(vy, vx)</code> rather than <code>atan(vy / vx)</code>: it handles all four quadrants and <em>v<sub>x</sub></em> = 0.)</p>
+<p>Vectors add component by component, and multiplying by a scalar scales each component. Geometrically, addition is <strong>tip to tail</strong>: draw <strong>a</strong>, then draw <strong>b</strong> starting from the tip of <strong>a</strong>; the sum <strong>a</strong> + <strong>b</strong> is the arrow from the start of <strong>a</strong> to the tip of <strong>b</strong>. Think of two walks taken one after the other.</p>
+<figure class="fig">
+<svg viewBox="0 0 300 200" role="img" aria-label="Tip-to-tail vector addition. Arrow a = (3, 1) starts at the origin; arrow b = (1, 2) starts at the tip of a; the sum a + b = (4, 3) goes from the origin to the tip of b. Dashed copies of b from the origin and a from b's tip complete a parallelogram.">
+  <defs><marker id="p2arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hl"/></marker></defs>
+  <line x1="40" y1="170" x2="80" y2="90" class="ln dash"/><line x1="80" y1="90" x2="200" y2="50" class="ln dash"/>
+  <line x1="40" y1="170" x2="160" y2="130" class="hl" marker-end="url(#p2arr)"/>
+  <line x1="160" y1="130" x2="200" y2="50" class="hl" marker-end="url(#p2arr)"/>
+  <line x1="40" y1="170" x2="200" y2="50" class="cv" marker-end="url(#p2arr)"/>
+  <circle cx="40" cy="170" r="3" class="dot"/>
+  <text x="96" y="168" class="code">a = (3, 1)</text>
+  <text x="190" y="100" class="code">b = (1, 2)</text>
+  <text x="40" y="40" class="em">a + b = (4, 3)</text><line x1="100" y1="46" x2="140" y2="94" class="ax dash"/>
+</svg>
+<figcaption>Tip to tail: a, then b from a's tip, gives a + b = (3 + 1, 1 + 2) = (4, 3). Adding in the other order (dashed) reaches the same point, so a + b = b + a.</figcaption>
+</figure>
+<p>This is exactly the <code>Vector2</code> class you built in <a href="#c-cs102-c2">CS 102, Lesson 2</a>; physics engines in games are built on such classes. (Use <code>math.atan2(vy, vx)</code> rather than <code>atan(vy / vx)</code>: it handles all four quadrants and <em>v<sub>x</sub></em> = 0.)</p>
 
 <h3>Motion in two dimensions</h3>
 <p>Position <strong>r</strong>(<em>t</em>) = (<em>x</em>(<em>t</em>), <em>y</em>(<em>t</em>)), velocity <strong>v</strong> = <em>d</em><strong>r</strong>/<em>dt</em>, and acceleration <strong>a</strong> = <em>d</em><strong>v</strong>/<em>dt</em>, each differentiated component by component. Velocity is always tangent to the path.</p>
@@ -271,7 +293,16 @@ print(best)   # about 39°</code></pre><p>Less than 45°: the projectile gets ex
 <p>For most everyday objects moving through air, drag is roughly proportional to the square of speed: <em>F</em><sub>drag</sub> = <em>kv</em>², where <em>k</em> = ½ρ<em>C<sub>d</sub>A</em> depends on air density ρ, the object's shape (drag coefficient <em>C<sub>d</sub></em>) and its cross-sectional area <em>A</em>. A falling object speeds up until drag balances weight; then the net force is zero and it falls at constant <strong>terminal velocity</strong>:</p>
 <p class="math"><em>kv<sub>t</sub></em>² = <em>mg</em>  ⟹  <em>v<sub>t</sub></em> = √(<em>mg</em>/<em>k</em>)</p>
 <p>A skydiver (<em>m</em> = 80 kg, <em>k</em> ≈ 0.25 kg/m) reaches about √(80 · 9.8/0.25) = 56 m/s, roughly 200 km/h. Spreading out increases <em>k</em> and slows the fall; a parachute increases it about a hundredfold.</p>
-<p>With drag, <em>m dv</em>/<em>dt</em> = <em>mg</em> − <em>kv</em>² can be solved exactly in one dimension, but in two dimensions (a thrown ball with drag) there's no formula. Simulation handles it with one extra line, since drag points opposite the velocity:</p>
+<p><strong>Why <em>v</em>², and when is drag proportional to <em>v</em> instead?</strong> A moving object has to shove air out of its way. In one second it sweeps through a column of air of volume <em>Av</em>, with mass ρ<em>Av</em>, and pushes that air to a speed comparable to its own, <em>v</em>. The momentum given to the air each second, which by Newton's second law and third law is the force on the object, is about (ρ<em>Av</em>) × <em>v</em> = ρ<em>Av</em>². Double the speed and you hit twice as much air each second, twice as hard: four times the force. That reasoning holds for balls, cars, people and planes. For very small or very slow objects in a "thick" fluid, such as dust and fog droplets drifting in air, bacteria swimming, or a marble sinking in honey, the fluid's stickiness (its <em>viscosity</em>) dominates instead, and drag is proportional to <em>v</em>: <em>F</em> = <em>bv</em>. A number called the Reynolds number, which you'd meet in a fluids course, decides which regime applies.</p>
+<p><strong>Units and measuring <em>k</em>.</strong> From <em>F</em> = <em>kv</em>², <em>k</em> = <em>F</em>/<em>v</em>², with units N/(m/s)² = (kg·m/s²) · (s²/m²) = kg/m. The easiest measurement uses terminal velocity itself: drop the object from high enough that it stops speeding up, measure <em>v<sub>t</sub></em> (from a video, say), and compute <em>k</em> = <em>mg</em>/<em>v<sub>t</sub></em>². Alternatively, estimate it from <em>k</em> = ½ρ<em>C<sub>d</sub>A</em> with ρ ≈ 1.2 kg/m³ for air at sea level and a drag coefficient from a table (about 0.5 for a ball, about 1 for a person falling belly-down). A belly-down skydiver with <em>A</em> ≈ 0.4 m² gives ½ · 1.2 · 1 · 0.4 ≈ 0.24 kg/m, close to the 0.25 used above.</p>
+<p><strong>The exact solution in one dimension.</strong> With drag, the falling speed obeys <em>m dv</em>/<em>dt</em> = <em>mg</em> − <em>kv</em>². Dividing by <em>m</em> and using <em>k</em>/<em>m</em> = <em>g</em>/<em>v<sub>t</sub></em>² (from the terminal-velocity formula):</p>
+<p class="math"><em>dv</em>/<em>dt</em> = <em>g</em>(1 − <em>v</em>²/<em>v<sub>t</sub></em>²)</p>
+<p>This separates (<a href="#c-math131-k6">MATH 131, Lesson 6</a>) and partial fractions do the integral, just as for the logistic equation. Starting from rest, the result is</p>
+<p class="math"><em>v</em>(<em>t</em>) = <em>v<sub>t</sub></em> tanh(<em>gt</em>/<em>v<sub>t</sub></em>)</p>
+<p>where tanh is the <strong>hyperbolic tangent</strong>, tanh <em>z</em> = (e<sup><em>z</em></sup> − e<sup>−<em>z</em></sup>)/(e<sup><em>z</em></sup> + e<sup>−<em>z</em></sup>), a function that rises smoothly from 0 toward 1, just as the speed rises from 0 toward <em>v<sub>t</sub></em>. You can check the formula by differentiating: (tanh <em>z</em>)′ = 1 − tanh² <em>z</em>, so <em>dv</em>/<em>dt</em> = <em>v<sub>t</sub></em> · (<em>g</em>/<em>v<sub>t</sub></em>)(1 − <em>v</em>²/<em>v<sub>t</sub></em>²), which is the equation. To find when the speed reaches a fraction <em>f</em> of <em>v<sub>t</sub></em>, solve tanh(<em>gt</em>/<em>v<sub>t</sub></em>) = <em>f</em> using the inverse function, atanh (<code>math.atanh</code> in Python; atanh <em>f</em> = ½ ln((1 + <em>f</em>)/(1 − <em>f</em>))):</p>
+<p class="math"><em>t</em> = (<em>v<sub>t</sub></em>/<em>g</em>) atanh(<em>f</em>)</p>
+<p>For the skydiver and <em>f</em> = 0.95: <em>t</em> = (56/9.8) × atanh(0.95) ≈ 5.71 × 1.832 ≈ 10.47 s. The auto-graded problem for this lesson checks your simulation against this formula.</p>
+<p>In two dimensions (a thrown ball with drag), there's no formula. Simulation handles it with one extra line, since drag points opposite the velocity:</p>
 <pre><code>import math
 
 def step(x, y, vx, vy, m, k, dt, g=9.8):
@@ -326,7 +357,8 @@ print(round(vt, 1), round(t, 1))   # 56.0 m/s after about 10.5 s</code></pre>` }
 <p>Newton's laws can solve any mechanics problem in principle, but following forces moment by moment is often hard. Conservation laws offer a shortcut: some quantities stay constant no matter how complicated the motion. They also give programmers a powerful check: a simulation that slowly creates energy from nothing is wrong, however good its pictures look.</p>
 
 <h3>Work and kinetic energy</h3>
-<p>A force <em>F</em> acting along a displacement <em>d</em> does <strong>work</strong> <em>W</em> = <em>Fd</em> cos θ, where θ is the angle between them (in general, <em>W</em> = ∫ <strong>F</strong> · <em>d</em><strong>r</strong>, as in MATH 131). Work is measured in joules: 1 J = 1 N·m. A force perpendicular to the motion, like the normal force on a sliding box, does no work.</p>
+<p>A force <em>F</em> acting along a displacement <em>d</em> does <strong>work</strong> <em>W</em> = <em>Fd</em> cos θ, where θ is the angle between them. Work is measured in joules: 1 J = 1 N·m. A force perpendicular to the motion, like the normal force on a sliding box, does no work.</p>
+<p>Yes, the cos θ is the dot product from <a href="#c-math131-k7">MATH 131, Lesson 7</a>: <em>W</em> = <strong>F</strong> · <strong>d</strong> = |<strong>F</strong>||<strong>d</strong>| cos θ. Only the part of the force along the motion does work. In components it's often easier: a force <strong>F</strong> = (3, 4) N acting while the object moves <strong>d</strong> = (2, 0) m does <em>W</em> = 3 · 2 + 4 · 0 = 6 J; the upward 4 N does nothing to a horizontal move. When the force varies along the path, add up the small pieces: <em>W</em> = ∫ <strong>F</strong> · <em>d</em><strong>r</strong>, which in one dimension is the integral ∫ <em>F</em>(<em>x</em>) <em>dx</em> of <a href="#c-math131-k2">MATH 131, Lesson 2</a>.</p>
 <p>The <strong>kinetic energy</strong> of a moving object is <em>K</em> = ½<em>mv</em>². The <strong>work–energy theorem</strong> says the net work on an object equals its change in kinetic energy: <em>W</em><sub>net</sub> = Δ<em>K</em>. (Proof sketch: <em>W</em> = ∫ <em>ma dx</em> = ∫ <em>m</em>(<em>dv</em>/<em>dt</em>) <em>v dt</em> = ∫ <em>mv dv</em> = Δ(½<em>mv</em>²).) Because <em>K</em> grows with <em>v</em>², a car at 100 km/h has four times the kinetic energy of one at 50 km/h, and needs about four times the distance to brake.</p>
 
 <h3>Potential energy and conservation</h3>
@@ -350,6 +382,11 @@ print(round(vt, 1), round(t, 1))   # 56.0 m/s after about 10.5 s</code></pre>` }
   <li><strong>Elastic</strong>: kinetic energy is also conserved (nearly true for billiard balls and exactly for atoms). In one dimension, solving both conservation equations gives</li>
 </ul>
 <p class="math"><em>v</em>₁′ = ((<em>m</em>₁ − <em>m</em>₂)<em>v</em>₁ + 2<em>m</em>₂<em>v</em>₂)/(<em>m</em>₁ + <em>m</em>₂),   <em>v</em>₂′ = ((<em>m</em>₂ − <em>m</em>₁)<em>v</em>₂ + 2<em>m</em>₁<em>v</em>₁)/(<em>m</em>₁ + <em>m</em>₂)</p>
+<p>Where do these come from? Write the two conservation laws, with primes for "after", and move each object's terms to its own side:</p>
+<p class="math">momentum: <em>m</em>₁(<em>v</em>₁ − <em>v</em>₁′) = <em>m</em>₂(<em>v</em>₂′ − <em>v</em>₂)     energy (times 2): <em>m</em>₁(<em>v</em>₁² − <em>v</em>₁′²) = <em>m</em>₂(<em>v</em>₂′² − <em>v</em>₂²)</p>
+<p>Factor the energy equation as a difference of squares: <em>m</em>₁(<em>v</em>₁ − <em>v</em>₁′)(<em>v</em>₁ + <em>v</em>₁′) = <em>m</em>₂(<em>v</em>₂′ − <em>v</em>₂)(<em>v</em>₂′ + <em>v</em>₂). Divide it by the momentum equation (assuming the collision changed something, so neither side is zero). Everything cancels except</p>
+<p class="math"><em>v</em>₁ + <em>v</em>₁′ = <em>v</em>₂ + <em>v</em>₂′,  i.e.  <em>v</em>₂′ − <em>v</em>₁′ = −(<em>v</em>₂ − <em>v</em>₁)</p>
+<p>In words: in an elastic collision the objects separate as fast as they approached. Now there are two <em>linear</em> equations. From the last one, <em>v</em>₂′ = <em>v</em>₁ + <em>v</em>₁′ − <em>v</em>₂. Substitute into the momentum equation: <em>m</em>₁<em>v</em>₁ − <em>m</em>₁<em>v</em>₁′ = <em>m</em>₂(<em>v</em>₁ + <em>v</em>₁′ − 2<em>v</em>₂). Collect the <em>v</em>₁′ terms: (<em>m</em>₁ + <em>m</em>₂)<em>v</em>₁′ = (<em>m</em>₁ − <em>m</em>₂)<em>v</em>₁ + 2<em>m</em>₂<em>v</em>₂, which is the first formula. The second follows the same way, or by swapping the labels 1 and 2.</p>
 <p>With equal masses, the objects simply swap velocities, which is what you see when a cue ball stops dead after a head-on hit. A ball bouncing off a much heavier wall reverses its velocity.</p>
 
 <h3>Energy as a simulation check</h3>
@@ -367,6 +404,12 @@ print(round(vt, 1), round(t, 1))   # 56.0 m/s after about 10.5 s</code></pre>` }
 
 print(energy_after(10_000, 0.01, False))   # about 1.36: energy has grown from 0.5
 print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
+<p><strong>Why does the order of two lines matter so much?</strong> Picture the state as a point (<em>x</em>, <em>v</em>) on a graph. For this spring (<em>k</em> = <em>m</em> = 1) the energy is ½(<em>x</em>² + <em>v</em>²), so states with the same energy lie on a circle around the origin, and the true motion goes round and round one circle.</p>
+<ul>
+  <li><strong>Explicit Euler</strong> uses only the old values, so each step moves the point straight along the tangent to its current circle. A tangent line always lies <em>outside</em> the circle, so every step lands on a slightly bigger circle. You can compute exactly how much: the new <em>x</em>² + <em>v</em>² is (<em>x</em> + <em>v</em>Δ<em>t</em>)² + (<em>v</em> − <em>x</em>Δ<em>t</em>)² = (<em>x</em>² + <em>v</em>²)(1 + Δ<em>t</em>²). The energy is multiplied by 1 + Δ<em>t</em>² at <em>every</em> step, so it grows without limit: after 10,000 steps of 0.01, by (1.0001)<sup>10,000</sup> ≈ 2.72, which is why the code prints about 1.36.</li>
+  <li><strong>Semi-implicit Euler</strong> moves the position with the velocity it has just corrected, so its small errors don't all push the same way: in one part of each cycle they push outward, and in another inward, and they cancel over a cycle. You can check that this method keeps a slightly tilted version of the energy, <em>x</em>² + <em>v</em>² − Δ<em>t</em> · <em>xv</em>, <em>exactly</em> constant. Since that differs from the true <em>x</em>² + <em>v</em>² only by the small term Δ<em>t</em> · <em>xv</em>, the true energy can only wobble in a narrow band (here within about 0.5%), never drift away.</li>
+</ul>
+<p>The word <strong>symplectic</strong> names the underlying property: the method preserves <em>areas</em> in the (<em>x</em>, <em>v</em>) plane. Take a small patch of starting states and step them all; with explicit Euler the patch grows by a factor 1 + Δ<em>t</em>² every step, while with semi-implicit Euler its area stays exactly the same. A method that can't grow areas can't spiral outward.</p>
 `,
     terms: [
       ["Work", "W = Fd cos θ, energy transferred by a force acting through a displacement (joules)."],
@@ -405,7 +448,28 @@ print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
 <h3>Uniform circular motion</h3>
 <p>An object moving in a circle at constant speed is accelerating, because its velocity keeps changing direction. The acceleration points toward the center (<strong>centripetal</strong>, "center-seeking") and has magnitude</p>
 <p class="math"><em>a<sub>c</sub></em> = <em>v</em>²/<em>r</em> = ω²<em>r</em></p>
-<p>where ω = <em>v</em>/<em>r</em> is the angular speed in radians per second. By Newton's second law, some real force must supply <em>F</em> = <em>mv</em>²/<em>r</em> toward the center: tension for a ball on a string, friction for a car on a curve, gravity for a satellite. There is no separate "centrifugal force" pushing outward; that's what inertia feels like from inside the turning object.</p>
+<p>where ω = <em>v</em>/<em>r</em> is the angular speed in radians per second.</p>
+<p><strong>Where <em>v</em>²/<em>r</em> comes from.</strong> The picture first. In a short time Δ<em>t</em> the object moves a distance <em>v</em>Δ<em>t</em> along the circle, turning through the angle Δθ = <em>v</em>Δ<em>t</em>/<em>r</em> (in radians, angle = arc length / radius). Its velocity keeps the same length <em>v</em> but turns through the same angle Δθ, because velocity is always perpendicular to the radius. Draw the two velocity arrows from one point: the change Δ<strong>v</strong> joins their tips, and it points toward the center of the circle. For a small angle, its length is about the arc of a circle of radius <em>v</em>: |Δ<strong>v</strong>| ≈ <em>v</em> Δθ = <em>v</em> · <em>v</em>Δ<em>t</em>/<em>r</em>. Dividing by Δ<em>t</em>, the acceleration has size <em>v</em>²/<em>r</em>.</p>
+<figure class="fig">
+<svg viewBox="0 0 400 190" role="img" aria-label="Left: an object on a circle at two nearby moments, with velocity arrows v1 and v2 tangent to the circle, and the angle delta theta between the two radii. Right: the same two velocity arrows drawn from a single point, with the change delta v joining their tips; delta v points toward the circle's center.">
+  <defs><marker id="p5arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hl"/></marker></defs>
+  <circle cx="100" cy="105" r="70" class="ln"/>
+  <line x1="100" y1="105" x2="145" y2="51.4" class="ln dash"/><line x1="100" y1="105" x2="87.8" y2="36.1" class="ln dash"/>
+  <path d="M111.6,91.2 A18,18 0 0 0 96.9,87.3" class="ln"/>
+  <circle cx="100" cy="105" r="3" class="dot"/><circle cx="145" cy="51.4" r="3" class="dot"/><circle cx="87.8" cy="36.1" r="3" class="dot"/>
+  <line x1="145" y1="51.4" x2="102.9" y2="16" class="hl" marker-end="url(#p5arr)"/>
+  <line x1="87.8" y1="36.1" x2="33.7" y2="45.6" class="hl" marker-end="url(#p5arr)"/>
+  <text x="104" y="76" class="m">Δθ</text><text x="128" y="26">v₁</text><text x="40" y="34">v₂</text>
+  <circle cx="320" cy="150" r="3" class="dot"/>
+  <line x1="320" y1="150" x2="277.9" y2="114.6" class="hl" marker-end="url(#p5arr)"/>
+  <line x1="320" y1="150" x2="265.8" y2="159.6" class="hl" marker-end="url(#p5arr)"/>
+  <line x1="277.9" y1="114.6" x2="265.8" y2="159.6" class="cv" marker-end="url(#p5arr)"/>
+  <text x="303" y="124">v₁</text><text x="290" y="176">v₂</text><text x="232" y="140" class="em">Δv</text>
+</svg>
+<figcaption>Left: the velocity turns through the same angle Δθ as the radius. Right: moved to a common starting point, the two velocities differ by Δv, which points toward the center. Its length is about v Δθ = v²Δt/r.</figcaption>
+</figure>
+<p>The same result with calculus: put the circle's center at the origin, so the position is <strong>r</strong>(<em>t</em>) = (<em>r</em> cos ω<em>t</em>, <em>r</em> sin ω<em>t</em>). Differentiate each component twice: <strong>v</strong> = (−<em>r</em>ω sin ω<em>t</em>, <em>r</em>ω cos ω<em>t</em>) and <strong>a</strong> = (−<em>r</em>ω² cos ω<em>t</em>, −<em>r</em>ω² sin ω<em>t</em>) = −ω²<strong>r</strong>(<em>t</em>). The acceleration is −ω² times the position: it points from the object to the center, with size ω²<em>r</em> = <em>v</em>²/<em>r</em>, since <em>v</em> = ω<em>r</em>.</p>
+<p>By Newton's second law, some real force must supply <em>F</em> = <em>mv</em>²/<em>r</em> toward the center: tension for a ball on a string, friction for a car on a curve, gravity for a satellite. There is no separate "centrifugal force" pushing outward; that's what inertia feels like from inside the turning object.</p>
 <p><strong>Example.</strong> A car takes a curve of radius 50 m at 15 m/s. It needs <em>a<sub>c</sub></em> = 225/50 = 4.5 m/s², supplied by friction: μ<sub><em>s</em></sub><em>mg</em> ≥ <em>mv</em>²/<em>r</em> requires μ<sub><em>s</em></sub> ≥ 4.5/9.8 ≈ 0.46. Dry asphalt (μ ≈ 0.7) is fine; ice (μ ≈ 0.1) is not.</p>
 
 <h3>Universal gravitation</h3>
@@ -427,6 +491,19 @@ print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
   <li><em>T</em>² is proportional to <em>a</em>³, where <em>a</em> is the ellipse's semi-major axis.</li>
 </ol>
 <p>Newton showed all three follow from <strong>F</strong> = <em>m</em><strong>a</strong> and the inverse-square law. The second law is conservation of angular momentum, which holds for any force pointing toward a fixed center.</p>
+<h3>Angular momentum</h3>
+<p>Momentum <em>m</em><strong>v</strong> measures "how much motion" an object has in a straight line. <strong>Angular momentum</strong> measures how much motion it has <em>around a center</em>. For an object at position <strong>r</strong> = (<em>x</em>, <em>y</em>), measured from the center, with velocity <strong>v</strong> = (<em>v<sub>x</sub></em>, <em>v<sub>y</sub></em>), it is</p>
+<p class="math"><em>L</em> = <em>m</em>(<em>x v<sub>y</sub></em> − <em>y v<sub>x</sub></em>) = <em>m r v</em><sub>⊥</sub></p>
+<p>where <em>r</em> is the distance from the center and <em>v</em><sub>⊥</sub> is the part of the velocity perpendicular to the radius, the sideways part that carries the object around. Motion straight toward or away from the center contributes nothing. (In three dimensions <em>L</em> is a vector, the "cross product" of <strong>r</strong> and <em>m</em><strong>v</strong>; in a flat orbit, this one number is all you need. Its sign says which way round the object goes.)</p>
+<p><strong>Angular momentum is conserved when the force points along the radius</strong>, toward or away from the center, as gravity does. Such a force can speed the object up or slow it down along the radius, but it can't push it sideways around the center, so <em>L</em> can't change. (With calculus: <em>dL</em>/<em>dt</em> = <em>m</em>(<em>x a<sub>y</sub></em> − <em>y a<sub>x</sub></em>), since the terms <em>v<sub>x</sub>v<sub>y</sub></em> − <em>v<sub>y</sub>v<sub>x</sub></em> cancel, and for an acceleration pointing along (<em>x</em>, <em>y</em>), <em>x a<sub>y</sub></em> = <em>y a<sub>x</sub></em>.) So in an orbit <em>r v</em><sub>⊥</sub> stays fixed: where the planet is closer, it must move faster. In a short time Δ<em>t</em> the line from the Sun sweeps a thin triangle of area ½ <em>r</em> · <em>v</em><sub>⊥</sub>Δ<em>t</em>, so constant <em>L</em> means equal areas in equal times: Kepler's second law.</p>
+<p>In the simulation below, units are chosen so that <em>m</em> = 1 and <em>GM</em> = 1. A body starting at (1, 0) with velocity (0, 1.2) has <em>L</em> = 1 · 1.2 − 0 · 0 = 1.2, and it keeps that value all the way round. At the farthest and nearest points of the orbit, the velocity is perpendicular to the radius, so there <em>v</em> = <em>L</em>/<em>r</em> = 1.2/<em>r</em>.</p>
+<h3>Gravitational energy and escape velocity</h3>
+<p>Lesson 4's <em>U</em> = <em>mgh</em> assumes gravity is the same at every height, which is only true near the surface. For the full inverse-square force, the potential energy at distance <em>r</em> from the center is</p>
+<p class="math"><em>U</em> = −<em>GMm</em>/<em>r</em></p>
+<p>It's negative and rises toward 0 as <em>r</em> → ∞: you must do work against gravity to move away, and an object infinitely far away has <em>U</em> = 0. (Check: the force is minus the derivative, −<em>dU</em>/<em>dr</em> = −<em>GMm</em>/<em>r</em>², the inverse-square pull toward the center.) So in an orbit the total energy ½<em>mv</em>² − <em>GMm</em>/<em>r</em> is constant; in our units, <em>v</em>²/2 − 1/<em>r</em>.</p>
+<p><strong>Escape velocity.</strong> To escape forever, an object must still have kinetic energy ≥ 0 when it gets infinitely far away, where <em>U</em> = 0. Energy is conserved, so its total energy must be at least 0 from the start: ½<em>mv</em>² − <em>GMm</em>/<em>r</em> ≥ 0, that is,</p>
+<p class="math"><em>v</em><sub>esc</sub> = √(2<em>GM</em>/<em>r</em>) = √2 · √(<em>GM</em>/<em>r</em>)</p>
+<p>and √(<em>GM</em>/<em>r</em>) is exactly the circular orbital speed. So escape velocity is √2 ≈ 1.41 times circular speed at the same distance. From the ISS's altitude that's about 1.41 × 7.67 ≈ 10.9 km/s; from Earth's surface (ignoring air), about 11.2 km/s.</p>
 
 <h3>Simulating an orbit</h3>
 <p>Using units where <em>GM</em> = 1, start at (1, 0) with velocity (0, 1), which is exactly circular speed. Gravity's acceleration is −<em>GM</em> <strong>r</strong>/|<strong>r</strong>|³ (inverse-square magnitude, pointing toward the center):</p>
@@ -446,7 +523,7 @@ def orbit(vx0, vy0, dt=0.001, steps=20_000):
 
 circle = orbit(0, 1.0)     # stays at radius 1; one orbit takes 2π ≈ 6.28 time units
 ellipse = orbit(0, 1.2)    # an ellipse, farthest from the center on the opposite side</code></pre>
-<p>Starting faster than circular speed gives an ellipse; at √2 times circular speed (the <strong>escape velocity</strong>), the orbit becomes a parabola and never returns. Measuring the simulated ellipse lets you check Kepler's second and third laws numerically, as in the practice problems. With the plain Euler method, the "circular" orbit spirals outward, gaining energy every step, another example of why integrators matter.</p>
+<p>Starting faster than circular speed gives an ellipse; at √2 times circular speed (the escape velocity derived above), the orbit becomes a parabola and never returns. Measuring the simulated ellipse lets you check Kepler's second and third laws numerically, as in the practice problems. With the plain Euler method, the "circular" orbit spirals outward, gaining energy every step, another example of why integrators matter.</p>
 <p>Simulating three or more bodies works the same way, summing the forces from every other body. Unlike two bodies, the three-body problem has no general formula solution, and its motion can be chaotic: tiny differences in starting conditions grow until predictions fail. Space agencies plan missions by numerical simulation, as Katherine Johnson did by hand and with early computers for the first American orbital flights.</p>
 `,
     terms: [
@@ -456,7 +533,9 @@ ellipse = orbit(0, 1.2)    # an ellipse, farthest from the center on the opposit
       ["Inverse-square law", "A force that falls off as 1/r² with distance."],
       ["Orbital speed", "v = √(GM/r) for a circular orbit."],
       ["Kepler's laws", "Elliptical orbits, equal areas in equal times, and T² ∝ a³."],
-      ["Escape velocity", "The speed needed to leave a body's gravity permanently: √2 times circular orbital speed at that distance."]
+      ["Escape velocity", "The speed needed to leave a body's gravity permanently: √2 times circular orbital speed at that distance."],
+      ["Angular momentum", "L = m(x v_y − y v_x) = m r v⊥ about a center; conserved when the force points along the radius."],
+      ["Gravitational potential energy", "U = −GMm/r, zero infinitely far away; mgh is its approximation near the surface."]
     ],
     quiz: [
       { q: "A ball whirled on a string in a horizontal circle; the string breaks. The ball moves:", choices: ["Outward, along the radius", "Along the tangent, in a straight line (plus falling)", "In a smaller circle", "Toward the center"], answer: 1, why: "With no centripetal force, it continues with its current velocity (first law)." },
@@ -487,12 +566,28 @@ ellipse = orbit(0, 1.2)    # an ellipse, farthest from the center on the opposit
 <p class="math"><em>m</em> <em>d</em>²<em>x</em>/<em>dt</em>² = −<em>kx</em>,  i.e.  <em>d</em>²<em>x</em>/<em>dt</em>² = −ω²<em>x</em>  with ω = √(<em>k</em>/<em>m</em>)</p>
 <p>We need a function whose second derivative is a negative multiple of itself: sines and cosines. The solution is</p>
 <p class="math"><em>x</em>(<em>t</em>) = <em>A</em> cos(ω<em>t</em> + φ)</p>
-<p>where the <strong>amplitude</strong> <em>A</em> and <strong>phase</strong> φ depend on how the motion starts. This is <strong>simple harmonic motion</strong> (SHM). The <strong>period</strong> and <strong>frequency</strong> are</p>
+<p>Check it by differentiating twice with the chain rule (each derivative of the inside, ω<em>t</em> + φ, brings out a factor ω): <em>x</em>′ = −<em>A</em>ω sin(ω<em>t</em> + φ), and <em>x</em>″ = −<em>A</em>ω² cos(ω<em>t</em> + φ) = −ω² <em>x</em>. ✓ That works for any <em>A</em> and φ, which is why they are free to match the starting conditions.</p>
+<p>The <strong>amplitude</strong> <em>A</em> is the largest displacement. The <strong>phase</strong> φ (an angle, in radians) says where in its cycle the motion is at <em>t</em> = 0. With φ = 0, <em>x</em>(0) = <em>A</em>: the mass starts at its farthest point, as when you pull it out and let go. With φ = −π/2, <em>x</em> = <em>A</em> cos(ω<em>t</em> − π/2) = <em>A</em> sin ω<em>t</em>: it starts at the middle, moving in the positive direction, as when you give a resting mass a tap. Changing φ slides the whole graph sideways in time without changing its shape. In general the starting position and velocity fix both constants: <em>x</em>(0) = <em>A</em> cos φ and <em>v</em>(0) = −<em>A</em>ω sin φ.</p>
+<figure class="fig">
+<svg viewBox="0 0 430 195" role="img" aria-label="Two graphs of x against t with the same amplitude and period. The curve with phase 0 starts at its maximum. The curve with phase minus pi over 2 starts at zero going up and reaches each maximum a quarter period later.">
+  <defs><marker id="p6arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hl"/></marker></defs>
+  <line x1="30" y1="100" x2="410" y2="100" class="ax"/><line x1="40" y1="185" x2="40" y2="15" class="ax"/>
+  <path d="M40.0,40.0 L48.4,42.7 L56.8,50.5 L65.2,62.7 L73.6,78.3 L82.0,95.8 L90.4,113.6 L98.8,130.3 L107.2,144.2 L115.6,154.2 L124.0,159.4 L132.4,159.2 L140.8,153.8 L149.2,143.6 L157.6,129.4 L166.0,112.6 L174.4,94.8 L182.8,77.3 L191.2,61.9 L199.6,49.9 L208.0,42.4 L216.4,40.0 L224.8,43.0 L233.2,51.1 L241.6,63.5 L250.0,79.2 L258.4,96.8 L266.8,114.6 L275.2,131.2 L283.6,144.9 L292.0,154.7 L300.4,159.5 L308.8,159.1 L317.2,153.4 L325.6,142.9 L334.0,128.5 L342.4,111.7 L350.8,93.7 L359.2,76.4 L367.6,61.1 L376.0,49.4 L384.4,42.1 L392.8,40.0" class="cv"/>
+  <path d="M40.0,100.0 L48.4,82.3 L56.8,66.1 L65.2,53.0 L73.6,44.1 L82.0,40.2 L90.4,41.6 L98.8,48.2 L107.2,59.5 L115.6,74.4 L124.0,91.5 L132.4,109.5 L140.8,126.6 L149.2,141.3 L157.6,152.3 L166.0,158.7 L174.4,159.8 L182.8,155.5 L191.2,146.4 L199.6,133.0 L208.0,116.8 L216.4,99.0 L224.8,81.3 L233.2,65.3 L241.6,52.4 L250.0,43.7 L258.4,40.1 L266.8,41.8 L275.2,48.7 L283.6,60.2 L292.0,75.3 L300.4,92.5 L308.8,110.5 L317.2,127.5 L325.6,142.0 L334.0,152.8 L342.4,158.9 L350.8,159.7 L359.2,155.2 L367.6,145.7 L376.0,132.2 L384.4,115.8 L392.8,98.0" class="hl dash"/>
+  <line x1="220" y1="30" x2="256" y2="30" class="hl" marker-start="url(#p6arr)" marker-end="url(#p6arr)"/>
+  <text x="228" y="22" class="m">T/4</text>
+  <text x="24" y="44" class="m">A</text><text x="18" y="164" class="m">−A</text><text x="414" y="104" class="m">t</text>
+  <text x="105" y="180">φ = 0</text><text x="60" y="28">φ = −π/2 (dashed)</text>
+</svg>
+<figcaption>x = A cos(ωt + φ) for φ = 0 (solid) and φ = −π/2 (dashed). Same amplitude, same period; the dashed curve runs a quarter period behind, because a phase difference of π/2 out of a full cycle of 2π is a quarter of the period T.</figcaption>
+</figure>
+<p>This is <strong>simple harmonic motion</strong> (SHM). The <strong>period</strong> and <strong>frequency</strong> are</p>
 <p class="math"><em>T</em> = 2π/ω = 2π√(<em>m</em>/<em>k</em>),   <em>f</em> = 1/<em>T</em> (hertz)</p>
+<p><strong>ω or <em>f</em>?</strong> Both measure how fast the oscillation repeats, in different units, and ω = 2π<em>f</em>. The frequency <em>f</em> counts <em>cycles</em> per second, in hertz (Hz): it's what you'd count with a stopwatch and what specifications quote (a 440 Hz tuning fork, a 32,768 Hz quartz crystal). The angular frequency ω counts <em>radians</em> per second (rad/s): one cycle is 2π radians, because the angle ω<em>t</em> + φ inside the cosine must advance by 2π for the motion to repeat. Use ω inside formulas, since <em>x</em> = <em>A</em> cos(ω<em>t</em> + φ) and ω = √(<em>k</em>/<em>m</em>) are written with it, and convert to <em>f</em> = ω/(2π) or <em>T</em> = 1/<em>f</em> when you report or measure. For example, ω = 20 rad/s means <em>f</em> = 20/(2π) ≈ 3.18 Hz and <em>T</em> ≈ 0.314 s. Since radians have no units, both are "per second", which is exactly why it's important to write rad/s or Hz: a factor of 2π (about 6.3) is a common and costly mistake.</p>
 <p>Notice what's missing: the period doesn't depend on the amplitude. A spring oscillates at the same rate whether stretched a little or a lot. That's what makes oscillators good clocks.</p>
 
 <h3>The pendulum</h3>
-<p>A pendulum of length <em>L</em> swinging through angle θ has restoring acceleration −(<em>g</em>/<em>L</em>) sin θ. For small angles, sin θ ≈ θ (the Taylor approximation from MATH 131), giving SHM with</p>
+<p>A pendulum of length <em>L</em> swinging through angle θ has restoring acceleration −(<em>g</em>/<em>L</em>) sin θ. For small angles, sin θ ≈ θ (the Taylor approximation from <a href="#c-math131-k5">MATH 131, Lesson 5</a>), giving SHM with</p>
 <p class="math"><em>T</em> = 2π√(<em>L</em>/<em>g</em>)</p>
 <p>A 1 m pendulum has a period of about 2.0 s, independent of the mass and (for small swings) of the amplitude. Galileo noticed this around 1602, and Christiaan Huygens built the first pendulum clock in 1656, improving timekeeping from minutes per day to seconds. For large swings the approximation fails and the period grows: at 90° it's about 18% longer. There's no elementary formula then, but a simulation handles it easily.</p>
 
@@ -718,7 +813,7 @@ CSA.addCode("phys150", {
 <ul>
   <li><code>terminal_velocity(m, k)</code>: √(<em>mg</em>/<em>k</em>), with <em>g</em> = 9.8.</li>
   <li><code>time_to_fraction(m, k, fraction, dt=0.001)</code>: simulate the fall (speed <em>v</em> ≥ 0, acceleration <em>g</em> − (<em>k</em>/<em>m</em>)<em>v</em>²) and return the time when <em>v</em> first reaches <code>fraction</code> × terminal velocity.</li>
-</ul>`,
+</ul><p>The tests compare your simulated time with the exact answer derived in the lesson, <em>t</em> = (<em>v<sub>t</sub></em>/<em>g</em>) atanh(<code>fraction</code>).</p>`,
       starter: `import math\n\nG = 9.8\n\ndef terminal_velocity(m, k):\n    pass\n\ndef time_to_fraction(m, k, fraction, dt=0.001):\n    pass\n`,
       hint: `<p>Loop while <code>v &lt; fraction * vt</code>: <code>v += (G - k / m * v * v) * dt</code>; <code>t += dt</code>. The fraction must be below 1, or the loop never ends.</p>`,
       solution: `import math\n\nG = 9.8\n\ndef terminal_velocity(m, k):\n    return math.sqrt(m * G / k)\n\ndef time_to_fraction(m, k, fraction, dt=0.001):\n    vt = terminal_velocity(m, k)\n    t, v = 0.0, 0.0\n    while v < fraction * vt:\n        v += (G - k / m * v * v) * dt\n        t += dt\n    return t\n`,

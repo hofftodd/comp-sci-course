@@ -109,10 +109,14 @@ a.withdraw(500)                # ValueError: insufficient funds</code></pre>
 
 <h3>Invariants: rules an object always keeps</h3>
 <p>An <strong>invariant</strong> is a condition that is true for every object of a class, at every moment between method calls: for our account, "the balance is never negative". The constructor must establish it, and every method must preserve it. Because only the class's own methods change the balance, you can check the rule in one place and trust it everywhere. That's the payoff of <strong>encapsulation</strong>: keeping an object's data behind its methods.</p>
-<p>Python doesn't strictly prevent outside code from writing <code>a.balance = -5</code>. By convention, an attribute that outside code shouldn't touch starts with an underscore, like <code>self._balance</code>, which signals "internal; use the methods". The next lesson shows <em>properties</em>, which let you control access more precisely.</p>
+<p>Python doesn't strictly prevent outside code from writing <code>a.balance = -5</code>. By convention, an attribute that outside code shouldn't touch starts with an underscore, like <code>self._balance</code>, which signals "internal; use the methods". The underscore is only a label, though. Python still runs <code>a._balance = -5</code> without complaint:</p>
+<pre><code>a = BankAccount("Ada", 100)   # a version that stores self._balance
+a._balance = -5               # no error: the invariant is now broken
+a.withdraw(1)                 # ValueError: insufficient funds</code></pre>
+<p>Nothing fails at the moment of the bad assignment. The trouble shows up later, somewhere else, in code that trusted the invariant, and that makes the bug hard to trace back. The underscore protects against accidents by people who read it; it can't stop someone who ignores it. The next lesson shows <em>properties</em>, which go one step further: they let the <em>public</em> name <code>a.balance</code> run a check on every assignment, so the obvious way to change the balance is also the safe one and a bad value is rejected immediately.</p>
 
 <h3>Objects in memory</h3>
-<p>Objects follow the same rules as lists in CS 101: variables are names that refer to objects, and assignment never copies.</p>
+<p>Objects follow the same rules as lists in <a href="#c-cs101-u5">CS 101's lesson on lists and dictionaries</a>: variables are names that refer to objects, and assignment never copies.</p>
 <pre><code>c = a          # c and a are the same account
 c.deposit(10)
 print(a.balance)   # 160: there's only one object</code></pre>
@@ -131,7 +135,16 @@ print(a.balance)   # 160: there's only one object</code></pre>
 
     def add_interest(self):
         self.balance += self.balance * self.interest_rate</code></pre>
-<p>Reading <code>self.interest_rate</code> looks for the name on the instance first and then on the class. Use class attributes for constants and shared counters, never for per-object data. A common bug is a class attribute holding a list, like <code>transactions = []</code> in the class body: every account would share one list.</p>
+<p>Reading <code>self.interest_rate</code> looks for the name on the instance first and then on the class. Writing is different: assigning to <code>self.something</code> always creates or changes an attribute <em>on the instance</em>. That's why the constructor updates the counter through the class, <code>BankAccount.accounts_opened += 1</code>. If it said <code>self.accounts_opened += 1</code>, Python would read the class's 0, add 1, and store the 1 as a new instance attribute that hides the class one. The shared counter would stay at 0 forever, with no error:</p>
+<pre><code>class Counted:
+    accounts_opened = 0
+    def __init__(self):
+        self.accounts_opened += 1      # bug: creates an instance attribute
+
+x, y = Counted(), Counted()
+print(Counted.accounts_opened)         # 0
+print(x.accounts_opened, y.accounts_opened)   # 1 1</code></pre>
+<p>The rule: read class attributes through <code>self</code> if you like, but change them through the class name. Use class attributes for constants and shared counters, never for per-object data. A common bug is a class attribute holding a list, like <code>transactions = []</code> in the class body: every account would share one list.</p>
 
 <h3>Designing a class</h3>
 <p>A good way to start a design is to describe the thing in a sentence and look at the words. Nouns suggest classes and attributes; verbs suggest methods. "A <em>library</em> lends <em>books</em> to <em>members</em>; a member can borrow up to five books and must return them within three weeks." That suggests classes <code>Library</code>, <code>Book</code> and <code>Member</code>, methods like <code>borrow</code> and <code>return_book</code>, and invariants like "a member never has more than five books".</p>
@@ -169,7 +182,7 @@ a.click(); a.click(); b.click()
 print(a.count, b.count)   # 2 1</code></pre>` },
       { q: `<p>Add a <code>transfer(self, other, amount)</code> method to <code>BankAccount</code> that moves money from this account to <code>other</code>. Make sure that if the withdrawal fails, neither balance changes.</p>`, a: `<pre><code>    def transfer(self, other, amount):
         self.withdraw(amount)    # raises ValueError if funds are short
-        other.deposit(amount)</code></pre><p>Withdrawing first is what keeps both balances unchanged on failure: if <code>withdraw</code> raises, <code>deposit</code> never runs. (If <code>deposit</code> could also fail, you'd need to undo the withdrawal; real banking systems use <em>transactions</em> for exactly this.)</p>` },
+        other.deposit(amount)</code></pre><p>Withdrawing first is what keeps both balances unchanged on failure: if <code>withdraw</code> raises, <code>deposit</code> never runs. (If <code>deposit</code> could also fail, you'd need to undo the withdrawal. Real banking systems use <em>transactions</em> for exactly this: a transaction is a group of changes that is treated as one unit, so either all of them happen or none do. If any step fails, the system <em>rolls back</em> the steps already done. You'll meet transactions properly in the Databases course.)</p>` },
       { q: `<p>Find the bug: every <code>Student</code> ends up with every course.</p><pre><code>class Student:
     courses = []
     def __init__(self, name):
@@ -225,7 +238,7 @@ class Fraction:
 Fraction(1, 2)
 &gt;&gt;&gt; print(Fraction(2, 4))
 1/2</code></pre>
-<p>Always write <code>__repr__</code>: it's what you see in the console, in lists of objects, and in error messages, so it makes debugging far easier.</p>
+<p>Always write <code>__repr__</code>: it's what you see in the console, in lists of objects, and in error messages, so it makes debugging far easier. Write <code>__str__</code> as well only when there is a natural human-friendly form that differs from the code-like one: <code>1/2</code> for a fraction, <code>$12.05</code> for money, <code>2026-03-14</code> for a date. If a class has no <code>__str__</code>, <code>print</code> and <code>str()</code> fall back to <code>__repr__</code>, so for most classes one method is enough.</p>
 
 <h3>Comparison: __eq__ and __lt__</h3>
 <p>By default, <code>==</code> on objects checks whether they are the <em>same object</em>, so <code>Fraction(1, 2) == Fraction(2, 4)</code> would be <code>False</code>. Define <code>__eq__</code> to compare values:</p>
@@ -239,7 +252,19 @@ Fraction(1, 2)
 
     def __hash__(self):
         return hash((self.num, self.den))</code></pre>
-<p>Returning <code>NotImplemented</code> (a special value, not an error) tells Python "I don't know how to compare with that type", so <code>Fraction(1, 2) == "hello"</code> gives <code>False</code> instead of crashing. With <code>__lt__</code> defined, <code>sorted</code> works on a list of fractions. And if objects are equal, they must have the same <strong>hash</strong>, so a class that defines <code>__eq__</code> needs <code>__hash__</code> to be usable in sets and as dictionary keys. Hash only immutable data: if a fraction could change after being put in a set, the set would lose track of it.</p>
+<p>Returning <code>NotImplemented</code> (a special value, not an error) tells Python "I don't know how to compare with that type". Python then gives the other object a chance to answer, and if neither knows, <code>==</code> falls back to checking identity. So <code>Fraction(1, 2) == "hello"</code> gives <code>False</code> instead of crashing. With <code>__lt__</code> defined, <code>sorted</code> works on a list of fractions.</p>
+<p>Don't confuse <code>NotImplemented</code> with <code>NotImplementedError</code>, which you'll see in Lesson 3. They do different jobs:</p>
+<ul>
+  <li><code>NotImplemented</code> is a <em>value</em> that you <code>return</code> from an operator method such as <code>__eq__</code> or <code>__add__</code>. It means "not with this kind of operand; Python, try something else". It is not an error, and the program carries on.</li>
+  <li><code>NotImplementedError</code> is an <em>exception</em> that you <code>raise</code>, usually in a base-class method that subclasses are supposed to replace. It means "this method was never written for this class", and it stops the program unless caught.</li>
+</ul>
+
+<h3>What is a hash, and why must equal objects have equal hashes?</h3>
+<p>You've used sets and dictionaries since CS 101. They find items quickly by not searching through everything. A <strong>hash</strong> is an integer computed from a value by the built-in function <code>hash</code>; for example <code>hash((1, 2))</code> is some fixed integer. A set keeps its items in many numbered slots, called <em>buckets</em>, and puts each item in the bucket chosen by its hash (roughly <code>hash(item) % number_of_buckets</code>). To answer <code>x in s</code>, the set computes <code>hash(x)</code>, goes straight to that one bucket, and uses <code>==</code> to compare <code>x</code> only with the few items stored there. That's why lookups take about the same time whether the set holds ten items or ten million.</p>
+<p>Now you can see the rule. Suppose <code>Fraction(1, 2)</code> is in a set and you ask whether <code>Fraction(2, 4)</code> is. They are equal, but if their hashes differed, the set would look in the wrong bucket, never compare them, and answer <code>False</code>. So <strong>if <code>a == b</code>, then <code>hash(a)</code> must equal <code>hash(b)</code></strong>. (The reverse isn't required: unequal objects may share a hash, which only costs a little time.) Our <code>__hash__</code> keeps the rule by hashing the tuple <code>(num, den)</code>, which is identical for equal fractions because both are stored in lowest terms:</p>
+<pre><code>s = {Fraction(1, 2)}
+print(Fraction(2, 4) in s)    # True: same hash, then == confirms</code></pre>
+<p>Because the rule is so important, Python enforces part of it: a class that defines <code>__eq__</code> but not <code>__hash__</code> can't be put in a set at all (<code>TypeError: unhashable type</code>). The second rule is to <strong>hash only data that never changes</strong>. If an object's attributes changed after it went into a set, its hash would change too, and the set, still holding it in the old bucket, would look in the new one and fail to find it.</p>
 
 <h3>Arithmetic: __add__, __mul__ and friends</h3>
 <pre><code>    def __add__(self, other):
@@ -259,7 +284,19 @@ Fraction(1, 2)
     <tr><td><code>a &lt; b</code></td><td><code>a.__lt__(b)</code></td><td><code>for x in a</code></td><td><code>a.__iter__()</code></td></tr>
   </tbody>
 </table>
-<p>Implementing the right special methods lets your type plug into the whole language: <code>sum</code> works if <code>__add__</code> does, <code>max</code> works if <code>__lt__</code> does, and <code>for</code> works if <code>__iter__</code> does (Lesson 5).</p>
+<h4>Mixing types: Fraction(1, 2) + 1</h4>
+<p>With the code above, <code>Fraction(1, 2) + 1</code> crashes with <code>AttributeError: 'int' object has no attribute 'den'</code>, because <code>__add__</code> assumes <code>other</code> is a fraction. It would be reasonable for it to work, since 1 is the fraction 1/1. Two changes make it work: convert integers, and add <code>__radd__</code>, the "reflected" add.</p>
+<pre><code>    def __add__(self, other):
+        if isinstance(other, int):
+            other = Fraction(other)          # 1 becomes Fraction(1, 1)
+        if not isinstance(other, Fraction):
+            return NotImplemented            # let Python try other.__radd__
+        return Fraction(self.num * other.den + other.num * self.den,
+                        self.den * other.den)
+
+    __radd__ = __add__                       # adding is symmetric</code></pre>
+<p>For <code>1 + Fraction(1, 2)</code>, Python first tries <code>(1).__add__(Fraction(1, 2))</code>. The <code>int</code> type doesn't know about fractions and returns <code>NotImplemented</code>, so Python tries the right operand's <code>__radd__</code>, which we've made the same as <code>__add__</code>. Now <code>Fraction(1, 2) + 1</code> and <code>1 + Fraction(1, 2)</code> both give <code>Fraction(3, 2)</code>, and adding a string still fails with a clear <code>TypeError</code>.</p>
+<p>Implementing the right special methods lets your type plug into the whole language: <code>max</code> works if <code>__lt__</code> does, <code>for</code> works if <code>__iter__</code> does (Lesson 5), and <code>sum</code> works if <code>__add__</code> and <code>__radd__</code> do. (<code>sum</code> starts from the integer 0, so its first step is <code>0 + Fraction(...)</code>, which needs <code>__radd__</code>. Without it, use <code>sum(fractions, Fraction(0))</code> to start from a fraction instead.)</p>
 
 <h3>Data abstraction</h3>
 <p>Code that <em>uses</em> <code>Fraction</code> only needs to know its interface: you can make fractions, add, multiply, compare and print them. It doesn't need to know they're stored in lowest terms, or even that there are attributes called <code>num</code> and <code>den</code>. This separation between <em>what a type does</em> and <em>how it's represented</em> is <strong>data abstraction</strong>, and the boundary between the two is the <strong>abstraction barrier</strong>. If you later change the representation, say to cache a decimal value, code on the other side of the barrier keeps working unchanged.</p>
@@ -284,6 +321,7 @@ Fraction(1, 2)
     def fahrenheit(self):             # computed, read-only
         return self._celsius * 9 / 5 + 32</code></pre>
 <p>Callers write <code>t.celsius = 25</code> and <code>t.fahrenheit</code> as if they were plain attributes, but every assignment is checked, so the invariant can't be broken from outside. <code>fahrenheit</code> has no setter, so assigning to it raises an error.</p>
+<p>How the setter syntax works, step by step. A decorator replaces the function below it with whatever the decorator returns (Lesson 5 shows this in detail). So after <code>@property</code>, the name <code>celsius</code> in the class no longer refers to a plain function: it refers to a <em>property object</em> holding that function as its "getter". Property objects have a method called <code>setter</code>. Writing <code>@celsius.setter</code> above the second function calls that method, which returns a new property object holding the old getter plus this function as the setter. The second function must also be named <code>celsius</code> so that the new, complete property replaces the old one under the same name; with a different name you'd end up with two separate properties. The whole thing is shorthand for <code>celsius = property(get_celsius, set_celsius)</code> with two ordinary methods.</p>
 
 <h3>Dataclasses</h3>
 <p>Many classes are mostly data: a point, a student record, a configuration. Writing <code>__init__</code>, <code>__repr__</code> and <code>__eq__</code> for each is tedious, so the standard library generates them:</p>
@@ -301,13 +339,14 @@ p = Point(3, 4)
 print(p)                       # Point(x=3, y=4)
 print(p == Point(3, 4))        # True
 print(p.distance_to(Point(0, 0)))   # 5.0</code></pre>
-<p>The <code>x: float</code> lines are type hints that declare the fields. <code>frozen=True</code> makes instances <strong>immutable</strong>: assigning <code>p.x = 5</code> raises an error. Immutable objects are easier to reason about, safe to share, and can be hashed, so frozen dataclasses work as dictionary keys and set members automatically.</p>
+<p>The <code>x: float</code> lines are <strong>type hints</strong>, which Lesson 4 covers fully. For now, read <code>x: float</code> as "this class has a field named <code>x</code>, which is meant to hold a float". Python doesn't check the type when the program runs (<code>Point("a", "b")</code> would be accepted), but the <code>@dataclass</code> decorator reads these lines to learn the names and order of the fields, and generates <code>__init__(self, x, y)</code> from them. <code>frozen=True</code> makes instances <strong>immutable</strong>: assigning <code>p.x = 5</code> raises an error. Immutable objects are easier to reason about, safe to share, and can be hashed, so frozen dataclasses work as dictionary keys and set members automatically.</p>
 `,
     terms: [
       ["Special method", "A method with a double-underscore name that Python calls for built-in syntax, such as __add__ for +."],
       ["__repr__", "Returns an unambiguous string for programmers; shown in the console and in error messages."],
-      ["NotImplemented", "A value a special method returns to say it can't handle that operand type."],
-      ["Hash", "A number derived from a value, used by sets and dicts; equal objects must have equal hashes."],
+      ["NotImplemented", "A value a special method returns to say it can't handle that operand type. Not to be confused with the exception NotImplementedError."],
+      ["Hash", "An integer computed from a value, used by sets and dicts to choose the bucket where the value is stored; equal objects must have equal hashes."],
+      ["__radd__", "The reflected add, called for x + obj when x's own __add__ returns NotImplemented."],
       ["Data abstraction", "Separating what a type does (its interface) from how it is represented."],
       ["Property", "A method that is accessed like an attribute, letting a class validate or compute values."],
       ["Dataclass", "A class whose __init__, __repr__ and __eq__ are generated from declared fields."],
@@ -353,7 +392,11 @@ print(p.distance_to(Point(0, 0)))   # 5.0</code></pre>
     def __eq__(self, other):
         return (self.x, self.y) == (other.x, other.y)
     def __hash__(self):
-        return hash((self.x, self.y))</code></pre>`, a: `<p>The hash depends on <code>x</code> and <code>y</code>, but they can be changed after the point is added to a set. Changing them changes the hash, so the set looks in the wrong place and can no longer find the point. Make points immutable: use <code>@dataclass(frozen=True)</code>, or remove the ability to change coordinates (store them in underscore attributes with read-only properties).</p>` },
+        return hash((self.x, self.y))</code></pre>`, a: `<p>The hash depends on <code>x</code> and <code>y</code>, but they can be changed after the point is added to a set. The set stored the point in the bucket chosen by its <em>old</em> hash. Changing a coordinate changes the hash, so a later lookup goes to a different bucket and can no longer find the point, even though it is still in the set:</p><pre><code>p = Point(1, 2)
+pts = {p}
+p.x = 10
+print(p in pts)            # False
+print(Point(1, 2) in pts)  # False: right bucket, but the point there is now (10, 2)</code></pre><p>The fix is to make points immutable: use <code>@dataclass(frozen=True)</code>, or remove the ability to change coordinates (store them in underscore attributes with read-only properties).</p>` },
       { q: `<p>Give <code>BankAccount</code> a read-only <code>balance</code> property, so callers can see the balance but can only change it through <code>deposit</code> and <code>withdraw</code>.</p>`, a: `<pre><code>class BankAccount:
     def __init__(self, owner, balance=0):
         self.owner = owner
@@ -415,7 +458,7 @@ class CheckingAccount(Account):
         super().withdraw(amount + self.fee)</code></pre>
 <ul>
   <li><code>class SavingsAccount(Account):</code> declares the superclass in parentheses.</li>
-  <li><code>super().__init__(...)</code> calls the superclass's version of a method, here so <code>Account</code> sets up <code>owner</code> and <code>balance</code> before the subclass adds its own attribute.</li>
+  <li><code>super().__init__(...)</code> calls the superclass's version of a method, here so <code>Account</code> sets up <code>owner</code> and <code>balance</code> before the subclass adds its own attribute. <code>super()</code> needs no arguments because Python fills them in: it knows which class the method was written in (<code>SavingsAccount</code>) and which object it was called on (<code>self</code>), and it starts looking for the method in the class after <code>SavingsAccount</code> in the inheritance chain, which here is <code>Account</code>. The long form, <code>super(SavingsAccount, self).__init__(owner, balance)</code>, means the same and appears in older code.</li>
   <li>Defining <code>withdraw</code> in <code>CheckingAccount</code> <strong>overrides</strong> the inherited one. It still uses the parent's logic through <code>super()</code>, adding the fee.</li>
 </ul>
 <p>When you call <code>acct.withdraw(10)</code>, Python looks for <code>withdraw</code> on the object's own class first, then on its superclass, and so on up the chain. <code>isinstance(acct, Account)</code> is <code>True</code> for an instance of any subclass of <code>Account</code>.</p>
@@ -461,6 +504,7 @@ class Blob(Shape):
 
 Blob()   # TypeError: Can't instantiate abstract class Blob ...</code></pre>
 <p>An <strong>abstract class</strong> can't be instantiated; it exists only to define an interface that subclasses must fill in.</p>
+<p>Is a docstring enough of a body? Yes. Python requires at least one statement inside a <code>def</code>, and a docstring is a statement (a string expression on its own line). An abstract method's body normally never runs, so a docstring that documents what subclasses must do is the most useful thing to put there. <code>pass</code> or <code>...</code> (Lesson 4) would also be valid. Notice the two styles in this lesson: the earlier <code>Shape</code> <em>raises</em> the exception <code>NotImplementedError</code> when called; the abstract version stops you from creating the object in the first place. (Neither is the value <code>NotImplemented</code> from Lesson 2, which operator methods return.)</p>
 
 <h3>Composition: "has a" instead of "is a"</h3>
 <p>Inheritance is tempting whenever two classes share code, but it couples them tightly: a subclass depends on every detail of its parent, and changing the parent can break it. Often it's better for one object to <em>contain</em> another and delegate work to it:</p>
@@ -480,7 +524,33 @@ class Car:
 <p>A car is not a kind of engine, so inheritance would be wrong here. Composition also lets you swap parts at run time, such as an electric motor with the same <code>start</code> method. A useful rule: use inheritance only for a genuine "is a" relationship where the subclass can be used anywhere the superclass is expected; otherwise prefer composition.</p>
 
 <h3>When "is a" is wrong: squares and rectangles</h3>
-<p>Mathematically, a square is a rectangle. In code it's often a bad subclass. Suppose <code>Rectangle</code> has methods <code>set_width</code> and <code>set_height</code>. A function that sets a rectangle's width to 5 and height to 4 expects an area of 20. If <code>Square</code> overrides the setters to keep the sides equal, the same function gets 16 for a square, so a <code>Square</code> can't be safely used where a <code>Rectangle</code> is expected.</p>
+<p>Mathematically, a square is a rectangle. In code it's often a bad subclass. Here is a mutable <code>Rectangle</code> with setters, and a <code>Square</code> that overrides them to keep its sides equal:</p>
+<pre><code>class Rectangle:
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+    def set_width(self, w):
+        self.w = w
+    def set_height(self, h):
+        self.h = h
+    def area(self):
+        return self.w * self.h
+
+class Square(Rectangle):
+    def __init__(self, side):
+        super().__init__(side, side)
+    def set_width(self, w):
+        self.w = self.h = w          # keep the sides equal
+    def set_height(self, h):
+        self.w = self.h = h
+
+def stretch(r):
+    r.set_width(5)
+    r.set_height(4)
+    return r.area()                  # anyone reading this expects 5 × 4 = 20
+
+print(stretch(Rectangle(2, 3)))      # 20
+print(stretch(Square(2)))            # 16</code></pre>
+<p>Trace the square: <code>set_width(5)</code> makes both sides 5; then <code>set_height(4)</code> makes both sides 4, undoing the width. The area is 4 × 4 = 16. Each class is reasonable on its own, but a <code>Square</code> can't be safely used where a <code>Rectangle</code> is expected.</p>
 <p>The principle being broken is named after Barbara Liskov, who stated it in 1987: the <strong>Liskov substitution principle</strong> says objects of a subclass must be usable anywhere objects of the superclass are, without surprises. Liskov received the Turing Award in 2008 for her work on data abstraction.</p>
 
 <h3>Designing a hierarchy</h3>
@@ -568,12 +638,31 @@ class Inventory:
     def count(self, name: str) -&gt; int:
         return self.items.get(name, 0)</code></pre>
 <p>Python itself ignores type hints at run time: <code>average("oops")</code> still runs and fails in the usual way. Their value is that people and tools can read them. Editors use them for autocomplete, and a <strong>static type checker</strong> such as mypy or pyright reads your whole program without running it and reports mismatches, such as calling <code>inv.count(42)</code> when <code>name</code> should be a <code>str</code>. Type hints became part of Python in 2015 (PEP 484) and are now standard in professional code.</p>
+<p>To run mypy, install it once in a terminal with <code>python -m pip install mypy</code>, then run it on a file:</p>
+<pre data-label="inventory.py"><code>class Inventory:
+    def __init__(self) -&gt; None:
+        self.items: dict[str, int] = {}
+
+    def add(self, name: str, quantity: int = 1) -&gt; None:
+        self.items[name] = self.items.get(name, 0) + quantity
+
+    def count(self, name: str) -&gt; int:
+        return self.items.get(name, 0)
+
+
+inv = Inventory()
+inv.add("apple", 3)
+print(inv.count(42))</code></pre>
+<pre data-label="Shell"><code>$ mypy inventory.py
+inventory.py:14: error: Argument 1 to "count" of "Inventory" has incompatible type "int"; expected "str"  [arg-type]
+Found 1 error in 1 file (checked 1 source file)</code></pre>
+<p>Running the program itself prints 0 and gives no warning; mypy finds the mistake without running anything. Many editors run a checker like this as you type and underline the error.</p>
 <p>Useful forms:</p>
 <table>
   <thead><tr><th>Hint</th><th>Means</th></tr></thead>
   <tbody>
     <tr><td><code>list[int]</code>, <code>dict[str, float]</code>, <code>tuple[int, int]</code></td><td>Collections with element types</td></tr>
-    <tr><td><code>int | None</code></td><td>An int, or None (for example, "not found")</td></tr>
+    <tr><td><code>int | None</code></td><td>An int, or None (for example, "not found"). Older code writes the same type as <code>Optional[int]</code>, imported from <code>typing</code>; the two mean exactly the same, and the <code>|</code> form works from Python 3.10.</td></tr>
     <tr><td><code>Callable[[int], bool]</code> (from <code>collections.abc</code>)</td><td>A function from int to bool</td></tr>
     <tr><td><code>Iterable[str]</code></td><td>Anything you can loop over that yields strings</td></tr>
   </tbody>
@@ -589,7 +678,7 @@ class HasArea(Protocol):
 
 def total_area(shapes: list[HasArea]) -&gt; float:
     return sum(s.area() for s in shapes)</code></pre>
-<p>Any class with an <code>area()</code> method that returns a float now satisfies <code>HasArea</code>, and the type checker verifies that, with no inheritance needed.</p>
+<p>Any class with an <code>area()</code> method that returns a float now satisfies <code>HasArea</code>, and the type checker verifies that, with no inheritance needed. The <code>...</code> at the end of the method line is a real Python value called <code>Ellipsis</code> (try <code>print(...)</code>). Used as a function body, it's a placeholder statement, like <code>pass</code>; by convention it means "no body here, only the signature matters", which is exactly what a protocol describes.</p>
 
 <h3>Enums: a fixed set of choices</h3>
 <p>When a value can only be one of a few options, a string like <code>"pending"</code> invites typos (<code>"pendng"</code>) that nothing catches. An <strong>enum</strong> makes the options a type:</p>
@@ -614,7 +703,15 @@ if order_status is Status.DELIVERED:
   <li><strong>Tell, don't ask.</strong> Instead of asking an object for its data and acting on it (<code>if acct.balance &gt;= x: acct.balance -= x</code>), tell the object what to do (<code>acct.withdraw(x)</code>) so it can enforce its own rules.</li>
   <li><strong>Depend on abstractions.</strong> A <code>Checkout</code> class that takes "something with a <code>charge(amount)</code> method" works with any payment provider, and with a fake one in tests; one that creates a specific provider's object inside itself works with only that provider.</li>
 </ul>
-<p>These ideas, collected in 2000 by Robert C. Martin under the acronym SOLID among others, are guidelines rather than laws. Their common purpose is to make a program easy to change: most of the cost of software comes after it's first written.</p>
+<p>Robert C. Martin collected five related principles around 2000, and Michael Feathers later gave them the acronym <strong>SOLID</strong>, which you'll see in job interviews and design books:</p>
+<ul>
+  <li><strong>S</strong>ingle responsibility: a class should have one reason to change (high cohesion, above).</li>
+  <li><strong>O</strong>pen–closed: extend behavior by adding code, such as a new subclass, rather than editing working code (Lesson 3's <code>total_area</code>).</li>
+  <li><strong>L</strong>iskov substitution: a subclass must work anywhere its superclass does (Lesson 3).</li>
+  <li><strong>I</strong>nterface segregation: prefer several small interfaces to one large one (small interfaces, above).</li>
+  <li><strong>D</strong>ependency inversion: depend on abstractions, not on specific classes (the last bullet above).</li>
+</ul>
+<p>They are guidelines rather than laws. Their common purpose is to make a program easy to change: most of the cost of software comes after it's first written.</p>
 
 <h3>Worked example: improving a design</h3>
 <p>Here is a first attempt at an online store's order handling:</p>
@@ -863,6 +960,13 @@ c = make_counter()
 c(); c()
 print(c())    # 3</code></pre>
 <p>A closure with state is a tiny object: data plus behavior. Closures and objects are two ways to express the same idea.</p>
+<p><strong><code>nonlocal</code> or <code>global</code>?</strong> You need either one only when a function <em>assigns</em> to a name it didn't create; reading a variable from an outer scope never needs a declaration. Use <code>nonlocal</code> when the variable belongs to an enclosing <em>function</em>, as with <code>count</code> above. Use <code>global</code> when it belongs to the module, the top level of the file. Global variables that functions change make programs hard to follow and test, so treat <code>global</code> as a last resort; usually a return value, a parameter, or an object attribute is clearer.</p>
+<p><strong>Closures capture variables, not values.</strong> The inner function doesn't copy <code>n</code> when it's created; it remembers the variable and looks up its current value each time it runs. That rarely matters, except in a loop:</p>
+<pre><code>funcs = []
+for i in range(3):
+    funcs.append(lambda: i)    # each lambda refers to the variable i
+print([f() for f in funcs])    # [2, 2, 2]: by now i is 2</code></pre>
+<p>All three functions share one variable <code>i</code>, and they are called after the loop has left it at 2. To freeze the value at creation time, pass it in as a default argument: <code>lambda i=i: i</code>. A default value is evaluated once, when the function is <em>created</em>, and stored with that function; so the first lambda stores 0, the second 1, the third 2, and the parameter <code>i</code> inside each one starts with its own stored value. Calling <code>make_multiplier</code> in a loop works too, because each call creates a fresh variable <code>n</code>.</p>
 
 <h3>Decorators</h3>
 <p>A <strong>decorator</strong> is a function that takes a function and returns a new function that wraps it, adding behavior before or after. The <code>@</code> syntax applies one:</p>
@@ -883,7 +987,17 @@ def slow_sum(n):
     return sum(range(n))
 
 slow_sum(10_000_000)</code></pre>
-<p><code>*args</code> and <code>**kwargs</code> collect any positional and keyword arguments, so the wrapper works for any function. You've already used decorators: <code>@property</code>, <code>@dataclass</code> and <code>@abstractmethod</code>. A very useful one from the standard library is <code>@functools.cache</code>, which remembers the results of previous calls:</p>
+<p><code>*args</code> and <code>**kwargs</code> collect any positional and keyword arguments, so the wrapper works for any function. In a parameter list, <code>*args</code> gathers the extra positional arguments into a tuple and <code>**kwargs</code> gathers the keyword arguments into a dictionary (the names are conventions; the stars do the work):</p>
+<pre><code>def show(*args, **kwargs):
+    print("args =", args)
+    print("kwargs =", kwargs)
+
+show(1, "two", x=3, y=4)
+# args = (1, 'two')
+# kwargs = {'x': 3, 'y': 4}</code></pre>
+<p>In a <em>call</em>, the stars do the reverse: <code>func(*args, **kwargs)</code> unpacks the tuple back into positional arguments and the dictionary into keyword arguments. So the wrapper receives whatever the caller passed and hands exactly the same arguments on to <code>func</code>.</p>
+<p>What does <code>@functools.wraps(func)</code> fix? The decorated name now refers to <code>wrapper</code>, so without it the function would introduce itself as the wrong thing: <code>slow_sum.__name__</code> would be <code>'wrapper'</code> and its docstring would be <code>None</code>. That breaks <code>help(slow_sum)</code>, makes error tracebacks and logs name <code>wrapper</code> instead of the function you wrote, and confuses tools that look functions up by name, such as pytest. <code>functools.wraps</code> copies the name, docstring and other details from <code>func</code> onto <code>wrapper</code>, and the decorator in the example prints the right name only because of it.</p>
+<p>You've already used decorators: <code>@property</code>, <code>@dataclass</code> and <code>@abstractmethod</code>. A very useful one from the standard library is <code>@functools.cache</code>, which remembers the results of previous calls:</p>
 <pre><code>@functools.cache
 def fib(n):
     return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
@@ -959,7 +1073,7 @@ def greet(name):
 greet("A"); greet("B")
 print(greet.calls)   # 2</code></pre><p>Functions are objects, so they can have attributes.</p>` },
       { q: `<p>What's wrong with this code, which tries to make three functions that return 0, 1 and 2?</p><pre><code>funcs = [lambda: i for i in range(3)]
-print([f() for f in funcs])   # [2, 2, 2]</code></pre>`, a: `<p>All three lambdas capture the <em>variable</em> <code>i</code>, not its value at the time; by the time they're called, <code>i</code> is 2. Capture the current value with a default argument, which is evaluated when the lambda is created: <code>[lambda i=i: i for i in range(3)]</code>, or use a factory function like <code>make_multiplier</code>.</p>` }
+print([f() for f in funcs])   # [2, 2, 2]</code></pre>`, a: `<p>All three lambdas capture the <em>variable</em> <code>i</code>, not its value at the time; by the time they're called, the comprehension has finished and <code>i</code> is 2. Capture the current value with a default argument: <code>[lambda i=i: i for i in range(3)]</code>. Read <code>lambda i=i: i</code> as "a function with one parameter named <code>i</code>, whose default is the <em>current</em> value of the loop's <code>i</code>". The default is computed once, when each lambda is created (0, then 1, then 2), and stored with that lambda. When you call <code>f()</code> with no argument, the parameter takes its stored default, so the result is <code>[0, 1, 2]</code>. A factory function like <code>make_multiplier</code> also works, since each call creates a separate variable.</p>` }
     ],
     sources: ["composing", "pytutorial", "thinkpython"]
   },
@@ -969,7 +1083,7 @@ print([f() for f in funcs])   # [2, 2, 2]</code></pre>`, a: `<p>All three lambda
     minutes: 90,
     summary: "Write the test first: pytest, assertions and fixtures, parametrized tests, testing exceptions, fakes for dependencies, the red–green–refactor cycle, and refactoring safely.",
     notes: `
-<p>In CS 101 you tested functions with a few <code>assert</code> statements. Professional programmers go further: they keep a <strong>test suite</strong>, a collection of automated tests that runs in seconds and checks the whole program every time anything changes. Many write each test <em>before</em> the code it tests. This lesson teaches the tools and the habit.</p>
+<p>In <a href="#c-cs101-u6">CS 101's testing lesson</a> you tested functions with a few <code>assert</code> statements. Professional programmers go further: they keep a <strong>test suite</strong>, a collection of automated tests that runs in seconds and checks the whole program every time anything changes. Many write each test <em>before</em> the code it tests. This lesson teaches the tools and the habit.</p>
 
 <h3>Why automated tests?</h3>
 <ul>
@@ -1019,6 +1133,14 @@ collected 4 items
 test_fraction.py ....                  [100%]
 ============= 4 passed in 0.01s =============</code></pre>
 <p>Each dot is a passing test. When a test fails, pytest shows the values on both sides of the failing <code>assert</code>, which usually tells you the bug at once. <code>pytest.raises</code> checks that a block raises the expected exception; the test fails if it doesn't.</p>
+<h4>Where to run it: your own computer</h4>
+<p>pytest runs in a terminal on your computer, using the Python you installed in <a href="#c-cs101-u0">CS 101's first lesson</a>. (The programming problems on this site run their tests in your browser instead, so they don't need pytest.) Put the code and its tests side by side in one folder:</p>
+<pre data-label="Folder layout"><code>fraction_project/
+    fraction.py          # the class Fraction
+    test_fraction.py     # the tests</code></pre>
+<pre data-label="Shell"><code>$ cd fraction_project
+$ python -m pytest</code></pre>
+<p>pytest searches the current folder (and the folders inside it) for files named <code>test_*.py</code>, runs every function in them whose name starts with <code>test_</code>, and prints the report above. The import <code>from fraction import Fraction</code> works because <code>fraction.py</code> sits in the same folder as the test file, exactly like importing your own module in <a href="#c-cs101-files">CS 101's lesson on files and modules</a>. If you see <code>ModuleNotFoundError: No module named 'fraction'</code>, you're either in the wrong folder or the file is named differently. Writing <code>python -m pytest</code> rather than plain <code>pytest</code> guarantees that pytest uses the same Python you installed it into. Every pytest example in this lesson follows this layout: a module, and a test file next to it.</p>
 
 <h3>What makes a good test</h3>
 <ul>
@@ -1054,10 +1176,18 @@ def test_overdraw(account):
     with pytest.raises(ValueError):
         account.withdraw(500)
     assert account.balance == 100      # unchanged after the failed withdrawal</code></pre>
-<p>Each test gets its own new account, so one test's deposit can't affect another. pytest also has built-in fixtures, such as <code>tmp_path</code>, a fresh temporary folder for testing code that reads and writes files.</p>
+<p>Each test gets its own new account, so one test's deposit can't affect another. How does pytest know to pass it? It isn't magic, just the idea that functions are values (Lesson 5). The <code>@pytest.fixture</code> decorator records the function <code>account</code> in a table under its name. Before running a test, pytest looks at the names of the test function's parameters (Python lets a program inspect a function's parameter list). For each parameter it finds the fixture with the same name, calls it, and passes the result in. So <code>test_deposit(account)</code> is run as <code>test_deposit(account())</code>, with a fresh call for every test. That's why the parameter name must match the fixture's name exactly.</p>
+<p>pytest also has built-in fixtures, such as <code>tmp_path</code>, a fresh temporary folder for testing code that reads and writes files. It's a <code>Path</code> object from the standard library's <code>pathlib</code> module, which represents file paths. <code>Path</code> defines the special method <code>__truediv__</code> (Lesson 2), so <code>/</code> between a path and a string means "join with a folder separator": <code>tmp_path / "scores.txt"</code> is the path of a file named <code>scores.txt</code> inside that folder. It's arithmetic-looking syntax for path joining, and it uses the right separator (<code>/</code> or <code>\\</code>) on every operating system. You can pass a <code>Path</code> to <code>open</code> like a string.</p>
 
 <h3>Testing code with dependencies</h3>
-<p>How do you test code that charges a credit card, sends email or calls a web service? You don't want tests to do those things for real. Lesson 4 showed the design that solves this: pass dependencies in, then pass a <strong>fake</strong> in tests. A fake is a simple stand-in object with the same interface that records what it was asked to do. (Python's <code>unittest.mock</code> can build such objects automatically, but writing a small fake class by hand is often clearer.)</p>
+<p>How do you test code that charges a credit card, sends email or calls a web service? You don't want tests to do those things for real. Lesson 4 showed the design that solves this: pass dependencies in, then pass a <strong>fake</strong> in tests. A fake is a simple stand-in object with the same interface that records what it was asked to do, like <code>FakeGateway</code> in Lesson 4's practice.</p>
+<p>Python's <code>unittest.mock</code> module can build such stand-ins automatically. A <code>Mock</code> object accepts <em>any</em> method call, returns another mock, and records every call so you can check it afterwards:</p>
+<pre><code>from unittest.mock import Mock
+
+gateway = Mock()
+Checkout(gateway, Mock()).complete(order)       # the $120 order from Lesson 4
+gateway.charge.assert_called_once_with("ada@example.com", 108.0)</code></pre>
+<p>When should you use which? A mock is quickest when you only need to check that one call happened with the right arguments, or when the real dependency has a large interface you'd otherwise have to imitate. A hand-written fake is better when the stand-in needs real behavior (say, an in-memory "database" that returns what was saved), when many tests reuse it, or when you want the test to read plainly. Be aware that a plain mock accepts misspelled method names too: <code>gateway.chrage(...)</code> silently succeeds, so a mock can hide the very bug a test should catch. Creating it as <code>Mock(spec=SomeClass)</code> limits it to that class's real methods.</p>
 <p>The same trick handles time and randomness, which make tests flaky: pass in a clock function or a seeded <code>random.Random</code> instead of calling <code>time.time()</code> or <code>random.random()</code> directly.</p>
 
 <h3>The red–green–refactor cycle</h3>
@@ -1109,7 +1239,8 @@ from dates import is_leap
     (1900, False), (2000, True), (2100, False), (2400, True),
 ])
 def test_is_leap(year, expected):
-    assert is_leap(year) == expected</code></pre><p>The century years are the edges where a naive "divisible by 4" implementation fails.</p>` },
+    assert is_leap(year) == expected</code></pre><p>The century years are the edges where a naive "divisible by 4" implementation fails. To run it, save the tests as <code>test_dates.py</code> in a folder, next to a file <code>dates.py</code> containing the function, and run <code>python -m pytest</code> in that folder. In true TDD style, start with <code>def is_leap(year): return False</code> and watch some tests fail, then write the real version:</p><pre data-label="dates.py"><code>def is_leap(year):
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)</code></pre><p>pytest then reports <code>6 passed</code>: one per row of the table.</p>` },
       { q: `<p>This test sometimes fails. Why, and how would you fix the design?</p><pre><code>def greeting():
     hour = datetime.now().hour
     return "Good morning" if hour &lt; 12 else "Good afternoon"
@@ -1148,6 +1279,9 @@ def test_empty(tmp_path):
     notes: `
 <p>The list and dictionary are so convenient that it's easy to forget they're <em>implemented</em> by someone, with particular costs. This lesson separates what a data structure does from how it does it, and builds the first structure made of objects pointing to objects: the linked list.</p>
 
+<h3>A quick recap of big-O</h3>
+<p>This lesson and the next compare costs with the <strong>big-O notation</strong> from <a href="#c-cs101-algo">CS 101's lesson on searching, sorting and efficiency</a>. We count the basic steps an operation takes as a function of the input size <em>n</em> (here, the number of items stored), keep only the term that grows fastest, and drop constant factors: 3<em>n</em> + 7 steps is O(<em>n</em>), and <em>n</em>²/2 + <em>n</em> is O(<em>n</em>²). Big-O describes how the cost <em>grows</em>, not the exact time. The classes you'll see, from fastest to slowest: O(1), <em>constant</em> (the same work however many items there are); O(log <em>n</em>), which grows by one step each time <em>n</em> doubles; O(<em>n</em>), <em>linear</em>, which doubles when <em>n</em> doubles; O(<em>n</em> log <em>n</em>); and O(<em>n</em>²), which quadruples when <em>n</em> doubles.</p>
+
 <h3>Abstract data types</h3>
 <p>An <strong>abstract data type</strong> (ADT) is defined by its operations and their behavior, with no mention of how it's stored. It's data abstraction (Lesson 2) applied to collections. A <strong>data structure</strong> is a concrete way of implementing an ADT. One ADT can have several implementations with different costs, and choosing between them is a central skill in computer science.</p>
 
@@ -1176,7 +1310,7 @@ def test_empty(tmp_path):
     def __len__(self):
         return len(self._items)</code></pre>
 <p>Putting the top at the <em>end</em> of the list makes push and pop O(1): appending to or removing from the end of a Python list doesn't move any other items. Putting the top at the front, with <code>insert(0, x)</code> and <code>pop(0)</code>, would shift every item each time: O(n).</p>
-<p>Stacks are everywhere: the "undo" history in an editor, the browser's back button, and the <strong>call stack</strong> from CS 101, which holds a frame for each function call in progress. A classic use is checking that brackets match:</p>
+<p>Stacks are everywhere: the "undo" history in an editor, the browser's back button, and the <strong>call stack</strong> from <a href="#c-cs101-u4">CS 101's recursion lesson</a>, which holds a frame for each function call in progress. A classic use is checking that brackets match:</p>
 <pre><code>PAIRS = {")": "(", "]": "[", "}": "{"}
 
 def balanced(text):
@@ -1216,6 +1350,8 @@ line.popleft()            # dequeue: "Ada"</code></pre>
   </tbody>
 </table>
 <p>When the block is full, <code>append</code> allocates a bigger block (about 1.125 times the size in CPython, plus a little) and copies everything over. Copying is O(n), but it happens rarely enough that the <em>average</em> cost per append stays O(1). This is called <strong>amortized</strong> O(1).</p>
+<p>Why does growing by a <em>fixed fraction</em> keep the average constant, even a fraction as small as 12.5%? Start with doubling, where the numbers are easy. Begin with room for 1 item and append 16 items. The block fills at sizes 1, 2, 4 and 8, and each time everything is copied: 1 + 2 + 4 + 8 = 15 copies for 16 appends, less than one copy per append. In general the copies form a geometric series that adds up to less than <em>n</em>, so the average stays below 1 per append however large <em>n</em> gets.</p>
+<p>Growing by 12.5% works the same way, just with a bigger constant. Each resize happens when the list is about 1.125 times larger than at the previous resize, so the copy sizes, read backwards from the last one, are roughly <em>n</em>, <em>n</em>/1.125, <em>n</em>/1.125², … That geometric series adds up to about <em>n</em>/(1 − 1/1.125) = 9<em>n</em>. Simulating CPython's exact growth rule for a million appends gives about 8.4 copies per append (at most; the memory system can sometimes extend a block in place without copying): more than doubling's 1, but a constant that doesn't grow with <em>n</em>. (CPython trades those extra copies for less wasted memory.) Compare growing by a fixed <em>amount</em>, say 100 more slots each time: then a resize happens every 100 appends, each copying the whole list, and the average for <em>n</em> appends is about <em>n</em>/200 copies per append. That grows with <em>n</em>: it's O(<em>n</em>) per append, not O(1). Growth by a factor is what makes the difference.</p>
 
 <h3>Linked lists</h3>
 <p>A <strong>linked list</strong> stores items in separate <strong>nodes</strong> scattered anywhere in memory. Each node holds one value and a reference to the next node; the last node's reference is <code>None</code>.</p>
@@ -1379,7 +1515,7 @@ class Queue:
 <ul>
   <li>The top node is the <strong>root</strong>. Each node except the root has exactly one <strong>parent</strong>; the nodes below it are its <strong>children</strong>. A node with no children is a <strong>leaf</strong>.</li>
   <li>A node together with everything below it is a <strong>subtree</strong>. This is the key idea: <em>every child is the root of a smaller tree</em>.</li>
-  <li>The <strong>depth</strong> of a node is the number of edges from the root to it. The <strong>height</strong> of a tree is the greatest depth of any node (the tree above has height 3; a single node has height 0; we'll say an empty tree has height −1).</li>
+  <li>The <strong>depth</strong> of a node is the number of edges from the root to it. The <strong>height</strong> of a tree is the greatest depth of any node (the tree above has height 3; a single node has height 0; we'll say an empty tree has height −1). The −1 isn't arbitrary: it's the only value that makes the recursive rule "height = 1 + the larger subtree height" (in the code below) give the right answer for a single node, whose two subtrees are empty: 1 + max(−1, −1) = 0. Some books count <em>nodes</em> on the longest path instead of edges; then a single node has height 1 and an empty tree 0. Either convention works if you use it consistently.</li>
   <li>In a <strong>binary tree</strong>, each node has at most two children, called left and right.</li>
 </ul>
 
@@ -1405,7 +1541,7 @@ def total(t):
     if t is None:
         return 0
     return t.value + total(t.left) + total(t.right)</code></pre>
-<p>These are almost word-for-word translations of the definitions: "the size of a tree is one for the root plus the sizes of the two subtrees". Trust the recursion (CS 101's "leap of faith"): assume the calls on the smaller subtrees return correct answers, and check that you combine them correctly and handle the base case.</p>
+<p>These are almost word-for-word translations of the definitions: "the size of a tree is one for the root plus the sizes of the two subtrees". Trust the recursion (the "leap of faith" from <a href="#c-cs101-u4">CS 101's recursion lesson</a>): assume the calls on the smaller subtrees return correct answers, and check that you combine them correctly and handle the base case.</p>
 
 <h3>Traversals</h3>
 <p>Visiting every node is a <strong>traversal</strong>. The three depth-first orders differ only in when the node itself is visited:</p>
@@ -1456,7 +1592,45 @@ def postorder(t):    # left, then right, then node
 
     def __iter__(self):
         return inorder(self.root)</code></pre>
-<p>The recursive <code>_insert</code> returns the (possibly new) root of each subtree, so the parent can attach a newly created node with a single assignment. The search in <code>__contains__</code> is a loop, since it follows just one path. And an <strong>inorder traversal of a BST yields the values in sorted order</strong>: everything smaller is visited first, then the node, then everything larger.</p>
+<p>The recursive <code>_insert</code> returns the (possibly new) root of each subtree, so the parent can attach a newly created node with a single assignment. Why reassign when the child usually doesn't change? Because the one call that <em>does</em> change something, the call that reaches <code>None</code> and creates the new node, can't attach it by itself: it has no reference to the parent. Its only way to hand the node over is to return it, and the parent's assignment does the attaching. Every other call returns the same <code>node</code> it was given, so its parent's assignment stores the reference that was already there, which changes nothing. Trace inserting 5 into the tree in the figure:</p>
+<ol>
+  <li><code>_insert(8, 5)</code>: 5 &lt; 8, so it runs <code>8.left = _insert(3, 5)</code>.</li>
+  <li><code>_insert(3, 5)</code>: 5 &gt; 3, so it runs <code>3.right = _insert(6, 5)</code>.</li>
+  <li><code>_insert(6, 5)</code>: 5 &lt; 6, so it runs <code>6.left = _insert(4, 5)</code>.</li>
+  <li><code>_insert(4, 5)</code>: 5 &gt; 4, so it runs <code>4.right = _insert(None, 5)</code>.</li>
+  <li><code>_insert(None, 5)</code> returns a new node 5. Back in step 4, <code>4.right</code> becomes that node: the only real change. Step 4 returns node 4, so <code>6.left = 4</code> (no change); step 3 returns 6, so <code>3.right = 6</code> (no change); and so on up to <code>self.root = 8</code>.</li>
+</ol>
+<p>The alternative is to check <code>if node.left is None</code> before every recursive call and attach there, which needs separate cases for left, right and the empty tree. Returning the subtree handles them all with one pattern, and deletion (below) uses the same pattern. The search in <code>__contains__</code> is a loop, since it follows just one path. And an <strong>inorder traversal of a BST yields the values in sorted order</strong>: everything smaller is visited first, then the node, then everything larger.</p>
+
+<h3>Deleting from a BST</h3>
+<p>Removing a value must keep the BST invariant. First find the node, then handle one of three cases:</p>
+<ol>
+  <li><strong>A leaf</strong> (no children): just remove it. In the figure, deleting 13 leaves 14 with no children.</li>
+  <li><strong>One child</strong>: replace the node by its child. Deleting 14 puts 13 in its place under 10. Everything in that subtree was already on the correct side of every ancestor, so the invariant still holds.</li>
+  <li><strong>Two children</strong>: the node can't simply disappear, since two subtrees would need one parent slot. Instead, copy into it the next larger value, its <strong>inorder successor</strong>: the smallest value in its right subtree, found by going right once and then left as far as possible. Then delete that successor from the right subtree. The successor has no left child, so that second deletion is case 1 or 2. Deleting 3 in the figure: the successor is 4 (right to 6, then left to 4). Copy 4 into the node, then delete the old 4 leaf. The result, with 4 where 3 was, is still a BST: 4 is larger than everything on its left (just 1) and smaller than everything left in its right subtree (6 and 7).</li>
+</ol>
+<pre><code>    def remove(self, value):
+        self.root = self._remove(self.root, value)
+
+    def _remove(self, node, value):
+        if node is None:
+            raise KeyError(value)             # not in the tree
+        if value &lt; node.value:
+            node.left = self._remove(node.left, value)
+        elif value &gt; node.value:
+            node.right = self._remove(node.right, value)
+        elif node.left is None:               # cases 1 and 2
+            return node.right
+        elif node.right is None:
+            return node.left
+        else:                                 # case 3: two children
+            successor = node.right
+            while successor.left is not None:
+                successor = successor.left
+            node.value = successor.value
+            node.right = self._remove(node.right, successor.value)
+        return node</code></pre>
+<p>Returning the new root of each subtree, as <code>_insert</code> does, means "replace this node by its child" is just <code>return node.right</code>; the parent's assignment does the rest. Deletion follows one path down (plus the walk to the successor), so it also costs O(height).</p>
 
 <h3>How fast is a BST?</h3>
 <p>Search and insert follow one path from the root, so they take time proportional to the tree's height. If the tree is <strong>balanced</strong>, with left and right subtrees of similar size at every node, a tree of n nodes has height about log₂ n: a million values in about 20 levels. But insert values in sorted order, 1, 2, 3, …, and each goes to the right of the last: the tree becomes a linked list of height n − 1, and every operation is O(n).</p>
@@ -1468,7 +1642,7 @@ def postorder(t):    # left, then right, then node
     <tr><td>All values in order</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n log n): must sort</td></tr>
   </tbody>
 </table>
-<p><strong>Self-balancing</strong> trees, such as AVL trees (1962, named for Adelson-Velsky and Landis) and red–black trees, rearrange themselves after each change to keep the height O(log n). You'll study them in Data Structures and Algorithms. They power ordered maps in Java (<code>TreeMap</code>) and C++ (<code>std::map</code>), and a close relative, the B-tree, organizes almost every database index and file system on disk.</p>
+<p><strong>Self-balancing</strong> trees, such as AVL trees (1962, named for Adelson-Velsky and Landis) and red–black trees, rearrange themselves after each change to keep the height O(log n). You don't need them yet; they come in the Year 2 Data Structures course. They power ordered maps in Java (<code>TreeMap</code>) and C++ (<code>std::map</code>), and a close relative, the B-tree, organizes almost every database index and file system on disk.</p>
 
 <h3>Trees you already use</h3>
 <ul>
@@ -1485,7 +1659,8 @@ def postorder(t):    # left, then right, then node
       ["Height", "The greatest number of edges from the root to a leaf (−1 for an empty tree, by our convention)."],
       ["Traversal", "Visiting every node of a tree in a systematic order: preorder, inorder, postorder or level order."],
       ["Binary search tree", "A binary tree in which every left subtree holds smaller values and every right subtree larger ones."],
-      ["Balanced tree", "A tree whose height is O(log n), keeping search and insert fast."]
+      ["Balanced tree", "A tree whose height is O(log n), keeping search and insert fast."],
+      ["Inorder successor", "The next larger value in a BST: the leftmost node of a node's right subtree. Used when deleting a node with two children."]
     ],
     quiz: [
       { q: "In the figure's tree, what is the height?", choices: ["2", "3", "4", "9"], answer: 1, why: "The longest path from root to leaf, 8 → 3 → 6 → 4, has 3 edges." },
@@ -1502,6 +1677,7 @@ def postorder(t):    # left, then right, then node
         return 1
     return count_leaves(t.left) + count_leaves(t.right)</code></pre><p>Two base cases: an empty tree has no leaves; a single node is one leaf.</p>` },
       { q: `<p>Draw the BST that results from inserting 50, 30, 70, 20, 40, 60, 80, 35. Then list its preorder and postorder traversals.</p>`, a: `<p>50 is the root; 30 and 70 its children; 20 and 40 under 30; 60 and 80 under 70; 35 is the left child of 40. Preorder: 50, 30, 20, 40, 35, 70, 60, 80. Postorder: 20, 35, 40, 30, 60, 80, 70, 50.</p>` },
+      { q: `<p>In the BST from the previous question, delete 30, then delete 50. Draw the tree after each deletion and give its preorder traversal.</p>`, a: `<p>30 has two children, so it takes the value of its inorder successor, the smallest value in its right subtree: right to 40, then left to 35. Copy 35 into the node and remove the old 35 leaf. Preorder: 50, 35, 20, 40, 70, 60, 80. Next, 50 also has two children; its successor is 60 (right to 70, then left to 60), a leaf. Preorder: 60, 35, 20, 40, 70, 80. Check with an inorder traversal: 20, 35, 40, 60, 70, 80 is still sorted.</p>` },
       { q: `<p>Write <code>bst_min(t)</code> returning the smallest value in a non-empty BST, without looking at every node. What is its cost?</p>`, a: `<pre><code>def bst_min(t):
     while t.left is not None:
         t = t.left

@@ -159,3 +159,110 @@ Files: `data/cs102.js`, `data/cs102-code.js`, `data/math121.js`, `data/math131.j
 86. MATH 131 Lesson 7 needs vectors and dot products, but PHYS 150 is optional and linear algebra is in Year 2. The math course needs its own short vector primer.
 87. References to other courses (for example "CS 102, Lesson 2" in MATH 131's optional lesson, or "MATH 131" in PHYS 150) are plain text. Links to the lesson would help me look things up.
 88. Several lessons send me to "a later course" (master theorem, AVL trees, RSA case where m shares a factor with n). A one-line "you don't need this yet" would reduce anxiety.
+
+## Professor's response
+
+Thank you for a careful, honest review. Every item below led to a change in the lesson it names, except where noted. Two items revealed real errors, which are now fixed: Simpson's error table (56) and, found while answering item 6, the claim in CS 102 Lesson 2 that `sum` works on any class with `__add__` (it also needs `__radd__`). Every number, table value and code output that I added or changed was checked by running Python. For advanced topics I chose, item by item, between a short correct explanation and an explicit "you don't need this yet"; the choice is stated in each line. Cross-course references now link to the lesson they mean.
+
+### CS 102 Programming II
+
+1. c1: Added a short demonstration that `a._balance = -5` runs silently and the failure appears later, elsewhere; explained that the underscore is only a label, and that properties make the *public* name check every assignment.
+2. c1, `transfer` practice answer: Defined a transaction (a group of changes that all happen or none do, with rollback) and pointed to the Databases course.
+3. c1, Class attributes: Explained that assigning through `self` always creates an instance attribute, with a runnable `Counted` example showing the class counter staying at 0.
+4. c2: Added a two-bullet comparison: `NotImplemented` is a value you return from operator methods; `NotImplementedError` is an exception you raise. c3 now repeats the distinction where `NotImplementedError` appears.
+5. c2: New subsection "What is a hash?": buckets, why lookups are fast, why equal objects must have equal hashes, and why hashed data must not change. Practice 3's answer now shows the mutated point disappearing from the set (blocking item; practice 3 is now doable from the lesson).
+6. c2: New subsection "Mixing types" showing the actual `AttributeError`, then an `__add__` with an `isinstance` check plus `__radd__`. **Error fixed:** the lesson said `sum` works if `__add__` does; `sum` starts from 0 and also needs `__radd__` (or a start value), and the text now says so.
+7. c2, Properties: Step-by-step explanation of what `@property` returns, where `.setter` comes from, why the name is repeated, and the equivalent `property(get, set)` form.
+8. c2, Dataclasses: Explained `x: float` in a sentence (a field named x meant to hold a float, not checked at run time, read by `@dataclass`) and pointed to Lesson 4.
+9. c2: Added the rule for `__str__`: write it only when a human-friendly form differs from the repr; otherwise `print` falls back to `__repr__`.
+10. c3, `super()` bullet: Explained that Python supplies the current class and `self`, and searches from the next class in the chain; gave the long form `super(SavingsAccount, self)`.
+11. c3: Added full `Rectangle` and `Square` code with `set_width` and `set_height`, a `stretch` function, and a line-by-line trace showing why the square gives 16 (blocking item).
+12. c3: Confirmed a docstring is a valid body (any statement is), and compared the raising and abstract styles.
+13. c4: Explained `...` (the `Ellipsis` value, used as a placeholder body).
+14. c4: Added how to install and run mypy, with a complete `inventory.py` and mypy's real output.
+15. c4: Spelled out SOLID and mapped each letter to the bullets above it. Also corrected the history: Martin collected the principles around 2000; Michael Feathers coined the acronym later.
+16. c4, type-hint table: `int | None` and `Optional[int]` mean the same; the `|` form works from Python 3.10.
+17. c5, Decorators: Added a `show(*args, **kwargs)` example with its printed output, and explained unpacking in calls.
+18. c5: Explained what `functools.wraps` fixes (`__name__` becomes `'wrapper'` and the docstring is lost without it, which affects `help`, tracebacks and tools).
+19. c5: New paragraph "Closures capture variables, not values" with a loop example, and a step-by-step explanation of why the default argument `i=i` fixes it; the practice answer is expanded the same way.
+20. c5: Added when to use `nonlocal` (enclosing function) versus `global` (module), and why to avoid `global`.
+21. c6: New subsection "Where to run it": pytest runs in a terminal on your computer; folder layout; `python -m pytest`; why the import works and what `ModuleNotFoundError` means. The leap-year practice answer now gives the file names and a `dates.py` to test (blocking item; checked with pytest 9.2: 6 passed).
+22. c6, Fixtures: Explained `pathlib.Path` and that `/` is `__truediv__` (Lesson 2) used to join paths.
+23. c6, Fixtures: Explained how pytest matches parameter names to registered fixtures and calls them for each test.
+24. c6: Added a `unittest.mock.Mock` example on Lesson 4's checkout, guidance on mock versus hand-written fake, and the warning that plain mocks accept misspelled methods (`Mock(spec=...)` prevents it).
+25. c7: Worked example of amortized cost: doubling (15 copies for 16 appends), why a 1.125 growth factor still averages a constant (about 8.4 copies per append in a simulation of CPython's growth rule), and why growing by a fixed amount would be O(n).
+26. c7: Added a one-paragraph big-O recap at the start, linked to CS 101's efficiency lesson.
+27. c8: Explained why `_insert` reassigns (only the return value can attach the new node; other assignments store the same reference) with a five-step trace of inserting 5.
+28. c8: I chose a brief, complete treatment: new subsection "Deleting from a BST" with the three cases, an example from the figure for each, and tested code (checked against a set on 2,000 random trees). Added a practice problem on deletion.
+29. c8, Vocabulary: Explained that −1 is the value that makes `1 + max(...)` give 0 for a single node, and noted the node-counting convention.
+
+### MATH 121 Discrete Mathematics II
+
+30. d1: Explained that n kinds need n − 1 separators, so the row has n + r − 1 symbols; checked against the donut example.
+31. d1: Added a standalone division-rule example (5 people at a round table: 120/5 = 24) and a handshake example.
+32. d2: Defined the ceiling (and floor), with examples, Python equivalents, and why the pigeonhole bound uses it.
+33. d2: Added the proof idea of Erdős–Szekeres (labels as holes) and stated that it is for interest and not on the exam.
+34. d2: Added a three-step method for finding the "story" and a second worked proof, k·C(n, k) = n·C(n − 1, k − 1) (committees with a chair).
+35. d3: Explained the r^n guess: first-order recurrences give powers, Hanoi gave powers, and substitution checks the guess.
+36. d3: Showed both equations for A and B in Binet's formula and solved them, with a check at n = 2.
+37. d3: Added the exact recurrence with ceiling and floor, a sandwich argument that it is still Θ(n log n), and the computed value T(1000) = 9976.
+38. d3: Worked Hanoi as a non-homogeneous recurrence: particular solution −1 plus A·2^n, matching the unrolled answer; said which other cases this course covers.
+39. d4: New subsection "The extended Euclidean algorithm by hand" with the table method and a checked table for 252 and 105. Practice 1 and practice 2 answers now use the table, so practice 2 is doable from the lesson (blocking item).
+40. d4: Derived the return value `g, t, s - (a // b) * t` algebraically and added a table tracing the recursive calls.
+41. d4: Added when you can "divide" a congruence (only by a number with an inverse), a counterexample mod 6, and the general rule.
+42. d5: Explained the rearrangement step: p − 1 different values landing in p − 1 places must fill each once; showed p = 7, a = 3.
+43. d5: New paragraph: d is an exponent, and powers repeat every φ(n), not every n (shown with powers of 3 mod 7).
+44. d5: Showed how text becomes a number (UTF-8 bytes read in base 256, with Python code) and explained hybrid encryption.
+45. d5: Said what OAEP does (random, reversible padding: different ciphertexts each time, large numbers, tamper detection) and pointed to the Security course.
+46. d6: Gave the law of total probability its own explanation and added a probability-tree figure for the disease example.
+47. d6: Yes, it depends. Listed the host's assumptions and showed that a host who opens a random door gives 1/2 (checked by simulation, about 0.497).
+48. d7: Derived E[(X − μ)²] = E[X²] − μ² by expanding and using linearity.
+49. d7: Defined H_n where it is used, gave H_50 ≈ 4.499, and linked to MATH 131 Lesson 4 for why it grows like ln n.
+50. d7: The phrase "converges (absolutely)" is in MATH 131's ratio test, not in d7; I addressed it where d7 needs it (expected values of infinitely-valued variables) and added a derivation of the geometric mean 1/p. Expanded the quicksort claim into the indicator argument, the exact sum 2(n + 1)H_n − 4n and its value for n = 1000, and what 1.39 means.
+
+### MATH 131 Calculus II and Multivariable
+
+51. k1: Added the LIATE rule of thumb, why it works, and when to ignore it.
+52. k1: Worked ∫ eˣ sin x dx in four numbered steps with the check and two cautions (blocking item).
+53. k1: Explained the counting argument: k comparisons distinguish at most 2^k orders, so log₂(n!) comparisons are needed; gave the numbers for n = 1000.
+54. k2: Added washers, with a worked example on the pictured region (2π/15) and the common π(f − g)² mistake.
+55. k2: Showed the integration by parts for the exponential mean, including the limit at infinity.
+56. k3: **Error fixed.** The table is now ∫₀¹ eˣ dx, where the errors fall by 4.0 and 16.0 as the text says. Added a paragraph explaining the π example: its leading Simpson error term is proportional to f‴(1) − f‴(0), which is 0 for that function, so the h⁶ term takes over (ratio 64), and the first ratio (159) comes before the pattern settles. Updated practice 3 to compute both.
+57. k3: Defined K precisely, how to find it, and a worked example on the figure's function (K = 2, bound 0.083 versus actual error 0.0033).
+58. k4: Defined ≪ in words and as a limit, with an example.
+59. k4: Added the rectangle figure for the integral test and a two-bullet explanation of both inequalities, including the bounds on H_N.
+60. k4: Defined absolute convergence before the ratio test uses it; added it to the terms.
+61. k5: Rewrote the sin(0.1) example: both bounds are correct; the sharper one is allowed because T₃ = T₄ for sin. Stated what earns credit on an exam. The actual error is about 8.3 × 10⁻⁸.
+62. k5: I chose "you don't need this yet": marked Euler's formula as a look-ahead, said what i is, and explained the grouping in one sentence.
+63. k6: Explained that separation is really the substitution rule from Lesson 1, and noted the constant solutions lost by dividing.
+64. k6: Derived the logistic solution in six numbered steps, with the partial fractions and a check at t = 0.
+65. k6: Added a slope-field figure for the logistic equation with two solution curves and the equilibria marked.
+66. k7: New section "A primer: vectors, unit vectors and the dot product": components, addition, length, unit vectors, both forms of the dot product with a law-of-cosines justification, a figure, and three consequences. The directional-derivative paragraph now explains why u must be a unit vector. Added a practice problem on the primer. The "ant" practice is now doable from the lesson (blocking item).
+67. k7: Added a four-step worked example of drawing a contour map by hand, using the figure's function.
+68. k8: Explained where D comes from by completing the square in the second-order approximation.
+69. k8: Derived the normal equations from ∂E/∂m = 0 and ∂E/∂b = 0, step by step.
+70. k8: Expanded Lagrange multipliers to a full section: why the gradients are parallel, a three-step method, two worked examples, and a new practice problem. Said that harder constrained problems come in later optimization courses.
+71. k8: Explained 1/√N from the variance of an average (linked to MATH 121 Lesson 7).
+
+### PHYS 150 Physics I
+
+72. p1: Showed explicit and semi-implicit Euler side by side, said which one the course uses, and noted in practice 4's answer that it is semi-implicit.
+73. p2: Added a tip-to-tail vector addition figure.
+74. p3: Explained why drag goes as v² (momentum given to the air each second) and when it is linear (viscous, small or slow objects).
+75. p3: Worked out the units of k (kg/m) and two ways to measure or estimate it, checked against the skydiver's 0.25 kg/m.
+76. p3: Gave the exact solution v = v_t tanh(gt/v_t), how to check it, and the time formula with atanh (10.47 s for the skydiver). The auto-graded problem's prompt now refers to this formula.
+77. p4: Yes; tied W = Fd cos θ to the dot product with a link to MATH 131 Lesson 7, a component example, and the integral form.
+78. p4: Derived the elastic-collision formulas from the two conservation laws.
+79. p4: Explained explicit Euler's energy growth factor (1 + Δt² per step, giving the 1.36 in the code), the exactly conserved quantity of semi-implicit Euler, and what "symplectic" (area-preserving) means.
+80. p5: New section "Angular momentum": definition, why it is conserved for central forces, its link to Kepler's second law, and the value L = 1.2 in the simulation's units. Practice 4 is now doable from the lesson (blocking item).
+81. p5: Added gravitational potential energy −GMm/r and derived escape velocity as √2 times circular speed, with numbers for the ISS altitude and Earth's surface.
+82. p5: Derived a = v²/r with a velocity-triangle figure and again with calculus.
+83. p6: Added the two-line check by differentiating.
+84. p6: Explained the phase, how starting conditions fix it, and added a figure comparing φ = 0 and φ = −π/2.
+85. p6: Added a paragraph on ω versus f: what each counts, when to use which, and a worked conversion.
+
+### Across courses
+
+86. Same as item 66: MATH 131 Lesson 7 now has its own self-contained vector primer, so it no longer depends on PHYS 150 or linear algebra.
+87. Specific references to other lessons are now links: CS 102 (Lessons 1, 6, 7 and 8, to CS 101), MATH 121 (to CS 102, CS 101, MATH 120, MATH 131), MATH 131 (to CS 101, CS 102, MATH 121, MATH 130, PHYS 150), and PHYS 150 (to MATH 131 and CS 102). Generic mentions such as "in CS 101 you used…" stay as plain text.
+88. Added explicit "you don't need this yet" notes for the master theorem (MATH 121 d3), AVL and red–black trees (CS 102 c8), the RSA shared-factor case (MATH 121 d5, with a one-line Python check instead), Euler's formula (MATH 131 k5), the √π integral (MATH 131 k3), Erdős–Szekeres (d2) and the full quicksort calculation (d7).
