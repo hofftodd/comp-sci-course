@@ -387,7 +387,7 @@ student on two devices counts as two.
 
 ## Content review
 
-Every new term gets at least one review cycle before it is called done. First, a student-perspective review lists everything unclear or blocking. Then a separate professor agent revises the content and answers each item. The reviews are kept in `docs/reviews/`, and the full procedure is in `CLAUDE.md`.
+Every new term gets at least one review cycle before it is called done. First, a student agent started with no context reads each course as plain text (`scripts/dump_course.js`) and lists everything unclear or blocking. Then a separate professor agent revises the content and answers each item. The reviews are kept in `docs/reviews/`, and the full procedure is in `CLAUDE.md`.
 
 ## Testing
 
