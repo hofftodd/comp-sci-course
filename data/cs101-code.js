@@ -412,7 +412,7 @@ Total: $57.23</code></pre>`,
 Ada,88,92,95
 Alan,79,85,91</code></pre><p>gives <code>{"Ada": 91.666…, "Alan": 85.0}</code>.</p>`,
       starter: `import csv\n\ndef averages(path):\n    pass\n`,
-      hint: `<p>Use <code>csv.reader</code>: take the first row as the header with <code>next(reader)</code>, then for each row convert <code>row[1:]</code> to numbers with <code>float</code>.</p>`,
+      hint: `<p>Use <code>csv.reader</code> (shown in the Files and modules lesson, just after <code>DictReader</code>): take the first row as the header with <code>next(reader)</code>, then for each row convert <code>row[1:]</code> to numbers with <code>float</code>.</p>`,
       solution: `import csv\n\ndef averages(path):\n    result = {}\n    with open(path, newline="", encoding="utf-8") as f:\n        reader = csv.reader(f)\n        next(reader)\n        for row in reader:\n            scores = [float(x) for x in row[1:]]\n            result[row[0]] = sum(scores) / len(scores)\n    return result\n`,
       tests: [
         { label: "Three quizzes", setup: `open("grades.csv", "w", encoding="utf-8").write("name,quiz1,quiz2,quiz3\\nAda,88,92,95\\nAlan,79,85,91\\n")`, call: "averages('grades.csv')", expect: "{'Ada': 275 / 3, 'Alan': 85.0}" },

@@ -252,13 +252,13 @@ Math.pow(2, 10)  // 1024.0  (returns a double)
 std::pow(2, 10)  // 1024  (returns a double, needs &lt;cmath&gt;)
 std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
 </div>
-<p><code>//</code> and <code>%</code> look odd at first but are used constantly. <code>a // b</code> is how many whole times <code>b</code> fits into <code>a</code>, and <code>a % b</code> (read "a mod b") is what's left over. Some everyday uses:</p>
+<p><code>//</code> and <code>%</code> look odd at first but are used constantly. For positive numbers, <code>a // b</code> is how many whole times <code>b</code> fits into <code>a</code>, and <code>a % b</code> (read "a mod b") is what's left over. Some everyday uses:</p>
 <ul>
   <li><strong>Even or odd:</strong> <code>n % 2</code> is <code>0</code> for even numbers and <code>1</code> for odd ones.</li>
   <li><strong>Last digit:</strong> <code>1987 % 10</code> is <code>7</code>, and <code>1987 // 10</code> is <code>198</code> (the number with its last digit removed).</li>
   <li><strong>Converting units:</strong> 135 minutes is <code>135 // 60</code> = 2 hours and <code>135 % 60</code> = 15 minutes.</li>
 </ul>
-<p>Floor division rounds <em>down</em>, toward negative infinity, so <code>-7 // 2</code> is <code>-4</code>, not <code>-3</code>.</p>
+<p>With negative numbers, "how many times it fits" stops making sense, so here is the exact rule: <code>a // b</code> is <code>a / b</code> rounded <em>down</em>, toward negative infinity. <code>-7 / 2</code> is <code>-3.5</code>, and rounding down gives <code>-4</code>, not <code>-3</code>. Then <code>a % b</code> is whatever makes the pieces fit back together, <code>(a // b) * b + a % b == a</code>: here <code>-4 * 2</code> is <code>-8</code>, so <code>-7 % 2</code> is <code>1</code>.</p>
 
 <h3>Order of operations</h3>
 <p>Python follows the precedence rules you know from math, with exponents first, then multiplication and division (including <code>//</code> and <code>%</code>), then addition and subtraction. Operators of equal precedence go left to right, except <code>**</code>, which goes right to left. Parentheses override everything. Here is an expression evaluated one step at a time:</p>
@@ -299,13 +299,14 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
     <tr><td>64</td><td>2<sup>64</sup> = 18,446,744,073,709,551,616</td><td>1.8 × 10<sup>19</sup></td></tr>
   </tbody>
 </table>
-<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 16 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. (Precisely: 53 of the 64 bits hold the digits, and 2<sup>53</sup> ≈ 9.0 × 10<sup>15</sup>, which is just under 16 decimal digits' worth. Any decimal number with 15 significant digits is stored faithfully, and 17 digits are always enough to write a float out exactly. "About 16" is the figure to use in this course and in MATH 130.) That limit is where the surprises below come from.</p>
+<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 16 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. (Where the 16 comes from: 53 of the 64 bits hold the digits, and 2<sup>53</sup> = 9,007,199,254,740,992 is a 16-digit number. So a float can hold every whole number up to that size exactly: every number with 15 digits, but only some with 16. For instance, <code>float(9007199254740993)</code> comes back as <code>9007199254740992.0</code>. Digits after the point behave the same way: the first 15 significant digits always survive and the 16th usually does. That is what "about 16" means, here and in MATH 130.) That limit is where the surprises below come from.</p>
 
 <h3>Floats are approximate</h3>
-<p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Two consequences:</p>
+<p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Three consequences:</p>
 <ul>
-  <li>Don't test floats with <code>==</code>: two calculations that should agree can differ in the last digit. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table near the end of this lesson shows where modules fit, and the Files and modules lesson explains <code>import</code> fully. This applies throughout the course: when a result is a float, check it with <code>math.isclose</code> unless you know it is exact. <code>==</code> is fine for ints and strings, and for floats that are whole numbers or simple halves and quarters, such as <code>6 / 3 == 2</code> or <code>1 / 4 == 0.25</code>, which binary stores exactly. When in doubt, use <code>math.isclose</code>.</li>
+  <li>Don't test floats with <code>==</code>: two calculations that should agree can differ in the last digit. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. By default, "nearly" means they differ by at most one billionth (10<sup>−9</sup>) of the larger one, so they agree in roughly their first 9 significant digits: <code>math.isclose(1.0, 1.0000000001)</code> is <code>True</code>, but <code>math.isclose(1.0, 1.000001)</code> is <code>False</code>. Rounding errors in the 16th digit are far smaller than that. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table near the end of this lesson shows where modules fit, and the Files and modules lesson explains <code>import</code> fully. This applies throughout the course: when a result is a float, check it with <code>math.isclose</code> unless you know it is exact. <code>==</code> is fine for ints and strings, and for floats that are whole numbers or simple halves and quarters, such as <code>6 / 3 == 2</code> or <code>1 / 4 == 0.25</code>, which binary stores exactly. When in doubt, use <code>math.isclose</code>.</li>
   <li>Use <code>round(x, 2)</code> to show a sensible number of decimal places: <code>round(0.1 + 0.2, 2)</code> is <code>0.3</code>. (An <em>f-string</em> such as <code>f"{x:.2f}"</code> does the same job when printing; it is explained in the output section at the end of this lesson.)</li>
+  <li>Subtracting two nearly equal floats loses accuracy. Each float is right to about 16 significant digits. If two floats agree in their first 12 digits, subtracting cancels those 12, and only about 4 trustworthy digits are left; the rest of the result is leftover rounding error. For example, <code>(1 + 1e-12) - 1</code> should be <code>1e-12</code> (that's 10<sup>−12</sup>; the notation is explained just below) but gives <code>1.000088900582341e-12</code>, wrong from the fifth digit. MATH 130 meets this when it estimates limits and derivatives with tiny steps.</li>
 </ul>
 <p>Very large and very small floats are written in <strong>scientific notation</strong> with an <code>e</code>, meaning "times ten to the power": <code>2.5e3</code> is 2.5 × 10<sup>3</sup> = <code>2500.0</code>, and <code>1e-10</code> is 1 × 10<sup>−10</sup> = 0.0000000001. Python prints tiny or huge floats this way too, and you can type them this way. You'll see <code>1e-10</code> used as "a very small tolerance" in later lessons and in MATH 130.</p>
 
@@ -798,7 +799,7 @@ CSA.addUnits("cs101", [
 <p>Strings compare alphabetically, character by character, using each character's code number. Every character is stored as a number: <code>A</code> to <code>Z</code> are 65 to 90, and <code>a</code> to <code>z</code> are 97 to 122 (the Strings lesson shows how to look these up with <code>ord</code>). So all uppercase letters come before all lowercase ones, so <code>"Zebra" &lt; "apple"</code> is <code>True</code>. When case shouldn't matter, convert both sides to lowercase first: <code>"Zebra".lower()</code> gives <code>"zebra"</code>, and <code>"Zebra".lower() &lt; "apple".lower()</code> is <code>False</code>. Writing <code>.lower()</code> after a string calls a <em>method</em>, a function that belongs to the value; the Strings lesson covers methods properly.</p>
 
 <h3>Combining conditions: and, or, not</h3>
-<p><code>and</code> is true only when both sides are true; <code>or</code> is true when at least one side is; <code>not</code> flips a value. These are the logical connectives ∧, ∨ and ¬ from Discrete Mathematics.</p>
+<p><code>and</code> is true only when both sides are true; <code>or</code> is true when at least one side is; <code>not</code> flips a value. In <a href="#c-math120-u1">MATH 120, Propositional logic</a>, which you take alongside this course, the same three connectives are written ∧ (and), ∨ (or) and ¬ (not).</p>
 <pre><code>age = 20
 has_ticket = True
 can_enter = age &gt;= 18 and has_ticket      # True
@@ -891,7 +892,7 @@ print(total)   # 15</code></pre>
   </tbody>
 </table>
 <p>The same shape counts things (<code>count += 1</code> inside an <code>if</code>) or tracks a maximum (<code>if x &gt; biggest: biggest = x</code>).</p>
-<div class="callout"><strong>Loop invariant.</strong> For any loop, ask: what is true at the start of every pass? Here, before each pass, <code>total</code> equals 1 + 2 + … + (i − 1), the sum of everything handled so far. If that statement is true before the first pass and each pass keeps it true, then when the loop ends it tells you the result is right. This is exactly the reasoning of a proof by induction, which you'll meet in Discrete Mathematics.</div>
+<div class="callout"><strong>Loop invariant.</strong> For any loop, ask: what is true at the start of every pass? Here, before each pass, <code>total</code> equals 1 + 2 + … + (i − 1), the sum of everything handled so far. If that statement is true before the first pass and each pass keeps it true, then when the loop ends it tells you the result is right. This is exactly the reasoning of a proof by induction (show a statement holds at the start, then show each step keeps it true), which <a href="#c-math120-u6">MATH 120, Mathematical induction</a> covers later this term.</div>
 
 <h3>break and continue</h3>
 <p><code>break</code> leaves the loop immediately. <code>continue</code> skips the rest of the current pass and moves to the next one.</p>
@@ -921,7 +922,7 @@ print(total)   # 1 + 2 + 3 = 6</code></pre>
 <pre data-label="Output"><code>   1   2   3   4   5
    2   4   6   8  10
    3   6   9  12  15</code></pre>
-<p>Two new details: <code>:4</code> inside an f-string pads a value to four characters wide, so the columns line up; and <code>end=""</code> tells <code>print</code> not to start a new line. <code>end=""</code> is a <em>keyword argument</em>: a value passed to a function by name rather than by position. It isn't special to <code>print</code>; any function can accept named arguments, and the next lesson shows how to write your own. (<code>print</code>'s <code>end</code> is normally <code>"\\n"</code>, a new line; here we replace it with nothing.) The empty <code>print()</code> ends each row. The inner block ran 3 × 5 = 15 times.</p>
+<p>Two new details: <code>:4</code> inside an f-string pads a value to four characters wide, so the columns line up; and <code>end=""</code> tells <code>print</code> not to start a new line. <code>end=""</code> is a <em>keyword argument</em>: a value passed to a function by name rather than by position. It isn't special to <code>print</code>; any function can accept named arguments, and the next lesson shows how to write your own. (<code>print</code>'s <code>end</code> is normally <code>"\\n"</code>, the new-line character. Inside a string, a backslash and the letter after it together stand for one special character, and <code>\\n</code> means "start a new line"; the Strings lesson lists the others. Here we replace it with nothing.) The empty <code>print()</code> ends each row. The inner block ran 3 × 5 = 15 times.</p>
 
 <h3>Searching with loops: guess-and-check and bisection</h3>
 <p>Loops let a program search for an answer. Suppose we want √2 without using a square root function. <strong>Guess-and-check</strong> tries values in small steps until one is close enough:</p>
@@ -939,7 +940,7 @@ while high - low &gt; 0.000001:
     else:
         low = mid
 print(low)   # 1.414213..., after only 21 passes</code></pre>
-<p>Twenty-one halvings shrink a range of width 2 to less than one millionth, because 2²¹ is about two million. Bisection appears again in Calculus (where a theorem guarantees it works) and in the efficiency lesson later in this course (where it becomes binary search).</p>
+<p>Twenty-one halvings shrink a range of width 2 to less than one millionth, because 2²¹ is about two million. Bisection appears again in <a href="#c-math130-u2">MATH 130, Continuity</a> (where a theorem guarantees it works) and in the efficiency lesson later in this course (where it becomes binary search).</p>
 
 <h3>A loop with surprises: the Collatz sequence</h3>
 <p>Start with any positive whole number. If it's even, halve it; if it's odd, triple it and add one. Repeat until you reach 1.</p>
@@ -1658,7 +1659,7 @@ word_counts("the cat and the hat")
 <p>To look up 33 later, Python computes 33 % 8 = 1 again and goes straight to slot 1, without checking the other keys. (Real dictionaries are a bit more elaborate, and string hashes are big numbers that change each time Python starts, but the idea is the same.) Now you can see why keys must not change: if a key changed after it was stored, its hash would change, and Python would look in the wrong slot. So Python refuses mutable keys: <code>{[1, 2]: "x"}</code> raises <code>TypeError: unhashable type: 'list'</code>. A value is <strong>hashable</strong> if it has a hash that never changes. <a href="#c-cs101-algo">The efficiency lesson</a> returns to this, including what happens when two keys land in the same slot.</p>
 
 <h3>Sets</h3>
-<p>A <strong>set</strong> is an unordered collection with no duplicates, written with braces: <code>{1, 2, 3}</code>. (An empty set is <code>set()</code>, because <code>{}</code> is an empty dictionary.) Sets are fast at answering "is this in here?" and support the operations from Discrete Mathematics:</p>
+<p>A <strong>set</strong> is an unordered collection with no duplicates, written with braces: <code>{1, 2, 3}</code>. (An empty set is <code>set()</code>, because <code>{}</code> is an empty dictionary.) Sets are fast at answering "is this in here?" and support the operations of set theory, which <a href="#c-math120-u4">MATH 120, Sets</a> covers (the comments below say what each one does):</p>
 <pre><code>a = {"Ada", "Alan", "Grace"}
 b = {"Grace", "Linus"}
 a | b      # union:        {'Ada', 'Alan', 'Grace', 'Linus'}
@@ -1671,6 +1672,9 @@ seen.add("Ada")        # add one item: {'Ada'}
 seen.add("Ada")        # already there, so no change
 "Ada" in seen          # True</code></pre>
 <p><code>.add(x)</code> puts one item into a set, much as <code>.append(x)</code> does for a list. A common pattern starts with an empty set and adds items as a loop meets them, so that <code>x in seen</code> answers "have I met this before?" quickly.</p>
+<p>Comprehensions work with braces too. With one expression they build a set; with <code>key: value</code> they build a dictionary:</p>
+<pre><code>{len(w) for w in ["to", "be", "or"]}      # set:  {2}
+{w: len(w) for w in ["to", "be", "or"]}   # dict: {'to': 2, 'be': 2, 'or': 2}</code></pre>
 
 <h3>Sorting with a key</h3>
 <p><code>sorted</code> takes an optional <code>key</code>: a function applied to each item to decide the order. This is where lambdas earn their keep.</p>
@@ -1715,7 +1719,7 @@ sorted(pairs, key=lambda p: (-p[1], p[0]))
       ["Hashable", "Usable as a dictionary key or set member: the value has a hash that never changes. Immutable built-ins are hashable; lists are not."],
       ["Hash", "A whole number computed from a value, used to choose where a dictionary or set stores it."],
       ["Shallow copy", "A new outer list holding the same inner objects, as made by xs.copy(); a deep copy also copies everything inside."],
-      ["Comprehension", "A compact expression that builds a list, dict or set from an iterable."]
+      ["Comprehension", "A compact expression that builds a list, set or dict from anything a for loop can go through, such as a list, string or range."]
     ],
     quiz: [
       { q: "After <code>a = [1, 2]; b = a; b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place (like <code>extend</code>). This differs from <code>b = b + [3]</code>, which would build a new list and leave <code>a</code> as <code>[1, 2]</code>; see \"A trap: += on a list\" above." },
@@ -1824,7 +1828,7 @@ print(original)   # expected [1, 2]</code></pre>`, a: `<p>The parameter <code>xs
 <p>This is the <strong>call stack</strong>. Python limits its depth (by default to about 1,000 frames). A recursive function with no base case, or one that never gets closer to it, keeps adding frames until Python stops it with <code>RecursionError: maximum recursion depth exceeded</code>.</p>
 
 <h3>The recursive leap of faith</h3>
-<p>Tracing every frame is useful for understanding, but it's not how you <em>write</em> recursive functions. Instead, assume the function already works for smaller inputs, and ask only: <em>if I had the answer for the smaller problem, how would I build the answer for this one?</em> For factorial: if I trust that <code>factorial(n - 1)</code> is correct, then <code>n * factorial(n - 1)</code> is clearly correct too. This is the same reasoning as proof by induction in Discrete Mathematics, where the "trust" is called the inductive hypothesis.</p>
+<p>Tracing every frame is useful for understanding, but it's not how you <em>write</em> recursive functions. Instead, assume the function already works for smaller inputs, and ask only: <em>if I had the answer for the smaller problem, how would I build the answer for this one?</em> For factorial: if I trust that <code>factorial(n - 1)</code> is correct, then <code>n * factorial(n - 1)</code> is clearly correct too. This is the same reasoning as proof by induction in <a href="#c-math120-u6">MATH 120, Mathematical induction</a>: prove a starting case, then show that if the statement holds for one case it holds for the next. There, the "trust" is called the inductive hypothesis.</p>
 
 <h3>Recursion on lists and strings</h3>
 <p>Lists and strings have a natural recursive structure: a non-empty sequence is its first item plus the rest, and the rest is a shorter sequence.</p>
@@ -2235,6 +2239,7 @@ with open("grades.csv", newline="", encoding="utf-8") as f:
 # Alan: 85.0
 # Grace: 96.7</code></pre>
 <p>Notice <code>int(...)</code>: everything read from a text file is a string, just like <code>input()</code>. Writing a CSV uses <code>csv.writer</code> and its <code>writerow</code> method.</p>
+<p>If you'd rather have each row as a plain list, use <code>reader = csv.reader(f)</code>. It gives every row, the header included, as a list of strings, such as <code>['Ada', '88', '92', '95']</code>. To skip the header, call <code>next(reader)</code> once before the loop: the built-in <code>next</code> takes one item from a reader (it returns the header row, which you can keep or ignore), so the <code>for</code> loop starts at the first data row. Lists suit files where the number of columns varies, because <code>row[1:]</code> is then "all the scores".</p>
 <p>Why <code>newline=""</code>? Normally, when Python reads or writes a text file, it translates line endings for you (Windows ends lines with two characters, <code>\\r\\n</code>; macOS and Linux use one, <code>\\n</code>). The <code>csv</code> module wants to handle line endings itself, because a quoted value in a CSV may legitimately contain a line break. <code>newline=""</code> switches Python's translation off and lets <code>csv</code> do it. Without it, files written on Windows get an extra blank line after every row. The rule is simple: whenever you open a file for <code>csv</code>, reading or writing, pass <code>newline=""</code>.</p>
 
 <h3>JSON: saving structured data</h3>
@@ -2444,7 +2449,7 @@ def save_scores(path, scores):
 <p>How many steps in the worst case? Each step halves the range, so the question is how many times you can halve <em>n</em> before reaching 1. That's log₂ <em>n</em>. For a million items, that's only about 20 steps; for a billion, about 30. This is the bisection idea from the branching lesson, applied to a list.</p>
 
 <h3>Counting steps: big-O notation</h3>
-<p>Exact timings depend on the computer, the language and what else is running. So we describe algorithms by their <strong>order of growth</strong>, written in <strong>big-O notation</strong>: the dominant way the work grows with input size <em>n</em>, ignoring constant factors and smaller terms. An algorithm that does 3<em>n</em> + 7 steps is O(<em>n</em>); one that does <em>n</em>² + 100<em>n</em> is O(<em>n</em>²), because for large <em>n</em> the <em>n</em>² term dominates. (This is the same "only the dominant term matters" idea as limits at infinity in Calculus.)</p>
+<p>Exact timings depend on the computer, the language and what else is running. So we describe algorithms by their <strong>order of growth</strong>, written in <strong>big-O notation</strong>: the dominant way the work grows with input size <em>n</em>, ignoring constant factors and smaller terms. An algorithm that does 3<em>n</em> + 7 steps is O(<em>n</em>); one that does <em>n</em>² + 100<em>n</em> is O(<em>n</em>²), because for large <em>n</em> the <em>n</em>² term dominates. (This is the same "only the dominant term matters" idea as limits at infinity in <a href="#c-math130-u1">MATH 130, Limits</a>.)</p>
 <table>
   <thead><tr><th>Order</th><th>Name</th><th>Example</th><th>n = 10</th><th>n = 1,000</th><th>n = 1,000,000</th></tr></thead>
   <tbody>
