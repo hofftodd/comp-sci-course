@@ -11,8 +11,8 @@ window.CSA = {
     terms: [
       { id: "y1f", year: 1, term: "Fall", theme: "Foundations", open: true, languages: ["python"],
         courses: ["cs101", "math120", "math130", "cs100", "writ100"] },
-      { id: "y1s", year: 1, term: "Spring", theme: "Foundations", languages: ["python"],
-        planned: ["Programming II", "Discrete Mathematics II", "Calculus II & Multivariable", "Physics I or science"] },
+      { id: "y1s", year: 1, term: "Spring", theme: "Foundations", open: true, languages: ["python"],
+        courses: ["cs102", "math121", "math131", "phys150"] },
       { id: "y2f", year: 2, term: "Fall", theme: "Core systems & theory",
         planned: ["Data Structures", "Computer Systems I", "Linear Algebra", "Probability & Statistics for CS"] },
       { id: "y2s", year: 2, term: "Spring", theme: "Core systems & theory",
@@ -67,7 +67,23 @@ window.CSA = {
     propublica: { title: "Machine Bias", author: "Julia Angwin, Jeff Larson, Surya Mattu, Lauren Kirchner, ProPublica (2016)", url: "https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing", license: "", kind: "Investigative report" },
     gendershades: { title: "Gender Shades: Intersectional Accuracy Disparities in Commercial Gender Classification", author: "Joy Buolamwini and Timnit Gebru, FAT* 2018", url: "https://proceedings.mlr.press/v81/buolamwini18a.html", license: "", kind: "Paper" },
     wcag: { title: "Web Content Accessibility Guidelines (WCAG)", author: "W3C Web Accessibility Initiative", url: "https://www.w3.org/WAI/standards-guidelines/wcag/", license: "", kind: "Standard" },
-    euaiact: { title: "EU Artificial Intelligence Act (text and explorer)", author: "Future of Life Institute, artificialintelligenceact.eu", url: "https://artificialintelligenceact.eu/", license: "", kind: "Regulation" }
+    euaiact: { title: "EU Artificial Intelligence Act (text and explorer)", author: "Future of Life Institute, artificialintelligenceact.eu", url: "https://artificialintelligenceact.eu/", license: "", kind: "Regulation" },
+    composing: { title: "Composing Programs", author: "John DeNero, UC Berkeley (based on Structure and Interpretation of Computer Programs)", url: "https://www.composingprograms.com/", license: "CC BY-SA 3.0", kind: "Textbook" },
+    pythonds: { title: "Problem Solving with Algorithms and Data Structures using Python", author: "Brad Miller and David Ranum, Runestone Academy", url: "https://runestone.academy/ns/books/published/pythonds3/index.html", license: "CC BY-NC-SA 4.0", kind: "Textbook" },
+    pytestdocs: { title: "pytest documentation", author: "Holger Krekel and pytest-dev team", url: "https://docs.pytest.org/", license: "MIT", kind: "Reference" },
+    kay93: { title: "The Early History of Smalltalk", author: "Alan C. Kay, HOPL-II, ACM SIGPLAN Notices 28(3), 1993", url: "", license: "", kind: "Paper" },
+    liskov87: { title: "Data Abstraction and Hierarchy (OOPSLA '87 keynote)", author: "Barbara Liskov, ACM SIGPLAN Notices 23(5), 1988", url: "", license: "", kind: "Paper" },
+    osi: { title: "Open Source Initiative: licenses and the Open Source Definition", author: "Open Source Initiative", url: "https://opensource.org/licenses", license: "CC BY 4.0", kind: "Reference" },
+    xzcve: { title: "CVE-2024-3094 (xz utils backdoor)", author: "NIST National Vulnerability Database", url: "https://nvd.nist.gov/vuln/detail/CVE-2024-3094", license: "U.S. government work", kind: "Advisory" },
+    grinstead: { title: "Introduction to Probability", author: "Charles M. Grinstead and J. Laurie Snell", url: "https://math.dartmouth.edu/~prob/prob/prob.pdf", license: "GNU FDL", kind: "Textbook" },
+    keller: { title: "Applied Combinatorics", author: "Mitchel T. Keller and William T. Trotter", url: "https://www.appliedcombinatorics.org/", license: "CC BY-SA 4.0", kind: "Textbook" },
+    openstaxcalc2: { title: "Calculus Volume 2", author: "Gilbert Strang, Edwin Herman, et al., OpenStax", url: "https://openstax.org/details/books/calculus-volume-2", license: "CC BY-NC-SA 4.0", kind: "Textbook" },
+    openstaxcalc3: { title: "Calculus Volume 3", author: "Gilbert Strang, Edwin Herman, et al., OpenStax", url: "https://openstax.org/details/books/calculus-volume-3", license: "CC BY-NC-SA 4.0", kind: "Textbook" },
+    mactutorseries: { title: "An overview of the history of mathematics: infinite series and Euler", author: "MacTutor History of Mathematics, University of St Andrews", url: "https://mathshistory.st-andrews.ac.uk/Biographies/Euler/", license: "", kind: "History" },
+    openstaxphys: { title: "University Physics Volume 1", author: "William Moebs, Samuel J. Ling, Jeff Sanny, OpenStax", url: "https://openstax.org/details/books/university-physics-volume-1", license: "CC BY 4.0", kind: "Textbook" },
+    feynman: { title: "The Feynman Lectures on Physics, Volume I", author: "Richard P. Feynman, Robert B. Leighton, Matthew Sands, Caltech", url: "https://www.feynmanlectures.caltech.edu/I_toc.html", license: "", kind: "Textbook" },
+    newton1687: { title: "Philosophiæ Naturalis Principia Mathematica (1687), English translation by Andrew Motte (1729)", author: "Isaac Newton, via Wikisource", url: "https://en.wikisource.org/wiki/The_Mathematical_Principles_of_Natural_Philosophy_(1729)", license: "Public domain", kind: "Primary source" },
+    nasahidden: { title: "Katherine Johnson biography", author: "NASA", url: "https://www.nasa.gov/people/katherine-johnson/", license: "U.S. government work", kind: "Biography" }
   },
 
   /* How a reader can get each source. open = openly licensed; pd = public domain or
@@ -80,7 +96,9 @@ window.CSA = {
     dijkstra68: "library", mccarthy60: "library", leveson93: "library", gao92: "pd", ariane96: "free",
     horizon: "free", boole: "pd", shannon37: "free", sepboole: "free", seprussell: "free", sel4: "free",
     mactutorcalc: "free", eniac: "free", chmrev: "free", propublica: "free", gendershades: "free",
-    wcag: "free", euaiact: "free"
+    wcag: "free", euaiact: "free", composing: "open", pythonds: "open", pytestdocs: "open", kay93: "library",
+    liskov87: "library", osi: "open", xzcve: "pd", grinstead: "open", keller: "open", openstaxcalc2: "open",
+    openstaxcalc3: "open", mactutorseries: "free", openstaxphys: "open", feynman: "free", newton1687: "pd", nasahidden: "pd"
   },
 
   courses: {},

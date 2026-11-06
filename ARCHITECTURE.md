@@ -40,7 +40,7 @@ flowchart LR
 | `data/program.js` | Defines `window.CSA`: the four-year plan, the source registry, source access labels, and the registration helpers. Loads first. |
 | `data/<course>.js` | One file per course: `CSA.addCourse({...})`. |
 | `data/cs101-extras.js` | Sidebars and optional lessons for CS 101, kept separate because they are long. Other courses keep theirs in the course file. |
-| `data/cs101-code.js` | CS 101's auto-graded programming problems: `CSA.addCode("cs101", { unitId: [...] })`. |
+| `data/cs101-code.js`, `data/cs102-code.js` | Auto-graded programming problems: `CSA.addCode("cs101", { unitId: [...] })`. PHYS 150 registers its few simulation problems at the end of its course file. |
 | `app/code.js` | Programming problems: editor, Check/Run, results, solution and hint reveal, export script. |
 | `app/pyworker.js` | Web Worker that loads Pyodide and runs the harness. |
 | `app/harness.py` | The grader: runs student code and checks one test at a time. Also embedded in exported check scripts. |
@@ -108,6 +108,10 @@ test and every starter fails at least one.
 ## Content model
 
 All content is plain JavaScript objects. Notes are HTML strings (template literals).
+
+Course and lesson ids must be lowercase letters and digits only (`c1`, `calchist`), because the
+route pattern is `#c-<course>-<lesson>`. A term appears on the home page and in the sidebar when it
+has `open: true` in `data/program.js`; several terms can be open at once.
 
 ```js
 CSA.addCourse({
@@ -186,7 +190,7 @@ C++ material for CS 101 Unit 1 stays in the files for later courses to reuse.
 
 | Hash | View |
 |---|---|
-| (none) or `#home` | Home: Year 1 Fall courses and the four-year plan |
+| (none) or `#home` | Home: the courses of every open term (`open: true` in `data/program.js`) and the four-year plan |
 | `#c-<course>` | Course overview: core units, optional lessons, outcomes |
 | `#c-<course>-<lesson>` | Lesson: notes, sidebars, key terms, clarity rating, quiz, sources |
 | `#sources` | All sources, access labels and where each is cited |
@@ -386,7 +390,10 @@ student on two devices counts as two.
 There is no automated test suite yet. Changes so far were checked by:
 
 - `node --check` on every script, and loading `data/*.js` in Node to validate references (every
-  `sources` id exists, every quiz `answer` is in range).
+  `sources` id exists, every quiz `answer` is in range, rubric weights total 100, SVG marker ids
+  are unique, tags in notes are balanced).
+- Recomputing every number in the math and physics lessons (worked examples, tables, simulation
+  outputs) in Python.
 - Driving the page in headless Chromium with Playwright, including a mock `window.claude` runtime
   for the claude.ai backend.
 - Running the server against mock Anthropic, OpenAI, Gemini and local-model APIs.

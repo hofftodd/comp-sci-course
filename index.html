@@ -87,6 +87,7 @@ h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.2
 .shell { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: var(--s-6); max-width: 1320px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: var(--s-5) calc(var(--s-7) + 4.5rem + env(safe-area-inset-bottom, 0px)); }
 .index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); align-self: start; max-height: calc(100vh - 96px); overflow-y: auto; font-size: 0.9rem; padding-right: var(--s-2); }
+.index h2.next-term { margin-top: var(--s-5); }
 .index h2 { font-family: var(--f-body); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: var(--s-2); }
 .index details { border-top: 1px solid var(--rule); padding-block: var(--s-2); }
 .index summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: auto 1fr auto; gap: var(--s-2); align-items: baseline; }
@@ -281,6 +282,7 @@ pre code { background: none; padding: 0; font-size: inherit; }
 .fig text { fill: var(--ink); font-family: var(--f-body); font-size: 13px; }
 .fig text.m { fill: var(--muted); font-size: 12px; }
 .fig text.code { font-family: var(--f-mono); font-size: 12.5px; }
+.fig text.em { fill: var(--mark); font-weight: 700; }
 /* Programming problems */
 .code-block { max-width: 820px; }
 .cps { display: grid; gap: var(--s-5); }
@@ -460,6 +462,11 @@ pre code { background: none; padding: 0; font-size: inherit; }
 <script src="data/math130.js"></script>
 <script src="data/cs100.js"></script>
 <script src="data/writ100.js"></script>
+<script src="data/cs102.js"></script>
+<script src="data/cs102-code.js"></script>
+<script src="data/math121.js"></script>
+<script src="data/math131.js"></script>
+<script src="data/phys150.js"></script>
 <script>
 (() => {
   const D = window.CSA;
@@ -508,9 +515,11 @@ pre code { background: none; padding: 0; font-size: inherit; }
     .map(s => s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>` : esc(s.title)).join("; ");
 
   /* ---------- index (left nav) ---------- */
+  const openTerms = () => D.program.terms.filter(t => t.open);
   function renderIndex(route) {
-    const t = D.program.terms.find(t => t.open);
-    let h = `<h2>${termLabel(t)} · ${esc(t.theme)}</h2>`;
+    let h = "";
+    for (const t of openTerms()) {
+    h += `<h2 class="${h ? "next-term" : ""}">${termLabel(t)} · ${esc(t.theme)}</h2>`;
     for (const c of courseList(t)) {
       const p = progress(c);
       const open = route.course === c.id;
@@ -534,22 +543,23 @@ pre code { background: none; padding: 0; font-size: inherit; }
       }
       h += `</details>`;
     }
+    }
     $("#index").innerHTML = h;
   }
 
   /* ---------- views ---------- */
   function viewHome() {
-    const t = D.program.terms.find(t => t.open);
-    const cs = courseList(t);
+    const terms = openTerms();
+    const cs = terms.flatMap(courseList);
     const core = cs.reduce((a, c) => a + c.units.length, 0);
     const opt = cs.reduce((a, c) => a + c.optional.length, 0);
     const qs = cs.reduce((a, c) => a + lessons(c).reduce((b, u) => b + (u.quiz || []).length, 0), 0);
     const ps = cs.reduce((a, c) => a + lessons(c).reduce((b, u) => b + (u.practice || []).length, 0), 0);
     const doneCore = cs.reduce((a, c) => a + progress(c).n, 0);
     let h = `<section class="hero">
-      <div class="eyebrow">${termLabel(t)} is open</div>
+      <div class="eyebrow">Open now: ${terms.map(termLabel).join(" and ")}</div>
       <h1>A complete computer science education, one term at a time.</h1>
-      <p>Four years of coursework modeled on the strongest undergraduate programs, Each lesson is about 90 minutes: notes with worked examples, sidebars on history, ethics and the evolution of programming languages, practice problems with worked solutions, and a quiz. Every course opens with a clear grading rubric.</p>
+      <p>Four years of coursework modeled on the strongest undergraduate programs. Each lesson is about 90 minutes: notes with worked examples, sidebars on history, ethics and the evolution of programming languages, practice problems with worked solutions, and a quiz. Every course opens with a clear grading rubric.</p>
       <div class="stats">
         <div><b>${core}</b>core units</div>
         <div><b>${opt}</b>optional lessons</div>
@@ -558,9 +568,11 @@ pre code { background: none; padding: 0; font-size: inherit; }
         <div><b>${doneCore}/${core}</b>units you've completed</div>
       </div>
     </section>
-    <div class="section-h"><h2>${termLabel(t)}: ${esc(t.theme)}</h2><span class="note">${t.languages && t.languages.length === 1 ? `Taught in ${LANGS[t.languages[0]]}. ` : ""}Pick a course to begin.</span></div>
+    `;
+    for (const t of terms) {
+    h += `<div class="section-h"><h2>${termLabel(t)}: ${esc(t.theme)}</h2><span class="note">${t.languages && t.languages.length === 1 ? `Taught in ${LANGS[t.languages[0]]}. ` : ""}${t === terms[0] ? "Pick a course to begin." : "Builds on the term before."}</span></div>
     <div class="cards">`;
-    for (const c of cs) {
+    for (const c of courseList(t)) {
       const p = progress(c);
       const planned = !c.units.length;
       h += `<a class="card ${planned ? "planned" : ""}" href="#c-${c.id}">
@@ -570,7 +582,9 @@ pre code { background: none; padding: 0; font-size: inherit; }
         ${planned ? `<div class="meta">Notes not written yet</div>` : `<div class="meta">${c.units.length} units · ${c.optional.length} optional lessons · ${p.n}/${p.of} done</div><div class="bar"><i style="width:${p.pct}%"></i></div>`}
       </a>`;
     }
-    h += `</div>
+    h += `</div>`;
+    }
+    h += `
     <div class="section-h"><h2>The four-year plan</h2><span class="note">Later terms open as their notes are written.</span></div>
     <div class="plan">`;
     for (const term of D.program.terms) {
