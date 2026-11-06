@@ -14,6 +14,8 @@ import ast, io, json, re, sys, contextlib, signal, math, random, textwrap
 
 blocks = json.load(open(sys.argv[1]))
 sys.stdin = io.StringIO("")   # programs that call input() stop with EOFError instead of waiting
+import os, tempfile
+os.chdir(tempfile.mkdtemp(prefix="lesson-code-"))   # lesson code writes files (todo.txt, settings.json); keep them out of the repo
 VALUE = re.compile(r"^\s*(about |approximately |≈ ?|roughly )?([-+]?[\d.]+(e[-+]?\d+)?|'[^']*'|\"[^\"]*\"|\[.*|\(.*|\{.*|True|False|None)")
 
 class Timeout(Exception): pass
