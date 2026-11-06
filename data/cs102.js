@@ -146,6 +146,23 @@ print(Counted.accounts_opened)         # 0
 print(x.accounts_opened, y.accounts_opened)   # 1 1</code></pre>
 <p>The rule: read class attributes through <code>self</code> if you like, but change them through the class name. Use class attributes for constants and shared counters, never for per-object data. A common bug is a class attribute holding a list, like <code>transactions = []</code> in the class body: every account would share one list.</p>
 
+<h3>A first special method: making len() work</h3>
+<p>Built-in functions can work on your own objects too. When you write <code>len(x)</code>, Python actually calls the method <code>x.__len__()</code> and returns whatever it returns. So to make <code>len</code> work on your class, define a method with exactly that name (two underscores on each side) that returns a whole number:</p>
+<pre><code>class Playlist:
+    def __init__(self):
+        self._songs = []
+
+    def add(self, song):
+        self._songs.append(song)
+
+    def __len__(self):
+        return len(self._songs)
+
+p = Playlist()
+p.add("Blue in Green"); p.add("So What")
+print(len(p))      # 2: Python called p.__len__()</code></pre>
+<p>You never call <code>p.__len__()</code> yourself; you write <code>len(p)</code> and Python finds the method. Methods with these double-underscore names are called <strong>special methods</strong>, and <code>__init__</code> is one too. <a href="#c-cs102-c2">Lesson 2</a> is all about them: printing, comparing and adding your own objects work the same way.</p>
+
 <h3>Designing a class</h3>
 <p>A good way to start a design is to describe the thing in a sentence and look at the words. Nouns suggest classes and attributes; verbs suggest methods. "A <em>library</em> lends <em>books</em> to <em>members</em>; a member can borrow up to five books and must return them within three weeks." That suggests classes <code>Library</code>, <code>Book</code> and <code>Member</code>, methods like <code>borrow</code> and <code>return_book</code>, and invariants like "a member never has more than five books".</p>
 <p>Keep each class focused on one responsibility. If you can't describe what a class is for in one sentence without "and", it's probably two classes.</p>
@@ -225,6 +242,7 @@ class Fraction:
         g = gcd(num, den)
         self.num = num // g
         self.den = den // g</code></pre>
+<p>Why does the sign come out right? <code>math.gcd</code> always returns a number that is zero or positive, whatever the signs of its inputs: <code>gcd(-3, 6)</code> is 3, and <code>gcd(0, 5)</code> is 5. Trace <code>Fraction(3, -6)</code>: the denominator is negative, so both signs flip to give <code>num = -3</code>, <code>den = 6</code>; then <code>g = gcd(-3, 6) = 3</code>, and dividing gives <code>-3 // 3 = -1</code> and <code>6 // 3 = 2</code>, that is −1/2. Dividing by a positive <code>g</code> never changes a sign, so the denominator stays positive. (Zero works too: <code>Fraction(0, 5)</code> becomes 0/1.)</p>
 <p>Because the constructor always normalizes, two fractions are equal exactly when their numerators and denominators are equal. Choosing a representation that makes later operations simple is a recurring theme in design.</p>
 
 <h3>Printing: __repr__ and __str__</h3>
@@ -239,6 +257,20 @@ Fraction(1, 2)
 &gt;&gt;&gt; print(Fraction(2, 4))
 1/2</code></pre>
 <p>Always write <code>__repr__</code>: it's what you see in the console, in lists of objects, and in error messages, so it makes debugging far easier. Write <code>__str__</code> as well only when there is a natural human-friendly form that differs from the code-like one: <code>1/2</code> for a fraction, <code>$12.05</code> for money, <code>2026-03-14</code> for a date. If a class has no <code>__str__</code>, <code>print</code> and <code>str()</code> fall back to <code>__repr__</code>, so for most classes one method is enough.</p>
+<p>When an attribute is a string, the repr should show its quotes, the way Python does: <code>Person('Ada')</code>, not <code>Person(Ada)</code>. In an f-string, <code>!r</code> after a value inserts its <em>repr</em> instead of its plain text, and the repr of a string includes the quotes:</p>
+<pre><code>name = "Ada"
+print(f"{name}")      # Ada
+print(f"{name!r}")    # 'Ada'
+
+class Person:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"Person({self.name!r})"
+
+print(repr(Person("Ada")))   # Person('Ada')</code></pre>
+<p>For numbers <code>!r</code> makes no difference, which is why the <code>Fraction</code> repr above doesn't need it.</p>
 
 <h3>Comparison: __eq__ and __lt__</h3>
 <p>By default, <code>==</code> on objects checks whether they are the <em>same object</em>, so <code>Fraction(1, 2) == Fraction(2, 4)</code> would be <code>False</code>. Define <code>__eq__</code> to compare values:</p>
@@ -340,6 +372,16 @@ print(p)                       # Point(x=3, y=4)
 print(p == Point(3, 4))        # True
 print(p.distance_to(Point(0, 0)))   # 5.0</code></pre>
 <p>The <code>x: float</code> lines are <strong>type hints</strong>, which Lesson 4 covers fully. For now, read <code>x: float</code> as "this class has a field named <code>x</code>, which is meant to hold a float". Python doesn't check the type when the program runs (<code>Point("a", "b")</code> would be accepted), but the <code>@dataclass</code> decorator reads these lines to learn the names and order of the fields, and generates <code>__init__(self, x, y)</code> from them. <code>frozen=True</code> makes instances <strong>immutable</strong>: assigning <code>p.x = 5</code> raises an error. Immutable objects are easier to reason about, safe to share, and can be hashed, so frozen dataclasses work as dictionary keys and set members automatically.</p>
+<p>You can still write methods in a dataclass body, as <code>distance_to</code> shows, and that includes special methods. <code>@dataclass</code> only generates a method if the class doesn't already define one with that name, so a <code>__repr__</code> you write yourself is kept:</p>
+<pre><code>@dataclass(frozen=True)
+class Point:
+    x: float
+    y: float
+
+    def __repr__(self):
+        return f"Point({self.x}, {self.y})"
+
+print(Point(3, 4))    # Point(3, 4), not Point(x=3, y=4)</code></pre>
 `,
     terms: [
       ["Special method", "A method with a double-underscore name that Python calls for built-in syntax, such as __add__ for +."],
@@ -487,6 +529,7 @@ def total_area(shapes):
     return sum(s.area() for s in shapes)
 
 total_area([Rectangle(2, 3), Circle(1)])   # 6 + π ≈ 9.14</code></pre>
+<p>Read <code>sum(s.area() for s in shapes)</code> as "the sum of <code>s.area()</code> for every <code>s</code> in <code>shapes</code>". It is like the list comprehension <code>sum([s.area() for s in shapes])</code> without the square brackets, which saves building the list. This form is called a <em>generator expression</em> (<a href="#c-cs102-c5">Lesson 5</a>); when it is the only argument of a call, the call's own parentheses are enough.</p>
 <p><code>total_area</code> doesn't know or care what kinds of shapes it gets. Adding a <code>Triangle</code> class later requires no change to <code>total_area</code>. Compare the alternative, a function full of <code>if isinstance(s, Rectangle): … elif isinstance(s, Circle): …</code>, which must be edited for every new shape. Polymorphism lets you extend a program by adding code rather than changing it.</p>
 <p>Python is <strong>duck typed</strong> ("if it walks like a duck and quacks like a duck…"): <code>total_area</code> works with <em>any</em> object that has an <code>area</code> method, even one that doesn't inherit from <code>Shape</code>. The shared base class mainly documents the intended interface.</p>
 
@@ -652,21 +695,22 @@ class Inventory:
 
 inv = Inventory()
 inv.add("apple", 3)
-print(inv.count(42))</code></pre>
+print(inv.count(42))    # line 14</code></pre>
 <pre data-label="Shell"><code>$ mypy inventory.py
 inventory.py:14: error: Argument 1 to "count" of "Inventory" has incompatible type "int"; expected "str"  [arg-type]
 Found 1 error in 1 file (checked 1 source file)</code></pre>
-<p>Running the program itself prints 0 and gives no warning; mypy finds the mistake without running anything. Many editors run a checker like this as you type and underline the error.</p>
+<p>The <code>14</code> after the file name is the line number of the mistake. (The file has two blank lines after the class, as Python's style guide recommends, so the last line is line 14.) Running the program itself prints 0 and gives no warning; mypy finds the mistake without running anything. Many editors run a checker like this as you type and underline the error.</p>
 <p>Useful forms:</p>
 <table>
   <thead><tr><th>Hint</th><th>Means</th></tr></thead>
   <tbody>
     <tr><td><code>list[int]</code>, <code>dict[str, float]</code>, <code>tuple[int, int]</code></td><td>Collections with element types</td></tr>
     <tr><td><code>int | None</code></td><td>An int, or None (for example, "not found"). Older code writes the same type as <code>Optional[int]</code>, imported from <code>typing</code>; the two mean exactly the same, and the <code>|</code> form works from Python 3.10.</td></tr>
-    <tr><td><code>Callable[[int], bool]</code> (from <code>collections.abc</code>)</td><td>A function from int to bool</td></tr>
+    <tr><td><code>Callable[[int], bool]</code></td><td>A function from int to bool</td></tr>
     <tr><td><code>Iterable[str]</code></td><td>Anything you can loop over that yields strings</td></tr>
   </tbody>
 </table>
+<p>The built-in names (<code>list</code>, <code>dict</code>, <code>tuple</code>, <code>int</code>, <code>None</code>) need no import. <code>Callable</code> and <code>Iterable</code> both come from the same place: <code>from collections.abc import Callable, Iterable</code>. (Older code imports them from <code>typing</code>, which still works.)</p>
 <p>Prefer general types for parameters (<code>Iterable[str]</code> accepts lists, tuples, sets and generators) and specific types for return values (<code>list[str]</code> tells callers exactly what they get).</p>
 
 <h3>Protocols: interfaces for duck typing</h3>
@@ -911,7 +955,7 @@ for n in countdown(3):
 
 from itertools import islice
 print(list(islice(fibonacci(), 10)))   # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</code></pre>
-<p>The expression <code>(x * x for x in data)</code>, with parentheses instead of brackets, is a <strong>generator expression</strong>: like a list comprehension, but lazy. Generators can be chained into <strong>pipelines</strong> in which each stage pulls items from the one before:</p>
+<p>The expression <code>(x * x for x in data)</code>, with parentheses instead of brackets, is a <strong>generator expression</strong>: like a list comprehension, but lazy. When a generator expression is the <em>only</em> argument of a call, you may leave out its own parentheses and let the call's parentheses do the job: <code>sum(x * x for x in data)</code> means <code>sum((x * x for x in data))</code>. With a second argument you need both: <code>sum((x * x for x in data), 0)</code>. Generators can be chained into <strong>pipelines</strong> in which each stage pulls items from the one before:</p>
 <pre><code>def read_lines(path):
     with open(path) as f:
         for line in f:
@@ -997,6 +1041,31 @@ show(1, "two", x=3, y=4)
 # kwargs = {'x': 3, 'y': 4}</code></pre>
 <p>In a <em>call</em>, the stars do the reverse: <code>func(*args, **kwargs)</code> unpacks the tuple back into positional arguments and the dictionary into keyword arguments. So the wrapper receives whatever the caller passed and hands exactly the same arguments on to <code>func</code>.</p>
 <p>What does <code>@functools.wraps(func)</code> fix? The decorated name now refers to <code>wrapper</code>, so without it the function would introduce itself as the wrong thing: <code>slow_sum.__name__</code> would be <code>'wrapper'</code> and its docstring would be <code>None</code>. That breaks <code>help(slow_sum)</code>, makes error tracebacks and logs name <code>wrapper</code> instead of the function you wrote, and confuses tools that look functions up by name, such as pytest. <code>functools.wraps</code> copies the name, docstring and other details from <code>func</code> onto <code>wrapper</code>, and the decorator in the example prints the right name only because of it.</p>
+<h4>Decorators with arguments</h4>
+<p><code>@functools.wraps(func)</code> has parentheses and an argument, unlike <code>@timed</code>. The rule is that Python first evaluates whatever follows the <code>@</code>, then uses the result as the decorator. <code>@timed</code> evaluates to the function <code>timed</code> itself. <code>@functools.wraps(func)</code> first <em>calls</em> <code>functools.wraps(func)</code>, which returns a decorator (a function that takes a function), and that decorator is applied to <code>wrapper</code>:</p>
+<pre><code>@functools.wraps(func)        # same as: wrapper = functools.wraps(func)(wrapper)
+def wrapper(*args, **kwargs): ...
+
+@dataclass(frozen=True)       # same as: Point = dataclass(frozen=True)(Point)
+class Point: ...</code></pre>
+<p>So a decorator with arguments is a function that <em>makes</em> a decorator. It still fits the definition: what finally gets applied takes one function (or class) and returns its replacement. You'll see the same pattern in <code>@pytest.mark.parametrize(...)</code> in Lesson 6. You don't need to write decorator factories yourself in this course.</p>
+<h4>Functions can carry attributes</h4>
+<p>Because functions are objects, you can attach attributes to them, just as you do to instances: <code>f.note = "hello"</code> works on any function <code>f</code> you defined. A wrapper can use this to keep information about itself where callers can read it:</p>
+<pre><code>def logged(func):
+    @functools.wraps(func)
+    def wrapper(*args):
+        wrapper.history.append(args)   # wrapper finds itself by name when it runs
+        return func(*args)
+    wrapper.history = []               # attach the attribute before returning
+    return wrapper
+
+@logged
+def add(a, b):
+    return a + b
+
+add(1, 2); add(5, 6)
+print(add.history)    # [(1, 2), (5, 6)]</code></pre>
+<p>Two details make this work. The attribute is created once, in <code>logged</code>, before the wrapper is ever called. And inside <code>wrapper</code>, the name <code>wrapper</code> refers to the enclosing function's variable, which holds the wrapper function itself; it is looked up each time the wrapper runs. Changing an attribute, as in <code>wrapper.history.append(...)</code> or <code>wrapper.count += 1</code>, changes the <em>object</em>, not which object the name refers to, so it needs no <code>nonlocal</code>.</p>
 <p>You've already used decorators: <code>@property</code>, <code>@dataclass</code> and <code>@abstractmethod</code>. A very useful one from the standard library is <code>@functools.cache</code>, which remembers the results of previous calls:</p>
 <pre><code>@functools.cache
 def fib(n):
@@ -1071,7 +1140,7 @@ def greet(name):
     return f"Hi {name}"
 
 greet("A"); greet("B")
-print(greet.calls)   # 2</code></pre><p>Functions are objects, so they can have attributes.</p>` },
+print(greet.calls)   # 2</code></pre><p>Functions are objects, so they can have attributes (see "Functions can carry attributes" above). <code>wrapper.calls += 1</code> changes an attribute of the wrapper object, not the variable <code>wrapper</code>, so no <code>nonlocal</code> is needed.</p>` },
       { q: `<p>What's wrong with this code, which tries to make three functions that return 0, 1 and 2?</p><pre><code>funcs = [lambda: i for i in range(3)]
 print([f() for f in funcs])   # [2, 2, 2]</code></pre>`, a: `<p>All three lambdas capture the <em>variable</em> <code>i</code>, not its value at the time; by the time they're called, the comprehension has finished and <code>i</code> is 2. Capture the current value with a default argument: <code>[lambda i=i: i for i in range(3)]</code>. Read <code>lambda i=i: i</code> as "a function with one parameter named <code>i</code>, whose default is the <em>current</em> value of the loop's <code>i</code>". The default is computed once, when each lambda is created (0, then 1, then 2), and stored with that lambda. When you call <code>f()</code> with no argument, the parameter takes its stored default, so the result is <code>[0, 1, 2]</code>. A factory function like <code>make_multiplier</code> also works, since each call creates a separate variable.</p>` }
     ],
@@ -1160,7 +1229,7 @@ $ python -m pytest</code></pre>
 ])
 def test_add_cases(a, b, expected):
     assert a + b == expected</code></pre>
-<p>pytest runs and reports each row as a separate test.</p>
+<p>pytest runs and reports each row as a separate test. <code>@pytest.mark.parametrize(...)</code> is a decorator with arguments (<a href="#c-cs102-c5">Lesson 5</a>): the call with the names and rows builds a decorator, which marks the test function so pytest knows to run it once per row, passing the row's values as the parameters <code>a</code>, <code>b</code> and <code>expected</code>.</p>
 
 <h3>Fixtures</h3>
 <p>A <strong>fixture</strong> provides a fresh object to each test that asks for it by naming it as a parameter:</p>
@@ -1181,12 +1250,14 @@ def test_overdraw(account):
 
 <h3>Testing code with dependencies</h3>
 <p>How do you test code that charges a credit card, sends email or calls a web service? You don't want tests to do those things for real. Lesson 4 showed the design that solves this: pass dependencies in, then pass a <strong>fake</strong> in tests. A fake is a simple stand-in object with the same interface that records what it was asked to do, like <code>FakeGateway</code> in Lesson 4's practice.</p>
-<p>Python's <code>unittest.mock</code> module can build such stand-ins automatically. A <code>Mock</code> object accepts <em>any</em> method call, returns another mock, and records every call so you can check it afterwards:</p>
+<p>Python's <code>unittest.mock</code> module can build such stand-ins automatically. A <code>Mock</code> object accepts <em>any</em> method call, returns another mock, and records every call so you can check it afterwards. Here it is with the <code>Order</code>, <code>LineItem</code> and <code>Checkout</code> classes from <a href="#c-cs102-c4">Lesson 4's worked example</a>, where <code>Checkout(payments, notifier)</code> charges an order's total and then sends a message:</p>
 <pre><code>from unittest.mock import Mock
 
+order = Order([LineItem("desk", 120.0, 1)], "ada@example.com")   # $120, over $100
 gateway = Mock()
-Checkout(gateway, Mock()).complete(order)       # the $120 order from Lesson 4
-gateway.charge.assert_called_once_with("ada@example.com", 108.0)</code></pre>
+Checkout(gateway, Mock()).complete(order)     # a second Mock stands in for the notifier
+gateway.charge.assert_called_once_with("ada@example.com", 108.0)   # 10% off 120</code></pre>
+<p>The last line passes if <code>charge</code> was called exactly once with those arguments, and fails the test otherwise.</p>
 <p>When should you use which? A mock is quickest when you only need to check that one call happened with the right arguments, or when the real dependency has a large interface you'd otherwise have to imitate. A hand-written fake is better when the stand-in needs real behavior (say, an in-memory "database" that returns what was saved), when many tests reuse it, or when you want the test to read plainly. Be aware that a plain mock accepts misspelled method names too: <code>gateway.chrage(...)</code> silently succeeds, so a mock can hide the very bug a test should catch. Creating it as <code>Mock(spec=SomeClass)</code> limits it to that class's real methods.</p>
 <p>The same trick handles time and randomness, which make tests flaky: pass in a clock function or a seeded <code>random.Random</code> instead of calling <code>time.time()</code> or <code>random.random()</code> directly.</p>
 
@@ -1258,7 +1329,16 @@ def test_greeting():
         self._items.append(x)
     def pop(self):
         return self._items.pop()</code></pre><p>Notice <code>__len__</code> changed to use the list, and the first test still passes.</p>` },
-      { q: `<p>Write a test using <code>tmp_path</code> for a function <code>save_scores(path, scores)</code> that writes one score per line, and a function <code>load_scores(path)</code> that reads them back as a list of ints.</p>`, a: `<pre><code>def test_round_trip(tmp_path):
+      { q: `<p>Write two functions, <code>save_scores(path, scores)</code>, which writes a list of integer scores to a file one per line, and <code>load_scores(path)</code>, which reads them back as a list of ints. Then write tests for them that use <code>tmp_path</code>, including the empty list.</p>`, a: `<pre data-label="scores.py"><code>def save_scores(path, scores):
+    with open(path, "w") as f:
+        for s in scores:
+            f.write(f"{s}\\n")
+
+def load_scores(path):
+    with open(path) as f:
+        return [int(line) for line in f]</code></pre><pre data-label="test_scores.py"><code>from scores import save_scores, load_scores
+
+def test_round_trip(tmp_path):
     path = tmp_path / "scores.txt"
     save_scores(path, [90, 85, 77])
     assert load_scores(path) == [90, 85, 77]
@@ -1329,7 +1409,7 @@ balanced("((")                # False: unclosed</code></pre>
 <p>Each opening bracket waits on the stack until its partner arrives; the most recent unclosed bracket is always on top, which is exactly the one the next closing bracket must match. Compilers and editors check your code's brackets this way.</p>
 
 <h3>Queues</h3>
-<p>A <strong>queue</strong> adds at the back and removes from the front: first in, first out (FIFO), like a line at a shop. Operations: <code>enqueue(x)</code> and <code>dequeue()</code>. Queues hold jobs waiting for a printer, requests waiting for a web server, and messages between programs. In algorithms, a queue drives breadth-first search, which you'll meet in Data Structures and Algorithms.</p>
+<p>A <strong>queue</strong> adds at the back and removes from the front: first in, first out (FIFO), like a line at a shop. Operations: <code>enqueue(x)</code> and <code>dequeue()</code>. Queues hold jobs waiting for a printer, requests waiting for a web server, and messages between programs. In algorithms, a queue drives breadth-first search, which you'll meet in Data Structures and Algorithms; its simplest case, visiting a tree row by row, is in <a href="#c-cs102-c8">Lesson 8</a>.</p>
 <p>A Python list is a poor queue: <code>pop(0)</code> is O(n). Use <code>collections.deque</code> (a "double-ended queue"), which is O(1) at both ends:</p>
 <pre><code>from collections import deque
 
@@ -1351,7 +1431,7 @@ line.popleft()            # dequeue: "Ada"</code></pre>
 </table>
 <p>When the block is full, <code>append</code> allocates a bigger block (about 1.125 times the size in CPython, plus a little) and copies everything over. Copying is O(n), but it happens rarely enough that the <em>average</em> cost per append stays O(1). This is called <strong>amortized</strong> O(1).</p>
 <p>Why does growing by a <em>fixed fraction</em> keep the average constant, even a fraction as small as 12.5%? Start with doubling, where the numbers are easy. Begin with room for 1 item and append 16 items. The block fills at sizes 1, 2, 4 and 8, and each time everything is copied: 1 + 2 + 4 + 8 = 15 copies for 16 appends, less than one copy per append. In general the copies form a geometric series that adds up to less than <em>n</em>, so the average stays below 1 per append however large <em>n</em> gets.</p>
-<p>Growing by 12.5% works the same way, just with a bigger constant. Each resize happens when the list is about 1.125 times larger than at the previous resize, so the copy sizes, read backwards from the last one, are roughly <em>n</em>, <em>n</em>/1.125, <em>n</em>/1.125², … That geometric series adds up to about <em>n</em>/(1 − 1/1.125) = 9<em>n</em>. Simulating CPython's exact growth rule for a million appends gives about 8.4 copies per append (at most; the memory system can sometimes extend a block in place without copying): more than doubling's 1, but a constant that doesn't grow with <em>n</em>. (CPython trades those extra copies for less wasted memory.) Compare growing by a fixed <em>amount</em>, say 100 more slots each time: then a resize happens every 100 appends, each copying the whole list, and the average for <em>n</em> appends is about <em>n</em>/200 copies per append. That grows with <em>n</em>: it's O(<em>n</em>) per append, not O(1). Growth by a factor is what makes the difference.</p>
+<p>Growing by 12.5% works the same way, just with a bigger constant. Each resize happens when the list is about 1.125 times larger than at the previous resize, so the copy sizes, read backwards from the last one, are roughly <em>n</em>, <em>n</em>/1.125, <em>n</em>/1.125², … That geometric series adds up to about <em>n</em>/(1 − 1/1.125) = 9<em>n</em>. Simulating CPython's exact growth rule for a million appends gives about 8.4 copies per append (at most; the memory system can sometimes extend a block in place without copying): more than doubling's 1, but a constant that doesn't grow with <em>n</em>. (CPython trades those extra copies for less wasted memory.) Compare growing by a fixed <em>amount</em>, say 100 more slots each time: then a resize happens every 100 appends, each copying the whole list. The copies have sizes 100, 200, 300, …, up to about <em>n</em>, which is 100 × (1 + 2 + … + <em>n</em>/100). The sum 1 + 2 + … + <em>k</em> is <em>k</em>(<em>k</em> + 1)/2 ≈ <em>k</em>²/2, so with <em>k</em> = <em>n</em>/100 the total is about 100 × (<em>n</em>/100)²/2 = <em>n</em>²/200 copies. Dividing by the <em>n</em> appends gives about <em>n</em>/200 copies per append. That grows with <em>n</em>: it's O(<em>n</em>) per append, not O(1). Growth by a factor is what makes the difference.</p>
 
 <h3>Linked lists</h3>
 <p>A <strong>linked list</strong> stores items in separate <strong>nodes</strong> scattered anywhere in memory. Each node holds one value and a reference to the next node; the last node's reference is <code>None</code>.</p>
@@ -1562,7 +1642,28 @@ def postorder(t):    # left, then right, then node
         yield from postorder(t.left)
         yield from postorder(t.right)
         yield t.value</code></pre>
-<p><code>yield from</code> passes along every value from another generator. For the tree in the figure: preorder gives 8, 3, 1, 6, 4, 7, 10, 14, 13; inorder gives 1, 3, 4, 6, 7, 8, 10, 13, 14; postorder gives 1, 4, 7, 6, 3, 13, 14, 10, 8. Preorder is the order you'd copy a tree or print an outline; postorder is the order you'd delete a folder (contents before the folder) or evaluate an expression tree (operands before the operator). A <strong>level-order</strong> traversal, row by row, uses a queue instead of recursion.</p>
+<p><code>yield from</code> passes along every value from another generator. For the tree in the figure: preorder gives 8, 3, 1, 6, 4, 7, 10, 14, 13; inorder gives 1, 3, 4, 6, 7, 8, 10, 13, 14; postorder gives 1, 4, 7, 6, 3, 13, 14, 10, 8. Preorder is the order you'd copy a tree or print an outline; postorder is the order you'd delete a folder (contents before the folder) or evaluate an expression tree (operands before the operator).</p>
+<h4>Level order: row by row, with a queue</h4>
+<p>A <strong>level-order</strong> traversal visits the root, then every node one level down from left to right, then the next row, and so on: for the figure's tree, 8, 3, 10, 1, 6, 14, 4, 7, 13. Recursion doesn't fit this order, because it finishes one whole subtree before starting the next. Instead, keep a queue (<a href="#c-cs102-c7">Lesson 7</a>) of nodes waiting to be visited:</p>
+<ol>
+  <li>Start with a queue holding just the root (or an empty queue if the tree is empty).</li>
+  <li>While the queue isn't empty: take the node at the <em>front</em>, record its value, then add its left child and then its right child (those that aren't <code>None</code>) to the <em>back</em>.</li>
+</ol>
+<p>Because children join the back of the line, every node in one row is visited before any node in the next. The trace for the figure's tree:</p>
+<table>
+  <thead><tr><th>Take from front</th><th>Add to back</th><th>Queue afterwards</th></tr></thead>
+  <tbody>
+    <tr><td>(start)</td><td></td><td>8</td></tr>
+    <tr><td>8</td><td>3, 10</td><td>3, 10</td></tr>
+    <tr><td>3</td><td>1, 6</td><td>10, 1, 6</td></tr>
+    <tr><td>10</td><td>14</td><td>1, 6, 14</td></tr>
+    <tr><td>1</td><td></td><td>6, 14</td></tr>
+    <tr><td>6</td><td>4, 7</td><td>14, 4, 7</td></tr>
+    <tr><td>14</td><td>13</td><td>4, 7, 13</td></tr>
+    <tr><td>4, 7, 13</td><td></td><td>(empty)</td></tr>
+  </tbody>
+</table>
+<p>The values were taken in the order 8, 3, 10, 1, 6, 14, 4, 7, 13. In Python, a <code>collections.deque</code> is the queue: <code>append</code> adds at the back and <code>popleft</code> takes from the front, both in O(1). Each node enters and leaves the queue once, so the traversal is O(<em>n</em>). This is the tree version of breadth-first search.</p>
 
 <h3>Binary search trees</h3>
 <p>A <strong>binary search tree</strong> (BST) is a binary tree with one invariant: for every node, all values in its left subtree are smaller and all values in its right subtree are larger. That lets a search discard half of what's left at each step, like binary search on a sorted list:</p>
@@ -1739,7 +1840,7 @@ CSA.addOptional("cs102", [
 <p>Object-oriented programming (OOP) is so common now that it's easy to assume it was always there. It took about thirty years to go from a research idea to the mainstream, and the story explains a lot about why languages look the way they do.</p>
 
 <h3>1. Simula: classes for simulation (1962–1967)</h3>
-<p>At the Norwegian Computing Center in Oslo, Ole-Johan Dahl and Kristen Nygaard were writing simulations: customers in a shop, ships in a harbor, jobs in a factory. Each simulated thing had its own state and behavior, and there were many things of each kind. Their language Simula I (1962–65) and its successor <strong>Simula 67</strong> introduced classes, objects, inheritance ("subclasses"), and virtual methods, which are the mechanism behind polymorphism. Simula was used mainly in Scandinavia and in research, but it was read closely by the people who built the next generation of languages.</p>
+<p>At the Norwegian Computing Center in Oslo, Ole-Johan Dahl and Kristen Nygaard were writing simulations: customers in a shop, ships in a harbor, jobs in a factory. Each simulated thing had its own state and behavior, and there were many things of each kind. Their language Simula I (1962–65) and its successor <strong>Simula 67</strong> introduced classes, objects, inheritance ("subclasses"), and <em>virtual methods</em>. A virtual method is one that a subclass can replace, where the version that runs is chosen by the object's actual class when the program runs, not by the type the code was written against. That is exactly what happens in Python every time <code>s.area()</code> runs <code>Circle.area</code> or <code>Rectangle.area</code> depending on what <code>s</code> is (<a href="#c-cs102-c3">CS 102, Lesson 3</a>): in Python every method is virtual, so the word never comes up. In Simula, and later C++, a method had to be marked <code>virtual</code> to behave this way, which is where the name comes from. Virtual methods are the mechanism behind polymorphism. Simula was used mainly in Scandinavia and in research, but it was read closely by the people who built the next generation of languages.</p>
 
 <h3>2. Smalltalk: everything is an object (1972–1980)</h3>
 <p>At Xerox's Palo Alto Research Center (PARC), Alan Kay imagined the "Dynabook", a personal computer a child could carry and program. His group, including Dan Ingalls and Adele Goldberg, built Smalltalk, in which <em>everything</em>, even numbers and classes, is an object, and all computation happens by objects sending messages to each other. Smalltalk-80 came with a graphical environment with overlapping windows, a mouse and menus. Kay later said the core idea was messaging: independent objects, like cells in a body or computers on a network, cooperating without knowing each other's insides. Steve Jobs saw the PARC work in 1979, and its influence on the Macintosh is well documented.</p>

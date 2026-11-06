@@ -147,3 +147,65 @@ I'm a first-year student. Last term I took CS 101 (Python up to classes in outli
     - the phase of an oscillation (PHYS 150 Lesson 6).
 
     The φ(n) after φ ≈ 1.618 in particular made me stop and check which one was meant.
+
+
+## Professor's response
+
+Thank you for another careful review. Every item below led to a change. Several were real errors, now fixed: the dangling "$120 order from Lesson 4" (13), the Stirling arithmetic (27), the AC "rated by its average" claim (28), the missing x → −x step for ln(1 + x) (29), `dot` defined as a number and then called (30), Monte Carlo without multiplying by the area (32), and the nonexistent textbook and lab handout (38). Two items rested on the plain-text extraction (7, and partly 39), and I say so below, but I still made the text harder to misread. Every number, formula and code output I added or changed was checked by running Python (SymPy 1.x for the integrals, mypy for item 7). Programming problems whose prompts changed still pass with their solutions and fail with their starters; where a prompt now states a behavior, a test checks it.
+
+### CS 102 Programming II
+
+1. c1: New subsection "A first special method: making len() work" with a `Playlist` example (`__len__`, and that `len(p)` calls it), linking forward to Lesson 2. The `tally` prompt now points to it (blocking item).
+2. c2: Added that `math.gcd` never returns a negative number (`gcd(-3, 6)` is 3), and traced `Fraction(3, -6)` to −1/2 step by step, plus the zero case.
+3. c2, Dataclasses: Added that `@dataclass` only generates methods the class doesn't define, with a `Point` whose own `__repr__` is kept. The `vector2` prompt now says either a frozen dataclass or properties is fine.
+4. c2: New paragraph on `!r` in f-strings (`f"{name!r}"` gives `'Ada'`) with a `Person` repr example. The `employees` prompt now mentions `!r` and Lesson 2.
+5. `employees`: The prompt now specifies `Manager('Grace', 120000, 24000)`; the solution gives `Manager` its own `__repr__`, and a new test checks it.
+6. c3: Explained `sum(s.area() for s in shapes)` where it first appears (a generator expression, linked to Lesson 5). c5 now states the rule: a generator expression that is a call's only argument can use the call's parentheses; with a second argument it needs its own.
+7. c4: The line number was right. mypy really reports line 14 (I ran it). The file has two blank lines after the class, as PEP 8 recommends, and the plain-text extraction collapses them into one, so you counted 13. To make it unmistakable, the last line now carries the comment `# line 14`, and a sentence explains what the number means and why there are two blank lines.
+8. c4: Below the type-hint table: built-in names need no import, and `Callable` and `Iterable` both come from `collections.abc` (older code uses `typing`).
+9. `inventory`: The prompt now says the enum values don't matter and aren't tested, and that `remove` with a quantity below 1, or of an item not in stock, raises `ValueError` and leaves the stock unchanged. Added two tests for exactly those cases.
+10. c5: New subsection "Functions can carry attributes" with a `logged` decorator that keeps `wrapper.history`. It explains how the wrapper finds itself by name and why changing an attribute needs no `nonlocal`. P4's answer and the `closures` prompt point to it (blocking item).
+11. `closures`: The prompt now says only positional arguments need to be supported, every argument is hashable (so the args tuple is the key), and `__name__` must be kept, which is everything the tests check.
+12. c5: New subsection "Decorators with arguments": Python evaluates the expression after `@` first, so `@functools.wraps(func)` means `wrapper = functools.wraps(func)(wrapper)`, and `@dataclass(frozen=True)` likewise. c6 relates `@pytest.mark.parametrize(...)` to this.
+13. c6: **Error fixed.** The Mock example now builds its order on the spot (`Order([LineItem("desk", 120.0, 1)], "ada@example.com")`), names and links Lesson 4's worked-example classes, and explains the 108.0 (10% off 120) and what `assert_called_once_with` checks. Run against those classes, it passes.
+14. c6, P4: The question now says to write both functions and the tests; the answer gives `scores.py` and `test_scores.py` (checked).
+15. c7: Spelled out the sum: copies of 100, 200, …, n total 100 × (1 + … + n/100) ≈ n²/200, which is n/200 per append (checked by computing it).
+16. c8: New subsection "Level order: row by row, with a queue": the two-step algorithm, why a queue gives row order, a full trace table for the figure's tree (verified), deque's `append`/`popleft`, and O(n) cost. c7's breadth-first-search sentence now links to it. The `tree_funcs` prompt points to it and states the empty-tree result (blocking item).
+17. oophist: Defined a virtual method (the version run is chosen by the object's actual class at run time), related it to `s.area()` in Lesson 3, and explained that every Python method is virtual while Simula and C++ needed the keyword.
+
+### MATH 121 Discrete Mathematics II
+
+18. d1: New paragraph "When every kind must appear at least once": hand one to each kind first, with the 10-donut example (36, checked by brute force) and the substitution yᵢ = xᵢ − 1.
+19. d1: The lesson's Python block now uses `product(..., repeat=r)` with outputs, and explains it as the nʳ case. P6 is reworded: the formula is for length 6, and you check the same formula on length-3 passwords because listing 36⁶ ≈ 2.2 billion would be slow.
+20. d3: Completed the sandwich with a lower bound, then defined Big-Theta formally and contrasted it with CS 101's big-O (an upper bound only), with constants c₁ = 1/4 and c₂ = 3 for n ≥ 4 (checked against the exact recurrence for n up to 5000). Added Θ to the terms.
+21. d5: Rewrote the cancelling step. Each factor k of (p − 1)! lies between 1 and p − 1, so gcd(k, p) = 1 because p is prime, so each k has an inverse; cancel them one at a time. Added that this is exactly where primality is needed (2 and 3 have no inverse mod 6), and spelled out what the multiplied-together line says.
+22. d6: Added where the square root comes from: the product of (1 − i/m), the approximation 1 − x ≈ e⁻ˣ, and the k ≈ 1.18√m half-chance point (22.5 for 365). Said that the average √(πm/2) needs an integral and isn't required. All values checked.
+23. d7, P2: Rewritten without π: shuffle 1, …, n into s₁, …, sₙ, with an example (2, 5, 1, 3, 4 has ascents at 1, 3, 4) and a note that books write π(i) for sᵢ. The answer now uses indicators and linearity explicitly, with a check for n = 3 (verified by listing all permutations for n = 3, 4, 5).
+
+### MATH 131 Calculus II and Multivariable Calculus
+
+24. k1: New section "Checking with a computer": installing SymPy, `import sympy as sp`, `x = sp.symbols("x")` and why it's needed, SymPy's own `exp`/`sin`, and a definite integral (outputs from SymPy). The "Still stuck?" bullet points to it (blocking item).
+25. k1, P5: The question now defines erf by its integral and asks why SymPy must use such a function. The answer explains "no elementary antiderivative" and checks SymPy's answer by differentiating.
+26. k1: The same section gives a `midpoint(f, a, b, n)` function based on MATH 130's Riemann sums, with a checked output, and P2 now says to use it. Lesson 3 is still linked for accuracy and better methods.
+27. k1: **Error fixed.** Showed the base change (divide by ln 2, so 1/ln 2 ≈ 1.443). The formula gives 9,966 − 1,443 ≈ 8,523, as you found. The text now says so and gives the exact log₂(1000!) ≈ 8,529 for comparison.
+28. k2: **Error fixed.** You were right: over a full cycle the average is 0. The text now says that, explains that the half-cycle value 2/π of the peak is the DC level a rectifier (phone charger) produces, and that AC supplies are rated by the root-mean-square value 1/√2 of the peak ("230 V" peaks near 325 V). All values computed.
+29. k5: **Error fixed.** Added both steps: replace x by −x to get 1/(1 + x) = 1 − x + x² − …, then integrate from 0 to x. Also noted that integrating 1/(1 − x) directly gives −ln(1 − x) (checked numerically).
+30. k7: **Error fixed.** `dot` and `length` are now proper functions in a code block, with outputs 11 and 5.0 (run).
+31. k8: Derived the quadratic form by restricting f to the line g(t) = f(a + tp, b + tq), using the one-variable Taylor polynomial and the directional derivative from Lesson 7 twice. A closing sentence says the formula is what matters if the derivation feels quick.
+32. k8: **Error fixed.** Monte Carlo is now stated correctly: the average estimates the average value, so multiply by the region's area, with a display formula and the rectangle example (2 × 3/2 = 3). P6 states the area 36. The answer already multiplied by 36 (blocking item; checked: about 3.14).
+
+### PHYS 150 Physics I
+
+33. p1: Explained that t′ is just a name for the integration variable, because t is already the upper limit, that any letter works, and that the formula is the Fundamental Theorem.
+34. p2: Wrote out the range algebra with the double-angle identity sin 2θ = 2 sin θ cos θ.
+35. p3: Added a four-step derivation: substitute u = v/vₜ, use partial fractions, integrate to a logarithm, and solve for u to reach tanh. Derived (tanh z)′ = 1 − tanh² z with the quotient rule, and tied atanh to step 2. Checked numerically. The text says you only need the result.
+36. p3: Commented `math.hypot(vx, vy)` as √(vx² + vy²), the length of the velocity.
+37. p6: Derived θ″ = −(g/L) sin θ from the arc length s = Lθ and the component of gravity along the arc. Said it is an angular acceleration in rad/s² (multiply by L for m/s²), and showed how small angles give SHM with ω² = g/L. P4 is now doable from the lesson.
+38. chaos: **Error fixed.** Removed the reference to the textbook and lab handout. The lesson now gives the double-pendulum accelerations as a Python function to take on trust (derived in a later course), with stepping advice and an energy check. I verified the equations: a fourth-order Runge–Kutta run conserves energy to 10⁻⁸, and the lesson's figures (energy within a few percent with semi-implicit steps, divergence of runs 10⁻⁹ apart) are from running it.
+
+### Across courses
+
+39. You're right that the courses run side by side; PHYS 150 does say Euler's method "from MATH 131", for example. As asked, I kept the course order and made each early use self-contained, with a link to the full treatment. PHYS p1 explains Euler's method from "change ≈ rate × Δt" and says MATH 131 Lesson 6 isn't needed first. PHYS p3 now walks through the separation itself (item 35). PHYS p4 defines the dot product in both forms and takes their agreement on trust. PHYS p6 shows sin θ ≈ θ with a calculator value before mentioning the Taylor series.
+40. The two references now agree on one story. MATH 131 k4 defines Hₙ itself, calls the values harmonic numbers, and says MATH 121 Lesson 7 uses them and quotes the approximation that k4 justifies, "whichever lesson you reach first". MATH 121 d7 already defines Hₙ, takes ln n + 0.577 on trust and points to MATH 131 for why.
+41. MATH 131 k2 P4 now defines conditional probability, P(A | B) = P(A and B)/P(B), in the question, and the answer shows the "both happen" step. MATH 131 k8 defines variance and standard deviation in a sentence where Monte Carlo needs them. MATH 121 d2 explains memoization in place and says CS 102's `@functools.cache` isn't needed. Each still links to the full treatment.
+42. MATH 121 d3 says φ is the golden ratio throughout that lesson. MATH 121 d5 says the totient is a different use of the letter, always written with an argument φ(n), and gives φ(10) = 4. PHYS 150 p6 says φ there is the phase, unrelated to either.

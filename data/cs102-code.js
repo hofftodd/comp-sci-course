@@ -35,7 +35,7 @@ CSA.addCode("cs102", {
   <li><code>add(item)</code> records one occurrence.</li>
   <li><code>count(item)</code> returns how many times it was added (0 if never).</li>
   <li><code>most_common()</code> returns the item added most often. If there's a tie, return the one that reached that count <em>first</em>. If nothing was added, return <code>None</code>.</li>
-  <li><code>len(t)</code> returns the number of <em>different</em> items seen.</li>
+  <li><code>len(t)</code> returns the number of <em>different</em> items seen. (Define a <code>__len__</code> method, as in the lesson's "A first special method".)</li>
 </ul>
 <pre><code>t = Tally()
 for word in "the cat and the hat".split():
@@ -91,7 +91,8 @@ len(t)             # 4</code></pre>`,
   <li><code>v == w</code> compares components; vectors can be used as dictionary keys.</li>
   <li><code>repr(Vector2(1, 2))</code> is <code>"Vector2(1, 2)"</code>.</li>
   <li>Assigning <code>v.x = 5</code> raises an error (any exception type).</li>
-</ul>`,
+</ul>
+<p>You may build it as a frozen dataclass (a <code>__repr__</code> you write in the class body is kept, as the lesson shows) or as a plain class with read-only properties.</p>`,
       starter: `class Vector2:\n    pass\n`,
       hint: `<p>A frozen dataclass gives you <code>__init__</code>, <code>__eq__</code>, <code>__hash__</code> and immutability. Its generated repr would be <code>Vector2(x=1, y=2)</code>, so write your own <code>__repr__</code>. <code>abs(v)</code> calls <code>v.__abs__()</code>.</p>`,
       solution: `from dataclasses import dataclass\nimport math\n\n@dataclass(frozen=True)\nclass Vector2:\n    x: float\n    y: float\n\n    def __add__(self, other):\n        return Vector2(self.x + other.x, self.y + other.y)\n\n    def __sub__(self, other):\n        return Vector2(self.x - other.x, self.y - other.y)\n\n    def __mul__(self, k):\n        return Vector2(self.x * k, self.y * k)\n\n    def __abs__(self):\n        return math.hypot(self.x, self.y)\n\n    def __repr__(self):\n        return f"Vector2({self.x}, {self.y})"\n`,
@@ -131,15 +132,16 @@ len(t)             # 4</code></pre>`,
     {
       id: "employees",
       title: "Employees and managers",
-      prompt: `<p>Write a class <code>Employee(name, salary)</code> with a method <code>monthly_pay()</code> returning <code>salary / 12</code>, and a <code>__repr__</code> like <code>Employee('Ada', 120000)</code>.</p>
-<p>Write a subclass <code>Manager(name, salary, bonus)</code> whose monthly pay also includes <code>bonus / 12</code>, and who keeps a list of reports: <code>add_report(employee)</code> adds one, and <code>team_payroll()</code> returns the manager's own monthly pay plus that of every report. A report can itself be a manager, whose team counts too.</p>
+      prompt: `<p>Write a class <code>Employee(name, salary)</code> with a method <code>monthly_pay()</code> returning <code>salary / 12</code>, and a <code>__repr__</code> so that <code>repr(Employee("Ada", 120000))</code> is <code>Employee('Ada', 120000)</code>, with quotes around the name (<code>!r</code> in an f-string does this; see Lesson 2).</p>
+<p>Write a subclass <code>Manager(name, salary, bonus)</code> whose monthly pay also includes <code>bonus / 12</code>, and who keeps a list of reports: <code>add_report(employee)</code> adds one, and <code>team_payroll()</code> returns the manager's own monthly pay plus that of every report. A report can itself be a manager, whose team counts too. A manager's repr shows all three arguments: <code>repr(Manager("Grace", 120000, 24000))</code> is <code>Manager('Grace', 120000, 24000)</code>.</p>
 <p>Use <code>super()</code> rather than repeating the parent's code.</p>`,
       starter: `class Employee:\n    def __init__(self, name, salary):\n        pass\n`,
-      hint: `<p><code>Manager.monthly_pay</code> can be <code>super().monthly_pay() + self.bonus / 12</code>. For <code>team_payroll</code>, a report that is a manager should contribute its own <code>team_payroll()</code>. Polymorphism helps: give <code>Employee</code> a <code>team_payroll()</code> too, returning just its own pay.</p>`,
-      solution: `class Employee:\n    def __init__(self, name, salary):\n        self.name = name\n        self.salary = salary\n\n    def monthly_pay(self):\n        return self.salary / 12\n\n    def team_payroll(self):\n        return self.monthly_pay()\n\n    def __repr__(self):\n        return f"{type(self).__name__}({self.name!r}, {self.salary})"\n\nclass Manager(Employee):\n    def __init__(self, name, salary, bonus):\n        super().__init__(name, salary)\n        self.bonus = bonus\n        self.reports = []\n\n    def monthly_pay(self):\n        return super().monthly_pay() + self.bonus / 12\n\n    def add_report(self, employee):\n        self.reports.append(employee)\n\n    def team_payroll(self):\n        return self.monthly_pay() + sum(r.team_payroll() for r in self.reports)\n`,
+      hint: `<p><code>Manager.monthly_pay</code> can be <code>super().monthly_pay() + self.bonus / 12</code>. For <code>team_payroll</code>, a report that is a manager should contribute its own <code>team_payroll()</code>. Polymorphism helps: give <code>Employee</code> a <code>team_payroll()</code> too, returning just its own pay. <code>Manager</code> needs its own <code>__repr__</code>, because it has an extra argument to show.</p>`,
+      solution: `class Employee:\n    def __init__(self, name, salary):\n        self.name = name\n        self.salary = salary\n\n    def monthly_pay(self):\n        return self.salary / 12\n\n    def team_payroll(self):\n        return self.monthly_pay()\n\n    def __repr__(self):\n        return f"Employee({self.name!r}, {self.salary})"\n\nclass Manager(Employee):\n    def __init__(self, name, salary, bonus):\n        super().__init__(name, salary)\n        self.bonus = bonus\n        self.reports = []\n\n    def monthly_pay(self):\n        return super().monthly_pay() + self.bonus / 12\n\n    def add_report(self, employee):\n        self.reports.append(employee)\n\n    def team_payroll(self):\n        return self.monthly_pay() + sum(r.team_payroll() for r in self.reports)\n\n    def __repr__(self):\n        return f"Manager({self.name!r}, {self.salary}, {self.bonus})"\n`,
       tests: [
         { label: "Employee pay and repr", type: "assert", code: `e = Employee("Ada", 120000)\nassert e.monthly_pay() == 10000, f"monthly_pay() gave {e.monthly_pay()}"\nassert repr(e) == "Employee('Ada', 120000)", f"repr gave {repr(e)!r}"` },
         { label: "Manager pay includes bonus", type: "assert", code: `m = Manager("Grace", 120000, 24000)\nassert isinstance(m, Employee), "Manager should be a subclass of Employee"\nassert m.monthly_pay() == 12000, f"monthly_pay() gave {m.monthly_pay()}"` },
+        { label: "Manager repr", type: "assert", code: `m = Manager("Grace", 120000, 24000)\nassert repr(m) == "Manager('Grace', 120000, 24000)", f"repr gave {repr(m)!r}"` },
         { label: "Team payroll", type: "assert", code: `m = Manager("Grace", 120000, 24000)\nm.add_report(Employee("A", 60000))\nm.add_report(Employee("B", 36000))\nassert m.team_payroll() == 12000 + 5000 + 3000, f"team_payroll() gave {m.team_payroll()}"` },
         { label: "Nested managers", type: "assert", code: `top = Manager("T", 120000, 0)\nmid = Manager("M", 60000, 0)\nmid.add_report(Employee("E", 12000))\ntop.add_report(mid)\nassert top.team_payroll() == 10000 + 5000 + 1000, f"team_payroll() gave {top.team_payroll()}"` },
         { label: "Each manager has their own reports", type: "assert", code: `a, b = Manager("A", 1, 0), Manager("B", 1, 0)\na.add_report(Employee("E", 12))\nassert b.team_payroll() == 1 / 12, "Adding a report to one manager affected another. Create the list in __init__."` },
@@ -153,12 +155,12 @@ len(t)             # 4</code></pre>`,
       title: "A typed inventory",
       prompt: `<p>A shop's stock is a set of items in categories. Write:</p>
 <ul>
-  <li>An enum <code>Category</code> with members <code>FOOD</code>, <code>TOOLS</code> and <code>TOYS</code>.</li>
+  <li>An enum <code>Category</code> with members <code>FOOD</code>, <code>TOOLS</code> and <code>TOYS</code>. Their values don't matter and aren't tested; lowercase strings like <code>"food"</code>, as in the lesson's <code>Status</code>, are a good choice.</li>
   <li>A frozen dataclass <code>Item</code> with fields <code>name: str</code>, <code>price: float</code> and <code>category: Category</code>.</li>
   <li>A class <code>Inventory</code> with methods:
     <ul>
       <li><code>add(item: Item, quantity: int = 1) -&gt; None</code> (a quantity below 1 raises <code>ValueError</code>)</li>
-      <li><code>remove(item: Item, quantity: int = 1) -&gt; None</code>, which raises <code>ValueError</code> if there aren't enough; an item whose quantity reaches 0 disappears</li>
+      <li><code>remove(item: Item, quantity: int = 1) -&gt; None</code>, which raises <code>ValueError</code> if the quantity is below 1 or there aren't enough in stock (an item not in stock at all has 0, so removing it raises too). A failed <code>remove</code> leaves the stock unchanged. An item whose quantity reaches 0 disappears.</li>
       <li><code>quantity(item: Item) -&gt; int</code></li>
       <li><code>value() -&gt; float</code>: total price × quantity of everything</li>
       <li><code>in_category(cat: Category) -&gt; list[Item]</code>: the items in stock in that category, sorted by name</li>
@@ -175,6 +177,8 @@ len(t)             # 4</code></pre>`,
         { label: "Remove", type: "assert", code: `inv = Inventory()\nh = Item("hammer", 12.0, Category.TOOLS)\ninv.add(h, 2)\ninv.remove(h)\nassert inv.quantity(h) == 1\ninv.remove(h)\nassert inv.quantity(h) == 0 and inv.in_category(Category.TOOLS) == [], "An item with quantity 0 should disappear"` },
         { label: "Removing too many raises ValueError", type: "assert", code: `inv = Inventory()\nh = Item("hammer", 12.0, Category.TOOLS)\ninv.add(h, 2)\ntry:\n    inv.remove(h, 3)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError("remove(h, 3) with only 2 should raise ValueError")\nassert inv.quantity(h) == 2, "A failed remove shouldn't change the stock"` },
         { label: "Adding zero raises ValueError", type: "raises", call: `Inventory().add(Item("x", 1, Category.TOYS), 0)`, error: "ValueError" },
+        { label: "Removing zero raises ValueError", type: "assert", code: `inv = Inventory()\nh = Item("hammer", 12.0, Category.TOOLS)\ninv.add(h, 2)\ntry:\n    inv.remove(h, 0)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError("remove(h, 0) should raise ValueError")\nassert inv.quantity(h) == 2, "A failed remove shouldn't change the stock"` },
+        { label: "Removing an item not in stock raises ValueError", type: "raises", call: `Inventory().remove(Item("x", 1, Category.TOYS))`, error: "ValueError" },
         { label: "Total value", type: "assert", code: `inv = Inventory()\ninv.add(Item("apple", 0.5, Category.FOOD), 10)\ninv.add(Item("yo-yo", 3.0, Category.TOYS), 2)\nassert abs(inv.value() - 11.0) < 1e-9, f"value() gave {inv.value()}"` },
         { label: "Items by category, sorted by name", type: "assert", code: `inv = Inventory()\nfor n in ["saw", "drill", "apple"]:\n    inv.add(Item(n, 1, Category.FOOD if n == "apple" else Category.TOOLS))\nassert [i.name for i in inv.in_category(Category.TOOLS)] == ["drill", "saw"], "in_category gave the wrong items or order"` },
         { label: "Methods have type hints", type: "assert", code: `import inspect\nfor name in ["add", "remove", "quantity", "value", "in_category"]:\n    sig = inspect.signature(getattr(Inventory, name))\n    assert sig.return_annotation is not inspect.Signature.empty, f"{name} needs a return type hint"\n    for p in list(sig.parameters.values())[1:]:\n        assert p.annotation is not inspect.Parameter.empty, f"Parameter {p.name} of {name} needs a type hint"` }
@@ -251,8 +255,9 @@ len(t)             # 4</code></pre>`,
       prompt: `<p>Write:</p>
 <ul>
   <li><code>make_counter(start=0, step=1)</code>, which returns a function. Each call to that function returns the next value: <code>c = make_counter(10, 5)</code>, then <code>c()</code> gives 10, then 15, then 20. Separate counters are independent.</li>
-  <li>A decorator <code>memoize</code> that caches a function's results by its arguments, and adds an attribute <code>calls</code> to the wrapper counting how many times the <em>original</em> function actually ran.</li>
+  <li>A decorator <code>memoize</code> that caches a function's results by its arguments, and adds an attribute <code>calls</code> to the wrapper counting how many times the <em>original</em> function actually ran. Only positional arguments need to be supported (the tests never pass keyword arguments), and every argument will be hashable, so the tuple of arguments can be a dictionary key. The wrapper must keep the original function's <code>__name__</code>.</li>
 </ul>
+<p>The lesson's "Functions can carry attributes" shows how a wrapper can keep an attribute on itself.</p>
 <pre><code>@memoize
 def slow_square(x):
     return x * x
@@ -386,7 +391,7 @@ slow_square.calls   # 2: the second slow_square(4) came from the cache</code></p
   <li><code>count_leaves(t)</code>: the number of nodes with no children.</li>
   <li><code>mirror(t)</code>: returns a <em>new</em> tree that's the mirror image (left and right swapped at every level), without changing <code>t</code>.</li>
   <li><code>is_bst(t)</code>: <code>True</code> if every node's left subtree holds only smaller values and its right subtree only larger values.</li>
-  <li><code>level_order(t)</code>: a list of the values row by row, left to right.</li>
+  <li><code>level_order(t)</code>: a list of the values row by row, left to right (<code>[]</code> for an empty tree). This one isn't recursive: use a queue, as in the lesson's "Level order" section.</li>
 </ul>`,
       starter: `class TreeNode:\n    def __init__(self, value, left=None, right=None):\n        self.value = value\n        self.left = left\n        self.right = right\n\ndef count_leaves(t):\n    pass\n\ndef mirror(t):\n    pass\n\ndef is_bst(t):\n    pass\n\ndef level_order(t):\n    pass\n`,
       hint: `<p>Start every function with the empty-tree case. For <code>is_bst</code>, checking each node against its children isn't enough; pass down the range of values allowed (<code>low</code>, <code>high</code>). <code>level_order</code> isn't recursive: use a <code>collections.deque</code> as a queue, starting with the root.</p>`,
