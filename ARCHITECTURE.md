@@ -396,6 +396,7 @@ There is no automated test suite yet. Changes so far were checked by:
 - `node --check` on every script, and `scripts/validate_content.js`, which loads `data/*.js` in Node to validate references (every
   `sources` id exists, every quiz `answer` is in range, rubric weights total 100, SVG marker ids
   are unique, tags in notes are balanced).
+- `scripts/test_dump_course.js`, which checks that the plain-text course extraction used by student review agents keeps superscripts, subscripts, blank lines in code, key terms, hints and bold symbols, and leaks no hidden Java/C++ or markup.
 - Recomputing every number in the math and physics lessons (worked examples, tables, simulation
   outputs) in Python.
 - Driving the page in headless Chromium with Playwright, including a mock `window.claude` runtime

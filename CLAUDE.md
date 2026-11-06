@@ -42,3 +42,9 @@ node scripts/export_problems.js > /tmp/problems.json && python3 scripts/check_pr
 ```
 
 Also run `node --check` on each edited data file.
+
+Before every student review round, run this too. It checks that the course text the student agent reads matches what students see on the page:
+
+```bash
+node scripts/test_dump_course.js
+```
