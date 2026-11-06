@@ -1,7 +1,7 @@
 // Print a course as plain text, the way a Year 1 student sees it (Java/C++ blocks removed).
 // Superscripts and subscripts are kept (as Unicode where possible, otherwise ^(...) and _(...)),
 // table cells are separated with " | ", figures appear as [figure: description], short bold
-// symbols (vectors) appear as **v**, blank lines in code are kept, and key terms and hints are included.
+// symbols (vectors) appear as **v**, key terms are printed as plain text (they aren't HTML), blank lines in code are kept, and key terms and hints are included.
 // Usage (from the repository root): node scripts/dump_course.js . <courseId> > course.txt
 const fs = require("fs"), path = require("path");
 const [root, cid] = process.argv.slice(2);
@@ -12,7 +12,9 @@ for (const m of html.matchAll(/<script src="(data\/[\w.-]+\.js)"><\/script>/g)) 
 }
 
 const SUP = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
-  "+": "⁺", "-": "⁻", "−": "⁻", "=": "⁼", "(": "⁽", ")": "⁾", "n": "ⁿ", "i": "ⁱ", "x": "ˣ", "k": "ᵏ", "m": "ᵐ", "t": "ᵗ", " ": "" };
+  "+": "⁺", "-": "⁻", "−": "⁻", "=": "⁼", "(": "⁽", ")": "⁾", "n": "ⁿ", "i": "ⁱ", "x": "ˣ", "k": "ᵏ", "m": "ᵐ", "t": "ᵗ", " ": "",
+  "a": "ᵃ", "b": "ᵇ", "c": "ᶜ", "d": "ᵈ", "e": "ᵉ", "f": "ᶠ", "g": "ᵍ", "h": "ʰ", "j": "ʲ", "l": "ˡ", "o": "ᵒ",
+  "p": "ᵖ", "r": "ʳ", "s": "ˢ", "u": "ᵘ", "v": "ᵛ", "w": "ʷ", "y": "ʸ", "z": "ᶻ" };
 const SUB = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉",
   "+": "₊", "-": "₋", "−": "₋", "=": "₌", "(": "₍", ")": "₎", "n": "ₙ", "i": "ᵢ", "x": "ₓ", "k": "ₖ", "m": "ₘ", "t": "ₜ", "a": "ₐ", "e": "ₑ", " ": "" };
 const script = (s, map, mark) => {
@@ -40,7 +42,7 @@ const c = CSA.courses[cid];
 let out = `# ${c.code} ${c.title}\n`;
 for (const u of [...c.units, ...c.optional]) {
   out += `\n\n======== ${u.id}: ${u.title} (${u.kind || "core"})\n` + txt(u.notes);
-  if ((u.terms || []).length) out += "\nKey terms:\n" + u.terms.map(([t, d]) => `- ${txt(t)}: ${txt(d)}`).join("\n") + "\n";
+  if ((u.terms || []).length) out += "\nKey terms:\n" + u.terms.map(([t, d]) => `- ${t}: ${d}`).join("\n") + "\n";
   for (const a of u.asides || []) out += `\n[SIDEBAR ${a.kind}: ${a.title}] ` + txt(a.html);
   (u.quiz || []).forEach((q, i) => out += `\nQ${i + 1}. ${txt(q.q)} | ${q.choices.map(txt).join(" / ")} | ans: ${txt(q.choices[q.answer])}`);
   (u.practice || []).forEach((p, i) => out += `\nP${i + 1}. ${txt(p.q)}` + (p.hint ? `\n   Hint: ${txt(p.hint)}` : ""));
