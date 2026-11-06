@@ -69,7 +69,7 @@ CSA.addCourse({
 <p>The oldest surviving computing device is the <strong>Antikythera mechanism</strong>, a box of bronze gears made in Greece more than 2,000 years ago and found in a shipwreck in 1901. Turning a handle moved dials that showed the positions of the sun and moon and predicted eclipses. It illustrates the first big idea: <em>a mechanism can model something else</em>, in this case the sky.</p>
 <p>For centuries afterward, "computing" meant people doing arithmetic, helped by the abacus, printed tables of logarithms and, from the 1640s, mechanical adding machines designed by Blaise Pascal and later Gottfried Leibniz. Science, engineering and navigation depended on printed tables of numbers, and those tables were full of human errors.</p>
 <p>That problem drove <strong>Charles Babbage</strong>. In the 1820s he designed the <strong>Difference Engine</strong> to calculate and print tables automatically. Money and engineering troubles stopped the project, but in 1991 London's Science Museum built his Difference Engine No. 2 from his drawings, and it worked. By 1837 Babbage had designed something far more ambitious, the <strong>Analytical Engine</strong>: a general-purpose machine with a "mill" that did arithmetic and a "store" that held numbers. Today we call these the <em>processor</em> and the <em>memory</em>. Its program was to be fed in on punched cards, and it could choose what to do next based on a result, an ancestor of the <code>if</code> statement.</p>
-<p><strong>Ada Lovelace</strong> saw further than anyone. In 1843 she translated an article about the Analytical Engine and added notes three times longer than the article itself. Her Note G sets out, step by step, how the engine could compute Bernoulli numbers, and it is often called the first published computer program. She also argued that such a machine could work with anything represented by symbols, such as music, not just numbers. The Analytical Engine was never built.</p>
+<p><strong>Ada Lovelace</strong> saw further than anyone. In 1843 she translated an article about the Analytical Engine and added notes three times longer than the article itself. Her Note G sets out, step by step, how the engine could compute Bernoulli numbers, and it is often called the first published computer program. (Bernoulli numbers are a sequence of fractions, beginning 1, −1/2, 1/6, 0, −1/30, that appear in formulas for adding up powers such as 1² + 2² + ⋯ + <em>n</em>². Each one is computed from the ones before it with many steps of arithmetic, which made them a demanding test of what a machine could do.) She also argued that such a machine could work with anything represented by symbols, such as music, not just numbers. The Analytical Engine was never built.</p>
 <p class="note"><strong>Why it matters:</strong> a separate processor and memory, and the idea of one general-purpose programmable machine, were on paper a century before electronics.</p>
 
 <h3>2. Cards: programs and data you can hold (1804 to the 1930s)</h3>
@@ -101,7 +101,7 @@ CSA.addCourse({
 <p class="note"><strong>Why it matters:</strong> each time switches got smaller and cheaper, computers moved closer to individual people: from a building, to a room, to a desk.</p>
 
 <h3>5. Nets: connecting the machines (1969 to the 2010s)</h3>
-<p>The U.S. Defense Department's research agency, ARPA, funded <strong>ARPANET</strong> so researchers could share scarce computers. Its first message, on October 29, 1969, went from UCLA to the Stanford Research Institute. The operator typed "LO", the start of "LOGIN", and then the system crashed. ARPANET broke data into small <em>packets</em> that could travel by different routes, so no single broken link stopped the network. In 1974 Vint Cerf and Bob Kahn published the design of <strong>TCP/IP</strong>, a common protocol that let separate networks join into one <strong>internet</strong>. ARPANET switched to it on January 1, 1983.</p>
+<p>The U.S. Defense Department's research agency, ARPA, funded <strong>ARPANET</strong> so researchers could share scarce computers. Its first message, on October 29, 1969, went from UCLA to the Stanford Research Institute. The operator typed "LO", the start of "LOGIN", and then the system crashed. ARPANET broke data into small <em>packets</em> that could travel by different routes, so no single broken link stopped the network. In 1974 Vint Cerf and Bob Kahn published the design of <strong>TCP/IP</strong>, a common protocol that let separate networks join into one <strong>internet</strong>. (A <em>protocol</em> is an agreed set of rules for communicating: the format of each message, and what each side does when it sends or receives one. TCP/IP's rules say, for example, how to label a packet with where it's going, and how to resend packets that get lost.) ARPANET switched to it on January 1, 1983.</p>
 <p>The internet carried email and files, but it was hard to use. In 1989 <strong>Tim Berners-Lee</strong> at CERN proposed the <strong>World Wide Web</strong>: pages written in HTML, identified by URLs and fetched with HTTP. The first website went online in 1991. In 1993 CERN made the web's software free for anyone to use, and the Mosaic browser put pictures inside pages. The web then spread at extraordinary speed.</p>
 <p>Two more shifts completed the picture. Cloud computing, led by Amazon Web Services from 2006, let anyone rent servers by the hour. The iPhone (2007) and Android (2008) put a networked computer, with a camera and GPS, in most people's pockets.</p>
 <p class="note"><strong>Why it matters:</strong> once computers were connected, information and the people who create it became the central resource, and privacy, security and misinformation became computing problems.</p>
@@ -189,7 +189,7 @@ CSA.addCourse({
 </table>
 
 <h3>Everything connects</h3>
-<p>A chatbot uses all of them: theory (algorithms for attention), systems (thousands of GPUs), languages (Python and CUDA), software engineering (the service around the model), data (training corpora), security (preventing misuse), and HCI (the chat interface).</p>
+<p>A chatbot uses all of them: theory (algorithms for attention, the step in a transformer model that decides, for each word, how much weight to give each of the other words in the text), systems (thousands of GPUs), languages (Python, and CUDA, the chip maker NVIDIA's extension of C++ for programming its graphics processors to do many calculations at once), software engineering (the service around the model), data (training corpora), security (preventing misuse), and HCI (the chat interface).</p>
 
 <h3>Computer science is not only programming</h3>
 <p>Programming is to computer science roughly what writing is to journalism: essential, but not the whole thing. As AI tools write more routine code, the lasting skills are precise thinking, problem decomposition, understanding systems, and judging whether a solution is correct and appropriate.</p>
@@ -310,6 +310,7 @@ CSA.addCourse({
 <p>In 2006 Netflix released movie ratings from about half a million customers, with names replaced by numbers, for a public contest to improve its recommendations. In 2008 researchers <strong>Arvind Narayanan and Vitaly Shmatikov</strong> showed that knowing just a few of someone's ratings and the approximate dates was usually enough to find them in the data, and matched some records to public reviews on IMDb. A lawsuit followed, and Netflix canceled a planned second contest.</p>
 <p>Even data with no individual records can reveal too much. In 2017 the fitness app Strava published a global "heatmap" of where its users ran and cycled. In early 2018 an analyst noticed that it showed the outlines and patrol routes of military bases in conflict zones, traced by soldiers wearing fitness trackers.</p>
 <p>The lesson: removing names is not anonymization. Combinations of ordinary details work like a fingerprint. A stronger approach is <strong>differential privacy</strong>, which adds carefully calibrated random noise to published statistics so that the results barely change whether or not any one person is included. The U.S. Census Bureau used it for the 2020 census.</p>
+<p><em>A tiny example.</em> A university surveys 1,000 students: "Have you ever used a fake ID?" Suppose 212 say yes. Instead of publishing 212, it adds a small random number, positive or negative, chosen so that small values like ±1 or ±2 are most likely and large ones are rare, and publishes the result, say 215. The published count is still useful: 21.5% versus the true 21.2%. But now think about one student, Sam. Whether Sam answered yes or no changes the true count by only 1, and that difference is buried in the noise. Even someone who knew every other student's answer couldn't work out Sam's from the published number. "Calibrated" means the amount of noise is chosen deliberately: more noise gives stronger privacy but less accurate statistics.</p>
 
 <h3>Belief 3: "Users agreed to it"</h3>
 <p>Most people click "Agree" without reading privacy policies, which are long and written by lawyers. Consent that nobody reads, or that is the only way to use a service, is weak protection. That is why privacy law does not rely on consent alone.</p>
@@ -445,7 +446,7 @@ CSA.addCourse({
 <p>In the 1970s, disability-rights activists in Berkeley, California pushed the city to cut ramps into sidewalk curbs so wheelchair users could cross streets. The ramps turned out to help nearly everyone: people with strollers, suitcases, delivery carts and bicycles. This is the <strong>curb-cut effect</strong>, and it is common in computing too. Captions, voice control, text-to-speech, keyboard shortcuts and dark mode all began as or were driven by accessibility work, and are now used by millions of people who don't consider themselves disabled.</p>
 
 <h3>What you can do in your own code</h3>
-<p>Most accessibility comes from small habits, and the most important one is to use the HTML element that means what you want. Compare these two buttons:</p>
+<p>Most accessibility comes from small habits, and the most important one is to use the HTML element that means what you want. You don't need to know HTML to follow this. A web page is text in which each piece is wrapped in a <strong>tag</strong> that says what kind of thing it is: <code>&lt;button&gt;Save&lt;/button&gt;</code> is a button labeled Save. A <code>div</code> is a generic box with no meaning of its own. Extra settings, called <strong>attributes</strong>, go inside the opening tag as <code>name="value"</code>: <code>class="btn"</code> names a visual style, <code>onclick="save()"</code> says "run the program's <code>save</code> function when this is clicked", and on an image, <code>&lt;img src="map.png" alt="Campus map"&gt;</code>, the <code>alt</code> attribute holds the <strong>alt text</strong> that a screen reader reads aloud instead of showing the picture. The parts between <code>&lt;!--</code> and <code>--&gt;</code> are comments. Compare these two buttons:</p>
 <pre data-label="HTML"><code>&lt;!-- Looks like a button, but Tab skips it and screen readers don't announce it --&gt;
 &lt;div class="btn" onclick="save()"&gt;Save&lt;/div&gt;
 
@@ -562,6 +563,32 @@ CSA.addOptional("cs100", [
 <h3>The response</h3>
 <p>The company that made COMPAS replied that its scores were <em>calibrated</em>: among people given the same score, Black and white defendants reoffended at about the same rate. Both claims were supported by the data.</p>
 
+<h3>The words you need, with a small example</h3>
+<p>To keep the numbers simple, imagine a tool that labels each person "high risk" or "low risk", and two groups, A and B, of 100 people each. Two years later we know who reoffended. Each group gives a 2×2 table:</p>
+<table>
+  <thead><tr><th>Group A</th><th>Reoffended</th><th>Did not</th><th>Total</th></tr></thead>
+  <tbody>
+    <tr><td>Labeled high risk</td><td>48</td><td>32</td><td>80</td></tr>
+    <tr><td>Labeled low risk</td><td>2</td><td>18</td><td>20</td></tr>
+    <tr><td>Total</td><td>50</td><td>50</td><td>100</td></tr>
+  </tbody>
+</table>
+<table>
+  <thead><tr><th>Group B</th><th>Reoffended</th><th>Did not</th><th>Total</th></tr></thead>
+  <tbody>
+    <tr><td>Labeled high risk</td><td>12</td><td>8</td><td>20</td></tr>
+    <tr><td>Labeled low risk</td><td>8</td><td>72</td><td>80</td></tr>
+    <tr><td>Total</td><td>20</td><td>80</td><td>100</td></tr>
+  </tbody>
+</table>
+<ul>
+  <li>The <strong>base rate</strong> is how often the outcome happens in a group overall: 50 of 100 (50%) in A, 20 of 100 (20%) in B. Here the base rates differ.</li>
+  <li>A tool is <strong>calibrated</strong> if a label means the same chance of the outcome in every group. It is here: "high risk" means 48/80 = 60% reoffended in A and 12/20 = 60% in B; "low risk" means 2/20 = 10% in A and 8/80 = 10% in B.</li>
+  <li>The <strong>false-positive rate</strong> is the share of people who did <em>not</em> reoffend but were labeled high risk: 32/50 = 64% in A, but only 8/80 = 10% in B.</li>
+  <li>The <strong>false-negative rate</strong> is the share of people who <em>did</em> reoffend but were labeled low risk: 2/50 = 4% in A, but 8/20 = 40% in B.</li>
+</ul>
+<p>So the same tool is perfectly calibrated and yet treats non-reoffenders in group A far more harshly, the pattern in the COMPAS debate. Could we fix the error rates? To lower A's false-positive rate we would have to relabel some of A's high-risk people as low risk. But then A's "low risk" group would contain more reoffenders, so "low risk" would mean more than 10% risk in A and still 10% in B: the tool would no longer be calibrated. With different base rates, something has to give. That is the theorem below.</p>
+
 <h3>The impossibility result</h3>
 <p>In 2016 and 2017, researchers including Jon Kleinberg, Sendhil Mullainathan and Manish Raghavan, and separately Alexandra Chouldechova, proved that when two groups have different underlying rates of the predicted outcome, a score cannot be calibrated <em>and</em> have equal false-positive and false-negative rates across groups, except in trivial cases. You must choose which kind of fairness matters most.</p>
 <table>
@@ -580,12 +607,14 @@ CSA.addOptional("cs100", [
 <ol>
   <li>Which fairness definition would you choose for bail decisions, and why?</li>
   <li>Does a human judge without a score do better or worse? How would you find out?</li>
-  <li>Apply two frameworks from Unit 3 to this case.</li>
+  <li>Apply two frameworks from <a href="#c-cs100-u3">Lesson 3</a> to this case.</li>
 </ol>
 `,
     terms: [
       ["Calibration", "Among people given the same score, outcomes occur at the same rate in every group."],
       ["False positive", "Predicting the outcome for someone who does not have it."],
+      ["False-positive rate", "Among people without the outcome, the share wrongly flagged."],
+      ["False-negative rate", "Among people with the outcome, the share the tool missed."],
       ["Base rate", "How often the outcome occurs in a group overall."]
     ],
     quiz: [

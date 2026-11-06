@@ -96,7 +96,7 @@ CSA.addUnits("cs101", [
   <li><strong>Windows:</strong> open the Start menu and search for <em>Terminal</em> or <em>PowerShell</em>.</li>
   <li><strong>Linux:</strong> on Ubuntu, press Ctrl+Alt+T.</li>
 </ul>
-<p>Check that Python is installed by asking for its version. On macOS and Linux type <code>python3 --version</code>; on Windows type <code>py --version</code>. You should see something like <code>Python 3.13.1</code>. In this course, examples use <code>python3</code>; on Windows, type <code>py</code> instead.</p>
+<p>Check that Python is installed by asking for its version. On macOS and Linux type <code>python3 --version</code>; on Windows type <code>py --version</code>. You should see something like <code>Python 3.13.1</code>. In this course, examples use <code>python3</code>; on Windows, type <code>py</code> instead. This rule holds <em>everywhere</em> in the course, including later commands such as <code>python3 -m pip install pytest</code> (on Windows: <code>py -m pip install pytest</code>) and <code>python3 -m pytest</code> (<code>py -m pytest</code>). Only the first word changes. Inside an activated virtual environment (<a href="#c-cs101-u7">Lesson 11</a>), plain <code>python</code> works on every system.</p>
 
 <h3>Moving around in the terminal</h3>
 <p>The terminal always has a <strong>current folder</strong> (also called the working directory). Commands act on files there. A few commands cover most daily work, and they are the same in macOS, Linux and Windows PowerShell:</p>
@@ -120,7 +120,13 @@ Hello, world</code></pre>
 <p>The console is perfect for trying small things. Everything disappears when you leave it, which you do with <code>exit()</code>, or Ctrl+D on macOS and Linux, or Ctrl+Z then Enter on Windows.</p>
 
 <h3>Your first program</h3>
-<p>A <strong>program</strong> is a file of instructions that Python runs from top to bottom. In your editor, create a file named <code>hello.py</code> in your <code>cs101</code> folder:</p>
+<p>A <strong>program</strong> is a file of instructions that Python runs from top to bottom. You will write it in your editor and save it inside your <code>cs101</code> folder. Editors do not save there by default (many choose your Documents or home folder), so do it this way:</p>
+<ol>
+  <li>In the terminal, make the folder once: <code>mkdir cs101</code>.</li>
+  <li><strong>VS Code:</strong> choose <em>File → Open Folder…</em> and pick <code>cs101</code>. Then, in the Explorer panel on the left, hover over the folder's name, click the <em>New File</em> icon, type <code>hello.py</code> and press Enter; the file is created inside <code>cs101</code>. VS Code's built-in terminal (<em>Terminal → New Terminal</em>) also starts in that folder. <strong>Thonny:</strong> type the code, choose <em>File → Save as…</em>, browse to <code>cs101</code>, and name the file <code>hello.py</code>.</li>
+  <li>In the terminal, <code>cd</code> into <code>cs101</code> and type <code>ls</code> (<code>dir</code> also works on Windows). You should see <code>hello.py</code> in the list. If it isn't there, the file was saved somewhere else, and <code>python3 hello.py</code> will say <em>No such file or directory</em>.</li>
+</ol>
+<p>Here is the program:</p>
 <pre><code># hello.py: my first Python program
 print("Hello, world!")
 print("I am learning to program.")
@@ -270,7 +276,7 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
 <h3>Floats are approximate</h3>
 <p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Two consequences:</p>
 <ul>
-  <li>Never test floats with <code>==</code>. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal.</li>
+  <li>Never test floats with <code>==</code>. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table near the end of this lesson shows where modules fit, and the Files and modules lesson explains <code>import</code> fully.</li>
   <li>Use <code>round(x, 2)</code> or an f-string such as <code>f"{x:.2f}"</code> to show a sensible number of decimal places.</li>
 </ul>
 
@@ -310,7 +316,7 @@ TypeError: can only concatenate str (not "int") to str
   <li>You can't use a keyword such as <code>if</code>, <code>for</code> or <code>class</code> as a name.</li>
   <li>Python style (called PEP 8) uses lowercase words joined by underscores: <code>hours_worked</code>, not <code>HoursWorked</code> or <code>hw</code>. Choose names that say what the value means.</li>
 </ul>
-<p>Two handy shortcuts. <strong>Augmented assignment</strong> combines an operation with assignment: <code>score += 10</code> means <code>score = score + 10</code>, and <code>-=</code>, <code>*=</code> and <code>//=</code> work the same way. <strong>Multiple assignment</strong> sets several names at once: <code>a, b = 1, 2</code>. It even swaps two values in one line: <code>a, b = b, a</code>.</p>
+<p>Two handy shortcuts. <strong>Augmented assignment</strong> combines an operation with assignment: <code>score += 10</code> means <code>score = score + 10</code>, and <code>-=</code>, <code>*=</code> and <code>//=</code> work the same way. (That is exactly true for numbers and strings. Lists, which come later, are an exception: the Lists lesson shows how <code>+=</code> behaves on them.) <strong>Multiple assignment</strong> sets several names at once: <code>a, b = 1, 2</code>. It even swaps two values in one line: <code>a, b = b, a</code>.</p>
 
 <h3>Tracing code by hand</h3>
 <p>To <em>trace</em> code, go line by line and write down what each name refers to after that line runs. It feels slow at first, but tracing is the single most useful skill you can build this term: it is how you find bugs and how you answer exam questions.</p>
@@ -340,7 +346,7 @@ b = b - 1</code></pre>
     <tr><td><code>int("3.5")</code></td><td><code>ValueError</code></td><td>Not a whole number; use <code>float()</code></td></tr>
   </tbody>
 </table>
-<p>One surprise: <code>round(2.5)</code> is <code>2</code>, not 3. Python rounds exact halves to the nearest <em>even</em> number, which avoids bias when rounding many values.</p>
+<p>One surprise: <code>round(2.5)</code> is <code>2</code>, not 3. Python rounds exact halves to the nearest <em>even</em> number, which avoids bias when rounding many values. So <code>round(3.5)</code> is <code>4</code>, and <code>round(0.125, 2)</code> is <code>0.12</code> (0.125 is exactly 1/8, a true half-way case, and 2 is even). A second, different surprise comes from binary floats: <code>round(2.675, 2)</code> gives <code>2.67</code>. The decimal 2.675 can't be stored exactly; the float actually stored is 2.67499999999999982…, which is slightly <em>below</em> half-way, so it rounds down. Neither result means you misunderstood rounding.</p>
 
 <h3>Talking to the user: output and input</h3>
 <p>Programs communicate with people through <em>output</em>, showing text, and <em>input</em>, reading what the user types. Every language provides a way to do both. Here is a complete program that asks two questions and replies. Choose your language at the top of the page.</p>
@@ -411,7 +417,7 @@ Hi Ada, next year you'll be 37.</code></pre>
   <li><code>input()</code> <strong>returns</strong> what they typed, as a string, without the Enter at the end. Here that string is stored in <code>name</code>.</li>
 </ol>
 <p>The result is <em>always</em> a string, even if the user types digits. <code>"36"</code> is text, not the number 36, and <code>"36" + 1</code> is an error. That is why the program wraps the second call in <code>int(...)</code>, which converts text to an integer. Use <code>float(...)</code> for numbers with a decimal point. If the text is not a valid number, such as <code>"thirty"</code>, the conversion raises a <code>ValueError</code>; you will learn to handle that gracefully in the testing and debugging lesson.</p>
-<p><code>print()</code> works the other way: it takes values, turns them into text and writes them out, followed by a new line. The <code>f</code> before the quotes in the last line makes an <strong>f-string</strong>. Python evaluates each expression inside <code>{ }</code> and inserts the result into the text, so <code>{age + 1}</code> becomes <code>37</code>. (The <code>{total:.2f}</code> in the earlier price example works the same way; <code>:.2f</code> means "show two decimal places".)</p>
+<p><code>print()</code> works the other way: it takes values, turns them into text and writes them out, followed by a new line. The <code>f</code> before the quotes in the last line makes an <strong>f-string</strong>. Python evaluates each expression inside <code>{ }</code> and inserts the result into the text, so <code>{age + 1}</code> becomes <code>37</code>. You can also put a <em>format specification</em> after a colon inside the braces: <code>f"{3.14159:.2f}"</code> gives <code>'3.14'</code>, because <code>:.2f</code> means "show as a float with two decimal places". The tip-calculator practice problem below uses it for money.</p>
 </div>
 <div data-only="java">
 <p>When the program reaches the first question, four things happen in order:</p>
@@ -769,8 +775,8 @@ has_ticket = True
 can_enter = age &gt;= 18 and has_ticket      # True
 is_weekend = day == "Sat" or day == "Sun"  # careful: not  day == "Sat" or "Sun"</code></pre>
 <p>Python <strong>short-circuits</strong>: in <code>a and b</code>, if <code>a</code> is false, <code>b</code> is never evaluated, because the answer is already known. That makes guards like <code>x != 0 and 10 / x &gt; 1</code> safe: the division only happens when <code>x</code> isn't zero.</p>
-<p class="note">A classic bug: <code>if day == "Sat" or "Sun":</code> is always true. Python reads it as <code>(day == "Sat") or ("Sun")</code>, and a non-empty string counts as true. Write the comparison out in full on both sides.</p>
-<p>That note mentions <strong>truthiness</strong>: in a condition, Python treats <code>0</code>, <code>0.0</code>, the empty string <code>""</code>, <code>None</code> and empty collections as false, and almost everything else as true. So <code>if name:</code> means "if name is not empty".</p>
+<p>A condition doesn't have to be a <code>bool</code>. Python decides whether any value counts as true or false; this is called <strong>truthiness</strong>. The values <code>0</code>, <code>0.0</code>, the empty string <code>""</code>, <code>None</code> and empty collections (such as an empty list, which you'll meet later) count as false, and almost everything else counts as true. So <code>if name:</code> means "if name is not empty", and the non-empty string <code>"Sun"</code> counts as true.</p>
+<p class="note">A classic bug that comes from truthiness: <code>if day == "Sat" or "Sun":</code> is always true. Python reads it as <code>(day == "Sat") or ("Sun")</code>, and the right side, <code>"Sun"</code>, is a non-empty string, so it counts as true. Write the comparison out in full on both sides: <code>day == "Sat" or day == "Sun"</code>.</p>
 
 <h3>if, elif and else</h3>
 <pre><code>temp = float(input("Temperature in °C: "))
@@ -819,6 +825,7 @@ while guess != secret:
     elif guess &gt; secret:
         print("Lower.")
 print(f"Correct! You took {guesses} guesses.")</code></pre>
+<p>The first line, <code>import random</code>, loads the <code>random</code> <em>module</em>: a file of ready-made functions that comes with Python but isn't available until you ask for it. After the import, you reach its functions with a dot: <code>random.randint(1, 100)</code> means "the <code>randint</code> function from <code>random</code>", which returns a random whole number from 1 to 100, both ends included. Put imports at the top of the file. The Files and modules lesson explains modules fully.</p>
 
 <h3>for loops: repeat for each item</h3>
 <p>A <code>for</code> loop runs its block once for each item in a sequence, with a variable set to the current item. <code>range</code> produces sequences of whole numbers:</p>
@@ -884,7 +891,7 @@ print(total)   # 1 + 2 + 3 = 6</code></pre>
 <pre data-label="Output"><code>   1   2   3   4   5
    2   4   6   8  10
    3   6   9  12  15</code></pre>
-<p>Two new details: <code>:4</code> inside an f-string pads a value to four characters wide, so the columns line up; and <code>end=""</code> tells <code>print</code> not to start a new line. The empty <code>print()</code> ends each row. The inner block ran 3 × 5 = 15 times.</p>
+<p>Two new details: <code>:4</code> inside an f-string pads a value to four characters wide, so the columns line up; and <code>end=""</code> tells <code>print</code> not to start a new line. <code>end=""</code> is a <em>keyword argument</em>: a value passed to a function by name rather than by position. It isn't special to <code>print</code>; any function can accept named arguments, and the next lesson shows how to write your own. (<code>print</code>'s <code>end</code> is normally <code>"\\n"</code>, a new line; here we replace it with nothing.) The empty <code>print()</code> ends each row. The inner block ran 3 × 5 = 15 times.</p>
 
 <h3>Searching with loops: guess-and-check and bisection</h3>
 <p>Loops let a program search for an answer. Suppose we want √2 without using a square root function. <strong>Guess-and-check</strong> tries values in small steps until one is close enough:</p>
@@ -1088,7 +1095,21 @@ print(x)         # 10: the global x never changed</code></pre>
 </svg>
 <figcaption>The <code>x</code> inside <code>bump</code> is a different name from the global <code>x</code>, in a different frame. Reassigning it changes only the function's own copy of the name.</figcaption>
 </figure>
-<p>A function <em>can read</em> global names, but if it assigns to a name, that name is local to the function unless declared with <code>global</code>. Avoid <code>global</code>: functions that take inputs as parameters and give results back with <code>return</code> are far easier to test and reuse.</p>
+<p>A function <em>can read</em> global names, but if it assigns to a name, that name is local to the function unless declared with <code>global</code>. Here is what goes wrong without it, and what the declaration looks like:</p>
+<pre><code>count = 0
+
+def add_one():
+    count = count + 1     # assigning makes count local, so reading it first fails
+
+add_one()   # UnboundLocalError: cannot access local variable 'count' ...
+
+def add_one_global():
+    global count          # "count in this function means the global name"
+    count = count + 1
+
+add_one_global()
+print(count)   # 1</code></pre>
+<p>Avoid <code>global</code>: functions that take inputs as parameters and give results back with <code>return</code> are far easier to test and reuse. The better version is <code>def add_one(n): return n + 1</code>, called as <code>count = add_one(count)</code>.</p>
 
 <h3>Specifications</h3>
 <p>A good function has a <strong>contract</strong> between the function and its callers, written in the docstring:</p>
@@ -1128,7 +1149,19 @@ def triple(n):
     return n * 3
 
 apply_twice(triple, 2)   # triple(triple(2)) = 18</code></pre>
-<p>For a tiny function you only need once, Python has <strong>lambda</strong>, a way to write a function in a single expression without giving it a name. <code>lambda n: n * 3</code> means "a function that takes <code>n</code> and returns <code>n * 3</code>". So <code>apply_twice(lambda n: n * 3, 2)</code> also gives 18. You'll see lambdas used with sorting and with the math courses' code, such as <code>bisect(lambda x: x**2 - 2, 0, 2)</code>.</p>
+<p>For a tiny function you only need once, Python has <strong>lambda</strong>, a way to write a function in a single expression without giving it a name. <code>lambda n: n * 3</code> means "a function that takes <code>n</code> and returns <code>n * 3</code>". So <code>apply_twice(lambda n: n * 3, 2)</code> also gives 18. You'll see lambdas used with sorting (in the lists lesson) and in the math courses' code. For example, <a href="#c-math130-u2">MATH 130, Continuity</a> defines a function <code>bisect(f, lo, hi)</code> that finds where <code>f</code> crosses zero. <code>bisect</code> is not built into Python, so you must define it before calling it, or you get a <code>NameError</code>. Here is a short version you can type in and try:</p>
+<pre><code>def bisect(f, lo, hi, tol=1e-10):
+    """Find x in [lo, hi] with f(x) close to 0; f(lo) and f(hi) must differ in sign."""
+    while hi - lo &gt; tol:
+        mid = (lo + hi) / 2
+        if f(lo) * f(mid) &lt;= 0:   # sign change in the left half
+            hi = mid
+        else:
+            lo = mid
+    return (lo + hi) / 2
+
+print(bisect(lambda x: x**2 - 2, 0, 2))   # 1.414213562355144, close to √2</code></pre>
+<p>The lambda <code>lambda x: x**2 - 2</code> is the function whose zero we want; writing it inline saves defining a named function just for this call.</p>
 
 <h3>Checking functions with assert</h3>
 <p>Because functions take inputs and return outputs, they are easy to check:</p>
@@ -1299,6 +1332,7 @@ s = "j" + s[1:]     # build a new string instead: 'jython'</code></pre>
     <tr><td><code>count(sub)</code></td><td><code>"banana".count("a")</code></td><td><code>3</code></td></tr>
     <tr><td><code>startswith</code>, <code>endswith</code></td><td><code>"report.pdf".endswith(".pdf")</code></td><td><code>True</code></td></tr>
     <tr><td><code>isdigit()</code>, <code>isalpha()</code></td><td><code>"2024".isdigit()</code></td><td><code>True</code></td></tr>
+    <tr><td><code>isalnum()</code></td><td><code>"R2D2".isalnum()</code>, <code>"R2-D2".isalnum()</code></td><td><code>True</code>, <code>False</code> (letters or digits only: "alphanumeric")</td></tr>
   </tbody>
 </table>
 <p><code>split</code> and <code>join</code> are opposites: <code>split</code> breaks a string into a <em>list</em> of pieces (lists are the next lesson), and <code>join</code> glues a list of strings together with a separator. The <code>in</code> operator checks for a substring: <code>"ana" in "banana"</code> is <code>True</code>.</p>
@@ -1353,6 +1387,15 @@ caesar("khoor, zruog", -3)   # 'hello, world'</code></pre>
 
 <h3>Worked example: is it a palindrome?</h3>
 <p>A palindrome reads the same backward, ignoring case, spaces and punctuation, as in "A man, a plan, a canal: Panama". Break the problem into two steps: clean the text, then compare.</p>
+<p>First, <code>clean</code> written with the loop pattern you already know. <code>isalnum()</code> (in the table above) is true for letters and digits:</p>
+<pre><code>def clean(text):
+    """Return only the letters and digits of text, in lowercase."""
+    result = ""
+    for ch in text:
+        if ch.isalnum():
+            result += ch.lower()
+    return result</code></pre>
+<p>Python programmers often write the same function in one line, and you will see this form in other people's code:</p>
 <pre><code>def clean(text):
     """Return only the letters and digits of text, in lowercase."""
     return "".join(ch.lower() for ch in text if ch.isalnum())
@@ -1363,7 +1406,7 @@ def is_palindrome(text):
 
 is_palindrome("A man, a plan, a canal: Panama")   # True
 is_palindrome("Python")                           # False</code></pre>
-<p>The expression inside <code>join</code> is a <em>generator expression</em>: it produces each lowercased letter or digit in turn. You'll meet its close relative, the list comprehension, in the next lesson.</p>
+<p>Both versions do exactly the same thing; use whichever you find clearer. In the one-line version, the expression inside <code>join</code> is a <em>generator expression</em>. Read it like the loop: "<code>ch.lower()</code>, for each <code>ch</code> in <code>text</code>, if <code>ch.isalnum()</code>". It hands those characters to <code>join</code> one at a time, and <code>join</code> glues them together with <code>""</code> (nothing) between them. You'll meet its close relative, the list comprehension, in the next lesson.</p>
 `,
     terms: [
       ["String", "A sequence of characters, type str."],
@@ -1466,6 +1509,7 @@ len(scores)        # 3
     <tr><td><code>xs.sort()</code></td><td><code>[1, 2, 3]</code></td><td><code>None</code></td></tr>
     <tr><td><code>sorted(xs)</code></td><td>unchanged</td><td>a new sorted list <code>[1, 2, 3]</code></td></tr>
     <tr><td><code>xs + [7]</code></td><td>unchanged</td><td>a new list <code>[3, 1, 2, 7]</code></td></tr>
+    <tr><td><code>xs += [7]</code></td><td><code>[3, 1, 2, 7]</code> (changed in place, like <code>extend</code>)</td><td>(a statement; no value)</td></tr>
   </tbody>
 </table>
 <p>Notice the pattern: methods that change a list in place, like <code>append</code> and <code>sort</code>, return <code>None</code>. So <code>xs = xs.sort()</code> is a bug: it sorts the list, then replaces it with <code>None</code>. Use either <code>xs.sort()</code> on its own line, or <code>ys = sorted(xs)</code> to get a new list and keep the original.</p>
@@ -1495,6 +1539,31 @@ print(c)        # [1, 2, 3, 4, 5]</code></pre>
 <figcaption><code>a</code> and <code>b</code> are aliases: two names for one list. <code>c</code> refers to a separate copy.</figcaption>
 </figure>
 <p>Aliasing matters most when you pass a list to a function. The parameter becomes another name for the caller's list, so a function that calls <code>append</code> on it changes the caller's list too. Sometimes that's what you want; if not, work on a copy. Strings and numbers don't have this issue, because they can't be changed in place.</p>
+<h4>A trap: <code>+=</code> on a list changes it in place</h4>
+<p>In <a href="#c-cs101-u1">Lesson 2</a> you learned that <code>count += 1</code> means <code>count = count + 1</code>. For numbers and strings that is exactly right: they can't be changed, so <code>+=</code> builds a new value and points the name at it. <strong>Lists are different.</strong> For a list, <code>b += [3]</code> changes the existing list in place (it works like <code>b.extend([3])</code>), while <code>b = b + [3]</code> builds a new list and points <code>b</code> at it. With an alias, you can see the difference:</p>
+<pre><code>a = [1, 2]
+b = a
+b += [3]         # changes the one shared list
+print(a)         # [1, 2, 3]
+
+a = [1, 2]
+b = a
+b = b + [3]      # makes a new list; only b moves
+print(a)         # [1, 2]
+print(b)         # [1, 2, 3]</code></pre>
+<p>Rule of thumb: on a list, <code>+=</code>, <code>append</code>, <code>sort</code> and item assignment all change the list itself; <code>+</code>, <code>sorted</code> and slicing make new lists.</p>
+<h4>Copying a list of lists</h4>
+<p><code>a.copy()</code> makes a new <em>outer</em> list, but it doesn't copy what's inside. For a list of lists, the copy holds the same inner lists, so changing a row through one is visible through the other. This is called a <strong>shallow copy</strong>.</p>
+<pre><code>grid = [[1, 2], [3, 4]]
+g2 = grid.copy()
+g2[0].append(99)      # changes the inner list both share
+print(grid)           # [[1, 2, 99], [3, 4]]
+
+grid = [[1, 2], [3, 4]]
+g3 = [row.copy() for row in grid]   # copy each row too
+g3[0].append(99)
+print(grid)           # [[1, 2], [3, 4]]  unchanged</code></pre>
+<p>Copying every level is a <strong>deep copy</strong>. For lists nested more than one level, <code>import copy</code> and use <code>copy.deepcopy(grid)</code>.</p>
 
 <h3>Building lists and comprehensions</h3>
 <p>The accumulator pattern builds a new list from an old one:</p>
@@ -1542,6 +1611,17 @@ del ages["Alan"]          # remove a pair</code></pre>
 word_counts("the cat and the hat")
 # {'the': 2, 'cat': 1, 'and': 1, 'hat': 1}</code></pre>
 <p>The line <code>counts.get(word, 0) + 1</code> says "the current count, or 0 if we haven't seen this word yet, plus one". Keys must be <strong>hashable</strong>, which in practice means immutable: strings, numbers and tuples work, but lists don't. Values can be anything, including lists: <code>{"Ada": [88, 95], "Alan": [79]}</code>.</p>
+<h4>What "hashable" means</h4>
+<p>A dictionary is fast because it doesn't search. Inside, it keeps a row of numbered slots. To store a key, Python computes a whole number from the key, called its <strong>hash</strong> (try <code>hash("Ada")</code>), and uses that number to choose a slot. A tiny example with 8 slots and whole-number keys, whose hash is the number itself, choosing the slot as hash % 8:</p>
+<table>
+  <thead><tr><th>Key</th><th><code>hash(key)</code></th><th>Slot: hash % 8</th></tr></thead>
+  <tbody>
+    <tr><td><code>12</code></td><td>12</td><td>4</td></tr>
+    <tr><td><code>7</code></td><td>7</td><td>7</td></tr>
+    <tr><td><code>33</code></td><td>33</td><td>1</td></tr>
+  </tbody>
+</table>
+<p>To look up 33 later, Python computes 33 % 8 = 1 again and goes straight to slot 1, without checking the other keys. (Real dictionaries are a bit more elaborate, and string hashes are big numbers that change each time Python starts, but the idea is the same.) Now you can see why keys must not change: if a key changed after it was stored, its hash would change, and Python would look in the wrong slot. So Python refuses mutable keys: <code>{[1, 2]: "x"}</code> raises <code>TypeError: unhashable type: 'list'</code>. A value is <strong>hashable</strong> if it has a hash that never changes. <a href="#c-cs101-algo">The efficiency lesson</a> returns to this, including what happens when two keys land in the same slot.</p>
 
 <h3>Sets</h3>
 <p>A <strong>set</strong> is an unordered collection with no duplicates, written with braces: <code>{1, 2, 3}</code>. (An empty set is <code>set()</code>, because <code>{}</code> is an empty dictionary.) Sets are fast at answering "is this in here?" and support the operations from Discrete Mathematics:</p>
@@ -1581,11 +1661,13 @@ sorted(students, key=lambda s: s[1], reverse=True)
       ["Mutable", "Able to be changed in place after creation."],
       ["Aliasing", "Two names referring to the same object."],
       ["Unpacking", "Assigning the parts of a tuple or list to separate names: x, y = point."],
-      ["Hashable", "Usable as a dictionary key or set member; immutable built-ins are hashable."],
+      ["Hashable", "Usable as a dictionary key or set member: the value has a hash that never changes. Immutable built-ins are hashable; lists are not."],
+      ["Hash", "A whole number computed from a value, used to choose where a dictionary or set stores it."],
+      ["Shallow copy", "A new outer list holding the same inner objects, as made by xs.copy(); a deep copy also copies everything inside."],
       ["Comprehension", "A compact expression that builds a list, dict or set from an iterable."]
     ],
     quiz: [
-      { q: "After <code>a = [1, 2]; b = a; b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place." },
+      { q: "After <code>a = [1, 2]; b = a; b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place (like <code>extend</code>). This differs from <code>b = b + [3]</code>, which would build a new list and leave <code>a</code> as <code>[1, 2]</code>; see \"A trap: += on a list\" above." },
       { q: "Which of these can be a dictionary key?", choices: ["[1, 2]", "{1, 2}", "(1, 2)", "{'a': 1}"], answer: 2, why: "Only the tuple is immutable and hashable." },
       { q: "What is <code>xs</code> after <code>xs = [3, 1, 2]</code> and <code>xs = xs.sort()</code>?", choices: ["[1, 2, 3]", "[3, 1, 2]", "None", "An error"], answer: 2, why: "<code>sort()</code> sorts in place and returns <code>None</code>, which is then assigned to <code>xs</code>." },
       { q: "What does <code>[n * 2 for n in range(4) if n != 2]</code> produce?", choices: ["[0, 2, 4, 6]", "[0, 2, 6]", "[2, 6]", "[0, 1, 3]"], answer: 1, why: "n takes 0, 1, 3 (2 is skipped), doubled to 0, 2, 6." },
@@ -1705,6 +1787,11 @@ def is_palindrome(s):
     if len(s) &lt;= 1:                   # "" and one-character strings are palindromes
         return True
     return s[0] == s[-1] and is_palindrome(s[1:-1])</code></pre>
+<p>These are written for clarity, not speed, and they have two costs worth knowing:</p>
+<ul>
+  <li><strong>Copying.</strong> The slice <code>xs[1:]</code> builds a new list each call, so a list of <em>n</em> items copies (<em>n</em> − 1) + (<em>n</em> − 2) + … + 1 + 0 = <em>n</em>(<em>n</em> − 1)/2 items in total: 404,550 copies for 900 items. You can avoid the copying by passing a position instead of a shorter list: <code>def total_from(xs, i=0)</code> returns 0 when <code>i == len(xs)</code> and otherwise <code>xs[i] + total_from(xs, i + 1)</code>.</li>
+  <li><strong>Depth.</strong> Either way, each item adds one frame to the call stack, so the stack ends up about as deep as the list is long. With Python's limit of about 1,000 frames, <code>total(list(range(900)))</code> works, but <code>total(list(range(2000)))</code> stops with <code>RecursionError</code>. For long lists, use a loop or the built-in <code>sum</code>, which gives 1999000 instantly.</li>
+</ul>
 <p>Recursion shines on <strong>nested</strong> data, where loops become awkward. A list can contain lists, which contain more lists:</p>
 <pre><code>def flatten(items):
     """Return a flat list of all non-list items, in order."""
@@ -1769,7 +1856,7 @@ def fib(n):
     return fib(n - 1) + fib(n - 2)
 
 fib(100)   # 354224848179261915075, instantly</code></pre>
-<p>The line <code>@cache</code> is a <strong>decorator</strong>: it wraps the function so that its results are remembered. Now each <code>fib(k)</code> is computed only once, so <code>fib(n)</code> takes about <em>n</em> steps. Without memoization, <code>fib(100)</code> would take longer than the age of the universe.</p>
+<p>The line <code>@cache</code> is a <strong>decorator</strong>. Writing <code>@cache</code> above <code>def fib</code> is shorthand for <code>fib = cache(fib)</code> after the definition: <code>cache</code> is a function that takes your function and returns a new one. "Wraps" means that the new function sits around the old one. When you call <code>fib(k)</code>, the new function first looks in a dictionary of answers it has saved; if <code>k</code> is there, it returns the saved answer, and if not, it calls your original <code>fib</code>, saves the result and returns it. Because the recursive calls inside <code>fib</code> also use the name <code>fib</code>, they go through the saved answers too. You'll write your own decorators in <a href="#c-cs102-c5">CS 102, Lesson 5</a>; for now, using <code>@cache</code> is enough. Now each <code>fib(k)</code> is computed only once, so <code>fib(n)</code> takes about <em>n</em> steps. Without memoization, <code>fib(100)</code> would take longer than the age of the universe.</p>
 `,
     terms: [
       ["Recursion", "Defining a function in terms of itself on smaller inputs."],
@@ -1846,7 +1933,15 @@ CSA.addUnits("cs101", [
 <p>Most bugs live at the edges. If a function works for <code>[3, 1, 2]</code>, it probably works for <code>[5, 9, 7]</code>; it's <code>[]</code> and <code>[4]</code> that break it.</p>
 
 <h3>Automated tests with pytest</h3>
-<p><code>assert</code> statements work for quick checks, but real projects use a testing tool. <strong>pytest</strong> is the most popular for Python. Install it once from the terminal with <code>python3 -m pip install pytest</code> (the toolkit lesson explains <code>pip</code> and why you might install it inside a virtual environment).</p>
+<p><code>assert</code> statements work for quick checks, but real projects use a testing tool. <strong>pytest</strong> is the most popular for Python. It doesn't come with Python, so you install it once. Python includes an installer for extra packages called <strong>pip</strong>; you run it from the terminal (not from inside the <code>&gt;&gt;&gt;</code> console):</p>
+<pre data-label="Terminal"><code>python3 -m pip install pytest      # Windows: py -m pip install pytest
+python3 -m pytest --version         # check: prints something like "pytest 9.2.0"</code></pre>
+<p><code>-m pip</code> means "run the pip module that belongs to this Python", which guarantees pytest is installed for the same Python you run your code with. If the install stops with an error that says <em>externally-managed-environment</em> (this happens with some Linux and Homebrew Pythons), make a private <em>virtual environment</em> in your <code>cs101</code> folder and install there:</p>
+<pre data-label="Terminal"><code>python3 -m venv .venv
+source .venv/bin/activate           # Windows: .venv\\Scripts\\activate
+python -m pip install pytest</code></pre>
+<p>(On Windows PowerShell, if activation says "running scripts is disabled", see the note in <a href="#c-cs101-u7">Lesson 11</a>, "Packages, pip and virtual environments".)</p>
+<p>After activating, use <code>python</code> for the rest of that terminal session, and run <code>source .venv/bin/activate</code> again in each new terminal. The toolkit lesson, <a href="#c-cs101-u7">Lesson 11</a>, explains pip and virtual environments properly; these commands are all you need until then.</p>
 <p>Suppose <code>stats.py</code> contains a <code>mean</code> function. Put tests in a file whose name starts with <code>test_</code>, in the same folder. Each test is a function whose name also starts with <code>test_</code>:</p>
 <pre><code># test_stats.py
 import pytest
@@ -1913,7 +2008,7 @@ ZeroDivisionError: division by zero</code></pre>
   <li><strong>Test the hypothesis</strong>. Print values at key points, or use a debugger to pause and inspect.</li>
   <li><strong>Fix the cause</strong>, not the symptom, then rerun all your tests.</li>
 </ol>
-<p>For quick inspection, an f-string with <code>=</code> prints a variable's name and value: <code>print(f"{total=}")</code> prints <code>total=42</code>. For more control, put <code>breakpoint()</code> on a line: the program pauses there and gives you a prompt where <code>p total</code> prints a value, <code>n</code> runs the next line, <code>s</code> steps into a function call, and <code>c</code> continues. Editors such as VS Code and Thonny offer the same thing with buttons.</p>
+<p>For quick inspection, an f-string with <code>=</code> prints a variable's name and value: <code>print(f"{total=}")</code> prints <code>total=42</code>. For more control, put <code>breakpoint()</code> on a line. When the program reaches it, it pauses and starts <strong>pdb</strong>, the Python debugger that comes with Python, which shows a <code>(Pdb)</code> prompt. There you type short commands: <code>p total</code> prints a value, <code>n</code> runs the next line, <code>s</code> steps into a function call, <code>c</code> continues until the next breakpoint or the end, <code>l</code> lists the code around the current line, and <code>q</code> quits the debugger and stops the program. Remember to delete the <code>breakpoint()</code> line when you're done. Editors such as VS Code and Thonny offer the same thing with buttons.</p>
 <p>And when you're stuck, explain the code out loud, line by line, to someone else or even to a rubber duck on your desk. Saying exactly what each line does often reveals the line that doesn't do what you thought. Programmers really do call this <strong>rubber duck debugging</strong>.</p>
 
 <h3>Exceptions: raising them</h3>
@@ -1937,6 +2032,20 @@ ZeroDivisionError: division by zero</code></pre>
         break          # runs only if no exception happened
 print("You entered", value)</code></pre>
 <p>Python runs the <code>try</code> block. If a <code>ValueError</code> happens, it jumps to the matching <code>except</code> block; if nothing goes wrong, it runs the optional <code>else</code> block. A <code>finally</code> block, if present, runs either way, which is useful for cleanup. Write <code>except ValueError as e:</code> to get the exception itself, and <code>print(e)</code> to see its message.</p>
+<p>Why use <code>else</code> instead of putting the code at the end of the <code>try</code> block? Keep the <code>try</code> block to the lines you expect might fail, so the <code>except</code> can only catch errors from those lines. Code in <code>else</code> runs only on success, but its own errors are <em>not</em> caught by that <code>except</code>. Here is a mistake that <code>else</code> prevents (with <code>import math</code> at the top):</p>
+<pre><code>try:
+    n = int(text)
+    print(math.sqrt(n))   # math.sqrt(-4) also raises ValueError!
+except ValueError:
+    print("Not a whole number.")</code></pre>
+<p>If the user types <code>-4</code>, the conversion works, but <code>math.sqrt</code> raises <code>ValueError: math domain error</code>, and the program wrongly says "Not a whole number." Moving the second line into <code>else</code> fixes it: the <code>except</code> now covers only <code>int(text)</code>, and the square-root problem shows up as its own error.</p>
+<pre><code>try:
+    n = int(text)
+except ValueError:
+    print("Not a whole number.")
+else:
+    print(math.sqrt(n))</code></pre>
+<p>For very short code like the loop above, either style works; the rule matters as blocks grow.</p>
 <p>Two rules keep exception handling from hiding bugs:</p>
 <ul>
   <li><strong>Catch specific exceptions.</strong> A bare <code>except:</code> catches everything, including a <code>NameError</code> from a typo, and your program carries on in a broken state.</li>
@@ -1964,7 +2073,7 @@ print("You entered", value)</code></pre>
       { q: "You found a bug. What should you write before fixing it?", choices: ["A comment", "A test that fails because of the bug", "A new function", "Nothing"], answer: 1, why: "The test proves the bug exists, proves the fix works, and stops it from coming back." }
     ],
     practice: [
-      { q: `<p>Write pytest tests for <code>is_leap_year</code> from the Functions lesson. Include at least one typical leap year, one typical non-leap year, and each of the edge cases in the rule.</p>`, a: `<pre><code># test_dates.py
+      { q: `<p>Write pytest tests for <code>is_leap_year</code> from the Functions lesson. Include at least one typical leap year, one typical non-leap year, and each of the edge cases in the rule. Copy <code>is_leap_year</code> into a file <code>dates.py</code>, write the tests in <code>test_dates.py</code> in the same folder, and run <code>python3 -m pytest</code> there. (If pytest isn't installed yet, see "Automated tests with pytest" above.)</p>`, a: `<p>With <code>dates.py</code> holding the <code>is_leap_year</code> function from the Functions lesson:</p><pre><code># test_dates.py
 from dates import is_leap_year
 
 def test_typical_leap_year():
@@ -1977,7 +2086,7 @@ def test_century_not_leap():
     assert not is_leap_year(1900)
 
 def test_400_year_is_leap():
-    assert is_leap_year(2000)</code></pre><p>The rule has three parts (divisible by 4, by 100, by 400), so the edge cases are a century year like 1900 and a 400th year like 2000. A function that only checked <code>year % 4 == 0</code> would pass the first two tests and fail the third.</p>` },
+    assert is_leap_year(2000)</code></pre><p>The rule has three parts (divisible by 4, by 100, by 400), so the edge cases are a century year like 1900 and a 400th year like 2000. A function that only checked <code>year % 4 == 0</code> would pass the first two tests and fail the third. Running <code>python3 -m pytest</code> in the folder should end with <code>4 passed</code>.</p>` },
       { q: `<p>Read this traceback. What went wrong, in which function, and what is the most likely real cause?</p><pre data-label="Terminal"><code>Traceback (most recent call last):
   File "grades.py", line 15, in &lt;module&gt;
     print(letter(scores["Grace"]))
@@ -2055,6 +2164,7 @@ with open("todo.txt", "a", encoding="utf-8") as f:
 here = Path(__file__).parent          # the folder this program file is in
 data = here / "data" / "grades.csv"   # / joins path parts
 print(data.exists())</code></pre>
+<p>Two pieces need explaining. <code>__file__</code> (two underscores on each side) is a name Python sets automatically in every program file: it holds the path of that file, as a string. <code>Path(__file__)</code> turns it into a <code>Path</code> object, and <code>.parent</code> is the folder containing it. So <code>here</code> is the program's own folder, wherever the terminal happens to be. (<code>__file__</code> isn't defined in the <code>&gt;&gt;&gt;</code> console, because there's no file.) The <code>/</code> is not division here: <code>Path</code> objects define <code>/</code> to mean "join with a path separator". It's a deliberate choice because <code>/</code> already separates folders on macOS and Linux, and <code>pathlib</code> uses <code>\\</code> on Windows for you.</p>
 
 <h3>CSV files: tables of data</h3>
 <p>A <strong>CSV</strong> (comma-separated values) file stores a table as text, one row per line, which spreadsheets can open and save. Suppose <code>grades.csv</code> holds:</p>
@@ -2073,6 +2183,7 @@ with open("grades.csv", newline="", encoding="utf-8") as f:
 # Alan: 85.0
 # Grace: 96.7</code></pre>
 <p>Notice <code>int(...)</code>: everything read from a text file is a string, just like <code>input()</code>. Writing a CSV uses <code>csv.writer</code> and its <code>writerow</code> method.</p>
+<p>Why <code>newline=""</code>? Normally, when Python reads or writes a text file, it translates line endings for you (Windows ends lines with two characters, <code>\\r\\n</code>; macOS and Linux use one, <code>\\n</code>). The <code>csv</code> module wants to handle line endings itself, because a quoted value in a CSV may legitimately contain a line break. <code>newline=""</code> switches Python's translation off and lets <code>csv</code> do it. Without it, files written on Windows get an extra blank line after every row. The rule is simple: whenever you open a file for <code>csv</code>, reading or writing, pass <code>newline=""</code>.</p>
 
 <h3>JSON: saving structured data</h3>
 <p>For data that isn't a simple table, such as a dictionary of lists or settings, use <strong>JSON</strong>, a text format that looks almost exactly like Python dictionaries and lists and is used by most web services.</p>
@@ -2324,7 +2435,14 @@ def has_duplicate_fast(xs):     # O(n): one pass with a set
     <tr><td>Get by position: <code>xs[i]</code></td><td>O(1)</td><td>not applicable</td></tr>
   </tbody>
 </table>
-<p>Sets and dictionaries use a <strong>hash table</strong>: they compute a number from each key that tells them where to store it, so finding a key doesn't require searching. You'll study how in Data Structures next year. You can see the difference yourself:</p>
+<p>Sets and dictionaries use a <strong>hash table</strong>: they compute a number from each key, its <em>hash</em>, that tells them where to store it, so finding a key doesn't require searching. The Lists lesson showed the first step (<a href="#c-cs101-u5">"What hashable means"</a>). Here is a small worked example, with 8 slots, whole-number keys (whose hash is the number itself), and slot = hash % 8:</p>
+<table>
+  <thead><tr><th>Insert key</th><th>12 % 8</th><th>7 % 8</th><th>33 % 8</th><th>20 % 8</th></tr></thead>
+  <tbody>
+    <tr><td>Slot</td><td>4</td><td>7</td><td>1</td><td>4: already taken by 12</td></tr>
+  </tbody>
+</table>
+<p>Two keys landing in the same slot is called a <strong>collision</strong>. One simple fix is to let each slot hold a short list: slot 4 holds <code>[12, 20]</code>. To check <code>20 in table</code>, compute 20 % 8 = 4 and look only through slot 4's two keys, never the rest. When the table fills up, it doubles its number of slots and reinserts everything, which keeps the lists short. That's why lookups are O(1) <em>on average</em>: a few steps, however many keys there are. (Python's real tables resolve collisions a little differently, by trying another slot, but the idea is the same.) You'll build hash tables yourself in CS 102 and Data Structures. You can see the difference in speed yourself:</p>
 <pre><code>import time
 
 n = 1_000_000
@@ -2375,7 +2493,7 @@ def merge_sort(xs):
         return xs
     mid = len(xs) // 2
     return merge(merge_sort(xs[:mid]), merge_sort(xs[mid:]))</code></pre>
-<p>Halving <em>n</em> items takes about log₂ <em>n</em> levels, and each level does about <em>n</em> work merging, so merge sort is O(<em>n</em> log <em>n</em>). It can be proved that no sorting method based on comparing items can do better than that in the worst case.</p>
+<p>Halving <em>n</em> items takes about log₂ <em>n</em> levels, and each level does about <em>n</em> work merging, so merge sort is O(<em>n</em> log <em>n</em>). It can be proved that no sorting method based on comparing items can do better than that in the worst case. The intuition: <em>n</em> items can arrive in <em>n</em>! different orders (3 items: 6 orders), and the sort must tell them all apart, since each needs different moves. Each comparison has only two answers, so it can at most halve the orders still possible. Getting from <em>n</em>! possibilities down to 1 therefore takes at least log₂(<em>n</em>!) comparisons in the worst case (for 3 items: 3 comparisons, because 2 comparisons can only separate 4 cases). And log₂(<em>n</em>!) grows like <em>n</em> log₂ <em>n</em>: for <em>n</em> = 1,000 it is about 8,530, compared with <em>n</em> log₂ <em>n</em> ≈ 9,966. <a href="#c-math131-k1">MATH 131, Lesson 1</a> computes this with Stirling's approximation, and you'll prove it carefully in Algorithms.</p>
 <p>In practice, use Python's built-in <code>sorted</code> and <code>.sort()</code>. They use <strong>Timsort</strong>, designed by Tim Peters for Python in 2002, which is O(<em>n</em> log <em>n</em>) and especially fast on data that is already partly sorted. Java, Android and other platforms later adopted it.</p>
 
 <div class="callout"><strong>The big idea.</strong> Before optimizing code line by line, ask what its order of growth is and whether a different algorithm or data structure changes it. Turning O(<em>n</em>²) into O(<em>n</em>) with a set, or O(<em>n</em>) into O(log <em>n</em>) by sorting once and using binary search, beats any amount of fine-tuning.</div>
@@ -2481,6 +2599,7 @@ git commit -m "Handle empty list in mean()"
 git log --oneline              # list past commits
 git restore stats.py           # throw away uncommitted changes to a file</code></pre>
 <p>A typical cycle is: edit, run your tests, <code>git status</code> and <code>git diff</code> to review, <code>git add</code>, <code>git commit</code>. Commit small working steps, each with a message that says <em>why</em>, in the present tense: "Handle empty list in mean()" rather than "changes" or "fixed stuff". Your commit history becomes a lab notebook of the project.</p>
+<p>If you type <code>git commit</code> without <code>-m</code>, Git opens a text editor for you to write the message, and on many systems that editor is <strong>Vim</strong>, which doesn't respond to the keys you expect. To get out: press <strong>Esc</strong>, then type <code>:wq</code> and press Enter to save the message and commit, or type <code>:q!</code> and press Enter to quit without saving (with an empty message, Git cancels the commit). To choose a friendlier editor once and for all, run <code>git config --global core.editor "code --wait"</code> for VS Code, or <code>git config --global core.editor nano</code> on macOS and Linux.</p>
 <p>Some files shouldn't be tracked: temporary files, the <code>__pycache__</code> folder Python creates, virtual environments, and anything containing passwords. List them in a file called <code>.gitignore</code>:</p>
 <pre data-label=".gitignore"><code>__pycache__/
 .venv/
@@ -2500,6 +2619,7 @@ source .venv/bin/activate        # activate it on macOS or Linux
 python -m pip install pytest     # installs into this project only
 python -m pip freeze &gt; requirements.txt   # record exact versions
 deactivate                       # leave the environment</code></pre>
+<p class="note"><strong>Windows PowerShell:</strong> activation may fail with "running scripts is disabled on this system". PowerShell blocks script files by default, and <code>activate</code> is one. Run this once, in PowerShell, to allow scripts you create yourself (and signed ones you download): <code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code>, then try again. If you'd rather not change the setting, open a Command Prompt instead and run <code>.venv\\Scripts\\activate.bat</code>, or skip activation and call the environment's Python directly: <code>.venv\\Scripts\\python -m pytest</code>.</p>
 <p>While an environment is active, your prompt usually shows <code>(.venv)</code>. Commit <code>requirements.txt</code> (but not the <code>.venv</code> folder), and anyone can recreate your setup with <code>python -m pip install -r requirements.txt</code>.</p>
 
 <h3>Tools that catch mistakes for you</h3>

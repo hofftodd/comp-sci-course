@@ -113,6 +113,17 @@ CSA.addUnits("math120", [
     <tr><td>Q unless P.</td><td>¬P → Q (equivalently P ∨ Q)</td></tr>
   </tbody>
 </table>
+<p><strong>Why "Q unless P" is ¬P → Q.</strong> "Unless" means "if not". "I walk to class unless it rains" says: if it does <em>not</em> rain, I walk. With <em>P</em> = "it rains" and <em>Q</em> = "I walk", that's ¬<em>P</em> → <em>Q</em>. On a rainy day the sentence makes no promise, so I may walk or not; the statement is broken only on a dry day when I don't walk. A truth table confirms that this is the same as <em>P</em> ∨ <em>Q</em> ("it rains or I walk"):</p>
+<table>
+  <thead><tr><th>P (rains)</th><th>Q (walk)</th><th>¬P</th><th>¬P → Q</th><th>P ∨ Q</th></tr></thead>
+  <tbody>
+    <tr><td>T</td><td>T</td><td>F</td><td>T</td><td>T</td></tr>
+    <tr><td>T</td><td>F</td><td>F</td><td>T</td><td>T</td></tr>
+    <tr><td>F</td><td>T</td><td>T</td><td>T</td><td>T</td></tr>
+    <tr><td>F</td><td>F</td><td>T</td><td>F</td><td>F</td></tr>
+  </tbody>
+</table>
+<p>The recipe: in "A unless B", negate the part after "unless" and make it the hypothesis: ¬B → A. A second example: "The program crashes unless the file exists" (<em>C</em> = crashes, <em>E</em> = file exists) is ¬<em>E</em> → <em>C</em>: if the file is missing, it crashes. It says nothing about what happens when the file exists.</p>
 <p>"You can graduate only if you pass Discrete Math" means graduate → passed. Passing is <em>necessary</em> for graduating, not <em>sufficient</em>: you can pass and still not graduate.</p>
 
 <h3>Converse, inverse and contrapositive</h3>
@@ -126,7 +137,7 @@ CSA.addUnits("math120", [
     <tr><td>Inverse</td><td>¬P → ¬Q</td><td>If it isn't raining, the ground isn't wet.</td><td>No</td></tr>
   </tbody>
 </table>
-<p>Confusing a statement with its converse is one of the most common reasoning errors, in mathematics and in everyday arguments. The contrapositive, on the other hand, always says the same thing, which makes it a powerful proof technique in Lesson 3.</p>
+<p>Confusing a statement with its converse is one of the most common reasoning errors, in mathematics and in everyday arguments. The contrapositive, on the other hand, always says the same thing, which makes it a powerful proof technique in <a href="#c-math120-u3">Lesson 3</a>.</p>
 
 <h3>Truth tables for compound statements</h3>
 <p>To evaluate a complicated statement, add a column for each piece, working from the inside out. Is ((<em>P</em> ∨ <em>Q</em>) ∧ ¬<em>P</em>) → <em>Q</em> always true?</p>
@@ -157,6 +168,7 @@ CSA.addUnits("math120", [
     <tr><td>Identity and domination</td><td>P ∧ T ≡ P, P ∨ F ≡ P, P ∨ T ≡ T, P ∧ F ≡ F</td></tr>
   </tbody>
 </table>
+<p>In the identity and domination laws, <strong>T</strong> and <strong>F</strong> are two special propositions: T is a proposition that is always true (for example <em>Q</em> ∨ ¬<em>Q</em>, or "1 = 1"), and F is one that is always false (for example <em>Q</em> ∧ ¬<em>Q</em>). They play the roles of 1 and 0 in algebra: P ∧ T ≡ P is like <em>x</em> · 1 = <em>x</em>, and P ∧ F ≡ F is like <em>x</em> · 0 = 0. In Python they are simply <code>True</code> and <code>False</code>.</p>
 <p>De Morgan's laws say: to negate an "and", negate each part and switch to "or", and vice versa. "It's not true that I'm tired and hungry" means "I'm not tired, or I'm not hungry".</p>
 <p><strong>Worked example.</strong> What does it mean for an implication to be false? Simplify ¬(<em>P</em> → <em>Q</em>):</p>
 <table>
@@ -169,6 +181,27 @@ CSA.addUnits("math120", [
   </tbody>
 </table>
 <p>So "if P then Q" is false exactly when P is true and Q is false, which matches the truth table. To <em>disprove</em> an implication, you find a case where the hypothesis holds and the conclusion fails: a counterexample.</p>
+
+<h3>Solving logic puzzles: knights and knaves</h3>
+<p>On an island, <strong>knights</strong> always tell the truth and <strong>knaves</strong> always lie. The key fact turns each statement into logic: <em>a person is a knight exactly when what they say is true</em>. The method is to try each possibility and look for a contradiction:</p>
+<ol>
+  <li>Assume something about one person, for example "A is a knight".</li>
+  <li>Then A's statement must be true (or, if you assumed a knave, false). Work out what that forces.</li>
+  <li>If it contradicts your assumption or itself, the assumption was wrong, so the opposite holds. If everything is consistent, check whether any other assignment also works.</li>
+</ol>
+<p><strong>Worked example.</strong> A says, "We are both knaves." What are A and B?</p>
+<ul>
+  <li><em>Assume A is a knight.</em> Then the statement is true, so both are knaves, including A. That contradicts the assumption. So A is not a knight: <strong>A is a knave</strong>.</li>
+  <li><em>A is a knave,</em> so the statement "we are both knaves" is false. Since A <em>is</em> a knave, the only way it can be false is if B is not one: <strong>B is a knight</strong>.</li>
+  <li><em>Check:</em> a knave saying a false thing (they aren't both knaves) is consistent. No other assignment works.</li>
+</ul>
+<p>With only two people there are just four cases, so a truth table works too: write K<sub>A</sub> for "A is a knight" and S for A's statement, and keep the rows where K<sub>A</sub> ↔ S is true. A computer can do exactly that:</p>
+<pre><code>for a in [True, False]:          # True means "is a knight"
+    for b in [True, False]:
+        statement = (not a) and (not b)    # "we are both knaves"
+        if a == statement:                 # knights say true things, knaves false
+            print("A knight" if a else "A knave", "B knight" if b else "B knave")
+# prints: A knave B knight</code></pre>
 
 <h3>Logic in code</h3>
 <p>The same laws simplify conditions in programs. These two lines are equivalent by De Morgan's law, and the second is easier to read:</p>
@@ -200,7 +233,7 @@ if not is_weekend and not is_holiday:</code></pre>
     ],
     practice: [
       { q: `<p>Which are propositions? (a) "17 is even." (b) "Is it raining?" (c) "x > 3." (d) "There is life on Europa." (e) "Turn in your homework."</p>`, a: `<p>(a) Yes, false. (b) No, a question. (c) No, its truth depends on <em>x</em>. (d) Yes: true or false, even though we don't know which. (e) No, a command.</p>` },
-      { q: `<p>Let <em>P</em> = "it is cold" and <em>Q</em> = "it is snowing". Translate: (a) It is cold and not snowing. (b) It is snowing only if it is cold. (c) It is not cold unless it is snowing. (d) Being cold is necessary for snowing.</p>`, a: `<p>(a) P ∧ ¬Q. (b) Q → P. (c) "A unless B" is ¬B → A, so ¬Q → ¬P, which is equivalent to P → Q. (d) Necessary conditions go on the right: Q → P.</p>` },
+      { q: `<p>Let <em>P</em> = "it is cold" and <em>Q</em> = "it is snowing". Translate: (a) It is cold and not snowing. (b) It is snowing only if it is cold. (c) It is not cold unless it is snowing. (d) Being cold is necessary for snowing.</p>`, a: `<p>(a) P ∧ ¬Q. (b) Q → P. (c) "A unless B" is ¬B → A. Here A is "it is not cold" (¬P) and B is "it is snowing" (Q), so the answer is ¬Q → ¬P: if it isn't snowing, it isn't cold. By the contrapositive law this is equivalent to P → Q ("if it is cold, it is snowing"), and by the table above also to Q ∨ ¬P. (d) Necessary conditions go on the right: Q → P.</p>` },
       { q: `<p>Write the converse, inverse and contrapositive of "If a number is divisible by 6, then it is divisible by 3." Which are true?</p>`, a: `<p>Converse: if divisible by 3, then divisible by 6. False: 9. Inverse: if not divisible by 6, then not divisible by 3. False: 9 again. Contrapositive: if not divisible by 3, then not divisible by 6. True, like the original. The converse and inverse are contrapositives of each other, so they always share a truth value.</p>` },
       { q: `<p>Build a truth table to decide whether (<em>P</em> → <em>Q</em>) ∧ (<em>Q</em> → <em>P</em>) is equivalent to <em>P</em> ↔ <em>Q</em>.</p>`, a: `<table><thead><tr><th>P</th><th>Q</th><th>P → Q</th><th>Q → P</th><th>both</th><th>P ↔ Q</th></tr></thead><tbody><tr><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td></tr><tr><td>T</td><td>F</td><td>F</td><td>T</td><td>F</td><td>F</td></tr><tr><td>F</td><td>T</td><td>T</td><td>F</td><td>F</td><td>F</td></tr><tr><td>F</td><td>F</td><td>T</td><td>T</td><td>T</td><td>T</td></tr></tbody></table><p>The columns match, so they're equivalent. That's why proving "if and only if" means proving both directions.</p>` },
       { q: `<p>Using the equivalence laws (not a truth table), show that ¬(<em>P</em> ∨ ¬<em>Q</em>) ∨ (¬<em>P</em> ∧ ¬<em>Q</em>) ≡ ¬<em>P</em>. Name the law at each step.</p>`, hint: `<p>Apply De Morgan to the first part, then look for a common factor of ¬P.</p>`, a: `<table><thead><tr><th>Statement</th><th>Reason</th></tr></thead><tbody><tr><td>¬(P ∨ ¬Q) ∨ (¬P ∧ ¬Q)</td><td>Start</td></tr><tr><td>(¬P ∧ ¬¬Q) ∨ (¬P ∧ ¬Q)</td><td>De Morgan</td></tr><tr><td>(¬P ∧ Q) ∨ (¬P ∧ ¬Q)</td><td>Double negation</td></tr><tr><td>¬P ∧ (Q ∨ ¬Q)</td><td>Distributive (in reverse)</td></tr><tr><td>¬P ∧ T</td><td>Q ∨ ¬Q is always true</td></tr><tr><td>¬P</td><td>Identity</td></tr></tbody></table>` },
@@ -241,6 +274,14 @@ if not is_weekend and not is_holiday:</code></pre>
 <pre><code>scores = [72, 88, 95]
 all(s &gt;= 60 for s in scores)    # ∀s, s ≥ 60: everyone passed. True
 any(s &gt;= 90 for s in scores)    # ∃s, s ≥ 90: someone got an A. True</code></pre>
+<p>Some statements are about <em>positions</em> in a list: "each item", "the next item", "some later item". Then quantify over the indexes <em>i</em> instead of the items, using <code>range</code>, and write <code>xs[i]</code> for the item at position <em>i</em>. For <code>xs = [3, 5, 5, 9]</code>:</p>
+<pre><code># "The list is in order": ∀i (that has a next item), xs[i] ≤ xs[i+1]
+all(xs[i] &lt;= xs[i + 1] for i in range(len(xs) - 1))     # True
+
+# "Some item appears again later": ∃i ∃j &gt; i, xs[j] = xs[i]
+any(any(xs[j] == xs[i] for j in range(i + 1, len(xs)))
+    for i in range(len(xs)))                              # True (the two 5s)</code></pre>
+<p>Notice two details. <code>range(len(xs) - 1)</code> stops one early, so <code>xs[i + 1]</code> never runs off the end. And "a later item" means <em>j</em> runs over <code>range(i + 1, len(xs))</code>: the inner quantifier's range depends on the outer variable, exactly as in ∃<em>j</em> &gt; <em>i</em>.</p>
 
 <h3>Negating quantifiers</h3>
 <p>Negation flips the quantifier and moves inside:</p>
@@ -291,7 +332,9 @@ any(s &gt;= 90 for s in scores)    # ∃s, s ≥ 90: someone got an A. True</cod
   </tbody>
 </table>
 <p>The rule: <strong>∀ goes with →, and ∃ goes with ∧</strong>. Mathematicians abbreviate these as ∀<em>x</em> ∈ <em>D</em>, <em>F</em>(<em>x</em>) and ∃<em>x</em> ∈ <em>D</em>, <em>F</em>(<em>x</em>), where <em>D</em> is now the set of dogs.</p>
-<p>A few more: "No student failed" is ∀<em>s</em> ¬<em>Failed</em>(<em>s</em>), or equivalently ¬∃<em>s</em> <em>Failed</em>(<em>s</em>). "Every student has a friend in the class" is ∀<em>s</em> ∃<em>t</em> (<em>t</em> ≠ <em>s</em> ∧ <em>Friend</em>(<em>s</em>, <em>t</em>)). "There is exactly one" needs two parts: one exists, and any two are equal.</p>
+<p>A few more: "No student failed" is ∀<em>s</em> ¬<em>Failed</em>(<em>s</em>), or equivalently ¬∃<em>s</em> <em>Failed</em>(<em>s</em>). "Every student has a friend in the class" is ∀<em>s</em> ∃<em>t</em> (<em>t</em> ≠ <em>s</em> ∧ <em>Friend</em>(<em>s</em>, <em>t</em>)). "There is exactly one" needs two parts: one exists, and any other with the property is the same one:</p>
+<p class="math">∃<em>x</em> (<em>P</em>(<em>x</em>) ∧ ∀<em>y</em> (<em>P</em>(<em>y</em>) → <em>y</em> = <em>x</em>))</p>
+<p>This is so common that it has an abbreviation, ∃!<em>x</em> <em>P</em>(<em>x</em>), read "there exists a unique <em>x</em> such that <em>P</em>(<em>x</em>)". You may use ∃! in this course, but be ready to expand it as above, because proofs of uniqueness work with the two parts separately. Example: "there is exactly one even prime" is ∃!<em>p</em> (<em>Prime</em>(<em>p</em>) ∧ <em>Even</em>(<em>p</em>)), true because of 2. In Python over a finite list: <code>sum(1 for x in xs if P(x)) == 1</code>.</p>
 <p class="note">You'll meet nested quantifiers again in Calculus: the precise definition of a limit says ∀ε &gt; 0 ∃δ &gt; 0 ∀<em>x</em> (…). Reading it is exactly the skill from this lesson.</p>
 `,
     terms: [
@@ -366,13 +409,19 @@ all(any(xs[j] &gt; xs[i] for j in range(i + 1, len(xs)))
 <p><strong>Claim.</strong> If <em>n</em>² is even, then <em>n</em> is even.</p>
 <p>A direct proof is awkward: knowing <em>n</em>² = 2<em>k</em> doesn't easily tell us about <em>n</em>. So prove the contrapositive.</p>
 <p><strong>Proof.</strong> We prove the contrapositive: if <em>n</em> is not even, then <em>n</em>² is not even; that is, if <em>n</em> is odd, then <em>n</em>² is odd. That is exactly the claim we proved directly above. ∎</p>
+<p>Here is a contrapositive proof with algebra of its own. <strong>Claim:</strong> for integers <em>x</em> and <em>y</em>, if <em>xy</em> is even, then <em>x</em> is even or <em>y</em> is even.</p>
+<p>Directly, "<em>xy</em> = 2<em>k</em>" gives no easy handle on <em>x</em> or <em>y</em> separately. The contrapositive negates both sides; by De Morgan's law, the negation of "<em>x</em> is even or <em>y</em> is even" is "<em>x</em> is odd and <em>y</em> is odd".</p>
+<p><strong>Proof.</strong> We prove the contrapositive: if <em>x</em> and <em>y</em> are both odd, then <em>xy</em> is odd. Write <em>x</em> = 2<em>a</em> + 1 and <em>y</em> = 2<em>b</em> + 1 for integers <em>a</em> and <em>b</em>. Then</p>
+<p class="math"><em>xy</em> = (2<em>a</em> + 1)(2<em>b</em> + 1) = 4<em>ab</em> + 2<em>a</em> + 2<em>b</em> + 1 = 2(2<em>ab</em> + <em>a</em> + <em>b</em>) + 1,</p>
+<p>which is 2 times an integer plus 1, so <em>xy</em> is odd. ∎</p>
+<p>The pattern to copy: (1) write the contrapositive, negating carefully; (2) assume its hypothesis and write it with the definition (odd means 2<em>a</em> + 1); (3) do the algebra until the conclusion's definition appears.</p>
 
 <h3>Proof by contradiction</h3>
 <p>Assume the statement is false, and show that this leads to something impossible. Since the assumption leads to nonsense, it must be wrong, so the statement is true.</p>
 <p><strong>Claim.</strong> √2 is irrational.</p>
-<p><strong>Proof.</strong> Suppose, for contradiction, that √2 is rational. Then √2 = <em>a</em>/<em>b</em> for integers <em>a</em> and <em>b</em> with <em>b</em> ≠ 0, and we can choose the fraction in lowest terms, so <em>a</em> and <em>b</em> have no common factor greater than 1. Squaring gives 2 = <em>a</em>²/<em>b</em>², so <em>a</em>² = 2<em>b</em>². So <em>a</em>² is even, and by the previous claim <em>a</em> is even: <em>a</em> = 2<em>c</em> for some integer <em>c</em>. Substituting, 4<em>c</em>² = 2<em>b</em>², so <em>b</em>² = 2<em>c</em>², which means <em>b</em>² is even, and so <em>b</em> is even. Now <em>a</em> and <em>b</em> are both even, so they share the factor 2, contradicting our choice of lowest terms. Therefore √2 is irrational. ∎</p>
+<p><strong>Proof.</strong> Suppose, for contradiction, that √2 is rational. Then √2 = <em>a</em>/<em>b</em> for integers <em>a</em> and <em>b</em> with <em>b</em> ≠ 0, and we can choose the fraction in lowest terms, so <em>a</em> and <em>b</em> have no common factor greater than 1. (Why can we? If <em>a</em> and <em>b</em> share a factor <em>d</em> &gt; 1, divide both by <em>d</em>: the fraction's value stays the same and the denominator (which we may take to be positive) gets smaller. A positive whole-number denominator can't shrink forever, so after finitely many steps no common factor is left. Or do it in one step: divide both by their greatest common divisor.) Squaring gives 2 = <em>a</em>²/<em>b</em>², so <em>a</em>² = 2<em>b</em>². So <em>a</em>² is even, and by the previous claim <em>a</em> is even: <em>a</em> = 2<em>c</em> for some integer <em>c</em>. Substituting, 4<em>c</em>² = 2<em>b</em>², so <em>b</em>² = 2<em>c</em>², which means <em>b</em>² is even, and so <em>b</em> is even. Now <em>a</em> and <em>b</em> are both even, so they share the factor 2, contradicting our choice of lowest terms. Therefore √2 is irrational. ∎</p>
 <p><strong>Claim</strong> (Euclid, about 300 BCE). There are infinitely many primes.</p>
-<p><strong>Proof.</strong> Suppose, for contradiction, that there are only finitely many primes, <em>p</em>₁, <em>p</em>₂, …, <em>p</em>ₙ. Let <em>N</em> = <em>p</em>₁<em>p</em>₂⋯<em>p</em>ₙ + 1. Dividing <em>N</em> by any <em>p</em>ᵢ leaves remainder 1, so no <em>p</em>ᵢ divides <em>N</em>. But <em>N</em> &gt; 1, so <em>N</em> has some prime divisor (Lesson 6 proves every integer greater than 1 has one), and that prime isn't on our list. This contradicts the assumption that the list contained every prime. ∎</p>
+<p><strong>Proof.</strong> Suppose, for contradiction, that there are only finitely many primes, <em>p</em>₁, <em>p</em>₂, …, <em>p</em>ₙ. Let <em>N</em> = <em>p</em>₁<em>p</em>₂⋯<em>p</em>ₙ + 1. Dividing <em>N</em> by any <em>p</em>ᵢ leaves remainder 1, so no <em>p</em>ᵢ divides <em>N</em>. But <em>N</em> &gt; 1, so <em>N</em> has some prime divisor (<a href="#c-math120-u6">Lesson 6</a> proves every integer greater than 1 has one), and that prime isn't on our list. This contradicts the assumption that the list contained every prime. ∎</p>
 
 <h3>Proof by cases</h3>
 <p>If the hypothesis splits naturally into cases that cover every possibility, prove the statement in each case.</p>
@@ -463,6 +512,7 @@ CSA.addUnits("math120", [
   <li>∅ is a subset of every set, because "every element of ∅ is in <em>A</em>" is vacuously true: there are no elements to check.</li>
 </ul>
 <p>Two sets are <strong>equal</strong> when they have exactly the same elements, which is the same as <em>A</em> ⊆ <em>B</em> and <em>B</em> ⊆ <em>A</em>. That fact is the basis for proving sets are equal, below.</p>
+<p>Two related symbols. <em>A</em> ⊄ <em>B</em> means "<em>A</em> is <em>not</em> a subset of <em>B</em>": at least one element of <em>A</em> is missing from <em>B</em>, as in {1, 4} ⊄ {1, 2, 3}. <em>A</em> is a <strong>proper subset</strong> of <em>B</em>, written <em>A</em> ⊊ <em>B</em>, if <em>A</em> ⊆ <em>B</em> and <em>A</em> ≠ <em>B</em>: <em>B</em> has at least one element that <em>A</em> lacks. So {1, 2} ⊊ {1, 2, 3}, but {1, 2} ⊊ {1, 2} is false. (Some books write ⊂ for proper subset and others use ⊂ to mean ⊆, which is why this course writes ⊆ and ⊊.) In Python, <code>a &lt;= b</code> tests ⊆ and <code>a &lt; b</code> tests ⊊.</p>
 <p class="note">Don't confuse ∈ with ⊆. "Is an element of" relates an object to a set; "is a subset of" relates two sets. With <em>A</em> = {1, {2}}: 1 ∈ <em>A</em>, {2} ∈ <em>A</em>, {1} ⊆ <em>A</em>, but 2 ∉ <em>A</em> and {2} ⊄ <em>A</em>. Sets can contain other sets as elements.</p>
 
 <h3>The universe and set operations</h3>
@@ -474,6 +524,7 @@ CSA.addUnits("math120", [
     <tr><td>Intersection</td><td><em>A</em> ∩ <em>B</em></td><td>in both <em>A</em> and <em>B</em></td><td>∧</td><td><code>a &amp; b</code></td></tr>
     <tr><td>Difference</td><td><em>A</em> − <em>B</em></td><td>in <em>A</em> but not in <em>B</em></td><td><em>x</em> ∈ <em>A</em> ∧ <em>x</em> ∉ <em>B</em></td><td><code>a - b</code></td></tr>
     <tr><td>Complement</td><td><em>A</em>ᶜ</td><td>in <em>U</em> but not in <em>A</em></td><td>¬</td><td><code>universe - a</code></td></tr>
+    <tr><td>Symmetric difference</td><td><em>A</em> △ <em>B</em></td><td>in exactly one of <em>A</em> and <em>B</em></td><td>⊕ (exclusive or)</td><td><code>a ^ b</code></td></tr>
   </tbody>
 </table>
 <p>A <strong>Venn diagram</strong> pictures sets as overlapping circles inside a box for the universe. The shaded areas show each operation:</p>
@@ -516,7 +567,7 @@ CSA.addUnits("math120", [
 <p><strong>Proof.</strong> (⊆) Let <em>x</em> ∈ <em>A</em> ∩ (<em>B</em> ∪ <em>C</em>). Then <em>x</em> ∈ <em>A</em>, and <em>x</em> ∈ <em>B</em> or <em>x</em> ∈ <em>C</em>. If <em>x</em> ∈ <em>B</em>, then <em>x</em> ∈ <em>A</em> ∩ <em>B</em>; if <em>x</em> ∈ <em>C</em>, then <em>x</em> ∈ <em>A</em> ∩ <em>C</em>. Either way, <em>x</em> ∈ (<em>A</em> ∩ <em>B</em>) ∪ (<em>A</em> ∩ <em>C</em>).</p>
 <p>(⊇) Let <em>x</em> ∈ (<em>A</em> ∩ <em>B</em>) ∪ (<em>A</em> ∩ <em>C</em>). Then <em>x</em> ∈ <em>A</em> ∩ <em>B</em> or <em>x</em> ∈ <em>A</em> ∩ <em>C</em>. In the first case <em>x</em> ∈ <em>A</em> and <em>x</em> ∈ <em>B</em> ⊆ <em>B</em> ∪ <em>C</em>; in the second, <em>x</em> ∈ <em>A</em> and <em>x</em> ∈ <em>C</em> ⊆ <em>B</em> ∪ <em>C</em>. Either way, <em>x</em> ∈ <em>A</em> ∩ (<em>B</em> ∪ <em>C</em>).</p>
 <p>Each side is a subset of the other, so they are equal. ∎</p>
-<p>Notice how closely the proof follows the logical law <em>P</em> ∧ (<em>Q</em> ∨ <em>R</em>) ≡ (<em>P</em> ∧ <em>Q</em>) ∨ (<em>P</em> ∧ <em>R</em>). Set operations are logic in disguise: ∪ is ∨, ∩ is ∧, and complement is ¬. Every law from Lesson 1 has a set version, including <strong>De Morgan's laws for sets</strong>: (<em>A</em> ∪ <em>B</em>)ᶜ = <em>A</em>ᶜ ∩ <em>B</em>ᶜ and (<em>A</em> ∩ <em>B</em>)ᶜ = <em>A</em>ᶜ ∪ <em>B</em>ᶜ.</p>
+<p>Notice how closely the proof follows the logical law <em>P</em> ∧ (<em>Q</em> ∨ <em>R</em>) ≡ (<em>P</em> ∧ <em>Q</em>) ∨ (<em>P</em> ∧ <em>R</em>). Set operations are logic in disguise: ∪ is ∨, ∩ is ∧, and complement is ¬. Every law from <a href="#c-math120-u1">Lesson 1</a> has a set version, including <strong>De Morgan's laws for sets</strong>: (<em>A</em> ∪ <em>B</em>)ᶜ = <em>A</em>ᶜ ∩ <em>B</em>ᶜ and (<em>A</em> ∩ <em>B</em>)ᶜ = <em>A</em>ᶜ ∪ <em>B</em>ᶜ.</p>
 <p>A Venn diagram is a good way to <em>check</em> an identity, but it isn't a proof: a picture with two circles can't represent every possible relationship between sets.</p>
 `,
     terms: [
@@ -543,7 +594,7 @@ CSA.addUnits("math120", [
       { q: `<p>A survey of 200 students finds 120 use a laptop for notes, 95 use a tablet, and 30 use neither. How many use both?</p>`, hint: `<p>First find how many use at least one device.</p>`, a: `<p>200 − 30 = 170 use at least one. By inclusion–exclusion, 170 = 120 + 95 − |both|, so |both| = 45.</p>` },
       { q: `<p>Prove by element chasing: <em>A</em> − <em>B</em> = <em>A</em> ∩ <em>B</em>ᶜ.</p>`, a: `<p><strong>Proof.</strong> (⊆) Let <em>x</em> ∈ <em>A</em> − <em>B</em>. Then <em>x</em> ∈ <em>A</em> and <em>x</em> ∉ <em>B</em>, so <em>x</em> ∈ <em>B</em>ᶜ, and therefore <em>x</em> ∈ <em>A</em> ∩ <em>B</em>ᶜ. (⊇) Let <em>x</em> ∈ <em>A</em> ∩ <em>B</em>ᶜ. Then <em>x</em> ∈ <em>A</em> and <em>x</em> ∈ <em>B</em>ᶜ, meaning <em>x</em> ∉ <em>B</em>, so <em>x</em> ∈ <em>A</em> − <em>B</em>. Each side is a subset of the other, so they are equal. ∎</p>` },
       { q: `<p>Prove: if <em>A</em> ⊆ <em>B</em>, then <em>A</em> ∪ <em>B</em> = <em>B</em>.</p>`, a: `<p><strong>Proof.</strong> (⊆) Let <em>x</em> ∈ <em>A</em> ∪ <em>B</em>. If <em>x</em> ∈ <em>B</em>, we're done. If <em>x</em> ∈ <em>A</em>, then <em>x</em> ∈ <em>B</em> because <em>A</em> ⊆ <em>B</em>. (⊇) Every element of <em>B</em> is in <em>A</em> ∪ <em>B</em> by the definition of union. ∎</p>` },
-      { q: `<p>Is it true that (<em>A</em> − <em>B</em>) ∪ (<em>B</em> − <em>A</em>) = <em>A</em> ∪ <em>B</em> for all sets? Prove it or give a counterexample. What does the left side describe?</p>`, a: `<p>False. Counterexample: <em>A</em> = <em>B</em> = {1}. The left side is ∅ ∪ ∅ = ∅, but <em>A</em> ∪ <em>B</em> = {1}. The left side is the <em>symmetric difference</em>: elements in exactly one of the two sets, which is (<em>A</em> ∪ <em>B</em>) − (<em>A</em> ∩ <em>B</em>). It's the set version of exclusive or, and Python writes it <code>a ^ b</code>.</p>` }
+      { q: `<p>Is it true that (<em>A</em> − <em>B</em>) ∪ (<em>B</em> − <em>A</em>) = <em>A</em> ∪ <em>B</em> for all sets? Prove it or give a counterexample. What does the left side describe?</p>`, a: `<p>False. Counterexample: <em>A</em> = <em>B</em> = {1}. The left side is ∅ ∪ ∅ = ∅, but <em>A</em> ∪ <em>B</em> = {1}. The left side is the <em>symmetric difference</em> <em>A</em> △ <em>B</em> from the operations table: elements in exactly one of the two sets, which is (<em>A</em> ∪ <em>B</em>) − (<em>A</em> ∩ <em>B</em>). It's the set version of exclusive or, and Python writes it <code>a ^ b</code>.</p>` }
     ],
     sources: ["mcs", "levin", "bookofproof"]
   },
@@ -557,6 +608,7 @@ CSA.addUnits("math120", [
 
 <h3>Functions</h3>
 <p>A <strong>function</strong> <em>f</em> : <em>A</em> → <em>B</em> assigns to <strong>each</strong> element of <em>A</em> <strong>exactly one</strong> element of <em>B</em>. <em>A</em> is the <strong>domain</strong>, <em>B</em> the <strong>codomain</strong>, and the set of outputs actually reached, {<em>f</em>(<em>a</em>) : <em>a</em> ∈ <em>A</em>}, is the <strong>range</strong> (or image).</p>
+<p>One function you'll need: the <strong>floor</strong> ⌊<em>x</em>⌋ is the greatest integer less than or equal to <em>x</em>, that is, <em>x</em> rounded <em>down</em>. So ⌊3.7⌋ = 3, ⌊7/2⌋ = 3, ⌊5⌋ = 5 and ⌊−3.5⌋ = −4 (down means toward −∞). It is a function ℝ → ℤ, and for integers it's Python's <code>//</code>: ⌊<em>a</em>/<em>b</em>⌋ is <code>a // b</code>. Its partner, the <strong>ceiling</strong> ⌈<em>x</em>⌉, rounds up. (<a href="#c-math130-pre">MATH 130, Lesson 1</a> has a graph and more examples.)</p>
 <p>Both conditions matter. A rule that gives some input no output, like 1/<em>x</em> on ℝ (nothing at 0), isn't a function on that domain. A rule that gives some input two outputs, like "<em>y</em> with <em>y</em>² = <em>x</em>" (both 2 and −2 for 4), isn't a function at all. The codomain is part of the definition: <em>f</em>(<em>n</em>) = <em>n</em>² as a function ℤ → ℤ has codomain ℤ but range {0, 1, 4, 9, …}.</p>
 
 <h3>Injective, surjective, bijective</h3>
@@ -618,10 +670,11 @@ CSA.addUnits("math120", [
   <tbody>
     <tr><td>Reflexive</td><td><em>a R a</em> for every <em>a</em></td><td>=, ≤, divides</td><td>&lt;</td></tr>
     <tr><td>Symmetric</td><td><em>a R b</em> implies <em>b R a</em></td><td>=, "is a sibling of"</td><td>≤</td></tr>
-    <tr><td>Antisymmetric</td><td><em>a R b</em> and <em>b R a</em> imply <em>a</em> = <em>b</em></td><td>≤, ⊆</td><td>"is a sibling of"</td></tr>
+    <tr><td>Antisymmetric</td><td><em>a R b</em> and <em>b R a</em> imply <em>a</em> = <em>b</em></td><td>≤, ⊆, &lt; (vacuously)</td><td>"is a sibling of"</td></tr>
     <tr><td>Transitive</td><td><em>a R b</em> and <em>b R c</em> imply <em>a R c</em></td><td>=, &lt;, ≤, divides</td><td>"is the parent of"</td></tr>
   </tbody>
 </table>
+<p>Why is &lt; antisymmetric? The definition is an implication, "if <em>a</em> &lt; <em>b</em> and <em>b</em> &lt; <em>a</em>, then <em>a</em> = <em>b</em>". Its hypothesis is never true, since no two numbers are each less than the other, so the implication is <strong>vacuously true</strong> (<a href="#c-math120-u1">Lesson 1</a>). The same happens for "is taller than". Note also that "doesn't have a property" needs only one counterexample: ≤ isn't symmetric because 1 ≤ 2 but not 2 ≤ 1.</p>
 
 <h3>Equivalence relations and congruence</h3>
 <p>An <strong>equivalence relation</strong> is reflexive, symmetric and transitive: it captures "the same in some respect". The most important example in computer science is <strong>congruence modulo <em>n</em></strong>:</p>
@@ -640,7 +693,8 @@ CSA.addUnits("math120", [
 
 <h3>Partial orders and topological sorting</h3>
 <p>A <strong>partial order</strong> is reflexive, antisymmetric and transitive: it captures "comes before or is the same as". Examples are ≤ on numbers, ⊆ on sets, and divisibility on positive integers. It's "partial" because some pairs may not be comparable at all: neither {1} ⊆ {2} nor {2} ⊆ {1}.</p>
-<p>Course prerequisites form an ordering like this. Suppose CS 101 must come before Data Structures, Discrete Math must come before Algorithms, and Data Structures must also come before Algorithms. A valid order to take all four courses is one that never puts a course before its prerequisite, such as CS 101, Discrete Math, Data Structures, Algorithms. Producing such an order is called <strong>topological sorting</strong>. Build tools use it to decide which files to compile first, and spreadsheets use it to decide which cells to recalculate first. You'll write the algorithm in Data Structures.</p>
+<p>Relations like &lt; and ⊊ that are <em>irreflexive</em> (no <em>a R a</em>), antisymmetric and transitive are called <strong>strict partial orders</strong>: they capture "comes strictly before". Each partial order has a strict version and back: <em>a</em> &lt; <em>b</em> means <em>a</em> ≤ <em>b</em> and <em>a</em> ≠ <em>b</em>, and <em>a</em> ≤ <em>b</em> means <em>a</em> &lt; <em>b</em> or <em>a</em> = <em>b</em>.</p>
+<p>Course prerequisites give an ordering of this kind. Strictly speaking, "<em>A</em> must be taken before <em>B</em>" (directly or through a chain of prerequisites) is a <em>strict</em> partial order: no course is its own prerequisite, so it isn't reflexive. Adding "or <em>A</em> is <em>B</em>" turns it into a partial order, "<em>A</em> comes no later than <em>B</em>", exactly as adding "or equal" turns &lt; into ≤. Either version describes the same ordering. Suppose CS 101 must come before Data Structures, Discrete Math must come before Algorithms, and Data Structures must also come before Algorithms. A valid order to take all four courses is one that never puts a course before its prerequisite, such as CS 101, Discrete Math, Data Structures, Algorithms. Producing such an order is called <strong>topological sorting</strong>. Build tools use it to decide which files to compile first, and spreadsheets use it to decide which cells to recalculate first. You'll write the algorithm in Data Structures.</p>
 `,
     terms: [
       ["Function", "A rule assigning each element of the domain exactly one element of the codomain."],
@@ -653,7 +707,9 @@ CSA.addUnits("math120", [
       ["Relation", "A set of ordered pairs saying which elements are related."],
       ["Equivalence relation", "Reflexive, symmetric and transitive; it splits a set into equivalence classes."],
       ["Congruence mod n", "a ≡ b (mod n) when n divides a − b."],
-      ["Partial order", "Reflexive, antisymmetric and transitive, like ≤ or ⊆."]
+      ["Partial order", "Reflexive, antisymmetric and transitive, like ≤ or ⊆."],
+      ["Strict partial order", "Irreflexive, antisymmetric and transitive, like < or ⊊."],
+      ["Floor", "⌊x⌋, the greatest integer less than or equal to x: x rounded down."]
     ],
     quiz: [
       ...[{"q":"f : ℤ → ℤ, f(n) = 3n. Which is true?","choices":["Bijective","Injective, not surjective","Surjective, not injective","Neither"],"answer":1,"why":"Different n give different 3n, but 1 is never reached."},{"q":"\"Has the same birthday as\" on a set of people is:","choices":["A partial order","An equivalence relation","Neither","A function"],"answer":1,"why":"It is reflexive, symmetric and transitive. The classes are the groups of people sharing each birthday."},{"q":"How many people guarantee that two share a birth month?","choices":["12","13","24","366"],"answer":1,"why":"With 12 months, 13 people force a repeat by pigeonhole."}],
@@ -714,6 +770,7 @@ Inductive step. Let k ≥ n₀ and assume P(k). [Inductive hypothesis.]
   We show P(k + 1). [Start from one side of P(k + 1),
   find P(k) inside it, apply the hypothesis, and finish.]
 Therefore P(n) holds for all n ≥ n₀. ∎</code></pre>
+<p><strong>Why the letter changes from <em>n</em> to <em>k</em>.</strong> In the claim, <em>n</em> means "every value": we're trying to prove <em>P</em>(<em>n</em>) for all of them. In the inductive step we need a different letter for <em>one particular</em> value that we assume the claim for. Writing "assume <em>P</em>(<em>n</em>)" there would look like assuming the claim for every <em>n</em>, which is exactly what we may not do. So: <em>n</em> in the claim and the conclusion, <em>k</em> inside the inductive step, and the step's goal is always <em>P</em>(<em>k</em> + 1), never <em>P</em>(<em>n</em> + 1).</p>
 
 <h3>Example 2: an inequality</h3>
 <p><strong>Claim.</strong> For all <em>n</em> ≥ 4, 2<sup>n</sup> &lt; <em>n</em>!.</p>
@@ -779,7 +836,7 @@ Therefore P(n) holds for all n ≥ n₀. ∎</code></pre>
     if n == 0:
         return 1
     return 2 * pow2(n - 1)</code></pre>`, a: `<p><strong>Base case:</strong> <code>pow2(0)</code> returns 1 = 2⁰. <strong>Inductive step.</strong> Assume <code>pow2(k)</code> returns 2<sup>k</sup>. Then <code>pow2(k + 1)</code> returns <code>2 * pow2(k)</code> = 2 · 2<sup>k</sup> = 2<sup>k+1</sup>. By induction, <code>pow2(n)</code> returns 2<sup>n</sup> for all <em>n</em> ≥ 0. ∎</p>` },
-      { q: `<p>Find the flaw in this "proof" that every positive integer is less than 10. <em>Inductive step:</em> assume <em>k</em> &lt; 10. Then … (the writer can't continue, so they give up and claim the base case <em>n</em> = 1 is enough because 1 &lt; 10).</p>`, a: `<p>There is no valid inductive step: from <em>k</em> &lt; 10 you can't conclude <em>k</em> + 1 &lt; 10 (take <em>k</em> = 9). A base case alone proves only that one case. Both parts of induction are required, and the inductive step must work for every <em>k</em> ≥ <em>n</em>₀, not just some.</p>` }
+      { q: `<p>Find the flaw in this "proof" that every positive integer is less than 10.</p><p><em>Base case:</em> <em>n</em> = 1, and 1 &lt; 10. <em>Inductive step:</em> assume that every positive integer <em>k</em> is less than 10. Then <em>k</em> + 1 is a positive integer, so by the hypothesis <em>k</em> + 1 &lt; 10. Therefore every positive integer is less than 10.</p><p>Name the step that is wrong, say why, and show that a correct inductive step can't be completed.</p>`, hint: `<p>Compare the inductive hypothesis with the claim being proved, and reread the paragraph "Aren't we assuming what we want to prove?"</p>`, a: `<p>The base case is fine. The flaw is the <strong>inductive hypothesis</strong>: "every positive integer <em>k</em> is less than 10" is the whole claim, so the "proof" assumes what it set out to prove (circular reasoning). A correct hypothesis assumes <em>P</em>(<em>k</em>) for one particular <em>k</em> only: <em>k</em> &lt; 10. From that you would have to prove <em>k</em> + 1 &lt; 10, and you can't: for <em>k</em> = 9, the hypothesis 9 &lt; 10 is true but 10 &lt; 10 is false. So the implication <em>P</em>(<em>k</em>) → <em>P</em>(<em>k</em> + 1) fails at <em>k</em> = 9, and the claim itself is false (10 is a counterexample). A base case alone proves only that one case; the inductive step must work for every <em>k</em> ≥ <em>n</em>₀.</p>` }
     ],
     sources: ["mcs", "levin", "bookofproof"]
   }
@@ -831,7 +888,7 @@ CSA.addOptional("math120", [
 <p>Claude Shannon, a 21-year-old master's student at MIT, noticed that relay circuits behave exactly like Boole's algebra: switches in series are ∧, switches in parallel are ∨. His thesis let engineers design circuits with algebra instead of trial and error. Within two decades, logic gates built from transistors became the building blocks of every computer.</p>
 
 <h3>The thread</h3>
-<p>The truth tables and equivalence laws in Unit 1 are the same mathematics used to design processors, simplify circuits and optimize compiler output. An idea developed to study human reasoning became the physical basis of computing.</p>
+<p>The truth tables and equivalence laws in <a href="#c-math120-u1">Lesson 1</a> are the same mathematics used to design processors, simplify circuits and optimize compiler output. An idea developed to study human reasoning became the physical basis of computing.</p>
 `,
     terms: [
       ["Boolean algebra", "Algebra over the values 0 and 1 with operations and, or and not."],
@@ -878,7 +935,7 @@ theorem zero_add_left (n : Nat) : 0 + n = n := by
   induction n with
   | zero => rfl
   | succ k ih => exact congrArg Nat.succ ih   -- 0 + (k+1) is (0 + k) + 1</code></pre>
-<p>The second proof is the same induction you learned in Unit 6: a base case (<code>zero</code>) and an inductive step (<code>succ k</code>) that uses the inductive hypothesis (<code>ih</code>).</p>
+<p>The second proof is the same induction you learned in <a href="#c-math120-u6">Lesson 6</a>: a base case (<code>zero</code>) and an inductive step (<code>succ k</code>) that uses the inductive hypothesis (<code>ih</code>).</p>
 
 <p class="note"><strong>Why it matters:</strong> testing can show that bugs are present, but only proof can show that they are absent. Verification is still expensive, so it is used where failure is unacceptable: aircraft, cryptography, operating system kernels and chip designs. As AI writes more code, machine-checked proof may become one of the main ways to trust it.</p>
 `,

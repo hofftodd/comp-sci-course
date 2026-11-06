@@ -128,6 +128,8 @@ CSA.addUnits("math130", [
   </tbody>
 </table>
 <p>Also tan θ = sin θ / cos θ, and the identity sin² θ + cos² θ = 1 (which is the Pythagorean theorem on the unit circle). Sine and cosine repeat every 2π, which is why they model anything periodic: sound waves, seasons, alternating current.</p>
+<p>Three more functions are reciprocals of these, and they appear in derivative formulas: the <strong>secant</strong> sec θ = 1/cos θ, the <strong>cosecant</strong> csc θ = 1/sin θ, and the <strong>cotangent</strong> cot θ = cos θ/sin θ. Each is undefined where its denominator is 0. Dividing sin² θ + cos² θ = 1 by cos² θ gives a second identity you'll use with them:</p>
+<p class="math">1 + tan² θ = sec² θ</p>
 
 <h3>Combining and transforming functions</h3>
 <p>The <strong>composition</strong> (<em>f</em> ∘ <em>g</em>)(<em>x</em>) = <em>f</em>(<em>g</em>(<em>x</em>)) feeds one function's output into another. Spotting compositions is the key skill for the chain rule later: √(<em>x</em>² + 1) is the square root function applied to <em>x</em>² + 1, and <em>e</em><sup>3x</sup> is the exponential applied to 3<em>x</em>.</p>
@@ -137,7 +139,48 @@ CSA.addUnits("math130", [
   <li><em>c</em> · <em>f</em>(<em>x</em>) stretches it vertically by <em>c</em>; −<em>f</em>(<em>x</em>) flips it over the <em>x</em>-axis.</li>
 </ul>
 <p>So (<em>x</em> − 2)² + 1 is the parabola <em>x</em>² moved right 2 and up 1, with its lowest point at (2, 1).</p>
-<p class="note">Throughout this course, you can check any calculation in Python. <code>import math</code> gives <code>math.exp</code>, <code>math.log</code> (natural log), <code>math.log2</code>, <code>math.sin</code>, <code>math.cos</code>, <code>math.pi</code> and <code>math.e</code>.</p>
+<h3>Inverse functions and inverse trigonometric functions</h3>
+<p>The <strong>inverse</strong> of a function <em>f</em>, written <em>f</em><sup>−1</sup>, undoes it: if <em>f</em>(<em>a</em>) = <em>b</em>, then <em>f</em><sup>−1</sup>(<em>b</em>) = <em>a</em>. You have already met one pair: ln undoes <em>e</em><sup>x</sup>. An inverse exists only if <em>f</em> never gives two inputs the same output; otherwise the inverse wouldn't know which input to return. The graph of <em>f</em><sup>−1</sup> is the graph of <em>f</em> reflected in the line <em>y</em> = <em>x</em>, because reflecting swaps each point (<em>a</em>, <em>b</em>) with (<em>b</em>, <em>a</em>).</p>
+<p>Sine, cosine and tangent repeat, so they give many inputs the same output (sin 0 = sin π = 0). To invert them we restrict each to one stretch where it takes every value exactly once:</p>
+<table>
+  <thead><tr><th>Inverse</th><th>Means</th><th>Accepts <em>x</em> in</th><th>Returns an angle in</th><th>Examples</th></tr></thead>
+  <tbody>
+    <tr><td>arcsin <em>x</em></td><td>the angle whose sine is <em>x</em></td><td>[−1, 1]</td><td>[−π/2, π/2]</td><td>arcsin(1/2) = π/6, arcsin 1 = π/2</td></tr>
+    <tr><td>arccos <em>x</em></td><td>the angle whose cosine is <em>x</em></td><td>[−1, 1]</td><td>[0, π]</td><td>arccos(1/2) = π/3, arccos 0 = π/2</td></tr>
+    <tr><td>arctan <em>x</em></td><td>the angle whose tangent is <em>x</em></td><td>all real numbers</td><td>(−π/2, π/2)</td><td>arctan 1 = π/4, arctan(−1) = −π/4, arctan √3 = π/3</td></tr>
+  </tbody>
+</table>
+<p>To evaluate one, ask the question it names, using the table of known values above. <em>Example:</em> arctan √3 asks "which angle between −π/2 and π/2 has tangent √3?" Since tan(π/3) = (√3/2)/(1/2) = √3, the answer is π/3. Note also that arcsin 2 is undefined: no angle has sine 2.</p>
+<figure class="fig">
+<svg viewBox="0 0 440 200" role="img" aria-label="Graph of y = arctan x for x from −6 to 6: an S-shaped curve through the origin that rises steeply near 0 and levels off toward the dashed horizontal asymptotes y = π/2 above and y = −π/2 below. The point (1, π/4) is marked.">
+  <line x1="20" y1="100" x2="425" y2="100" class="ax"/><line x1="220" y1="10" x2="220" y2="192" class="ax"/>
+  <line x1="30.0" y1="97" x2="30.0" y2="103" class="ax"/><line x1="93.3" y1="97" x2="93.3" y2="103" class="ax"/><line x1="156.7" y1="97" x2="156.7" y2="103" class="ax"/><line x1="283.3" y1="97" x2="283.3" y2="103" class="ax"/><line x1="346.7" y1="97" x2="346.7" y2="103" class="ax"/><line x1="410.0" y1="97" x2="410.0" y2="103" class="ax"/>
+  <text x="279.3" y="116" class="m">2</text><text x="342.7" y="116" class="m">4</text><text x="148.7" y="116" class="m">−2</text><text x="85.3" y="116" class="m">−4</text>
+  <line x1="20" y1="21.5" x2="425" y2="21.5" class="ax dash"/><line x1="20" y1="178.5" x2="425" y2="178.5" class="ax dash"/>
+  <path d="M30.0,170.3 L37.9,169.9 L45.8,169.5 L53.8,169.1 L61.7,168.7 L69.6,168.2 L77.5,167.6 L85.4,167.0 L93.3,166.3 L101.2,165.5 L109.2,164.6 L117.1,163.6 L125.0,162.5 L132.9,161.1 L140.8,159.5 L148.8,157.6 L156.7,155.4 L164.6,152.6 L172.5,149.1 L180.4,144.8 L188.3,139.3 L196.2,132.2 L204.2,123.2 L212.1,112.2 L220.0,100.0 L227.9,87.8 L235.8,76.8 L243.8,67.8 L251.7,60.7 L259.6,55.2 L267.5,50.9 L275.4,47.4 L283.3,44.6 L291.2,42.4 L299.2,40.5 L307.1,38.9 L315.0,37.5 L322.9,36.4 L330.8,35.4 L338.8,34.5 L346.7,33.7 L354.6,33.0 L362.5,32.4 L370.4,31.8 L378.3,31.3 L386.2,30.9 L394.2,30.5 L402.1,30.1 L410.0,29.7" class="cv" fill="none"/>
+  <circle cx="251.7" cy="60.7" r="4" class="dot"/>
+  <text x="259.7" y="78.7" class="m">(1, π/4)</text>
+  <text x="26" y="16.5" class="m">y = π/2</text>
+  <text x="340" y="172.5" class="m">y = −π/2</text>
+  <text x="328" y="66">y = arctan x</text>
+</svg>
+<figcaption>arctan takes any real number and returns an angle strictly between −π/2 and π/2. As <em>x</em> grows, the angle approaches π/2 but never reaches it.</figcaption>
+</figure>
+<p>arctan matters most in calculus. It is defined for every real number, and its graph has two horizontal asymptotes, so arctan <em>x</em> → π/2 as <em>x</em> → ∞ and → −π/2 as <em>x</em> → −∞. In <a href="#c-math130-u4">Lesson 5</a> you'll see that its derivative is 1/(1 + <em>x</em>²), which is why arctan appears whenever you integrate 1/(1 + <em>x</em>²) in MATH 131.</p>
+<p class="note">Notation: many books and calculators write sin<sup>−1</sup> <em>x</em> for arcsin <em>x</em>. This −1 means "inverse function", not a power: sin<sup>−1</sup> <em>x</em> is not 1/sin <em>x</em> (that's csc <em>x</em>). In Python, the inverses are <code>math.asin</code>, <code>math.acos</code> and <code>math.atan</code>, and they return radians: <code>math.atan(1)</code> is <code>0.7853981633974483</code>, which is π/4.</p>
+
+<h3>Floor and ceiling</h3>
+<p>Two step-shaped functions come up in both calculus and discrete mathematics. The <strong>floor</strong> ⌊<em>x</em>⌋ is the greatest integer less than or equal to <em>x</em>: <em>x</em> rounded <em>down</em>. The <strong>ceiling</strong> ⌈<em>x</em>⌉ is the least integer greater than or equal to <em>x</em>: <em>x</em> rounded <em>up</em>.</p>
+<table>
+  <thead><tr><th><em>x</em></th><th>2.7</th><th>4</th><th>−2.3</th><th>2.1</th><th>−2.1</th></tr></thead>
+  <tbody>
+    <tr><td>⌊<em>x</em>⌋</td><td>2</td><td>4</td><td>−3</td><td>2</td><td>−3</td></tr>
+    <tr><td>⌈<em>x</em>⌉</td><td>3</td><td>4</td><td>−2</td><td>3</td><td>−2</td></tr>
+  </tbody>
+</table>
+<p>Watch the negative numbers: rounding down −2.3 goes to −3, further from zero. The graph of ⌊<em>x</em>⌋ is a staircase: flat at height <em>n</em> for <em>n</em> ≤ <em>x</em> &lt; <em>n</em> + 1, then jumping up by 1 at each integer. In Python, <code>math.floor</code> and <code>math.ceil</code> compute them, and for integers <code>a // b</code> is ⌊<em>a</em>/<em>b</em>⌋, so <code>-7 // 2</code> is <code>-4</code>.</p>
+
+<p class="note">Throughout this course, you can check any calculation in Python. <code>import math</code> gives <code>math.exp</code>, <code>math.log</code> (natural log), <code>math.log2</code>, <code>math.sin</code>, <code>math.cos</code>, <code>math.atan</code>, <code>math.floor</code>, <code>math.pi</code> and <code>math.e</code>.</p>
 `,
     terms: [
       ["Domain", "The set of inputs for which a function is defined."],
@@ -147,13 +190,18 @@ CSA.addUnits("math130", [
       ["Exponential function", "A function with the variable in the exponent, such as eˣ or 2ˣ."],
       ["Logarithm", "log_b x = y means b^y = x; the inverse of an exponential."],
       ["Radian", "Angle measured by arc length on a unit circle; 2π radians is a full turn."],
-      ["Composition", "(f ∘ g)(x) = f(g(x)): one function applied to another's output."]
+      ["Composition", "(f ∘ g)(x) = f(g(x)): one function applied to another's output."],
+      ["Secant", "sec θ = 1/cos θ; with csc θ = 1/sin θ and cot θ = cos θ/sin θ, the reciprocal trigonometric functions."],
+      ["Inverse function", "f⁻¹ undoes f: f⁻¹(b) = a exactly when f(a) = b. Its graph is f's reflected in y = x."],
+      ["arctan", "The angle in (−π/2, π/2) whose tangent is x. Defined for every real x; also written tan⁻¹ x."],
+      ["Floor and ceiling", "⌊x⌋ is x rounded down to an integer; ⌈x⌉ is x rounded up."]
     ],
     quiz: [
       { q: "What is the domain of f(x) = √(x − 4) / (x − 6)?", choices: ["x ≥ 4", "x ≥ 4 and x ≠ 6", "x > 6", "All real numbers"], answer: 1, why: "The square root needs x − 4 ≥ 0, and the denominator can't be zero, so x ≠ 6." },
       { q: "Rewrite 1/√x as a power of x.", choices: ["x^(1/2)", "x^(−2)", "x^(−1/2)", "x^2"], answer: 2, why: "√x = x^(1/2), and 1/x^(1/2) = x^(−1/2)." },
       { q: "What is log₂ 64?", choices: ["5", "6", "8", "32"], answer: 1, why: "2⁶ = 64." },
       { q: "What is cos(π/3)?", choices: ["√3/2", "1/2", "√2/2", "0"], answer: 1, why: "π/3 is 60°, and cos 60° = 1/2." },
+      { q: "What is arctan(−1)?", choices: ["3π/4", "−π/4", "−1/tan 1", "Undefined"], answer: 1, why: "arctan returns the angle between −π/2 and π/2 whose tangent is −1. tan(−π/4) = −1. (3π/4 also has tangent −1 but is outside the range.)" },
       { q: "How is the graph of y = (x + 3)² related to y = x²?", choices: ["Shifted right 3", "Shifted left 3", "Shifted up 3", "Stretched by 3"], answer: 1, why: "f(x − c) shifts right by c, so f(x + 3) = f(x − (−3)) shifts left by 3." }
     ],
     practice: [
@@ -163,7 +211,8 @@ CSA.addUnits("math130", [
       { q: `<p>Simplify, writing each as a single power of <em>x</em>: (a) <em>x</em>³ · <em>x</em><sup>−5</sup>. (b) (<em>x</em><sup>2/3</sup>)³. (c) √<em>x</em> / <em>x</em>². (d) 1/∛(<em>x</em>²).</p>`, a: `<p>(a) <em>x</em><sup>−2</sup>. (b) <em>x</em>². (c) <em>x</em><sup>1/2 − 2</sup> = <em>x</em><sup>−3/2</sup>. (d) <em>x</em><sup>−2/3</sup>.</p>` },
       { q: `<p>Solve for <em>x</em>: (a) 2<sup>x</sup> = 32. (b) <em>e</em><sup>2x</sup> = 7. (c) log₃(<em>x</em> − 1) = 2. (d) ln <em>x</em> + ln 4 = ln 20.</p>`, a: `<p>(a) <em>x</em> = 5. (b) Take ln of both sides: 2<em>x</em> = ln 7, so <em>x</em> = (ln 7)/2 ≈ 0.973. (c) <em>x</em> − 1 = 3² = 9, so <em>x</em> = 10. (d) ln(4<em>x</em>) = ln 20, so 4<em>x</em> = 20 and <em>x</em> = 5.</p>` },
       { q: `<p>A sorted list of a billion (10⁹) items is searched with binary search, which takes about log₂ <em>n</em> steps. Estimate the number of steps without a calculator, using 2¹⁰ ≈ 10³.</p>`, a: `<p>10⁹ = (10³)³ ≈ (2¹⁰)³ = 2³⁰, so log₂ 10⁹ ≈ 30 steps.</p>` },
-      { q: `<p>Let <em>f</em>(<em>x</em>) = √<em>x</em> and <em>g</em>(<em>x</em>) = 3<em>x</em> + 1. Find (<em>f</em> ∘ <em>g</em>)(5) and (<em>g</em> ∘ <em>f</em>)(4). Then write <em>h</em>(<em>x</em>) = sin(<em>x</em>²) and <em>k</em>(<em>x</em>) = (2<em>x</em> − 1)⁷ as compositions of two simpler functions.</p>`, a: `<p>(<em>f</em> ∘ <em>g</em>)(5) = <em>f</em>(16) = 4. (<em>g</em> ∘ <em>f</em>)(4) = <em>g</em>(2) = 7. <em>h</em> is sin applied to <em>x</em>²: outer function sin <em>u</em>, inner <em>u</em> = <em>x</em>². <em>k</em> has outer <em>u</em>⁷ and inner <em>u</em> = 2<em>x</em> − 1. Recognizing the outer and inner functions is exactly what the chain rule needs.</p>` }
+      { q: `<p>Let <em>f</em>(<em>x</em>) = √<em>x</em> and <em>g</em>(<em>x</em>) = 3<em>x</em> + 1. Find (<em>f</em> ∘ <em>g</em>)(5) and (<em>g</em> ∘ <em>f</em>)(4). Then write <em>h</em>(<em>x</em>) = sin(<em>x</em>²) and <em>k</em>(<em>x</em>) = (2<em>x</em> − 1)⁷ as compositions of two simpler functions.</p>`, a: `<p>(<em>f</em> ∘ <em>g</em>)(5) = <em>f</em>(16) = 4. (<em>g</em> ∘ <em>f</em>)(4) = <em>g</em>(2) = 7. <em>h</em> is sin applied to <em>x</em>²: outer function sin <em>u</em>, inner <em>u</em> = <em>x</em>². <em>k</em> has outer <em>u</em>⁷ and inner <em>u</em> = 2<em>x</em> − 1. Recognizing the outer and inner functions is exactly what the chain rule needs.</p>` },
+      { q: `<p>Evaluate without a calculator: (a) arcsin(√2/2). (b) arccos(−1). (c) arctan 0. (d) sec(π/3). (e) ⌊−0.5⌋ and ⌈−0.5⌉. Then explain why arccos 3 is undefined.</p>`, a: `<p>(a) π/4, since sin(π/4) = √2/2 and π/4 is in [−π/2, π/2]. (b) π, since cos π = −1 and π is in [0, π]. (c) 0. (d) 1/cos(π/3) = 1/(1/2) = 2. (e) ⌊−0.5⌋ = −1 (down is toward −∞) and ⌈−0.5⌉ = 0. arccos 3 would be an angle whose cosine is 3, but cosines are always between −1 and 1. Check in Python: <code>math.asin(math.sqrt(2) / 2)</code> gives <code>0.7853981633974484</code> ≈ π/4.</p>` }
     ],
     sources: ["openstaxcalc"]
   },
@@ -247,7 +296,8 @@ for h in [0.1, 0.01, 0.001, 0.0001]:
 <p><strong>Worked example.</strong> Prove lim<sub><em>x</em>→1</sub> (2<em>x</em> + 1) = 3.</p>
 <p><em>Scratch work:</em> we need |(2<em>x</em> + 1) − 3| &lt; ε, that is, |2<em>x</em> − 2| &lt; ε, that is, 2|<em>x</em> − 1| &lt; ε, so |<em>x</em> − 1| &lt; ε/2. That suggests δ = ε/2.</p>
 <p><em>Proof.</em> Let ε &gt; 0 and choose δ = ε/2. If 0 &lt; |<em>x</em> − 1| &lt; δ, then |(2<em>x</em> + 1) − 3| = 2|<em>x</em> − 1| &lt; 2δ = ε. ∎</p>
-<p>You won't need to write many ε–δ proofs in this course, but understanding the definition makes everything else in calculus precise.</p>
+<p>You won't need to write many ε–δ proofs in this course, but understanding the definition makes everything else in calculus precise. <strong>What you're expected to do:</strong> on exams, ε–δ proofs are for linear functions like the one above. Nonlinear limits need one extra idea, shown below for interest; it is practiced properly in a real analysis course.</p>
+<p><em>A nonlinear example (not on the exam).</em> Prove lim<sub><em>x</em>→3</sub> <em>x</em>² = 9. Scratch work: |<em>x</em>² − 9| = |<em>x</em> − 3| · |<em>x</em> + 3|. The factor |<em>x</em> − 3| is the one we control; the extra idea is to keep the other factor bounded. If we insist that |<em>x</em> − 3| &lt; 1, then 2 &lt; <em>x</em> &lt; 4, so |<em>x</em> + 3| &lt; 7. Then |<em>x</em>² − 9| &lt; 7|<em>x</em> − 3|, which is less than ε when |<em>x</em> − 3| &lt; ε/7. <em>Proof.</em> Let ε &gt; 0 and choose δ = the smaller of 1 and ε/7. If 0 &lt; |<em>x</em> − 3| &lt; δ, then |<em>x</em> + 3| &lt; 7 and |<em>x</em> − 3| &lt; ε/7, so |<em>x</em>² − 9| &lt; 7 · ε/7 = ε. ∎</p>
 `,
     terms: [
       ["Limit", "The value f(x) approaches as x approaches a, regardless of f(a)."],
@@ -314,7 +364,7 @@ for k in range(1, 13):
 </figure>
 <ul>
   <li><strong>Removable:</strong> the limit exists, but <em>f</em>(<em>a</em>) is undefined or has the wrong value. Redefining one point would fix it. Example: (<em>x</em>² − 1)/(<em>x</em> − 1) at 1.</li>
-  <li><strong>Jump:</strong> the one-sided limits exist but differ, as in a step. Examples: the floor function ⌊<em>x</em>⌋ at every integer; a shipping price that jumps at 1 kg.</li>
+  <li><strong>Jump:</strong> the one-sided limits exist but differ, as in a step. Examples: the floor function ⌊<em>x</em>⌋ (<em>x</em> rounded down; see <a href="#c-math130-pre">Lesson 1</a>) at every integer; a shipping price that jumps at 1 kg.</li>
   <li><strong>Infinite:</strong> the function blows up near <em>a</em>, as 1/<em>x</em>² does at 0.</li>
 </ul>
 <p>(Some functions fail in stranger ways, like sin(1/<em>x</em>) at 0, which oscillates infinitely often with no limit at all.)</p>
@@ -370,7 +420,7 @@ bisect([](double x) { return x * x * x - x - 1; }, 1, 2);   // 1.3247179...</cod
 
 <h3>The Extreme Value Theorem</h3>
 <p><strong>Theorem (EVT).</strong> A function continuous on a closed interval [<em>a</em>, <em>b</em>] reaches both a maximum and a minimum value somewhere on that interval.</p>
-<p>Both conditions matter. On the open interval (0, 1), <em>f</em>(<em>x</em>) = <em>x</em> never reaches a maximum: it gets ever closer to 1 but never gets there. And 1/<em>x</em> on [−1, 1] has no maximum because it isn't continuous at 0. The EVT is the reason optimization works in Lesson 6: on a closed interval, there's always an answer to find.</p>
+<p>Both conditions matter. On the open interval (0, 1), <em>f</em>(<em>x</em>) = <em>x</em> never reaches a maximum: it gets ever closer to 1 but never gets there. And 1/<em>x</em> on [−1, 1] has no maximum because it isn't continuous at 0. The EVT is the reason optimization works in <a href="#c-math130-u5">Lesson 6</a>: on a closed interval, there's always an answer to find.</p>
 `,
     terms: [
       ["Continuous at a", "f(a) exists, the limit at a exists, and they are equal."],
@@ -445,7 +495,7 @@ print(root)   # 0.7390851332...</code></pre><p>The starting width is π/2 ≈ 1.
 <h3>Tangent lines</h3>
 <p>The tangent line to <em>y</em> = <em>f</em>(<em>x</em>) at <em>x</em> = <em>a</em> passes through (<em>a</em>, <em>f</em>(<em>a</em>)) with slope <em>f</em>′(<em>a</em>), so by point-slope form:</p>
 <p class="math">y = f(a) + f′(a)(x − a)</p>
-<p><em>Example:</em> the tangent to <em>y</em> = <em>x</em>² at <em>x</em> = 3 goes through (3, 9) with slope 6: <em>y</em> = 9 + 6(<em>x</em> − 3) = 6<em>x</em> − 9. Near <em>x</em> = 3, the curve and the line are almost indistinguishable, which is the basis of linear approximation in Lesson 7.</p>
+<p><em>Example:</em> the tangent to <em>y</em> = <em>x</em>² at <em>x</em> = 3 goes through (3, 9) with slope 6: <em>y</em> = 9 + 6(<em>x</em> − 3) = 6<em>x</em> − 9. Near <em>x</em> = 3, the curve and the line are almost indistinguishable, which is the basis of linear approximation in <a href="#c-math130-rates">Lesson 7</a>.</p>
 
 <h3>Notation and meaning</h3>
 <p>The derivative has several notations: <em>f</em>′(<em>x</em>), <em>dy</em>/<em>dx</em>, <em>d</em>/<em>dx</em> <em>f</em>(<em>x</em>), and <em>ẏ</em> when the variable is time. Leibniz's <em>dy</em>/<em>dx</em> suggests "a tiny change in <em>y</em> over a tiny change in <em>x</em>", which is a useful way to think about it.</p>
@@ -458,7 +508,7 @@ print(root)   # 0.7390851332...</code></pre><p>The starting width is π/2 ≈ 1.
 <p>The sign of the derivative tells you direction: <em>f</em>′ &gt; 0 means <em>f</em> is increasing there, <em>f</em>′ &lt; 0 decreasing, and <em>f</em>′ = 0 means the tangent is flat, as at the top of a hill or the bottom of a valley.</p>
 
 <h3>Higher derivatives</h3>
-<p>The derivative of <em>f</em>′ is the <strong>second derivative</strong> <em>f</em>″ (or <em>d</em>²<em>y</em>/<em>dx</em>²), the rate of change of the rate of change. For the falling stone, <em>s</em>(<em>t</em>) = 16<em>t</em>², velocity is <em>s</em>′(<em>t</em>) = 32<em>t</em> and acceleration is <em>s</em>″(<em>t</em>) = 32 ft/s², the constant acceleration of gravity. The second derivative also describes how a graph bends, which Lesson 6 uses.</p>
+<p>The derivative of <em>f</em>′ is the <strong>second derivative</strong> <em>f</em>″ (or <em>d</em>²<em>y</em>/<em>dx</em>²), the rate of change of the rate of change. For the falling stone, <em>s</em>(<em>t</em>) = 16<em>t</em>², velocity is <em>s</em>′(<em>t</em>) = 32<em>t</em> and acceleration is <em>s</em>″(<em>t</em>) = 32 ft/s², the constant acceleration of gravity. The second derivative also describes how a graph bends, which <a href="#c-math130-u5">Lesson 6</a> uses.</p>
 
 <h3>Where derivatives don't exist</h3>
 <p>If <em>f</em>′(<em>a</em>) exists, then <em>f</em> is continuous at <em>a</em>: a function can't have a well-defined slope at a point where it jumps. But a continuous function can still fail to have a derivative:</p>
@@ -564,14 +614,46 @@ CSA.addUnits("math130", [
     <tr><td>sin <em>x</em></td><td>cos <em>x</em></td><td>Radians only</td></tr>
     <tr><td>cos <em>x</em></td><td>−sin <em>x</em></td><td>Note the minus sign</td></tr>
     <tr><td>tan <em>x</em></td><td>sec² <em>x</em> = 1/cos² <em>x</em></td><td>From the quotient rule on sin/cos</td></tr>
+    <tr><td>arctan <em>x</em></td><td>1/(1 + <em>x</em>²)</td><td>Defined for all <em>x</em>; derived below</td></tr>
+    <tr><td>arcsin <em>x</em></td><td>1/√(1 − <em>x</em>²)</td><td>For −1 &lt; <em>x</em> &lt; 1; derived below</td></tr>
   </tbody>
 </table>
-<p>The derivative of sin <em>x</em> comes from the definition together with the limit lim (sin <em>h</em>)/<em>h</em> = 1 from Lesson 2, which is why radians are required. Exponential growth has a natural interpretation: for <em>e</em><sup>x</sup>, the rate of growth always equals the current amount, like a population whose growth rate is proportional to its size.</p>
+<p>Here sec <em>x</em> = 1/cos <em>x</em> is the secant, and arctan and arcsin are the inverse trigonometric functions; all three are reviewed in <a href="#c-math130-pre">Lesson 1</a>. The rules for <em>a</em><sup>x</sup>, ln <em>x</em>, arctan and arcsin each follow in a line or two from the chain rule, so we derive them at the end of this lesson, once the chain rule is in hand.</p>
+<p>The derivative of sin <em>x</em> comes from the definition together with the limit lim (sin <em>h</em>)/<em>h</em> = 1 from <a href="#c-math130-u1">Lesson 2</a>, which is why radians are required. Exponential growth has a natural interpretation: for <em>e</em><sup>x</sup>, the rate of growth always equals the current amount, like a population whose growth rate is proportional to its size.</p>
 
 <h3>The chain rule</h3>
 <p>The chain rule handles <strong>compositions</strong>, a function applied to another function, and it is the most important rule in this lesson:</p>
 <p class="math">(f(g(x)))′ = f′(g(x)) · g′(x)</p>
 <p>In words: <strong>the derivative of the outer function, evaluated at the inner function, times the derivative of the inner function.</strong> In Leibniz notation, with <em>u</em> = <em>g</em>(<em>x</em>), it reads like fractions canceling: <em>dy</em>/<em>dx</em> = (<em>dy</em>/<em>du</em>) · (<em>du</em>/<em>dx</em>). If a gear <em>u</em> turns 3 times as fast as <em>x</em>, and <em>y</em> turns 2 times as fast as <em>u</em>, then <em>y</em> turns 6 times as fast as <em>x</em>.</p>
+<p><strong>Why it's true.</strong> A derivative is a stretch factor for small changes: near a point, a small change Δ<em>x</em> in the input changes <em>g</em>(<em>x</em>) by about <em>g</em>′(<em>x</em>) · Δ<em>x</em>. Follow a small change through both functions:</p>
+<ol>
+  <li>Change <em>x</em> by Δ<em>x</em>. The inner value <em>u</em> = <em>g</em>(<em>x</em>) changes by Δ<em>u</em> ≈ <em>g</em>′(<em>x</em>) · Δ<em>x</em>.</li>
+  <li>That change in <em>u</em> changes <em>y</em> = <em>f</em>(<em>u</em>) by Δ<em>y</em> ≈ <em>f</em>′(<em>u</em>) · Δ<em>u</em> ≈ <em>f</em>′(<em>g</em>(<em>x</em>)) · <em>g</em>′(<em>x</em>) · Δ<em>x</em>.</li>
+  <li>Divide by Δ<em>x</em>: Δ<em>y</em>/Δ<em>x</em> ≈ <em>f</em>′(<em>g</em>(<em>x</em>)) · <em>g</em>′(<em>x</em>). As Δ<em>x</em> → 0 the approximations become exact, and the left side becomes <em>dy</em>/<em>dx</em>.</li>
+</ol>
+<figure class="fig">
+<svg viewBox="0 0 480 170" role="img" aria-label="Three number lines labeled x, u = g(x) and y = f(u). A small change Δx on the first line becomes a change three times as long on the u line, and that becomes a change twice as long again, six times Δx, on the y line.">
+  <line x1="110" y1="40" x2="470" y2="40" class="ax"/>
+  <text x="10" y="45" class="m">x</text>
+  <line x1="150" y1="40" x2="180" y2="40" class="cv"/>
+  <line x1="150" y1="33" x2="150" y2="47" class="cv"/><line x1="180" y1="33" x2="180" y2="47" class="cv"/>
+  <text x="150" y="28" class="m">Δx</text>
+  <line x1="110" y1="95" x2="470" y2="95" class="ax"/>
+  <text x="10" y="100" class="m">u = g(x)</text>
+  <line x1="150" y1="95" x2="240" y2="95" class="cv"/>
+  <line x1="150" y1="88" x2="150" y2="102" class="cv"/><line x1="240" y1="88" x2="240" y2="102" class="cv"/>
+  <text x="150" y="83" class="m">Δu ≈ g′ · Δx = 3Δx</text>
+  <line x1="110" y1="150" x2="470" y2="150" class="ax"/>
+  <text x="10" y="155" class="m">y = f(u)</text>
+  <line x1="150" y1="150" x2="330" y2="150" class="cv"/>
+  <line x1="150" y1="143" x2="150" y2="157" class="cv"/><line x1="330" y1="143" x2="330" y2="157" class="cv"/>
+  <text x="150" y="138" class="m">Δy ≈ f′ · Δu = 6Δx</text>
+  <text x="340" y="70" class="m">× 3 (inner rate)</text>
+  <text x="340" y="125" class="m">× 2 (outer rate)</text>
+</svg>
+<figcaption>Rates multiply. Where the inner function stretches small changes by <em>g</em>′ = 3 and the outer one stretches them by <em>f</em>′ = 2, a small change in <em>x</em> becomes a change 6 times as big in <em>y</em>.</figcaption>
+</figure>
+<p><em>A check with numbers:</em> for <em>y</em> = sin(5<em>x</em>) at <em>x</em> = 0.2, take Δ<em>x</em> = 0.001. Then <em>u</em> = 5<em>x</em> moves from 1 to 1.005 (Δ<em>u</em> = 0.005), and sin <em>u</em> changes by about cos(1) · 0.005 ≈ 0.0027. So Δ<em>y</em>/Δ<em>x</em> ≈ 2.7, matching the chain rule's 5 cos(1) ≈ 2.7015. (A complete proof also handles inner functions whose Δ<em>u</em> can be exactly 0; you don't need that detail here.)</p>
 <p>A reliable method: name the inner function <em>u</em>, differentiate the outer function with respect to <em>u</em>, then multiply by <em>du</em>/<em>dx</em>.</p>
 <table>
   <thead><tr><th>Function</th><th>Outer, inner</th><th>Derivative</th></tr></thead>
@@ -594,7 +676,17 @@ CSA.addUnits("math130", [
 <h3>Implicit differentiation</h3>
 <p>Sometimes <em>y</em> isn't given as a formula in <em>x</em> but by an equation, like the circle <em>x</em>² + <em>y</em>² = 25. Differentiate both sides with respect to <em>x</em>, treating <em>y</em> as a function of <em>x</em>, so the chain rule gives (<em>y</em>²)′ = 2<em>y</em> · <em>y</em>′:</p>
 <p class="math">2x + 2y·y′ = 0, so y′ = −x/y</p>
-<p>At the point (3, 4) on the circle, the slope is −3/4, and the tangent line is <em>y</em> − 4 = −¾(<em>x</em> − 3). This makes sense geometrically: the tangent to a circle is perpendicular to the radius, which has slope 4/3. Implicit differentiation is the key technique for related rates in Lesson 7.</p>
+<p>At the point (3, 4) on the circle, the slope is −3/4, and the tangent line is <em>y</em> − 4 = −¾(<em>x</em> − 3). This makes sense geometrically: the tangent to a circle is perpendicular to the radius, which has slope 4/3. Implicit differentiation is the key technique for related rates in <a href="#c-math130-rates">Lesson 7</a>.</p>
+
+<h3>Where the exponential, logarithm and inverse-trig rules come from</h3>
+<p>With the chain rule and implicit differentiation, each rule in the table above takes only a line or two.</p>
+<ul>
+  <li><strong><em>a</em><sup>x</sup>.</strong> Since <em>a</em> = <em>e</em><sup>ln <em>a</em></sup>, we can write <em>a</em><sup>x</sup> = <em>e</em><sup>x ln <em>a</em></sup>. This is <em>e</em><sup>u</sup> with inner function <em>u</em> = <em>x</em> ln <em>a</em>, whose derivative is the constant ln <em>a</em>. By the chain rule, (<em>a</em><sup>x</sup>)′ = <em>e</em><sup>x ln <em>a</em></sup> · ln <em>a</em> = <em>a</em><sup>x</sup> ln <em>a</em>.</li>
+  <li><strong>ln <em>x</em>.</strong> ln is the inverse of <em>e</em><sup>x</sup>: <em>y</em> = ln <em>x</em> means <em>e</em><sup>y</sup> = <em>x</em>. Differentiate both sides implicitly: <em>e</em><sup>y</sup> · <em>y</em>′ = 1, so <em>y</em>′ = 1/<em>e</em><sup>y</sup> = 1/<em>x</em>.</li>
+  <li><strong>arctan <em>x</em>.</strong> <em>y</em> = arctan <em>x</em> means tan <em>y</em> = <em>x</em>, with −π/2 &lt; <em>y</em> &lt; π/2. Differentiate implicitly: sec² <em>y</em> · <em>y</em>′ = 1, so <em>y</em>′ = 1/sec² <em>y</em>. By the identity sec² <em>y</em> = 1 + tan² <em>y</em> = 1 + <em>x</em>², this is <strong>1/(1 + <em>x</em>²)</strong>.</li>
+  <li><strong>arcsin <em>x</em>.</strong> <em>y</em> = arcsin <em>x</em> means sin <em>y</em> = <em>x</em>, with −π/2 ≤ <em>y</em> ≤ π/2. Then cos <em>y</em> · <em>y</em>′ = 1, so <em>y</em>′ = 1/cos <em>y</em>. On that interval cos <em>y</em> ≥ 0, so cos <em>y</em> = √(1 − sin² <em>y</em>) = √(1 − <em>x</em>²), giving 1/√(1 − <em>x</em>²).</li>
+</ul>
+<p>The same method works for any inverse function: write <em>f</em>(<em>y</em>) = <em>x</em>, differentiate implicitly, and express the answer in terms of <em>x</em>. Chain-rule example: (arctan(<em>x</em>²))′ = 1/(1 + <em>x</em>⁴) · 2<em>x</em> = 2<em>x</em>/(1 + <em>x</em>⁴), which is 1 at <em>x</em> = 1. A Python check with the <code>derivative</code> function from the previous lesson: <code>derivative(math.atan, 1)</code> gives <code>0.50000000000882…</code>, matching 1/(1 + 1²) = 0.5, and <code>derivative(lambda x: math.atan(x**2), 1)</code> gives <code>0.99999999996…</code>, matching 1.</p>
 `,
     terms: [
       ["Power rule", "The derivative of xⁿ is n·xⁿ⁻¹, for any real n."],
@@ -602,12 +694,14 @@ CSA.addUnits("math130", [
       ["Quotient rule", "(f/g)′ = (f′g − fg′)/g²."],
       ["Chain rule", "(f(g(x)))′ = f′(g(x))·g′(x): outer derivative at the inner function, times the inner derivative."],
       ["Implicit differentiation", "Differentiating both sides of an equation, treating y as a function of x."],
+      ["Derivative of arctan", "d/dx arctan x = 1/(1 + x²), found by differentiating tan y = x implicitly."],
       ["Backpropagation", "Computing gradients in a neural network by applying the chain rule backward through its layers."]
     ],
     quiz: [
       ...[{"q": "What is d/dx [x³ sin x]?", "choices": ["3x² cos x", "3x² sin x + x³ cos x", "3x² sin x − x³ cos x", "x³ cos x"], "answer": 1, "why": "Product rule: (x³)′ sin x + x³ (sin x)′."}, {"q": "What is d/dx [ln(x² + 1)]?", "choices": ["1/(x² + 1)", "2x/(x² + 1)", "2x ln(x² + 1)", "1/(2x)"], "answer": 1, "why": "Chain rule: 1/u · u′ with u = x² + 1 and u′ = 2x."}, {"q": "Backpropagation in neural networks is an application of which rule?", "choices": ["Quotient rule", "Power rule", "Chain rule", "L'Hôpital's rule"], "answer": 2, "why": "A network is a composition of layers; gradients flow back through it by the chain rule."}],
       { q: "What is d/dx [cos(3x)]?", choices: ["−sin(3x)", "−3 sin(3x)", "3 sin(3x)", "sin(3x)"], answer: 1, why: "Outer derivative −sin evaluated at 3x, times the inner derivative 3." },
       { q: "What is d/dx [1/x²]?", choices: ["−2/x³", "1/(2x)", "−1/x²", "2/x³"], answer: 0, why: "Rewrite as x⁻², then the power rule gives −2x⁻³ = −2/x³." },
+      { q: "What is d/dx [arctan(3x)]?", choices: ["1/(1 + 9x²)", "3/(1 + 9x²)", "3/(1 + x²)", "3 sec²(3x)"], answer: 1, why: "Chain rule: the outer derivative 1/(1 + u²) at u = 3x, times the inner derivative 3." },
       { q: "For x² + y² = 25, what is the slope of the tangent at (−3, 4)?", choices: ["3/4", "−3/4", "4/3", "−4/3"], answer: 0, why: "y′ = −x/y = −(−3)/4 = 3/4." }
     ],
     practice: [
@@ -620,7 +714,8 @@ CSA.addUnits("math130", [
       { q: `<p>Check your answer to <em>y</em> = <em>x</em>² <em>e</em><sup>3x</sup> at <em>x</em> = 1 numerically with the central-difference <code>derivative</code> function from the previous lesson.</p>`, a: `<pre><code>import math
 f = lambda x: x**2 * math.exp(3 * x)
 exact = lambda x: x * math.exp(3 * x) * (2 + 3 * x)
-print(derivative(f, 1), exact(1))   # both about 100.428</code></pre><p>The formula gives 1 · <em>e</em>³ · 5 = 5<em>e</em>³ ≈ 100.43. Checking symbolic answers numerically is a habit that catches many algebra mistakes.</p>` }
+print(derivative(f, 1), exact(1))   # both about 100.428</code></pre><p>The formula gives 1 · <em>e</em>³ · 5 = 5<em>e</em>³ ≈ 100.43. Checking symbolic answers numerically is a habit that catches many algebra mistakes.</p>` },
+      { q: `<p>Differentiate: (a) arctan(<em>x</em>/2). (b) <em>x</em> arctan <em>x</em>. (c) 10<sup>x</sup>. Then (d) find the slope of <em>y</em> = arctan <em>x</em> at <em>x</em> = 0 and at <em>x</em> = 3, and say what happens to the slope as <em>x</em> grows.</p>`, a: `<p>(a) 1/(1 + <em>x</em>²/4) · ½ = 2/(4 + <em>x</em>²). (b) Product rule: arctan <em>x</em> + <em>x</em>/(1 + <em>x</em>²). (c) 10<sup>x</sup> ln 10 ≈ 2.303 · 10<sup>x</sup>. (d) 1/(1 + 0) = 1 at 0, and 1/(1 + 9) = 0.1 at 3. The slope 1/(1 + <em>x</em>²) shrinks toward 0 as <em>x</em> grows, which is why the graph levels off toward its asymptote π/2.</p>` }
     ],
     sources: ["openstaxcalc", "eoc"]
   },
@@ -918,13 +1013,23 @@ riemann(lambda x: x**2, 0, 1, 1000)   # 0.33333325</code></pre>
     <tr><td><em>e</em><sup>x</sup></td><td><em>e</em><sup>x</sup> + <em>C</em></td></tr>
     <tr><td>cos <em>x</em></td><td>sin <em>x</em> + <em>C</em></td></tr>
     <tr><td>sin <em>x</em></td><td>−cos <em>x</em> + <em>C</em></td></tr>
+    <tr><td>1/(1 + <em>x</em>²)</td><td>arctan <em>x</em> + <em>C</em></td></tr>
   </tbody>
 </table>
 <p>You can always check an antiderivative by differentiating it.</p>
+<p><strong>Why ln |<em>x</em>| and not ln <em>x</em>?</strong> The function 1/<em>x</em> is defined for negative <em>x</em> too, but ln <em>x</em> isn't, so ln <em>x</em> can only be its antiderivative for <em>x</em> &gt; 0. For <em>x</em> &lt; 0, try ln(−<em>x</em>), which is defined there: by the chain rule its derivative is (1/(−<em>x</em>)) · (−1) = 1/<em>x</em>. So ln(−<em>x</em>) works on the negative side, and ln |<em>x</em>| combines both: it is ln <em>x</em> for <em>x</em> &gt; 0 and ln(−<em>x</em>) for <em>x</em> &lt; 0, and its derivative is 1/<em>x</em> on each side. Example: ∫<sub>−3</sub><sup>−1</sup> (1/<em>x</em>) <em>dx</em> = ln |−1| − ln |−3| = −ln 3 ≈ −1.0986, negative because the curve is below the axis there. (An interval of integration must not cross 0, where 1/<em>x</em> blows up.)</p>
 
 <h3>The Fundamental Theorem of Calculus</h3>
 <p>The theorem has two parts, which together say that differentiation and integration undo each other.</p>
+<p><strong>A note on the letter <em>t</em>.</strong> In ∫<sub>a</sub><sup>b</sup> <em>f</em>(<em>x</em>) <em>dx</em>, the letter <em>x</em> is a <strong>dummy variable</strong>: it only labels the points we add up along the way, and the answer doesn't depend on it, so ∫<sub>0</sub><sup>1</sup> <em>x</em>² <em>dx</em> = ∫<sub>0</sub><sup>1</sup> <em>t</em>² <em>dt</em> = 1/3. (It's like the loop variable in <code>sum(i * i for i in range(4))</code>: renaming <code>i</code> to <code>k</code> changes nothing.) When the upper limit is itself the variable <em>x</em>, we must use a different letter inside, or ∫<sub>a</sub><sup>x</sup> <em>f</em>(<em>x</em>) <em>dx</em> would use <em>x</em> for two different things at once: the fixed right edge and the moving point. So we write ∫<sub>a</sub><sup>x</sup> <em>f</em>(<em>t</em>) <em>dt</em>: <em>t</em> runs from <em>a</em> to <em>x</em>, and the result is a function of <em>x</em>.</p>
 <p><strong>Part 1.</strong> If <em>f</em> is continuous and <em>A</em>(<em>x</em>) = ∫<sub>a</sub><sup>x</sup> <em>f</em>(<em>t</em>) <em>dt</em> is the area accumulated from <em>a</em> up to <em>x</em>, then <em>A</em>′(<em>x</em>) = <em>f</em>(<em>x</em>). The rate at which area accumulates is the height of the curve at the edge. Picture moving the right edge a tiny distance <em>h</em>: the area grows by a thin strip of height about <em>f</em>(<em>x</em>) and width <em>h</em>, so (<em>A</em>(<em>x</em> + <em>h</em>) − <em>A</em>(<em>x</em>))/<em>h</em> ≈ <em>f</em>(<em>x</em>).</p>
+<p><strong>When the upper limit is a function of <em>x</em>.</strong> Part 1 needs the upper limit to be exactly <em>x</em>. If it's something else, such as <em>x</em>³, combine Part 1 with the chain rule. <em>Example:</em> find <em>H</em>′(<em>x</em>) for <em>H</em>(<em>x</em>) = ∫<sub>0</sub><sup><em>x</em>³</sup> cos <em>t</em> <em>dt</em>.</p>
+<ol>
+  <li>Name the inside: let <em>A</em>(<em>u</em>) = ∫<sub>0</sub><sup><em>u</em></sup> cos <em>t</em> <em>dt</em>. Then <em>H</em>(<em>x</em>) = <em>A</em>(<em>x</em>³), a composition with inner function <em>u</em> = <em>x</em>³.</li>
+  <li>Outer derivative, by Part 1: <em>A</em>′(<em>u</em>) = cos <em>u</em>.</li>
+  <li>Chain rule: <em>H</em>′(<em>x</em>) = <em>A</em>′(<em>x</em>³) · (<em>x</em>³)′ = cos(<em>x</em>³) · 3<em>x</em>².</li>
+</ol>
+<p><em>Check:</em> here we can also compute the integral directly: <em>H</em>(<em>x</em>) = sin(<em>x</em>³) − sin 0 = sin(<em>x</em>³), whose derivative is 3<em>x</em>² cos(<em>x</em>³), the same. In general: d/d<em>x</em> ∫<sub>a</sub><sup><em>g</em>(<em>x</em>)</sup> <em>f</em>(<em>t</em>) <em>dt</em> = <em>f</em>(<em>g</em>(<em>x</em>)) · <em>g</em>′(<em>x</em>).</p>
 <p><strong>Part 2.</strong> If <em>F</em> is any antiderivative of <em>f</em>, then</p>
 <p class="math">∫<sub>a</sub><sup>b</sup> f(x) dx = F(b) − F(a)</p>
 <p>This is the computational miracle: instead of taking a limit of sums, find an antiderivative and subtract. The constant <em>C</em> cancels, so any antiderivative works. We write <em>F</em>(<em>b</em>) − <em>F</em>(<em>a</em>) as [<em>F</em>(<em>x</em>)]<sub>a</sub><sup>b</sup>.</p>
@@ -956,6 +1061,7 @@ riemann(lambda x: x**2, 0, 1, 1000)   # 0.33333325</code></pre>
       ["Indefinite integral", "The family of all antiderivatives, ∫ f(x) dx = F(x) + C."],
       ["Fundamental Theorem of Calculus", "Accumulated area has derivative f, and ∫ₐᵇ f = F(b) − F(a)."],
       ["Average value", "(1/(b − a)) ∫ₐᵇ f(x) dx."],
+      ["Dummy variable", "The letter inside an integral, such as t in ∫ₐˣ f(t) dt; renaming it doesn't change the value."],
       ["Substitution", "Reversing the chain rule by letting u be an inner function."]
     ],
     quiz: [
@@ -1036,7 +1142,7 @@ std::cout &lt;&lt; w &lt;&lt; "\\n";   // approaches 3.0</code></pre>
 <p>If the learning rate is too large (try 0.3), each step overshoots and w diverges. Choosing step sizes is one of the practical arts of training.</p>
 
 <h3>Many parameters</h3>
-<p>Real models have millions to trillions of parameters. The derivative becomes the <strong>gradient</strong>, a vector of partial derivatives, one per parameter, which you will meet in Multivariable Calculus next term. The gradient points uphill; training steps the other way.</p>
+<p>Real models have millions to trillions of parameters. The derivative becomes the <strong>gradient</strong>, a vector of partial derivatives, one per parameter, which you will meet in <a href="#c-math131-k7">MATH 131, Lesson 7</a> next term. A quick preview of the two words: a <em>vector</em> here is just an ordered list of numbers, like a Python list <code>[0.3, -1.2, 5.0]</code>. A <em>partial derivative</em> of a function of several inputs is the ordinary derivative with respect to one input while all the others are held fixed: for <em>f</em>(<em>w</em>, <em>b</em>) = <em>w</em>² + 3<em>b</em>, the partial derivative with respect to <em>w</em> is 2<em>w</em> (treating <em>b</em> as a constant), and with respect to <em>b</em> it is 3. The gradient lists them all: (2<em>w</em>, 3). The gradient points uphill; training steps the other way.</p>
 
 <h3>The chain rule at scale</h3>
 <p>A neural network is a composition f<sub>n</sub>(…f<sub>2</sub>(f<sub>1</sub>(x))). Backpropagation, popularized for neural networks by Rumelhart, Hinton and Williams in 1986, computes every partial derivative in one backward pass by applying the chain rule from the output toward the input, reusing intermediate results. Its cost is about the same as running the network forward once.</p>
