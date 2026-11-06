@@ -1,6 +1,7 @@
 // Print a course as plain text, the way a Year 1 student sees it (Java/C++ blocks removed).
 // Superscripts and subscripts are kept (as Unicode where possible, otherwise ^(...) and _(...)),
-// table cells are separated with " | ", and figures appear as [figure: description].
+// table cells are separated with " | ", figures appear as [figure: description], short bold
+// symbols (vectors) appear as **v**, blank lines in code are kept, and key terms and hints are included.
 // Usage (from the repository root): node scripts/dump_course.js . <courseId> > course.txt
 const fs = require("fs"), path = require("path");
 const [root, cid] = process.argv.slice(2);
@@ -27,20 +28,22 @@ const txt = s => s
   .replace(/<svg[\s\S]*?<\/svg>/g, "[figure]")
   .replace(/<sup>([\s\S]*?)<\/sup>/g, (_, s) => script(s, SUP, "^"))
   .replace(/<sub>([\s\S]*?)<\/sub>/g, (_, s) => script(s, SUB, "_"))
+  .replace(/<(strong|b)>([^<]{1,3})<\/\1>/g, "**$2**")
   .replace(/<pre[^>]*>/g, "\n```\n").replace(/<\/pre>/g, "\n```\n")
   .replace(/<\/t[dh]>/g, " | ")
   .replace(/<\/(p|li|h3|h4|tr|figcaption|thead|tbody)>/g, "\n").replace(/<h3>/g, "\n### ").replace(/<h4>/g, "\n#### ").replace(/<li>/g, "- ")
   .replace(/<[^>]+>/g, "")
   .replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&")
-  .replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+  .replace(/[ \t]+\n/g, "\n").replace(/\n{4,}/g, "\n\n\n");
 
 const c = CSA.courses[cid];
 let out = `# ${c.code} ${c.title}\n`;
 for (const u of [...c.units, ...c.optional]) {
   out += `\n\n======== ${u.id}: ${u.title} (${u.kind || "core"})\n` + txt(u.notes);
+  if ((u.terms || []).length) out += "\nKey terms:\n" + u.terms.map(([t, d]) => `- ${txt(t)}: ${txt(d)}`).join("\n") + "\n";
   for (const a of u.asides || []) out += `\n[SIDEBAR ${a.kind}: ${a.title}] ` + txt(a.html);
   (u.quiz || []).forEach((q, i) => out += `\nQ${i + 1}. ${txt(q.q)} | ${q.choices.map(txt).join(" / ")} | ans: ${txt(q.choices[q.answer])}`);
-  (u.practice || []).forEach((p, i) => out += `\nP${i + 1}. ${txt(p.q)}`);
-  (u.code || []).forEach(p => out += `\nCODE ${p.id}: ${txt(p.prompt)}`);
+  (u.practice || []).forEach((p, i) => out += `\nP${i + 1}. ${txt(p.q)}` + (p.hint ? `\n   Hint: ${txt(p.hint)}` : ""));
+  (u.code || []).forEach(p => out += `\nCODE ${p.id}: ${txt(p.prompt)}` + (p.hint ? `\n   Hint: ${txt(p.hint)}` : ""));
 }
 process.stdout.write(out + "\n");

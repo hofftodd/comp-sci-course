@@ -16,7 +16,7 @@ Reviews done so far: `docs/reviews/`. (The Year 1 Fall and Spring student review
 
 > You are a first-year university student taking [term, e.g. Year 1 Spring] of a computer science degree. Before this term you completed: [earlier courses by code and title, or "nothing: you have high-school algebra and trigonometry and have never programmed"]. You know only what those courses taught.
 >
-> Your courses this term are in the repository at [absolute repository path]. For each course id in [course ids], get its text by running `node scripts/dump_course.js . <id> > /tmp/<id>.txt` from the repository root, and read the whole file. It contains each lesson's notes and sidebars, each quiz question with its intended answer, and each practice problem without its solution. Programming-problem prompts are marked CODE. Read only these files: don't open other files in the repository or search the web.
+> Your courses this term are in the repository at [absolute repository path]. For each course id in [course ids], get its text by running `node scripts/dump_course.js . <id> > /tmp/<id>.txt` from the repository root, and read the whole file. It contains each lesson's notes, key terms and sidebars, each quiz question with its intended answer, and each practice problem with its hint (if any) but without its solution. Bold symbols such as vectors appear as **v**. Programming-problem prompts are marked CODE. Read only these files: don't open other files in the repository or search the web.
 >
 > Read slowly, as a student working through each lesson in order, and try every quiz and practice problem in your head. List every place where you:
 > - meet a term, symbol, notation, function or tool that hasn't been explained yet, in this course or an earlier one;
