@@ -169,7 +169,7 @@ for (t1, _, v1), (t2, _, v2) in zip(log, log[1:]):
 </svg>
 <figcaption>Tip to tail: a, then b from a's tip, gives a + b = (3 + 1, 1 + 2) = (4, 3). Adding in the other order (dashed) reaches the same point, so a + b = b + a.</figcaption>
 </figure>
-<p>This is exactly the <code>Vector2</code> class you built in <a href="#c-cs102-c2">CS 102, Lesson 2</a>; physics engines in games are built on such classes. (Use <code>math.atan2(vy, vx)</code> rather than <code>atan(vy / vx)</code>: it handles all four quadrants and <em>v<sub>x</sub></em> = 0.)</p>
+<p>In <a href="#c-cs102-c2">CS 102, Lesson 2</a> you write a <code>Vector2</code> class that does exactly this arithmetic with <code>+</code> and <code>*</code>, and physics engines in games are built on such classes. This course doesn't need it: the code below keeps the <em>x</em> and <em>y</em> components in separate variables. (Use <code>math.atan2(vy, vx)</code> rather than <code>atan(vy / vx)</code>: it handles all four quadrants and <em>v<sub>x</sub></em> = 0.)</p>
 
 <h3>Motion in two dimensions</h3>
 <p>Position <strong>r</strong>(<em>t</em>) = (<em>x</em>(<em>t</em>), <em>y</em>(<em>t</em>)), velocity <strong>v</strong> = <em>d</em><strong>r</strong>/<em>dt</em>, and acceleration <strong>a</strong> = <em>d</em><strong>v</strong>/<em>dt</em>, each differentiated component by component. Velocity is always tangent to the path.</p>
@@ -192,7 +192,7 @@ for (t1, _, v1), (t2, _, v2) in zip(log, log[1:]):
   <text x="200" y="60">no air: 40.8 m</text><text x="178" y="174" class="m">with drag: 22 m</text>
   <text x="34" y="204" class="m">0</text><text x="276" y="204" class="m">40 m</text>
 </svg>
-<figcaption>A projectile at 20 m/s and 45°, without air resistance (a parabola) and with quadratic drag (simulated). Drag shortens the range and makes the descent steeper than the climb.</figcaption>
+<figcaption>A projectile at 20 m/s and 45°, without air resistance (a parabola) and with quadratic drag (simulated with <em>k</em>/<em>m</em> = 0.03 per meter, for example <em>m</em> = 1 kg and <em>k</em> = 0.03 kg/m). Drag shortens the range and makes the descent steeper than the climb.</figcaption>
 </figure>
 
 <h3>Simulating in two dimensions</h3>
@@ -211,7 +211,7 @@ def simulate_projectile(speed, angle_deg, dt=0.001, g=9.8):
             return x          # range
 
 print(simulate_projectile(20, 45), 20**2 / 9.8)   # both about 40.8</code></pre>
-<p>The figure's second curve came from the same loop with a drag acceleration added (next lesson). Two lessons from it: without air, the formula and simulation agree, which validates the code; with air, only the simulation gives an answer.</p>
+<p>The figure's second curve came from the same loop with a drag acceleration added: <a href="#c-phys150-p3">Lesson 3</a>'s <code>step</code> function with <em>m</em> = 1 kg, <em>k</em> = 0.03 kg/m and Δ<em>t</em> = 0.001 s, which lands at 22.2 m after reaching a height of 7.1 m. Two lessons from it: without air, the formula and simulation agree, which validates the code; with air, only the simulation gives an answer.</p>
 
 <h3>Relative motion</h3>
 <p>Velocities depend on the observer. A passenger walking forward at 1 m/s on a train moving at 30 m/s moves at 31 m/s relative to the ground: velocities add as vectors. A plane flying north at 200 m/s in a 30 m/s wind from the west moves at √(200² + 30²) ≈ 202 m/s over the ground, heading about 8.5° east of north. Navigation systems, from airliners to GPS, constantly make these corrections.</p>
@@ -299,7 +299,7 @@ print(best)   # about 39°</code></pre><p>Less than 45°: the projectile gets ex
 <p class="math"><em>dv</em>/<em>dt</em> = <em>g</em>(1 − <em>v</em>²/<em>v<sub>t</sub></em>²)</p>
 <p>Here is how to solve it. You don't need to reproduce this derivation, only to use the result; <a href="#c-math131-k6">MATH 131, Lesson 6</a> teaches the method, called <em>separation of variables</em>, in general. The idea is to get everything involving <em>v</em> on one side and <em>t</em> on the other, then integrate both sides. Write <em>u</em> = <em>v</em>/<em>v<sub>t</sub></em> (the speed as a fraction of terminal speed), so <em>dv</em> = <em>v<sub>t</sub> du</em>, and the equation becomes <em>v<sub>t</sub> du</em>/(1 − <em>u</em>²) = <em>g dt</em>.</p>
 <ol>
-  <li><strong>Split the fraction</strong> (partial fractions, MATH 131 Lesson 1): 1/(1 − <em>u</em>²) = ½[1/(1 + <em>u</em>) + 1/(1 − <em>u</em>)]. Check by adding the right side over the common denominator (1 + <em>u</em>)(1 − <em>u</em>) = 1 − <em>u</em>².</li>
+  <li><strong>Split the fraction</strong> (a trick called partial fractions, <a href="#c-math131-k1">MATH 131, Lesson 1</a>; you can check this case directly): 1/(1 − <em>u</em>²) = ½[1/(1 + <em>u</em>) + 1/(1 − <em>u</em>)]. Check by adding the right side over the common denominator (1 + <em>u</em>)(1 − <em>u</em>) = 1 − <em>u</em>².</li>
   <li><strong>Integrate</strong> both sides from the start (<em>t</em> = 0, <em>u</em> = 0) to time <em>t</em>: (<em>v<sub>t</sub></em>/2)[ln(1 + <em>u</em>) − ln(1 − <em>u</em>)] = <em>gt</em>, that is, ln((1 + <em>u</em>)/(1 − <em>u</em>)) = 2<em>z</em>, where <em>z</em> = <em>gt</em>/<em>v<sub>t</sub></em>.</li>
   <li><strong>Undo the logarithm</strong>: (1 + <em>u</em>)/(1 − <em>u</em>) = e<sup>2<em>z</em></sup>. Multiply out, 1 + <em>u</em> = e<sup>2<em>z</em></sup> − <em>u</em>e<sup>2<em>z</em></sup>, and solve for <em>u</em>: <em>u</em> = (e<sup>2<em>z</em></sup> − 1)/(e<sup>2<em>z</em></sup> + 1).</li>
   <li><strong>Tidy up</strong>: divide top and bottom by e<sup><em>z</em></sup> to get <em>u</em> = (e<sup><em>z</em></sup> − e<sup>−<em>z</em></sup>)/(e<sup><em>z</em></sup> + e<sup>−<em>z</em></sup>). This combination has a name, below.</li>
@@ -365,7 +365,7 @@ print(round(vt, 1), round(t, 1))   # 56.0 m/s after about 10.5 s</code></pre>` }
 
 <h3>Work and kinetic energy</h3>
 <p>A force <em>F</em> acting along a displacement <em>d</em> does <strong>work</strong> <em>W</em> = <em>Fd</em> cos θ, where θ is the angle between them. Work is measured in joules: 1 J = 1 N·m. A force perpendicular to the motion, like the normal force on a sliding box, does no work.</p>
-<p>The combination |<strong>F</strong>||<strong>d</strong>| cos θ is called the <strong>dot product</strong> of the two vectors, written <strong>F</strong> · <strong>d</strong>, so <em>W</em> = <strong>F</strong> · <strong>d</strong>. In components it is simply "multiply matching components and add": (<em>u</em>₁, <em>u</em>₂) · (<em>w</em>₁, <em>w</em>₂) = <em>u</em>₁<em>w</em>₁ + <em>u</em>₂<em>w</em>₂, and the two forms always agree (<a href="#c-math131-k7">MATH 131, Lesson 7</a> shows why, using the law of cosines; you can take it on trust here). Only the part of the force along the motion does work. In components it's often easier: a force <strong>F</strong> = (3, 4) N acting while the object moves <strong>d</strong> = (2, 0) m does <em>W</em> = 3 · 2 + 4 · 0 = 6 J; the upward 4 N does nothing to a horizontal move. When the force varies along the path, add up the small pieces: <em>W</em> = ∫ <strong>F</strong> · <em>d</em><strong>r</strong>, which in one dimension is the integral ∫ <em>F</em>(<em>x</em>) <em>dx</em> of <a href="#c-math131-k2">MATH 131, Lesson 2</a>.</p>
+<p>The combination |<strong>F</strong>||<strong>d</strong>| cos θ is called the <strong>dot product</strong> of the two vectors, written <strong>F</strong> · <strong>d</strong>, so <em>W</em> = <strong>F</strong> · <strong>d</strong>. In components it is simply "multiply matching components and add": (<em>u</em>₁, <em>u</em>₂) · (<em>w</em>₁, <em>w</em>₂) = <em>u</em>₁<em>w</em>₁ + <em>u</em>₂<em>w</em>₂, and the two forms always agree. (Try <strong>F</strong> = (3, 0) and <strong>d</strong> = (2, 2): the components give 3 · 2 + 0 · 2 = 6, and |<strong>F</strong>||<strong>d</strong>| cos θ = 3 · 2√2 · cos 45° = 6. <a href="#c-math131-k7">MATH 131, Lesson 7</a> proves it in general with the law of cosines; you can take it on trust here.) Only the part of the force along the motion does work. In components it's often easier: a force <strong>F</strong> = (3, 4) N acting while the object moves <strong>d</strong> = (2, 0) m does <em>W</em> = 3 · 2 + 4 · 0 = 6 J; the upward 4 N does nothing to a horizontal move. When the force varies along the path, add up the small pieces: <em>W</em> = ∫ <strong>F</strong> · <em>d</em><strong>r</strong>, which in one dimension is the integral ∫ <em>F</em>(<em>x</em>) <em>dx</em> of <a href="#c-math131-k2">MATH 131, Lesson 2</a>.</p>
 <p>The <strong>kinetic energy</strong> of a moving object is <em>K</em> = ½<em>mv</em>². The <strong>work–energy theorem</strong> says the net work on an object equals its change in kinetic energy: <em>W</em><sub>net</sub> = Δ<em>K</em>. (Proof sketch, in one dimension: <em>W</em> = ∫ <em>F dx</em> = ∫ <em>ma dx</em>. Two substitutions, as in <a href="#c-math131-k1">MATH 131, Lesson 1</a>, finish it. First, make time the variable: <em>x</em> depends on <em>t</em>, so <em>dx</em> = (<em>dx</em>/<em>dt</em>) <em>dt</em> = <em>v dt</em>, and with <em>a</em> = <em>dv</em>/<em>dt</em> the integral is ∫ <em>m</em>(<em>dv</em>/<em>dt</em>) <em>v dt</em>. Second, make speed the variable: (<em>dv</em>/<em>dt</em>) <em>dt</em> = <em>dv</em>, leaving ∫ <em>mv dv</em> from the starting speed <em>v</em>₁ to the final speed <em>v</em>₂, which is ½<em>mv</em>₂² − ½<em>mv</em>₁² = Δ<em>K</em>.) Because <em>K</em> grows with <em>v</em>², a car at 100 km/h has four times the kinetic energy of one at 50 km/h, and needs about four times the distance to brake.</p>
 
 <h3>Potential energy and conservation</h3>
@@ -397,7 +397,7 @@ print(round(vt, 1), round(t, 1))   # 56.0 m/s after about 10.5 s</code></pre>` }
 <p>With equal masses, the objects simply swap velocities, which is what you see when a cue ball stops dead after a head-on hit. A ball bouncing off a much heavier wall reverses its velocity.</p>
 
 <h3>Energy as a simulation check</h3>
-<p>Simulate a ball on a spring with the plain (explicit) Euler method, where position is updated with the <em>old</em> velocity, and plot the total energy: it grows steadily, and the oscillation spirals outward. Semi-implicit Euler, which you've used since Lesson 1, keeps the energy oscillating within a small band forever. Methods with this property are called <strong>symplectic</strong>, and they're the standard choice for long simulations of orbits, molecules and game physics.</p>
+<p>Simulate a ball on a spring with the plain (explicit) Euler method, where position is updated with the <em>old</em> velocity, and plot the total energy: it grows steadily, and the oscillation spirals outward. Semi-implicit Euler, which you've used since Lesson 1, keeps the energy oscillating within a small band forever. Methods with this property are called <strong>symplectic</strong>, and they're the standard choice for long simulations of orbits, molecules and game physics. (In the code, <code>10_000</code> is ten thousand: Python ignores underscores between digits.)</p>
 <pre><code>def energy_after(steps, dt, semi_implicit):
     k = m = 1.0
     x, v = 1.0, 0.0
@@ -531,7 +531,7 @@ print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
 <p>and √(<em>GM</em>/<em>r</em>) is exactly the circular orbital speed. So escape velocity is √2 ≈ 1.41 times circular speed at the same distance. From the ISS's altitude that's about 1.41 × 7.67 ≈ 10.9 km/s; from Earth's surface (ignoring air), about 11.2 km/s.</p>
 
 <h3>Simulating an orbit</h3>
-<p>Using units where <em>GM</em> = 1, start at (1, 0) with velocity (0, 1), which is exactly circular speed. Gravity's acceleration is −<em>GM</em> <strong>r</strong>/|<strong>r</strong>|³ (inverse-square magnitude, pointing toward the center):</p>
+<p>Using units where <em>GM</em> = 1, start at (1, 0) with velocity (0, 1), which is exactly circular speed. Gravity's acceleration is −<em>GM</em> <strong>r</strong>/|<strong>r</strong>|³. The cube isn't a mistake: split it as (<em>GM</em>/|<strong>r</strong>|²) × (−<strong>r</strong>/|<strong>r</strong>|). The second factor is <strong>r</strong> divided by its own length, a vector of length 1 pointing from the body toward the center; the first is the inverse-square magnitude. In the code, <code>r3</code> is |<strong>r</strong>|³ and <em>GM</em> = 1:</p>
 <pre><code>import math
 
 def orbit(vx0, vy0, dt=0.001, steps=20_000):
@@ -845,7 +845,7 @@ CSA.addCode("phys150", {
 </ul>
 <p>Then write <code>best_angle(speed)</code> that returns the whole-number angle from 1 to 89 with the largest simulated range.</p>`,
       starter: `import math\n\nG = 9.8\n\ndef range_formula(speed, angle):\n    pass\n\ndef range_sim(speed, angle, dt=0.001):\n    pass\n\ndef best_angle(speed):\n    pass\n`,
-      hint: `<p>Convert degrees with <code>math.radians</code>. Split the velocity into <code>vx = speed * cos</code>, <code>vy = speed * sin</code>; only <code>vy</code> changes. For <code>best_angle</code>, use <code>max(range(1, 90), key=...)</code>.</p>`,
+      hint: `<p>Convert degrees with <code>math.radians</code>. Split the velocity into <code>vx = speed * cos</code>, <code>vy = speed * sin</code>; only <code>vy</code> changes. For <code>best_angle</code>, <code>max</code> takes a <code>key</code> just as <code>sorted</code> does (<a href="#c-cs101-u5">CS 101's lists lesson</a>): <code>max(range(1, 90), key=f)</code> returns the angle <code>a</code> for which <code>f(a)</code> is largest. Make <code>f</code> a lambda that calls <code>range_sim(speed, a)</code>.</p>`,
       solution: `import math\n\nG = 9.8\n\ndef range_formula(speed, angle):\n    return speed ** 2 * math.sin(2 * math.radians(angle)) / G\n\ndef range_sim(speed, angle, dt=0.001):\n    th = math.radians(angle)\n    x, y = 0.0, 0.0\n    vx, vy = speed * math.cos(th), speed * math.sin(th)\n    while True:\n        vy -= G * dt\n        x += vx * dt\n        y += vy * dt\n        if y < 0:\n            return x\n\ndef best_angle(speed):\n    return max(range(1, 90), key=lambda a: range_sim(speed, a, 0.001))\n`,
       tests: [
         { label: "Formula at 45°", type: "assert", code: `assert abs(range_formula(20, 45) - 400 / 9.8) < 1e-9, f"range_formula(20, 45) gave {range_formula(20, 45)}"` },

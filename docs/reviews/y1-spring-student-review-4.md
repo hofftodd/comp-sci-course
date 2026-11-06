@@ -87,3 +87,57 @@ I'm a first-year student. Last term I took CS 101 Programming I (Python), MATH 1
     - PHYS 150 Lesson 3 depends on MATH 131 Lessons 1 and 6 (partial fractions, separation of variables).
     - PHYS 150 Lesson 4 depends on MATH 131 Lesson 7 (dot product).
     - PHYS 150 Lesson 2 says "This is exactly the Vector2 class you built in CS 102, Lesson 2", whether or not I've built it yet.
+
+## Professor's response
+
+Thank you; a careful list, and three of the items caught real errors. The `fib(100)` comment overstated the cost (8), the doubling bound "more than n/2" contradicted the lesson's own 16-append example (12), and a quiz used a `make_adder` the lesson never shows (9). Practice 6 in MATH 131 Lesson 8 also never connected its π to Lesson 3's √π (26). All four are fixed. Items 15, 24 and 25 came from the plain-text extraction tool, since fixed; the pages render those correctly. Every number, formula and code output I added or changed was checked by running Python. Three programming-problem hints changed (CS 102 `inventory` and `tree_funcs`, PHYS 150 `projectile`); no tests or solutions changed, and all solutions still pass while all starters fail.
+
+### CS 102 Programming II
+
+1. c1: Added a sentence after the `Playlist` example: a semicolon puts two statements on one line and means the same as two lines; the course uses it only to keep short examples short.
+2. c2: Defined `isinstance(x, C)` where it first appears: `True` if `x` is an instance of `C` or a subclass (link to Lesson 3), with `isinstance(3, int)` as an example.
+3. c2: Explained that `max` asks whether each item is `>` the largest so far, and that for a class with no `__gt__` Python answers `a > b` by asking `b < a` (checked by tracing a class with only `__lt__`).
+4. c2, P5: Added a hint pointing to CS 101's lists lesson ("Sorting with a key"), which did show `key=lambda s: s[1]`, and giving `key=lambda c: c.rank`.
+5. c4: Glossed `for _, p, q in self.items`: each tuple is unpacked into three names, and `_` is an ordinary name that by convention means "unused".
+6. c4, `inventory` hint: It no longer assumes an attribute name ("stored in an attribute of your choice"). It now says to collect the matching items into a list and sort with `key=lambda i: i.name`, linking CS 101's "Sorting with a key". Lambda is review from CS 101 (item 22).
+7. c5: Glossed digit underscores at `slow_sum(10_000_000)`. The same gloss is at the first use in MATH 121 (d6, `100_000`) and PHYS 150 (p4, `10_000`).
+8. c5: **Error fixed.** The comment now gives the result, `354224848179261915075`. A new paragraph derives the call count C(n) = 1 + C(n − 1) + C(n − 2) = 2F(n + 1) − 1 (checked against a counting recursion for small n). For `fib(100)` that is about 1.1 × 10²¹ calls. At roughly 30 million calls a second (measured here: 3.2 × 10⁷), that's about a million years: long, but nothing like the age of the universe.
+9. c5, Q4: **Fixed.** The question now uses `double = make_multiplier(2)` from the Closures section, so the captured `n` is the one the lesson shows.
+10. c6: Glossed `collections.Counter` as a ready-made dictionary of counts, with `Counter("a b a".split()) == {"a": 2, "b": 1}` being `True` (run). Explained a seed: generators built with `random.Random(42)` produce the same sequence every run, so tests see the same numbers.
+11. c7: Explained the built-in `any` (true if at least one item is true, stopping at the first) right after `__contains__`.
+12. c7: **Error fixed.** The bound now reads n/2 ≤ s < n, with the reason spelled out. The last copy happened because a block of size s was full and another item arrived, so n > s. No copy came after it, so the block of 2s never overflowed, so n ≤ 2s. The text notes that 16 appends give s = 8 = n/2 and 17 give s = 16. The total 2s − 1 is therefore between n − 1 and 2n. A simulation confirmed n/2 ≤ s < n, total = 2s − 1, and n − 1 ≤ total < 2n for every n from 2 to 3000.
+13. c7: The lesson now derives both sums itself instead of relying on MATH 131. For doubling, 2S − S leaves 2s − 1. For 12.5% growth, with q = 8/9, S − qS = s − sq^(k+1), so S = s(1 − q^(k+1))/(1 − q), just under 9s. A link to MATH 131 remains for the general treatment. The CPython simulation still gives 8.45 copies per append at a million, and between 8.1 and 9.0 for n near a million (rerun).
+14. c8, `tree_funcs` hint: Says to start with `low = float("-inf")` and `high = float("inf")`, floats that compare smaller and larger than every number, and shows them as default parameters of `is_bst`.
+
+### MATH 121 Discrete Mathematics II
+
+15. d1, d4: Extraction artifact. The pages write n to the power r, a to the power e and a to the power 1,000,000 as ordinary raised superscripts, the same notation as 26³. No change.
+16. d2: Explained `-(-N // k)`: `//` rounds down, so negating, rounding down and negating again rounds up; `-(-25 // 12)` is 3. Explained that `math.ceil(N / k)` goes through a float (about 16 significant digits), so `math.ceil((10**17 + 1) / 1)` gives 10¹⁷ (run).
+17. d2: Defined subsequence (some of the numbers, in their original order, not necessarily adjacent), with 1, 2, 3 inside 5, 1, 4, 2, 3.
+18. d3: The Binet check now states φ + ψ = (1 + √5)/2 + (1 − √5)/2 = 1 before using it.
+19. d3: Added the justification after the Hanoi steps. Subtracting the particular solution's equation from any solution's cancels the + 1, so the difference D satisfies the homogeneous recurrence, D(n) = A · 2ⁿ, and every solution has the form p + D.
+20. d5, P5: Added a hint: c = 42³ mod n; compute 42³ (74088) and compare with n ≈ 2²⁰⁴⁸; what does "mod n" do to a smaller number?
+21. d7: Replaced "(by the ratio test)" with the argument itself. The terms k(1 − p)^(k−1)p have ratio (k + 1)(1 − p)/k → 1 − p < 1, so past some point each term is less than a fixed fraction r < 1 of the one before. The tail is then below a + ar + ar² + …, whose partial sums a(1 − rᵐ)/(1 − r) never exceed a/(1 − r). The text names this argument as the ratio test and links MATH 131 for more.
+
+### MATH 131 Calculus II and Multivariable Calculus
+
+22. k1: No change needed here. MATH 131 is right: CS 101 taught lambda (Functions and abstraction; also as a sort key in the lists lesson) and generator expressions (Strings, the one-line `clean`). CS 102 was the inconsistent one and is fixed: c3 now calls the generator expression something "you met in CS 101, Strings" with a link, and c5 introduces it as "first met in CS 101" and lambda as review ("You met lambda in CS 101, Functions and abstraction...").
+23. k2: Added a short argument with no integration. cos x is sin x shifted by π/2, so over a full cycle sin² x and cos² x have the same average; they sum to 1, so each averages 1/2, giving the RMS value 1/√2 (checked numerically: 0.5000).
+24. k4: Extraction artifact. The page shows the full definition, "If |aₙ₊₁/aₙ| → L < 1 the series converges; L > 1 diverges; L = 1 is inconclusive." No change.
+25. k5: Extraction artifact. The page shows "converges for |x − a| < R and diverges for |x − a| > R." No change.
+26. k8, P6: **Fixed.** The question now also asks why this checks Lesson 3's √π. The answer shows that e^(−(x²+y²)) = e^(−x²)e^(−y²), so the iterated integral is I · I = I², where I is the single integral. A double integral of π means the single one is √π. The code now also prints `math.sqrt(est)` beside `math.sqrt(math.pi)`. Over five seeds, estimates are 3.13 to 3.17 (square roots 1.770 to 1.780), and the exact single integral over [−3, 3] is 1.77241, within 0.0001 of √π. Lesson 3 now says the check is done "through its square".
+
+### PHYS 150 Physics I
+
+27. p2: The figure caption and the paragraph after the code now give the drag settings: Lesson 3's `step` with m = 1 kg, k = 0.03 kg/m and Δt = 0.001 s. That lands at 22.2 m with a top height of 7.1 m (run), matching the curve's pixel coordinates (22.2 m, 7.07 m).
+28. p5: Showed −GM**r**/|**r**|³ = (GM/|**r**|²) × (−**r**/|**r**|), where the second factor is a unit vector toward the center and the first is the inverse-square magnitude. Also noted that `r3` in the code is |**r**|³.
+
+### Across courses
+
+29. See items 22, 4 and 6. CS 102 now treats lambda and generator expressions as review from CS 101, with links. The PHYS 150 `projectile` hint now explains `max(range(1, 90), key=f)` (it works like `sorted`'s key, CS 101's lists lesson; it returns the angle where `f` is largest) and says to make `f` a lambda calling `range_sim`. MATH 131 k1 already glosses both with CS 101 links.
+30. Each dependency now has a self-contained statement where it is used, plus a link:
+    - CS 102 c7: derives the finite geometric sums itself (item 13).
+    - MATH 121 d7: the convergence argument is spelled out (item 21). For harmonic numbers, H_n adds 1/x at x = 1, …, n, close to the area under 1/x from 1 to n, which is ln n (MATH 130); the 0.577 is the leftover gap (checked: H₅₀ = 4.499 against ln 50 + 0.577 = 4.489).
+    - PHYS 150 p3: the derivation already does the separation of variables inline and checks the partial-fraction split by adding over a common denominator; it now links MATH 131 Lesson 1 and says the split can be checked directly.
+    - PHYS 150 p4: added a worked check of the two dot-product forms, with **F** = (3, 0) and **d** = (2, 2) both giving 6, plus the link for the general proof.
+    - PHYS 150 p2: no longer assumes you've built `Vector2`. It says CS 102 Lesson 2 builds one, and that this course doesn't need it, because it keeps the x and y components in separate variables.
