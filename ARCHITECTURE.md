@@ -397,6 +397,7 @@ There is no automated test suite yet. Changes so far were checked by:
   `sources` id exists, every quiz `answer` is in range, rubric weights total 100, SVG marker ids
   are unique, tags in notes are balanced).
 - `scripts/test_dump_course.js`, which checks that the plain-text course extraction used by student review agents keeps superscripts, subscripts, blank lines in code, key terms, hints and bold symbols, and leaks no hidden Java/C++ or markup.
+- `scripts/check_lesson_code.py` (with `extract_lesson_code.js`), which runs each lesson's Python blocks in order and flags lines whose actual output differs from the value their `# comment` claims. Review its output by hand.
 - Recomputing every number in the math and physics lessons (worked examples, tables, simulation
   outputs) in Python.
 - Driving the page in headless Chromium with Playwright, including a mock `window.claude` runtime

@@ -109,10 +109,10 @@ a.withdraw(500)                # ValueError: insufficient funds</code></pre>
 
 <h3>Invariants: rules an object always keeps</h3>
 <p>An <strong>invariant</strong> is a condition that is true for every object of a class, at every moment between method calls: for our account, "the balance is never negative". The constructor must establish it, and every method must preserve it. Because only the class's own methods change the balance, you can check the rule in one place and trust it everywhere. That's the payoff of <strong>encapsulation</strong>: keeping an object's data behind its methods.</p>
-<p>Python doesn't strictly prevent outside code from writing <code>a.balance = -5</code>. By convention, an attribute that outside code shouldn't touch starts with an underscore, like <code>self._balance</code>, which signals "internal; use the methods". The underscore is only a label, though. Python still runs <code>a._balance = -5</code> without complaint:</p>
-<pre><code>a = BankAccount("Ada", 100)   # a version that stores self._balance
-a._balance = -5               # no error: the invariant is now broken
-a.withdraw(1)                 # ValueError: insufficient funds</code></pre>
+<p>Python doesn't strictly prevent outside code from writing <code>a.balance = -5</code>. By convention, an attribute that outside code shouldn't touch starts with an underscore, like <code>self._balance</code>, which signals "internal; use the methods". The underscore is only a label, though: Python would run <code>a._balance = -5</code> without complaint. Here is the same problem with our class as written, which stores the public name <code>balance</code>:</p>
+<pre><code>acct = BankAccount("Ada", 100)
+acct.balance = -5             # no error: the invariant is now broken
+acct.withdraw(1)              # ValueError: insufficient funds, from an account opened with 100</code></pre>
 <p>Nothing fails at the moment of the bad assignment. The trouble shows up later, somewhere else, in code that trusted the invariant, and that makes the bug hard to trace back. The underscore protects against accidents by people who read it; it can't stop someone who ignores it. The next lesson shows <em>properties</em>, which go one step further: they let the <em>public</em> name <code>a.balance</code> run a check on every assignment, so the obvious way to change the balance is also the safe one and a bad value is rejected immediately.</p>
 
 <h3>Objects in memory</h3>
