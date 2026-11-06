@@ -385,11 +385,15 @@ student on two devices counts as two.
 - Provider adapters were tested against mock APIs that follow each provider's documented streaming
   format. Test each provider with real keys before relying on it.
 
+## Content review
+
+Every new term gets at least one review cycle before it is called done. First, a student-perspective review lists everything unclear or blocking. Then a separate professor agent revises the content and answers each item. The reviews are kept in `docs/reviews/`, and the full procedure is in `CLAUDE.md`.
+
 ## Testing
 
 There is no automated test suite yet. Changes so far were checked by:
 
-- `node --check` on every script, and loading `data/*.js` in Node to validate references (every
+- `node --check` on every script, and `scripts/validate_content.js`, which loads `data/*.js` in Node to validate references (every
   `sources` id exists, every quiz `answer` is in range, rubric weights total 100, SVG marker ids
   are unique, tags in notes are balanced).
 - Recomputing every number in the math and physics lessons (worked examples, tables, simulation
