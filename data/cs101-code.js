@@ -153,7 +153,7 @@ Total: $57.23</code></pre>`,
     {
       id: "max_of_three",
       title: "Largest of three",
-      prompt: `<p>Write <code>max_of_three(a, b, c)</code> that returns the largest of three numbers, <strong>without</strong> using the built-in <code>max</code> or <code>sorted</code>.</p>`,
+      prompt: `<p>Write <code>max_of_three(a, b, c)</code> that returns the largest of three numbers, <strong>without</strong> using the built-in <code>max</code> or <code>sorted</code> (Python's own functions for this, which you'll meet in the Lists lesson).</p>`,
       starter: `def max_of_three(a, b, c):\n    pass\n`,
       hint: `<p>Start with <code>biggest = a</code>, then compare it with <code>b</code> and with <code>c</code>.</p>`,
       solution: `def max_of_three(a, b, c):\n    biggest = a\n    if b > biggest:\n        biggest = b\n    if c > biggest:\n        biggest = c\n    return biggest\n`,

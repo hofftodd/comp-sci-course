@@ -275,6 +275,7 @@ if not is_weekend and not is_holiday:</code></pre>
 <pre><code>scores = [72, 88, 95]
 all(s &gt;= 60 for s in scores)    # ∀s, s ≥ 60: everyone passed. True
 any(s &gt;= 90 for s in scores)    # ∃s, s ≥ 90: someone got an A. True</code></pre>
+<p class="note">Reading the Python, if CS 101 hasn't reached it yet: <code>[72, 88, 95]</code> is a <em>list</em>, values in order inside square brackets. Inside <code>all(...)</code>, the phrase <code>s &gt;= 60 for s in scores</code> means "the test <code>s &gt;= 60</code>, done once for each value <code>s</code> in <code>scores</code>". <code>all</code> gives <code>True</code> when every test is true; <code>any</code> gives <code>True</code> when at least one is. Below, <code>len(xs)</code> is the number of items in <code>xs</code>, and <code>xs[i]</code> is the item at position <em>i</em>, counting from 0. <code>range(n)</code> stands for the whole numbers 0, 1, …, <em>n</em> − 1, and <code>range(a, b)</code> for <em>a</em>, <em>a</em> + 1, …, <em>b</em> − 1. CS 101 covers all of these properly in its Loops and Lists lessons.</p>
 <p>Some statements are about <em>positions</em> in a list: "each item", "the next item", "some later item". Then quantify over the indexes <em>i</em> instead of the items, using <code>range</code>, and write <code>xs[i]</code> for the item at position <em>i</em>. For <code>xs = [3, 5, 5, 9]</code>:</p>
 <pre><code># "The list is in order": ∀i (that has a next item), xs[i] ≤ xs[i+1]
 all(xs[i] &lt;= xs[i + 1] for i in range(len(xs) - 1))     # True

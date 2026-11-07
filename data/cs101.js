@@ -313,7 +313,7 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
     terms: [
       ["Value", "A piece of data, such as 3, 'hi' or True."],
       ["Type", "The category of a value, such as int, float, str or bool. It determines which operations are allowed."],
-      ["Expression", "Code that evaluates to a value, such as 2 + 3 or len(name)."],
+      ["Expression", "Code that evaluates to a value, such as 2 + 3 or 7 // 2 * 10."],
       ["Modulo (%)", "The remainder after division: 17 % 5 is 2."]
     ],
     quiz: [
@@ -819,8 +819,9 @@ CSA.addUnits("cs101", [
 <p><code>and</code> is true only when both sides are true; <code>or</code> is true when at least one side is; <code>not</code> flips a value. In <a href="#c-math120-u1">MATH 120, Propositional logic</a>, which you take alongside this course, the same three connectives are written ∧ (and), ∨ (or) and ¬ (not).</p>
 <pre><code>age = 20
 has_ticket = True
+day = "Sun"
 can_enter = age &gt;= 18 and has_ticket      # True
-is_weekend = day == "Sat" or day == "Sun"  # careful: not  day == "Sat" or "Sun"</code></pre>
+is_weekend = day == "Sat" or day == "Sun"  # True; careful: not  day == "Sat" or "Sun"</code></pre>
 <p>Python <strong>short-circuits</strong>: in <code>a and b</code>, if <code>a</code> is false, <code>b</code> is never evaluated, because the answer is already known. That makes guards like <code>x != 0 and 10 / x &gt; 1</code> safe: the division only happens when <code>x</code> isn't zero.</p>
 <p>A condition doesn't have to be a <code>bool</code>. Python decides whether any value counts as true or false; this is called <strong>truthiness</strong>. The values <code>0</code>, <code>0.0</code>, the empty string <code>""</code>, <code>None</code> and empty collections (such as an empty list, which you'll meet later) count as false, and almost everything else counts as true. So <code>if name:</code> means "if name is not empty", and the non-empty string <code>"Sun"</code> counts as true.</p>
 <p class="note">A classic bug that comes from truthiness: <code>if day == "Sat" or "Sun":</code> is always true. Python reads it as <code>(day == "Sat") or ("Sun")</code>, and the right side, <code>"Sun"</code>, is a non-empty string, so it counts as true. Write the comparison out in full on both sides: <code>day == "Sat" or day == "Sun"</code>.</p>
@@ -1046,7 +1047,7 @@ for ch in word.lower():
     if ch in "aeiou":
         count += 1
 print(count)</code></pre><p><code>ch in "aeiou"</code> checks whether the character appears in that string. Lowercasing first means you only need to check five letters.</p>` },
-      { q: `<p>Ask the user for numbers one at a time until they enter 0, then print the largest number they entered (not counting the 0). Don't use the built-in <code>max</code>.</p>`, hint: `<p>What should the "largest so far" start as? Think about what happens if every number is negative.</p>`, a: `<pre><code>x = int(input("Number (0 to stop): "))
+      { q: `<p>Ask the user for numbers one at a time until they enter 0, then print the largest number they entered (not counting the 0). Don't use the built-in <code>max</code>, a function that returns the largest of the values it's given; you'll meet it with lists. The point is to write the comparison yourself.</p>`, hint: `<p>What should the "largest so far" start as? Think about what happens if every number is negative.</p>`, a: `<pre><code>x = int(input("Number (0 to stop): "))
 largest = x
 while x != 0:
     if x &gt; largest:
@@ -1307,7 +1308,7 @@ assert math.isclose(f_to_c(c_to_f(100)), 100)</code></pre><p>Using <code>math.is
 
 result = average(80, 91)
 print("Average:", result)</code></pre>`, a: `<p><code>average</code> prints the value but doesn't return it, so it returns <code>None</code>, which is what <code>result</code> holds. (The program actually prints <code>85.5</code> and then <code>Average: None</code>.) Fix: replace <code>print((a + b) / 2)</code> with <code>return (a + b) / 2</code>.</p>` },
-      { q: `<p>Write <code>max_of_three(a, b, c)</code> without using the built-in <code>max</code>. Test it with at least four calls, including one where two values tie for largest.</p>`, a: `<pre><code>def max_of_three(a, b, c):
+      { q: `<p>Write <code>max_of_three(a, b, c)</code> without using the built-in <code>max</code> (Python's own function for the largest value, shown in the Lists lesson). Test it with at least four calls, including one where two values tie for largest.</p>`, a: `<pre><code>def max_of_three(a, b, c):
     biggest = a
     if b &gt; biggest:
         biggest = b
@@ -1581,7 +1582,11 @@ scores[0]          # 88
 scores[-1]         # 79
 scores[1] = 95     # change an element: [88, 95, 79]
 len(scores)        # 3
-92 in scores       # False (it was replaced)</code></pre>
+92 in scores       # False (it was replaced)
+sum(scores)        # 262, the total
+min(scores)        # 79, the smallest
+max(scores)        # 95, the largest</code></pre>
+<p>The built-in functions <code>sum</code>, <code>min</code> and <code>max</code> take a whole list. <code>min</code> and <code>max</code> also take separate values: <code>max(3, 8, 5)</code> is 8. Earlier problems asked you not to use them so that you would write the loop yourself; from now on you may use them unless a problem says otherwise.</p>
 <p>A list can hold values of any type, even other lists: <code>grid = [[1, 2], [3, 4]]</code>, where <code>grid[1][0]</code> is 3 (row 1, then column 0).</p>
 
 <h3>Changing lists</h3>
@@ -1687,7 +1692,7 @@ low, high = min_max([7, 2, 9])  # low is 2, high is 9</code></pre>
       ["Comprehension", "A compact expression that builds a list, set or dict from anything a for loop can go through, such as a list, string or range."]
     ],
     quiz: [
-      { q: "After <code>a = [1, 2]; b = a; b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place (like <code>extend</code>). This differs from <code>b = b + [3]</code>, which would build a new list and leave <code>a</code> as <code>[1, 2]</code>; see \"A trap: += on a list\" above." },
+      { q: "After these three lines run in order: <code>a = [1, 2]</code>, then <code>b = a</code>, then <code>b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place (like <code>extend</code>). This differs from <code>b = b + [3]</code>, which would build a new list and leave <code>a</code> as <code>[1, 2]</code>; see \"A trap: += on a list\" above." },
       { q: "What is <code>xs</code> after <code>xs = [3, 1, 2]</code> and <code>xs = xs.sort()</code>?", choices: ["[1, 2, 3]", "[3, 1, 2]", "None", "An error"], answer: 2, why: "<code>sort()</code> sorts in place and returns <code>None</code>, which is then assigned to <code>xs</code>." },
       { q: "What does <code>[n * 2 for n in range(4) if n != 2]</code> produce?", choices: ["[0, 2, 4, 6]", "[0, 2, 6]", "[2, 6]", "[0, 1, 3]"], answer: 1, why: "n takes 0, 1, 3 (2 is skipped), doubled to 0, 2, 6." }
     ],
@@ -2367,6 +2372,7 @@ g.circle_area(1)                 # a shorter nickname</code></pre>
     <tr><td><code>random</code></td><td>Random numbers and choices</td><td><code>random.choice(["a", "b"])</code></td></tr>
     <tr><td><code>statistics</code></td><td>Mean, median, standard deviation</td><td><code>statistics.median([3, 1, 2])</code></td></tr>
     <tr><td><code>datetime</code></td><td>Dates and times</td><td><code>datetime.date.today()</code></td></tr>
+    <tr><td><code>time</code></td><td>Measuring how long code takes</td><td><code>time.perf_counter()</code>, a clock reading in seconds (the Searching lesson uses it)</td></tr>
     <tr><td><code>collections</code></td><td>Extra data structures</td><td><code>Counter("banana").most_common(1)</code> gives <code>[('a', 3)]</code></td></tr>
     <tr><td><code>pathlib</code>, <code>csv</code>, <code>json</code></td><td>Files and data formats</td><td>See above</td></tr>
   </tbody>
@@ -2516,7 +2522,7 @@ def save_scores(path, scores):
     <tr><td>3</td><td>5</td><td>6</td><td>5</td><td>23</td><td>Found at index 5</td></tr>
   </tbody>
 </table>
-<p>How many steps in the worst case? Each step halves the range, so the question is how many times you can halve <em>n</em> before reaching 1. That's log₂ <em>n</em>. For a million items, that's only about 20 steps; for a billion, about 30. This is the bisection idea from the branching lesson, applied to a list.</p>
+<p>How many steps in the worst case? Each step halves the range, so the question is how many times you can halve <em>n</em> before reaching 1. That's log₂ <em>n</em>. For a million items, that's only about 20 steps; for a billion, about 30. This is the bisection idea from <a href="#c-cs101-loops">Lesson 5, Loops</a> ("Searching with loops: guess-and-check and bisection"), applied to a list.</p>
 
 <h3>Counting steps: big-O notation</h3>
 <p>Exact timings depend on the computer, the language and what else is running. So we describe algorithms by their <strong>order of growth</strong>, written in <strong>big-O notation</strong>: the dominant way the work grows with input size <em>n</em>, ignoring constant factors and smaller terms. An algorithm that does 3<em>n</em> + 7 steps is O(<em>n</em>); one that does <em>n</em>² + 100<em>n</em> is O(<em>n</em>²), because for large <em>n</em> the <em>n</em>² term dominates. (This is the same "only the dominant term matters" idea as limits at infinity in <a href="#c-math130-u1">MATH 130, Limits</a>.)</p>
@@ -2591,7 +2597,7 @@ start = time.perf_counter()
 for _ in range(100):
     (n - 1) in as_set
 print("set: ", time.perf_counter() - start)</code></pre>
-<p>On a typical laptop the list version takes around a second and the set version well under a millisecond. (The underscores in <code>1_000_000</code> are just for readability. The loop variable <code>_</code> is the "I don't use this value" name from <a href="#c-cs101-loops">Lesson 5, for loops</a>: the loop just repeats 100 times.)</p>
+<p>The <code>time</code> module, from the standard library, measures time. <code>time.perf_counter()</code> returns a number of seconds counted from some fixed starting point. That starting point means nothing on its own, so a single reading is useless, but the difference between two readings is the time that passed between them. That's why each test reads the clock before the loop, again after it, and prints the difference. On a typical laptop the list version takes around a second and the set version well under a millisecond. (The underscores in <code>1_000_000</code> are just for readability. The loop variable <code>_</code> is the "I don't use this value" name from <a href="#c-cs101-loops">Lesson 5, for loops</a>: the loop just repeats 100 times.)</p>
 
 <h3>Sorting: selection sort</h3>
 <p>Sorting is one of the most studied problems in computer science, because so much else depends on it, binary search included. The simplest method, <strong>selection sort</strong>, repeatedly finds the smallest remaining item and moves it to the front:</p>
