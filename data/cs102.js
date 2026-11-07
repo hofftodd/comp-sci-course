@@ -746,7 +746,7 @@ if order_status is Status.DELIVERED:
   <li><strong>Low coupling.</strong> Classes should depend on each other as little as possible, and only through public interfaces. If changing one class's internals forces changes in five others, they're too tightly coupled.</li>
   <li><strong>Small interfaces.</strong> Every public method is a promise you must keep forever. Expose what callers need and keep the rest internal (with a leading underscore).</li>
   <li><strong>Tell, don't ask.</strong> Instead of asking an object for its data and acting on it (<code>if acct.balance &gt;= x: acct.balance -= x</code>), tell the object what to do (<code>acct.withdraw(x)</code>) so it can enforce its own rules.</li>
-  <li><strong>Depend on abstractions.</strong> A <code>Checkout</code> class that takes "something with a <code>charge(amount)</code> method" works with any payment provider, and with a fake one in tests; one that creates a specific provider's object inside itself works with only that provider.</li>
+  <li><strong>Depend on abstractions.</strong> A <code>Checkout</code> class that takes "something with a <code>charge(email, amount)</code> method" works with any payment provider, and with a fake one in tests; one that creates a specific provider's object inside itself works with only that provider.</li>
 </ul>
 <p>Robert C. Martin collected five related principles around 2000, and Michael Feathers later gave them the acronym <strong>SOLID</strong>, which you'll see in job interviews and design books:</p>
 <ul>
@@ -1034,7 +1034,7 @@ def slow_sum(n):
     return sum(range(n))
 
 slow_sum(10_000_000)</code></pre>
-<p>(Python ignores underscores between digits, so <code>10_000_000</code> is just ten million, written so you can count the zeros.) <code>*args</code> and <code>**kwargs</code> collect any positional and keyword arguments, so the wrapper works for any function. In a parameter list, <code>*args</code> gathers the extra positional arguments into a tuple and <code>**kwargs</code> gathers the keyword arguments into a dictionary (the names are conventions; the stars do the work):</p>
+<p><code>time.perf_counter()</code>, from the standard <code>time</code> module, returns a number of seconds, as a float, measured on a precise clock from an arbitrary starting point. The starting point is meaningless on its own, but the difference between two calls is the time that passed between them, in seconds. (Python ignores underscores between digits, so <code>10_000_000</code> is just ten million, written so you can count the zeros.) <code>*args</code> and <code>**kwargs</code> collect any positional and keyword arguments, so the wrapper works for any function. In a parameter list, <code>*args</code> gathers the extra positional arguments into a tuple and <code>**kwargs</code> gathers the keyword arguments into a dictionary (the names are conventions; the stars do the work):</p>
 <pre><code>def show(*args, **kwargs):
     print("args =", args)
     print("kwargs =", kwargs)
@@ -1093,7 +1093,7 @@ fib(100)   # 354224848179261915075, instantly</code></pre>
       { q: "What does calling a generator function, like <code>countdown(3)</code>, do immediately?", choices: ["Runs the body and returns a list", "Returns a generator object without running the body yet", "Prints 3, 2, 1", "Raises StopIteration"], answer: 1, why: "The body runs only as values are requested with next()." },
       { q: "What does <code>next</code> raise when an iterator has no more values?", choices: ["IndexError", "StopIteration", "ValueError", "It returns None"], answer: 1, why: "StopIteration is how iterators signal the end; for loops catch it." },
       { q: "<code>g = (x * x for x in range(3))</code>. What is <code>list(g) + list(g)</code>?", choices: ["[0, 1, 4, 0, 1, 4]", "[0, 1, 4]", "An error", "[]"], answer: 1, why: "A generator can be consumed only once; the second list(g) is empty." },
-      { q: "After <code>double = make_multiplier(2)</code> (from the Closures section), why does <code>double(10)</code> still know about 2?", choices: ["5 is a global variable", "The inner function captured n from the enclosing call", "Python re-runs make_adder", "Default arguments"], answer: 1, why: "That's what a closure is: a function plus the variables it captured." },
+      { q: "After <code>double = make_multiplier(2)</code> (from the Closures section), why does <code>double(10)</code> still know about 2?", choices: ["2 is a global variable", "The inner function captured n from the enclosing call", "Python re-runs make_multiplier", "Default arguments"], answer: 1, why: "That's what a closure is: a function plus the variables it captured." },
       { q: "<code>@timed</code> above <code>def f(): ...</code> is equivalent to:", choices: ["f = timed", "f = timed(f)", "timed = f(timed)", "f()"], answer: 1, why: "The decorator receives the function and its return value replaces the name." }
     ],
     practice: [
@@ -1253,7 +1253,7 @@ def test_overdraw(account):
 <p>pytest also has built-in fixtures, such as <code>tmp_path</code>, a fresh temporary folder for testing code that reads and writes files. It's a <code>Path</code> object from the standard library's <code>pathlib</code> module, which represents file paths. <code>Path</code> defines the special method <code>__truediv__</code> (Lesson 2), so <code>/</code> between a path and a string means "join with a folder separator": <code>tmp_path / "scores.txt"</code> is the path of a file named <code>scores.txt</code> inside that folder. It's arithmetic-looking syntax for path joining, and it uses the right separator (<code>/</code> or <code>\\</code>) on every operating system. You can pass a <code>Path</code> to <code>open</code> like a string.</p>
 
 <h3>Testing code with dependencies</h3>
-<p>How do you test code that charges a credit card, sends email or calls a web service? You don't want tests to do those things for real. Lesson 4 showed the design that solves this: pass dependencies in, then pass a <strong>fake</strong> in tests. A fake is a simple stand-in object with the same interface that records what it was asked to do, like <code>FakeGateway</code> in Lesson 4's practice.</p>
+<p>How do you test code that charges a credit card, sends email or calls a web service? You don't want tests to do those things for real. Lesson 4 showed the design that solves this: pass dependencies in, then pass a <strong>fake</strong> in tests. A fake is a simple stand-in object with the same interface that records what it was asked to do, like <code>FakeGateway</code> in <a href="#c-cs102-c4">Lesson 4</a>'s Practice 4, which stands in for the worked example's <code>PaymentGateway</code>.</p>
 <p>Python's <code>unittest.mock</code> module can build such stand-ins automatically. A <code>Mock</code> object accepts <em>any</em> method call, returns another mock, and records every call so you can check it afterwards. Here it is with the <code>Order</code>, <code>LineItem</code> and <code>Checkout</code> classes from <a href="#c-cs102-c4">Lesson 4's worked example</a>, where <code>Checkout(payments, notifier)</code> charges an order's total and then sends a message:</p>
 <pre><code>from unittest.mock import Mock
 
@@ -1263,7 +1263,7 @@ Checkout(gateway, Mock()).complete(order)     # a second Mock stands in for the 
 gateway.charge.assert_called_once_with("ada@example.com", 108.0)   # 10% off 120</code></pre>
 <p>The last line passes if <code>charge</code> was called exactly once with those arguments, and fails the test otherwise.</p>
 <p>When should you use which? A mock is quickest when you only need to check that one call happened with the right arguments, or when the real dependency has a large interface you'd otherwise have to imitate. A hand-written fake is better when the stand-in needs real behavior (say, an in-memory "database" that returns what was saved), when many tests reuse it, or when you want the test to read plainly. Be aware that a plain mock accepts misspelled method names too: <code>gateway.chrage(...)</code> silently succeeds, so a mock can hide the very bug a test should catch. Creating it as <code>Mock(spec=SomeClass)</code> limits it to that class's real methods.</p>
-<p>The same trick handles time and randomness, which make tests flaky: pass in a clock function or a seeded <code>random.Random</code> instead of calling <code>time.time()</code> or <code>random.random()</code> directly. <code>random.Random(42)</code> is a random-number generator started from the <em>seed</em> 42; generators with the same seed produce the same sequence on every run, so a test sees the same "random" numbers each time.</p>
+<p>The same trick handles time and randomness, which make tests flaky: pass in a clock function or a seeded <code>random.Random</code> instead of calling <code>time.time()</code> (the current time, in seconds) or <code>random.random()</code> (a random float from 0 up to, but not including, 1) directly. <code>random.Random(42)</code> is a random-number generator started from the <em>seed</em> 42; generators with the same seed produce the same sequence on every run, so a test sees the same "random" numbers each time.</p>
 
 <h3>The red–green–refactor cycle</h3>
 <p><strong>Test-driven development</strong> (TDD), popularized by Kent Beck around 2002, is a rhythm of very small steps:</p>
@@ -1316,7 +1316,9 @@ from dates import is_leap
 def test_is_leap(year, expected):
     assert is_leap(year) == expected</code></pre><p>The century years are the edges where a naive "divisible by 4" implementation fails. To run it, save the tests as <code>test_dates.py</code> in a folder, next to a file <code>dates.py</code> containing the function, and run <code>python -m pytest</code> in that folder. In true TDD style, start with <code>def is_leap(year): return False</code> and watch some tests fail, then write the real version:</p><pre data-label="dates.py"><code>def is_leap(year):
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)</code></pre><p>pytest then reports <code>6 passed</code>: one per row of the table.</p>` },
-      { q: `<p>This test sometimes fails. Why, and how would you fix the design?</p><pre><code>def greeting():
+      { q: `<p>This test sometimes fails. Why, and how would you fix the design? (<code>datetime</code> is a standard module for dates and times: after <code>from datetime import datetime</code>, <code>datetime.now()</code> is the current date and time, and its <code>.hour</code> is the hour as a whole number from 0 to 23.)</p><pre><code>from datetime import datetime
+
+def greeting():
     hour = datetime.now().hour
     return "Good morning" if hour &lt; 12 else "Good afternoon"
 

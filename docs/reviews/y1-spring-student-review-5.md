@@ -85,3 +85,48 @@ I'm a first-year student. Last term I took CS 101 Programming I (Python), MATH 1
 
 25. Vectors are introduced twice, with different conventions. MATH 131 Lesson 7 writes **v** = (v₁, v₂), writes the length as |**v**|, and says "The plain letters v₁ and v₂ are scalars: the components of **v**." PHYS 150 Lesson 2 writes **v** = (vₓ, v_y) and says "the same letter in plain italic is its magnitude". In the course text italic and plain look the same, so in PHYS 150 a plain v means the length of **v**, while in MATH 131 plain letters with subscripts mean components. When a formula mixed v and subscripted v's, I had to check which convention the course was using.
 26. Random numbers in simulations. MATH 121 (Lessons 6 and 7) and MATH 131 (Lesson 9) ask for simulations. CS 102 Lesson 6 mentions `random.random()` and `random.Random(42)`, but no course shows how to draw a random real number in a given range. That makes the Monte Carlo problem (item 17) impossible to start from the lessons alone.
+
+## Professor's response
+
+Thank you; most of these are real gaps, and two were outright errors. A quiz still listed `make_adder` and "5" among its wrong choices after the question moved to `make_multiplier` (2). MATH 131 also pointed to a Practice 5 that the k8/k9 split had removed (16). Three problems could not be started from the lessons: the Monte Carlo practice needed random floats (17, 26), the autodiff exercise needed Newton's method (19), and the `windows` hint needed a `deque` feature not taught until Lesson 7 (4). All of these are fixed. Every number and code output I added or changed was checked by running Python. Two programming problems changed: CS 102 `checkout` (classes renamed) and `chunks` (list-based hint and solution). PHYS 150's `fall_time`, `projectile` and `terminal` now name the constant `g`. All 54 reference solutions still pass, and every starter still fails.
+
+### CS 102 Programming II
+
+1. c4: The programming problem's classes are now `Cart(gateway)` and `FakeCardGateway`, so `Checkout` and `FakeGateway` each mean one thing. The prompt says this is a smaller design than the worked example: there, the gateway's `charge` returns nothing; here, it reports success with `True` or `False`. Lesson 6 now names "Lesson 4's Practice 4, which stands in for the worked example's `PaymentGateway`" and links to it. The design-principles bullet now writes `charge(email, amount)` to match the worked example.
+2. c5, Q4: **Fixed.** The wrong choices are now "2 is a global variable" and "Python re-runs make_multiplier".
+3. c5: Added a sentence after the `timed` example. `time.perf_counter()` returns seconds as a float, counted from an arbitrary starting point. One reading means nothing on its own, but the difference between two readings is the time that passed.
+4. c5, `chunks`: The hint no longer uses `deque`. It says to keep a list of the latest items, append each new one, `pop(0)` the oldest once there are more than `n`, and yield `tuple(window)` when the list holds exactly `n`. The reference solution does the same. All tests pass, including the one with an endless input.
+5. c6, P2: The code now starts with `from datetime import datetime`. The question explains that `datetime.now()` is the current date and time, and `.hour` is the hour as a whole number from 0 to 23.
+
+### MATH 121 Discrete Mathematics II
+
+6. d1 sidebar: Now says that 20 cities give 20! orders, but each round trip is counted twice, once in each direction. By the division rule that leaves 20!/2 ≈ 1.2 × 10¹⁸ routes (checked: 1.216 × 10¹⁸, 38.5 years at 10⁹ a second).
+7. d4: "O(log n) steps, where n is the smaller of the two inputs."
+8. d4: Step 1 now reads "the remainder two rows up divided by the remainder one row up, rounded down", with the first case worked: 252 ÷ 105 rounds down to 2.
+9. d5: Defined *symmetric cipher* where it first appears: one secret key both encrypts and decrypts, unlike RSA's public and private pair. Such ciphers are much faster than RSA, but both sides must share the key first, and RSA is how they share it.
+10. d5: Yes, that's the reason, and the lesson now says so. The message must be less than n, or decryption gives back m mod n instead of m. A 2048-bit n is at least 2²⁰⁴⁷. Any 255-byte message is below 256²⁵⁵ = 2²⁰⁴⁰ (checked), so it always fits. A 256-byte message can be as large as 2²⁰⁴⁸ − 1, which may be more than n.
+11. d7: Now says "Call the term at that point a". The next term is less than ar, the one after less than ar², and so on.
+12. d7: The variance of one Bernoulli trial is now worked out in the lesson. Since X² = X (0² = 0 and 1² = 1), E[X²] = p, so Var = p − p² = p(1 − p). The binomial's np(1 − p) then follows from "variances add". That rule is stated as a separate fact, without proof.
+13. d7: Added a short description of quicksort before the analysis. It picks a pivot, compares every other item with it, splits the items into a smaller side and a larger side, and sorts each side recursively. Items are compared only with the current pivot, and items on different sides are never compared. The comparison argument now also says why the block zᵢ, …, zⱼ stays together until one of its own items is chosen as a pivot.
+
+### MATH 131 Calculus II and Multivariable Calculus
+
+14. k3, Q5: The answer now spells out "Fundamental Theorem of Calculus". The abbreviation appears nowhere else in the course.
+15. k6: The exponential-growth section now uses and defines the term. The equation alone has one solution for each y₀. Adding a starting value such as y(0) = y₀ makes an **initial value problem**, which has just one solution.
+16. k8: **Fixed** (left over from the k8/k9 split). The text now says "the last part of Practice 4 shows this".
+17. k9: **Fixed (was blocking).** The Monte Carlo paragraph now explains `random.uniform(a, b)`: a random float between a and b, every value equally likely. It also shows that `(random.uniform(a, b), random.uniform(c, d))` is a uniformly random point in a rectangle. P2 has a new hint that applies this to the square [−3, 3]², averages the values and multiplies by the area 36. The reference code already used `random.uniform`.
+18. k9 / d7: MATH 121 Lesson 7 now states both facts: variances of independent variables add, and Var[cX] = c² Var[X]. The second is proved in one line from the definition. The MATH 131 paragraph now also gives the reason in place: multiplying by c multiplies every distance from the mean by c, and dividing by N is multiplying by c = 1/N.
+19. autodiff, Exercise 2: **Fixed (was blocking).** The exercise now explains Newton's method itself. To solve g(x) = 0, repeat x ← x − g(x)/g′(x). Each step follows the tangent line at x to where it crosses zero. The exercise asks for a `cos` for `Dual` (cos has derivative −sin) and `__sub__` from Exercise 1, then g(x) = cos x − x from x = 1. Both g(x) and g′(x) come from one call, `g(Dual(x, 1.0))`. It gives the expected result, 0.7390851332 after four steps (checked with a `Dual` implementation).
+
+### PHYS 150 Physics I
+
+20. p1, p2, p3 problems: The constant is now lowercase `g = 9.8` in the starter code, solution and hints of `fall_time`, `projectile` and `terminal`. This matches the problem statements and the lesson's own simulation code. Capital G now appears only as the gravitational constant in Lesson 5.
+21. p3: The normal force is now written F_N everywhere: the list of forces, the friction formulas, the figure label and caption, the box example ("F_N = mg = 196 N") and the elevator practice. The list says that "normal" means perpendicular, and that the subscript keeps the force apart from N, the newton.
+22. p3: Added a paragraph on the incline. Tilting the ramp by θ also tilts its perpendicular by θ away from straight down, so the weight makes angle θ with the "into the slope" axis. The side next to θ is mg cos θ, into the slope. The side opposite is mg sin θ, along it. The paragraph checks both extremes: θ = 0 (nothing along the surface) and θ = 90° (free fall).
+23. p4/p5: Lesson 4 now states the rule after the potential-energy list: F = −dU/dx, because the force's work F dx over a small step equals the drop in U, −dU. It checks the rule on the spring (−kx) and on gravity (−mg). Lesson 5's check now links back to it.
+24. p5: The text now uses the sidereal day as well, so it agrees with P3. A geostationary satellite must turn with Earth, once every 86,164 s (23 h 56 min 4 s), relative to the distant stars. The 86,400 s solar day is longer because Earth also moves about 1° along its orbit each day (360/365.25 = 0.986°) and must turn that extra degree to face the Sun again. With T = 86,164 s the radius is 42,164 km (checked; 86,400 s would give 42,241 km). Both round to the lesson's 42,200 km.
+
+### Across courses
+
+25. Both courses now tie the two notations together. PHYS 150 Lesson 2 adds that a letter with a subscript, like v_x, is always a component and never the magnitude. It adds that MATH 131 numbers the components v₁, v₂ and writes the magnitude only as |**v**|, and that physics shortens |**v**| to v. MATH 131 Lesson 7 has the matching note, with a link to PHYS 150. In both courses a subscript now means a component, and a plain v with no subscript (physics only) means the length.
+26. Random decimals are now explained wherever they're first needed. MATH 121 Lesson 6, next to `randrange` and `choice`, says that `random.random()` gives a float from 0 up to but not including 1, and `random.uniform(a, b)` gives one between a and b. CS 102 Lesson 6 now says what `random.random()` returns. MATH 131 Lesson 9 explains `random.uniform` where the Monte Carlo problem needs it (item 17). The MATH 121 simulations need only `randrange` and `choice`, which that lesson already explains.

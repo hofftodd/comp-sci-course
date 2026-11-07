@@ -152,7 +152,7 @@ for (t1, _, v1), (t2, _, v2) in zip(log, log[1:]):
 <p>Real motion happens in two or three dimensions. The key insight that makes it manageable: <strong>motion in perpendicular directions is independent</strong>. A ball thrown horizontally from a table and a ball dropped from the same height hit the floor at the same moment. So you can treat each direction as a one-dimensional problem, using vectors to keep track.</p>
 
 <h3>Vectors</h3>
-<p>A <strong>vector</strong> has a magnitude and a direction: displacement, velocity, acceleration and force are vectors; mass, time and temperature are <strong>scalars</strong>. In two dimensions, write a vector by its components, <strong>v</strong> = (<em>v<sub>x</sub></em>, <em>v<sub>y</sub></em>). Notation: a <strong>bold</strong> letter is a vector, and the same letter in plain italic is its magnitude, a number that is never negative. So <em>v</em> = |<strong>v</strong>| is the speed, the length of the velocity vector <strong>v</strong> (by hand, write an arrow over the letter for the vector). Converting between components and magnitude-and-angle:</p>
+<p>A <strong>vector</strong> has a magnitude and a direction: displacement, velocity, acceleration and force are vectors; mass, time and temperature are <strong>scalars</strong>. In two dimensions, write a vector by its components, <strong>v</strong> = (<em>v<sub>x</sub></em>, <em>v<sub>y</sub></em>). Notation: a <strong>bold</strong> letter is a vector, and the same letter in plain italic is its magnitude, a number that is never negative. So <em>v</em> = |<strong>v</strong>| is the speed, the length of the velocity vector <strong>v</strong> (by hand, write an arrow over the letter for the vector). A letter <em>with a subscript</em>, like <em>v<sub>x</sub></em>, is always a component, never the magnitude. (<a href="#c-math131-k7">MATH 131, Lesson 7</a> numbers the components <em>v</em>₁, <em>v</em>₂ instead of <em>v<sub>x</sub></em>, <em>v<sub>y</sub></em>, and writes the magnitude only as |<strong>v</strong>|. Both mean the same thing; physics just shortens |<strong>v</strong>| to <em>v</em>.) Converting between components and magnitude-and-angle:</p>
 <p class="math"><em>v<sub>x</sub></em> = <em>v</em> cos θ,  <em>v<sub>y</sub></em> = <em>v</em> sin θ;   <em>v</em> = √(<em>v<sub>x</sub></em>² + <em>v<sub>y</sub></em>²),  θ = atan2(<em>v<sub>y</sub></em>, <em>v<sub>x</sub></em>)</p>
 <p>Vectors add component by component, and multiplying by a scalar scales each component. Geometrically, addition is <strong>tip to tail</strong>: draw <strong>a</strong>, then draw <strong>b</strong> starting from the tip of <strong>a</strong>; the sum <strong>a</strong> + <strong>b</strong> is the arrow from the start of <strong>a</strong> to the tip of <strong>b</strong>. Think of two walks taken one after the other.</p>
 <figure class="fig">
@@ -267,13 +267,13 @@ print(best)   # about 39°</code></pre><p>Less than 45°: the projectile gets ex
 <p>To apply Newton's second law, isolate one object and draw every force acting <em>on it</em>, as arrows from its center. Then choose axes and write <strong>F</strong><sub>net</sub> = <em>m</em><strong>a</strong> for each component. The common forces:</p>
 <ul>
   <li><strong>Weight</strong> <em>mg</em>, straight down.</li>
-  <li><strong>Normal force</strong> <em>N</em>: a surface pushes perpendicular to itself, as hard as needed to prevent the object passing through it.</li>
-  <li><strong>Friction</strong>, parallel to the surface, opposing sliding. Kinetic friction (sliding) is <em>f<sub>k</sub></em> = μ<sub><em>k</em></sub><em>N</em>; static friction (not sliding) adjusts up to a maximum μ<sub><em>s</em></sub><em>N</em>.</li>
+  <li><strong>Normal force</strong> <em>F</em><sub>N</sub>: a surface pushes perpendicular to itself, as hard as needed to prevent the object passing through it. ("Normal" means perpendicular. The subscript N keeps the force apart from N, the unit newton.)</li>
+  <li><strong>Friction</strong>, parallel to the surface, opposing sliding. Kinetic friction (sliding) is <em>f<sub>k</sub></em> = μ<sub><em>k</em></sub><em>F</em><sub>N</sub>; static friction (not sliding) adjusts up to a maximum μ<sub><em>s</em></sub><em>F</em><sub>N</sub>.</li>
   <li><strong>Tension</strong> <em>T</em>, along a rope, pulling.</li>
   <li><strong>Drag</strong>, opposing motion through air or water (below).</li>
 </ul>
 <figure class="fig">
-<svg viewBox="0 0 300 200" role="img" aria-label="Free-body diagram of a box being pulled to the right along a floor: weight mg points down, normal force N points up, applied force F points right, and friction f points left.">
+<svg viewBox="0 0 300 200" role="img" aria-label="Free-body diagram of a box being pulled to the right along a floor: weight mg points down, normal force F_N points up, applied force F points right, and friction f points left.">
   <defs><marker id="p3arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="hl"/></marker></defs>
   <line x1="20" y1="140" x2="280" y2="140" class="ax"/>
   <rect x="115" y="80" width="70" height="60" class="box soft"/>
@@ -281,13 +281,14 @@ print(best)   # about 39°</code></pre><p>Less than 45°: the projectile gets ex
   <line x1="150" y1="110" x2="150" y2="35" class="hl" marker-end="url(#p3arr)"/>
   <line x1="150" y1="110" x2="250" y2="110" class="hl" marker-end="url(#p3arr)"/>
   <line x1="150" y1="110" x2="80" y2="110" class="hl" marker-end="url(#p3arr)"/>
-  <text x="158" y="190" class="m">weight mg</text><text x="158" y="40" class="m">normal N</text>
+  <text x="158" y="190" class="m">weight mg</text><text x="158" y="40" class="m">normal F<tspan dy="4" font-size="10">N</tspan></text>
   <text x="222" y="102" class="m">pull F</text><text x="60" y="102" class="m">friction f</text>
 </svg>
-<figcaption>Forces on a box pulled along a floor. Vertically, N = mg (no vertical acceleration). Horizontally, F − f = ma.</figcaption>
+<figcaption>Forces on a box pulled along a floor. Vertically, F<sub>N</sub> = mg (no vertical acceleration). Horizontally, F − f = ma.</figcaption>
 </figure>
-<p><strong>Example.</strong> A 20 kg box is pulled with 100 N across a floor with μ<sub><em>k</em></sub> = 0.3. Vertically, <em>N</em> = <em>mg</em> = 196 N. Friction is 0.3 × 196 = 58.8 N. Horizontally, 100 − 58.8 = 20<em>a</em>, so <em>a</em> ≈ 2.06 m/s².</p>
-<p><strong>Inclines.</strong> On a ramp at angle θ, tilt the axes along and perpendicular to the surface. Weight splits into <em>mg</em> sin θ down the slope and <em>mg</em> cos θ into it, so <em>N</em> = <em>mg</em> cos θ. Without friction, <em>a</em> = <em>g</em> sin θ down the slope.</p>
+<p><strong>Example.</strong> A 20 kg box is pulled with 100 N across a floor with μ<sub><em>k</em></sub> = 0.3. Vertically, <em>F</em><sub>N</sub> = <em>mg</em> = 196 N. Friction is 0.3 × 196 = 58.8 N. Horizontally, 100 − 58.8 = 20<em>a</em>, so <em>a</em> ≈ 2.06 m/s².</p>
+<p><strong>Inclines.</strong> On a ramp at angle θ, tilt the axes along and perpendicular to the surface. Weight splits into <em>mg</em> sin θ down the slope and <em>mg</em> cos θ into it, so <em>F</em><sub>N</sub> = <em>mg</em> cos θ. Without friction, <em>a</em> = <em>g</em> sin θ down the slope.</p>
+<p>Why sin along the slope and cos into it? Tilting the ramp up by θ from horizontal also tilts the line perpendicular to the ramp by θ away from straight down. The weight points straight down, so it makes the angle θ with the "into the slope" axis. In the right triangle that splits the weight, the side next to θ is <em>mg</em> cos θ (into the slope) and the side opposite θ is <em>mg</em> sin θ (along it). Check the extremes: on flat ground (θ = 0) nothing pulls along the surface and all of <em>mg</em> presses into it; on a vertical wall (θ = 90°) all of <em>mg</em> acts along it and the object falls freely.</p>
 
 <h3>Air resistance and terminal velocity</h3>
 <p>For most everyday objects moving through air, drag is roughly proportional to the square of speed: <em>F</em><sub>drag</sub> = <em>kv</em>², where <em>k</em> = ½ρ<em>C<sub>d</sub>A</em> depends on air density ρ, the object's shape (drag coefficient <em>C<sub>d</sub></em>) and its cross-sectional area <em>A</em>. A falling object speeds up until drag balances weight; then the net force is zero and it falls at constant <strong>terminal velocity</strong>:</p>
@@ -340,7 +341,7 @@ def step(x, y, vx, vy, m, k, dt, g=9.8):
       { q: "In a physics engine, what changes when you add a new kind of force?", choices: ["The position update", "Only the force (acceleration) calculation", "The time step", "Everything"], answer: 1, why: "Sum forces → acceleration → velocity → position; only the first step changes." }
     ],
     practice: [
-      { q: `<p>An elevator of mass 800 kg accelerates upward at 1.5 m/s². What is the cable tension? What would a 60 kg passenger's bathroom scale read (in newtons)?</p>`, a: `<p><em>T</em> − <em>mg</em> = <em>ma</em>: <em>T</em> = 800(9.8 + 1.5) = 9040 N. The scale reads the normal force on the passenger: <em>N</em> = 60(9.8 + 1.5) = 678 N, more than their weight of 588 N.</p>` },
+      { q: `<p>An elevator of mass 800 kg accelerates upward at 1.5 m/s². What is the cable tension? What would a 60 kg passenger's bathroom scale read (in newtons)?</p>`, a: `<p><em>T</em> − <em>mg</em> = <em>ma</em>: <em>T</em> = 800(9.8 + 1.5) = 9040 N. The scale reads the normal force on the passenger: <em>F</em><sub>N</sub> = 60(9.8 + 1.5) = 678 N, more than their weight of 588 N.</p>` },
       { q: `<p>A sled slides down a 20° slope with μ<sub><em>k</em></sub> = 0.1. Find its acceleration.</p>`, a: `<p>Along the slope: <em>mg</em> sin θ − μ<em>mg</em> cos θ = <em>ma</em>, so <em>a</em> = 9.8(sin 20° − 0.1 cos 20°) = 9.8(0.342 − 0.094) ≈ 2.43 m/s². The mass cancels.</p>` },
       { q: `<p>What is the smallest coefficient of static friction that keeps a box at rest on a 30° ramp?</p>`, a: `<p>Need μ<sub><em>s</em></sub><em>mg</em> cos θ ≥ <em>mg</em> sin θ, so μ<sub><em>s</em></sub> ≥ tan 30° ≈ 0.577.</p>` },
       { q: `<p>Two blocks, 3 kg and 5 kg, sit side by side on a frictionless floor. You push the 3 kg block with 16 N, and it pushes the 5 kg block. Find the acceleration and the force between the blocks.</p>`, a: `<p>Together: 16 = 8<em>a</em>, so <em>a</em> = 2 m/s². The 5 kg block is pushed only by the 3 kg block: <em>F</em> = 5 × 2 = 10 N. By the third law, the 5 kg block pushes back on the 3 kg block with 10 N, so the 3 kg block's net force is 16 − 10 = 6 N = 3 × 2. ✓</p>` },
@@ -374,6 +375,7 @@ print(round(vt, 1), round(t, 1))   # 56.0 m/s after about 10.5 s</code></pre>` }
   <li>Gravity near Earth: <em>U</em> = <em>mgh</em>, where <em>h</em> is height above any chosen reference level.</li>
   <li>A spring stretched or compressed by <em>x</em>: <em>U</em> = ½<em>kx</em>² (from integrating Hooke's law, <em>F</em> = −<em>kx</em>).</li>
 </ul>
+<p>Going the other way, <strong>a conservative force is minus the derivative of its potential energy</strong>: <em>F</em> = −<em>dU</em>/<em>dx</em>. The reason: <em>U</em> is defined so that the force's work over a small step <em>dx</em>, which is <em>F dx</em>, equals the drop in <em>U</em>, −<em>dU</em>. Check: for the spring, −<em>d</em>(½<em>kx</em>²)/<em>dx</em> = −<em>kx</em>, Hooke's law; for gravity, −<em>d</em>(<em>mgh</em>)/<em>dh</em> = −<em>mg</em>, the weight pulling down (toward smaller <em>h</em>).</p>
 <p>When only conservative forces do work, <strong>mechanical energy is conserved</strong>:</p>
 <p class="math"><em>K</em> + <em>U</em> = constant,  i.e.  ½<em>mv</em>₁² + <em>U</em>₁ = ½<em>mv</em>₂² + <em>U</em>₂</p>
 <p><strong>Example.</strong> A roller coaster starts at rest 40 m above the bottom of a dip. Ignoring friction, its speed at the bottom is √(2<em>gh</em>) = √(2 · 9.8 · 40) ≈ 28 m/s, regardless of the track's shape. Doing this with forces would require knowing the shape at every point. Friction converts mechanical energy to heat, so total energy is still conserved, but mechanical energy decreases.</p>
@@ -488,7 +490,7 @@ print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
 <p>A satellite in a circular orbit is falling continuously, but moving sideways fast enough that the ground curves away beneath it. Setting gravity equal to the centripetal force:</p>
 <p class="math"><em>GMm</em>/<em>r</em>² = <em>mv</em>²/<em>r</em>  ⟹  <em>v</em> = √(<em>GM</em>/<em>r</em>),   period <em>T</em> = 2π<em>r</em>/<em>v</em></p>
 <p>For the International Space Station, about 400 km up (<em>r</em> ≈ 6771 km, <em>GM</em><sub>E</sub> = 3.986 × 10¹⁴ m³/s²): <em>v</em> ≈ 7.67 km/s, <em>T</em> ≈ 92 minutes, so astronauts see about 16 sunrises a day. The astronauts float not because gravity is absent (it's about 90% as strong as on the ground) but because they and the station fall together.</p>
-<p>Squaring the period formula gives <em>T</em>² = 4π²<em>r</em>³/(<em>GM</em>): the square of the period is proportional to the cube of the radius. A geostationary satellite, with <em>T</em> = 1 day, must orbit at <em>r</em> ≈ 42,200 km, which is where weather and TV satellites sit.</p>
+<p>Squaring the period formula gives <em>T</em>² = 4π²<em>r</em>³/(<em>GM</em>): the square of the period is proportional to the cube of the radius. A geostationary satellite stays above one spot on the equator, so its period must match Earth's turn: one <em>sidereal day</em>, <em>T</em> = 86,164 s (23 h 56 min 4 s). That is how long Earth takes to turn once relative to the distant stars. The 24-hour (86,400 s) day we use is a little longer, because Earth also moves about 1° along its orbit each day and must turn that extra degree to face the Sun again. With <em>T</em> = 86,164 s, the satellite must orbit at <em>r</em> ≈ 42,200 km, which is where weather and TV satellites sit.</p>
 
 <h3>Kepler's laws</h3>
 <p>Johannes Kepler found three laws of planetary motion (1609–1619) by fitting Tycho Brahe's careful naked-eye observations, without knowing why they held:</p>
@@ -525,7 +527,7 @@ print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
 <h3>Gravitational energy and escape velocity</h3>
 <p>Lesson 4's <em>U</em> = <em>mgh</em> assumes gravity is the same at every height, which is only true near the surface. For the full inverse-square force, the potential energy at distance <em>r</em> from the center is</p>
 <p class="math"><em>U</em> = −<em>GMm</em>/<em>r</em></p>
-<p>It's negative and rises toward 0 as <em>r</em> → ∞: you must do work against gravity to move away, and an object infinitely far away has <em>U</em> = 0. (Check: the force is minus the derivative, −<em>dU</em>/<em>dr</em> = −<em>GMm</em>/<em>r</em>², the inverse-square pull toward the center.) So in an orbit the total energy ½<em>mv</em>² − <em>GMm</em>/<em>r</em> is constant; in our units, <em>v</em>²/2 − 1/<em>r</em>.</p>
+<p>It's negative and rises toward 0 as <em>r</em> → ∞: you must do work against gravity to move away, and an object infinitely far away has <em>U</em> = 0. (Check: the force is minus the derivative of the potential energy (<a href="#c-phys150-p4">Lesson 4</a>), −<em>dU</em>/<em>dr</em> = −<em>GMm</em>/<em>r</em>², the inverse-square pull toward the center.) So in an orbit the total energy ½<em>mv</em>² − <em>GMm</em>/<em>r</em> is constant; in our units, <em>v</em>²/2 − 1/<em>r</em>.</p>
 <p><strong>Escape velocity.</strong> To escape forever, an object must still have kinetic energy ≥ 0 when it gets infinitely far away, where <em>U</em> = 0. Energy is conserved, so its total energy must be at least 0 from the start: ½<em>mv</em>² − <em>GMm</em>/<em>r</em> ≥ 0, that is,</p>
 <p class="math"><em>v</em><sub>esc</sub> = √(2<em>GM</em>/<em>r</em>) = √2 · √(<em>GM</em>/<em>r</em>)</p>
 <p>and √(<em>GM</em>/<em>r</em>) is exactly the circular orbital speed. So escape velocity is √2 ≈ 1.41 times circular speed at the same distance. From the ISS's altitude that's about 1.41 × 7.67 ≈ 10.9 km/s; from Earth's surface (ignoring air), about 11.2 km/s.</p>
@@ -823,9 +825,9 @@ CSA.addCode("phys150", {
       id: "fall_time",
       title: "Simulate a fall",
       prompt: `<p>Write <code>fall_time(height, dt=0.001)</code> that simulates an object dropped from rest at <code>height</code> meters with semi-implicit Euler steps (update velocity, then position) and returns the simulated time until it reaches the ground (<em>y</em> ≤ 0). Use <em>g</em> = 9.8 m/s² and no air resistance.</p><p>Also write <code>exact_fall_time(height)</code> returning √(2<em>h</em>/<em>g</em>), so you can compare.</p>`,
-      starter: `import math\n\nG = 9.8\n\ndef fall_time(height, dt=0.001):\n    pass\n\ndef exact_fall_time(height):\n    pass\n`,
-      hint: `<p>Keep <code>t</code>, <code>y</code> and <code>v</code>. In a loop: <code>v -= G * dt</code>, <code>y += v * dt</code>, <code>t += dt</code>; stop when <code>y &lt;= 0</code>.</p>`,
-      solution: `import math\n\nG = 9.8\n\ndef fall_time(height, dt=0.001):\n    t, y, v = 0.0, height, 0.0\n    while y > 0:\n        v -= G * dt\n        y += v * dt\n        t += dt\n    return t\n\ndef exact_fall_time(height):\n    return math.sqrt(2 * height / G)\n`,
+      starter: `import math\n\ng = 9.8\n\ndef fall_time(height, dt=0.001):\n    pass\n\ndef exact_fall_time(height):\n    pass\n`,
+      hint: `<p>Keep <code>t</code>, <code>y</code> and <code>v</code>. In a loop: <code>v -= g * dt</code>, <code>y += v * dt</code>, <code>t += dt</code>; stop when <code>y &lt;= 0</code>.</p>`,
+      solution: `import math\n\ng = 9.8\n\ndef fall_time(height, dt=0.001):\n    t, y, v = 0.0, height, 0.0\n    while y > 0:\n        v -= g * dt\n        y += v * dt\n        t += dt\n    return t\n\ndef exact_fall_time(height):\n    return math.sqrt(2 * height / g)\n`,
       tests: [
         { label: "Exact formula", type: "call", call: `exact_fall_time(19.6)`, expect: `2.0` },
         { label: "Simulation matches theory for 20 m", type: "assert", code: `t = fall_time(20)\nassert abs(t - exact_fall_time(20)) < 0.01, f"fall_time(20) gave {t:.4f}; expected about {exact_fall_time(20):.4f}"` },
@@ -844,9 +846,9 @@ CSA.addCode("phys150", {
   <li><code>range_sim(speed, angle, dt=0.001)</code>: simulate with semi-implicit Euler until <em>y</em> &lt; 0 (after launch), and return <em>x</em>.</li>
 </ul>
 <p>Then write <code>best_angle(speed)</code> that returns the whole-number angle from 1 to 89 with the largest simulated range.</p>`,
-      starter: `import math\n\nG = 9.8\n\ndef range_formula(speed, angle):\n    pass\n\ndef range_sim(speed, angle, dt=0.001):\n    pass\n\ndef best_angle(speed):\n    pass\n`,
+      starter: `import math\n\ng = 9.8\n\ndef range_formula(speed, angle):\n    pass\n\ndef range_sim(speed, angle, dt=0.001):\n    pass\n\ndef best_angle(speed):\n    pass\n`,
       hint: `<p>Convert degrees with <code>math.radians</code>. Split the velocity into <code>vx = speed * cos</code>, <code>vy = speed * sin</code>; only <code>vy</code> changes. For <code>best_angle</code>, <code>max</code> takes a <code>key</code> just as <code>sorted</code> does (<a href="#c-cs101-dicts">CS 101's dictionaries lesson</a>): <code>max(range(1, 90), key=f)</code> returns the angle <code>a</code> for which <code>f(a)</code> is largest. Make <code>f</code> a lambda that calls <code>range_sim(speed, a)</code>.</p>`,
-      solution: `import math\n\nG = 9.8\n\ndef range_formula(speed, angle):\n    return speed ** 2 * math.sin(2 * math.radians(angle)) / G\n\ndef range_sim(speed, angle, dt=0.001):\n    th = math.radians(angle)\n    x, y = 0.0, 0.0\n    vx, vy = speed * math.cos(th), speed * math.sin(th)\n    while True:\n        vy -= G * dt\n        x += vx * dt\n        y += vy * dt\n        if y < 0:\n            return x\n\ndef best_angle(speed):\n    return max(range(1, 90), key=lambda a: range_sim(speed, a, 0.001))\n`,
+      solution: `import math\n\ng = 9.8\n\ndef range_formula(speed, angle):\n    return speed ** 2 * math.sin(2 * math.radians(angle)) / g\n\ndef range_sim(speed, angle, dt=0.001):\n    th = math.radians(angle)\n    x, y = 0.0, 0.0\n    vx, vy = speed * math.cos(th), speed * math.sin(th)\n    while True:\n        vy -= g * dt\n        x += vx * dt\n        y += vy * dt\n        if y < 0:\n            return x\n\ndef best_angle(speed):\n    return max(range(1, 90), key=lambda a: range_sim(speed, a, 0.001))\n`,
       tests: [
         { label: "Formula at 45°", type: "assert", code: `assert abs(range_formula(20, 45) - 400 / 9.8) < 1e-9, f"range_formula(20, 45) gave {range_formula(20, 45)}"` },
         { label: "Complementary angles", type: "assert", code: `assert abs(range_formula(25, 30) - range_formula(25, 60)) < 1e-9, "30° and 60° should give the same range"` },
@@ -864,9 +866,9 @@ CSA.addCode("phys150", {
   <li><code>terminal_velocity(m, k)</code>: √(<em>mg</em>/<em>k</em>), with <em>g</em> = 9.8.</li>
   <li><code>time_to_fraction(m, k, fraction, dt=0.001)</code>: simulate the fall (speed <em>v</em> ≥ 0, acceleration <em>g</em> − (<em>k</em>/<em>m</em>)<em>v</em>²) and return the time when <em>v</em> first reaches <code>fraction</code> × terminal velocity.</li>
 </ul><p>The tests compare your simulated time with the exact answer derived in the lesson, <em>t</em> = (<em>v<sub>t</sub></em>/<em>g</em>) atanh(<code>fraction</code>).</p>`,
-      starter: `import math\n\nG = 9.8\n\ndef terminal_velocity(m, k):\n    pass\n\ndef time_to_fraction(m, k, fraction, dt=0.001):\n    pass\n`,
-      hint: `<p>Loop while <code>v &lt; fraction * vt</code>: <code>v += (G - k / m * v * v) * dt</code>; <code>t += dt</code>. The fraction must be below 1, or the loop never ends.</p>`,
-      solution: `import math\n\nG = 9.8\n\ndef terminal_velocity(m, k):\n    return math.sqrt(m * G / k)\n\ndef time_to_fraction(m, k, fraction, dt=0.001):\n    vt = terminal_velocity(m, k)\n    t, v = 0.0, 0.0\n    while v < fraction * vt:\n        v += (G - k / m * v * v) * dt\n        t += dt\n    return t\n`,
+      starter: `import math\n\ng = 9.8\n\ndef terminal_velocity(m, k):\n    pass\n\ndef time_to_fraction(m, k, fraction, dt=0.001):\n    pass\n`,
+      hint: `<p>Loop while <code>v &lt; fraction * vt</code>: <code>v += (g - k / m * v * v) * dt</code>; <code>t += dt</code>. The fraction must be below 1, or the loop never ends.</p>`,
+      solution: `import math\n\ng = 9.8\n\ndef terminal_velocity(m, k):\n    return math.sqrt(m * g / k)\n\ndef time_to_fraction(m, k, fraction, dt=0.001):\n    vt = terminal_velocity(m, k)\n    t, v = 0.0, 0.0\n    while v < fraction * vt:\n        v += (g - k / m * v * v) * dt\n        t += dt\n    return t\n`,
       tests: [
         { label: "Skydiver's terminal velocity", type: "assert", code: `assert abs(terminal_velocity(80, 0.25) - 56.0) < 1e-6, f"Got {terminal_velocity(80, 0.25)}"` },
         { label: "Time to 95%", type: "assert", code: `t = time_to_fraction(80, 0.25, 0.95)\nexact = 56.0 / 9.8 * math.atanh(0.95)\nassert abs(t - exact) < 0.02, f"Got {t:.3f} s; expected about {exact:.3f} s"` },
