@@ -41,7 +41,8 @@ const txt = s => s
 const c = CSA.courses[cid];
 let out = `# ${c.code} ${c.title}\n`;
 for (const u of [...c.units, ...c.optional]) {
-  out += `\n\n======== ${u.id}: ${u.title} (${u.kind || "core"})\n` + txt(u.notes);
+  const n = c.units.indexOf(u);
+  out += `\n\n======== ${n >= 0 ? `Lesson ${n + 1} of ${c.units.length}` : "Optional lesson"}: ${u.id}: ${u.title} (${u.kind || "core"})\n` + txt(u.notes);
   if ((u.terms || []).length) out += "\nKey terms:\n" + u.terms.map(([t, d]) => `- ${t}: ${d}`).join("\n") + "\n";
   for (const a of u.asides || []) out += `\n[SIDEBAR ${a.kind}: ${a.title}] ` + txt(a.html);
   (u.quiz || []).forEach((q, i) => out += `\nQ${i + 1}. ${txt(q.q)} | ${q.choices.map(txt).join(" / ")} | ans: ${txt(q.choices[q.answer])}`);

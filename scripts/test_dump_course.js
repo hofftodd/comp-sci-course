@@ -53,6 +53,7 @@ for (const id of courses) {
   const t = text[id];
   check(`${id}: lessons, quizzes and practice present`, /^======== /m.test(t) && /^Q1\. /m.test(t) && /^P1\. /m.test(t));
 }
+check("lesson headings show the number the page shows", /^======== Lesson 4 of \d+: u2: /m.test(text.cs101) && /^======== Optional lesson: /m.test(text.cs101));
 check("programming problems are marked CODE", /^CODE \w+: /m.test(text.cs101) && /^CODE \w+: /m.test(text.cs102) && /^CODE \w+: /m.test(text.phys150));
 
 console.log(failed ? `\n${failed} check(s) failed.` : "\nAll checks passed.");
