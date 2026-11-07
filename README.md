@@ -14,9 +14,9 @@ instructor approves each change before students see it.
 
 | Course | Credits | Core units | Optional lessons |
 |---|---|---|---|
-| CS 101 Programming I (Python) | 4 | 11 | How programming languages evolved · When software fails people · How Python actually runs your code |
+| CS 101 Programming I (Python) | 4 | 14 | How programming languages evolved · When software fails people · How Python actually runs your code |
 | MATH 120 Discrete Mathematics I | 4 | 6 | From Boole to Shannon · Proof assistants and verified software |
-| MATH 130 Calculus I | 4 | 8 | Calculus inside machine learning · Two thousand years of calculus |
+| MATH 130 Calculus I | 4 | 11 | Calculus inside machine learning · Two thousand years of calculus |
 | CS 100 Computing in Society | 2 | 6 | The hidden history of computing · Risk scores and the math of fairness |
 | WRIT 100 Writing for Technical Audiences (elective) | 3 | planned | |
 
@@ -26,7 +26,7 @@ instructor approves each change before students see it.
 |---|---|---|---|
 | CS 102 Programming II (Python) | 4 | 8 | The rise of object-oriented programming · Open source: licenses, communities and responsibility |
 | MATH 121 Discrete Mathematics II | 4 | 7 | Codes and code-breakers · Encryption, privacy and the "crypto wars" |
-| MATH 131 Calculus II and Multivariable Calculus | 4 | 8 | Automatic differentiation · Newton, Leibniz and the infinite |
+| MATH 131 Calculus II and Multivariable Calculus | 4 | 9 | Automatic differentiation · Newton, Leibniz and the infinite |
 | PHYS 150 Physics I: Mechanics with Computation (elective) | 4 | 6 | Chaos: the limits of prediction · From Galileo to Newton |
 
 Every course opens with a **rubric**: what is graded and how much it counts, the criteria with four
@@ -41,7 +41,7 @@ idea is used in practice. Year 1 is taught in Python.
 
 - **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
   the student's browser.
-- **Auto-graded programming problems**: 54 in all. CS 101 has 31, about three per lesson; CS 102
+- **Auto-graded programming problems**: 54 in all. CS 101 has 31, two or three per lesson; CS 102
   has 17 (classes, generators, writing tests that catch bugs, linked lists, trees); PHYS 150 has a
   simulation problem per lesson. Each comes with
   starter code, a hint, a reference solution and automatic tests: edge cases, hidden tests, speed

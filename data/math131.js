@@ -22,7 +22,7 @@ CSA.addCourse({
       { name: "Weekly problem sets", weight: 25, desc: "Computation, application and short explanation problems based on each lesson's practice set. Show your work." },
       { name: "Computing labs", weight: 15, desc: "Four Python notebooks: numerical integration and error, Taylor approximations, Euler's method for a population model, and gradient descent on a function of two variables. Graded on correctness and a written interpretation." },
       { name: "Midterm exam", weight: 20, desc: "Integration techniques and applications, numerical integration and series (lessons 1–4)." },
-      { name: "Final exam", weight: 30, desc: "Cumulative, with emphasis on Taylor series, differential equations and multivariable calculus (lessons 5–8)." }
+      { name: "Final exam", weight: 30, desc: "Cumulative, with emphasis on Taylor series, differential equations and multivariable calculus (lessons 5–9)." }
     ],
     criteria: [
       { name: "Setup", desc: "Is the problem translated correctly?", levels: [
@@ -308,7 +308,7 @@ print(V, 8 * math.pi)   # both 25.1327...</code></pre>` }
   <li>In general ∫<sub>1</sub><sup>∞</sup> <em>dx</em>/<em>x<sup>p</sup></em> converges if and only if <em>p</em> &gt; 1. These <strong><em>p</em>-integrals</strong> are the standard comparisons.</li>
   <li>∫<sub>0</sub><sup>∞</sup> e<sup>−<em>x</em></sup> <em>dx</em> = 1. Exponential decay beats any power.</li>
 </ul>
-<p><strong>Comparison.</strong> If 0 ≤ <em>f</em> ≤ <em>g</em> and ∫ <em>g</em> converges, so does ∫ <em>f</em>; if ∫ <em>f</em> diverges, so does ∫ <em>g</em>. For example, e<sup>−<em>x</em>²</sup> ≤ e<sup>−<em>x</em></sup> for <em>x</em> ≥ 1, so ∫<sub>1</sub><sup>∞</sup> e<sup>−<em>x</em>²</sup> <em>dx</em> converges, even though we can't compute an antiderivative. (In fact ∫<sub>−∞</sub><sup>∞</sup> e<sup>−<em>x</em>²</sup> <em>dx</em> = √π. You don't need the proof, which uses a double integral in polar coordinates; Lesson 8's last practice problem checks the value numerically, through its square.)</p>
+<p><strong>Comparison.</strong> If 0 ≤ <em>f</em> ≤ <em>g</em> and ∫ <em>g</em> converges, so does ∫ <em>f</em>; if ∫ <em>f</em> diverges, so does ∫ <em>g</em>. For example, e<sup>−<em>x</em>²</sup> ≤ e<sup>−<em>x</em></sup> for <em>x</em> ≥ 1, so ∫<sub>1</sub><sup>∞</sup> e<sup>−<em>x</em>²</sup> <em>dx</em> converges, even though we can't compute an antiderivative. (In fact ∫<sub>−∞</sub><sup>∞</sup> e<sup>−<em>x</em>²</sup> <em>dx</em> = √π. You don't need the proof, which uses a double integral in polar coordinates; <a href="#c-math131-k9">Lesson 9</a>'s Practice 2 checks the value numerically, through its square.)</p>
 
 <h3>Improper integrals: unbounded functions</h3>
 <p>If <em>f</em> blows up at an endpoint, take a limit there too. ∫<sub>0</sub><sup>1</sup> <em>dx</em>/√<em>x</em> = lim<sub><em>s</em>→0⁺</sub> (2 − 2√<em>s</em>) = 2, which converges. ∫<sub>0</sub><sup>1</sup> <em>dx</em>/<em>x</em> diverges. Near 0 the rule is reversed: ∫<sub>0</sub><sup>1</sup> <em>dx</em>/<em>x<sup>p</sup></em> converges if and only if <em>p</em> &lt; 1. Watch for singularities <em>inside</em> the interval: ∫<sub>−1</sub><sup>1</sup> <em>dx</em>/<em>x</em>² is not [−1/<em>x</em>] = −2 (a negative area of a positive function!); it diverges. Numerical methods can be fooled the same way, so always look at the function before integrating it.</p>
@@ -806,11 +806,11 @@ print(grad(lambda x, y: x**2 + 2 * y**2, 1, 1))   # about (2.0, 4.0)</code></pre
   },
   {
     id: "k8",
-    title: "Optimization, gradient descent and double integrals",
+    title: "Optimization and gradient descent",
     minutes: 90,
-    summary: "Finding minima and maxima of functions of several variables, least-squares fitting, gradient descent and the learning rate, and a first look at double integrals.",
+    summary: "Finding minima and maxima of functions of several variables, the second derivative test, least-squares fitting, and gradient descent and the learning rate.",
     notes: `
-<p>Optimization, finding the best choice among many, is everywhere in computing: fitting a line to data, routing deliveries, allocating servers, and, above all, training machine-learning models, which means adjusting millions of parameters to minimize an error. This lesson extends Calculus I's optimization to several variables, introduces the algorithm that trains nearly every neural network, and ends with integration over regions of the plane.</p>
+<p>Optimization, finding the best choice among many, is everywhere in computing: fitting a line to data, routing deliveries, allocating servers, and, above all, training machine-learning models, which means adjusting millions of parameters to minimize an error. This lesson extends Calculus I's optimization to several variables, and introduces the algorithm that trains nearly every neural network. <a href="#c-math131-k9">The next lesson</a> adds constraints to optimization and extends integration to regions of the plane.</p>
 
 <h3>Critical points</h3>
 <p>At a local minimum or maximum of a smooth function, the surface is flat in every direction, so every partial derivative is zero: <strong>∇<em>f</em> = 0</strong>. Points where this happens are <strong>critical points</strong>. For <em>f</em>(<em>x</em>, <em>y</em>) = <em>x</em>² + <em>y</em>² − 4<em>x</em> + 6<em>y</em>: <em>f<sub>x</sub></em> = 2<em>x</em> − 4 = 0 and <em>f<sub>y</sub></em> = 2<em>y</em> + 6 = 0, so (2, −3) is the only critical point. Completing the square, <em>f</em> = (<em>x</em> − 2)² + (<em>y</em> + 3)² − 13, so it's a minimum with value −13.</p>
@@ -859,6 +859,49 @@ print(gradient_descent(grad, 2.0, 1.0, 0.6, 50))   # y explodes</code></pre>
 <p>For this <em>f</em>, each step multiplies <em>x</em> by (1 − 2α) and <em>y</em> by (1 − 4α). With α = 0.1 those are 0.8 and 0.6: both shrink, and the iterates approach the minimum. With α = 0.6, the <em>y</em> factor is −1.4: <em>y</em> overshoots the valley, flips sign and grows. Too small a learning rate is slow; too large diverges. And the steepest direction (the <em>y</em>-direction here) limits how large α can be, even though the <em>x</em>-direction would tolerate more. Elongated valleys like this make plain gradient descent zigzag, which is why practical optimizers such as momentum and Adam adjust the step for each direction.</p>
 <p>In machine learning, <em>f</em> is usually the <em>average</em> error over a training set rather than the sum. Dividing by the number of points doesn't move the minimum, but it divides the gradient too, so a learning rate that works for one may fail for the other (Practice 5 shows this). Training sets often have millions of examples, so <strong>stochastic gradient descent</strong> estimates the gradient from a small random batch at each step, which is noisy but vastly cheaper. Combined with automatic differentiation to compute gradients, this simple loop trains essentially every modern neural network.</p>
 <p>A caveat: gradient descent finds a <em>local</em> minimum, wherever the downhill walk leads. For a <strong>convex</strong> function (bowl-shaped everywhere, like least squares), any local minimum is the global one. Most machine-learning objectives aren't convex, yet gradient descent works remarkably well on them, for reasons that are still an active research question.</p>
+`,
+    terms: [
+      ["Critical point", "A point where ∇f = 0."],
+      ["Saddle point", "A critical point that is a minimum in some directions and a maximum in others."],
+      ["Second derivative test", "D = f_xx f_yy − f_xy² classifies critical points as minima, maxima or saddles."],
+      ["Least squares", "Choosing model parameters to minimize the sum of squared errors."],
+      ["Gradient descent", "Minimizing f by repeatedly stepping opposite the gradient: x ← x − α∇f(x)."],
+      ["Learning rate", "The step size α in gradient descent."],
+      ["Convex function", "A bowl-shaped function, for which every local minimum is a global minimum."]
+    ],
+    quiz: [
+      { q: "At a local minimum of a smooth <em>f</em>(<em>x</em>, <em>y</em>):", choices: ["∇f points down", "∇f = 0", "f = 0", "D < 0"], answer: 1, why: "Every partial derivative is zero at an interior extreme point." },
+      { q: "At a critical point, <em>f<sub>xx</sub></em> = 4, <em>f<sub>yy</sub></em> = 1, <em>f<sub>xy</sub></em> = 3. The point is:", choices: ["A minimum", "A maximum", "A saddle", "Can't tell"], answer: 2, why: "D = 4 − 9 = −5 < 0." },
+      { q: "Gradient descent steps in which direction?", choices: ["Along ∇f", "Opposite ∇f", "Perpendicular to ∇f", "Randomly"], answer: 1, why: "−∇f is the direction of steepest decrease." },
+      { q: "For <em>f</em> = <em>x</em>² + 2<em>y</em>², which learning rate makes gradient descent diverge?", choices: ["0.05", "0.2", "0.45", "0.6"], answer: 3, why: "The y factor is 1 − 4α; it has magnitude above 1 when α > 0.5." }
+    ],
+    practice: [
+      { q: `<p>Find and classify the critical points of <em>f</em>(<em>x</em>, <em>y</em>) = <em>x</em>³ − 3<em>x</em> + <em>y</em>².</p>`, a: `<p><em>f<sub>x</sub></em> = 3<em>x</em>² − 3 = 0 gives <em>x</em> = ±1; <em>f<sub>y</sub></em> = 2<em>y</em> = 0 gives <em>y</em> = 0. <em>f<sub>xx</sub></em> = 6<em>x</em>, <em>f<sub>yy</sub></em> = 2, <em>f<sub>xy</sub></em> = 0. At (1, 0): <em>D</em> = 12 &gt; 0, <em>f<sub>xx</sub></em> &gt; 0: local minimum (value −2). At (−1, 0): <em>D</em> = −12: saddle.</p>` },
+      { q: `<p>Fit a least-squares line to (1, 2), (2, 3), (3, 5).</p>`, a: `<p>Σ<em>x</em> = 6, Σ<em>y</em> = 10, Σ<em>x</em>² = 14, Σ<em>xy</em> = 2 + 6 + 15 = 23, <em>n</em> = 3. Equations: 14<em>m</em> + 6<em>b</em> = 23, 6<em>m</em> + 3<em>b</em> = 10. Doubling the second: 12<em>m</em> + 6<em>b</em> = 20; subtract: 2<em>m</em> = 3, <em>m</em> = 1.5, <em>b</em> = (10 − 9)/3 = 1/3. Line: <em>y</em> = 1.5<em>x</em> + 1/3.</p>` },
+      { q: `<p>Run gradient descent by hand for two steps on <em>f</em>(<em>x</em>, <em>y</em>) = (<em>x</em> − 3)² + (<em>y</em> + 1)², from (0, 0) with α = 0.25. Where is it heading?</p>`, a: `<p>∇<em>f</em> = (2(<em>x</em> − 3), 2(<em>y</em> + 1)). At (0, 0): (−6, 2); step: (0, 0) − 0.25(−6, 2) = (1.5, −0.5). At (1.5, −0.5): (−3, 1); step: (2.25, −0.75). Each step halves the distance to the minimum at (3, −1).</p>` },
+      { q: `<p>Use gradient descent in Python to fit the least-squares line for the lesson's four points, starting from <em>m</em> = <em>b</em> = 0, and compare with <em>m</em> = 1.6, <em>b</em> = 1.1. Minimize the lesson's <em>E</em>, the <em>sum</em> of squared errors, using the partial derivatives worked out above. Try learning rates 0.01, 0.05 and 0.1 for 2000 steps each. Then try 0.1 again on the <em>average</em> error <em>E</em>/4.</p>`, a: `<pre><code>xs, ys = [0, 1, 2, 3], [1, 3, 4, 6]
+
+def grad(m, b):
+    gm = sum(-2 * x * (y - (m * x + b)) for x, y in zip(xs, ys))
+    gb = sum(-2 * (y - (m * x + b)) for x, y in zip(xs, ys))
+    return gm, gb
+
+for rate in (0.01, 0.05, 0.1):
+    m = b = 0.0
+    for _ in range(2000):
+        gm, gb = grad(m, b)
+        m, b = m - rate * gm, b - rate * gb
+    print(rate, m, b)</code></pre><p>0.01 and 0.05 converge to (1.6, 1.1) (0.05 is faster); 0.1 is too large for the sum and diverges, overflowing to <code>nan</code> ("not a number"). For the sum, rates up to about 0.059 converge for these four points. The average <em>E</em>/4 has a gradient 4 times smaller, so dividing <code>gm</code> and <code>gb</code> by 4 lets 0.1 (and even 0.2) converge to the same (1.6, 1.1): the same line, a different safe learning rate. Choosing the learning rate is a real practical problem in machine learning.</p>` }
+    ],
+    sources: ["openstaxcalc3", "eoc"]
+  },
+  {
+    id: "k9",
+    title: "Constrained optimization and double integrals",
+    minutes: 90,
+    summary: "Optimizing with a constraint using Lagrange multipliers, and integrating over regions of the plane with double integrals and Monte Carlo estimates.",
+    notes: `
+<p>This lesson adds two more tools for functions of several variables. The first finishes <a href="#c-math131-k8">the previous lesson's</a> story about optimization: finding the best point when the variables must satisfy a constraint. The second extends integration from intervals to regions of the plane.</p>
 
 <h3>Constrained optimization: Lagrange multipliers</h3>
 <p>Often the variables must satisfy a constraint: maximize <em>f</em>(<em>x</em>, <em>y</em>) subject to <em>g</em>(<em>x</em>, <em>y</em>) = <em>c</em>. You can only move along the curve <em>g</em> = <em>c</em>. Walk along it, watching the level curves of <em>f</em> you cross. While you cross them, <em>f</em> is still increasing in one direction along the path, so you aren't at the best point. At the best point the path stops crossing levels and just <em>touches</em> a level curve of <em>f</em>. Two curves that touch have the same perpendicular direction there, and gradients are perpendicular to level curves, so ∇<em>f</em> and ∇<em>g</em> point along the same line:</p>
@@ -879,50 +922,25 @@ print(gradient_descent(grad, 2.0, 1.0, 0.6, 50))   # y explodes</code></pre>
 <p>Fubini's theorem says the order doesn't matter for well-behaved functions; integrating in <em>x</em> first gives the same 3. Double integrals compute masses of plates with varying density, averages over regions (the average of <em>x</em> + <em>y</em> on that rectangle is 3/2), and probabilities for two random variables at once. For regions in many dimensions, numerical methods break down (a grid with 10 points per side in 100 dimensions has 10¹⁰⁰ points), so scientists use <strong>Monte Carlo integration</strong>. Pick <em>N</em> points uniformly at random in the region <em>R</em> and average <em>f</em> at them. That average estimates the <em>average value</em> of <em>f</em> on <em>R</em>, which is the integral divided by the area (just as in one variable, Lesson 2). So to estimate the integral itself, <strong>multiply the average by the area of <em>R</em></strong>:</p>
 <p class="math">∬<sub><em>R</em></sub> <em>f dA</em> ≈ area(<em>R</em>) × (1/<em>N</em>) [ <em>f</em>(<em>P</em>₁) + … + <em>f</em>(<em>P<sub>N</sub></em>) ]</p>
 <p>For example, on the rectangle [0, 1] × [0, 2] above (area 2), the average of <em>x</em> + <em>y</em> at random points comes out near 3/2, and 2 × 3/2 = 3 is the integral. Its error shrinks like 1/√<em>N</em> regardless of dimension.</p>
-<p>Why 1/√<em>N</em>? The estimate is an average of <em>N</em> independent random values <em>f</em>(<em>P</em>₁), …, <em>f</em>(<em>P<sub>N</sub></em>). Let σ² be the <em>variance</em> of one value: the average of (value − mean)², a measure of how spread out the values are; its square root σ, the <em>standard deviation</em>, is a typical distance from the mean. (That's all you need here; <a href="#c-math121-d7">MATH 121, Lesson 7</a> covers variance properly, including the two facts used next.) For independent random variables variances add, so the sum of the <em>N</em> values has variance <em>N</em>σ². Dividing the sum by <em>N</em> to get the average divides the variance by <em>N</em>², leaving σ²/<em>N</em>. The typical error is the standard deviation, the square root: σ/√<em>N</em>. So 100 times as many points make the error 10 times smaller. Nothing in that argument mentions the dimension, which is why the method works where grids fail; the price is slow convergence, since each extra digit of accuracy costs 100 times more points.</p>
-`,
+<p>Why 1/√<em>N</em>? The estimate is an average of <em>N</em> independent random values <em>f</em>(<em>P</em>₁), …, <em>f</em>(<em>P<sub>N</sub></em>). Let σ² be the <em>variance</em> of one value: the average of (value − mean)², a measure of how spread out the values are; its square root σ, the <em>standard deviation</em>, is a typical distance from the mean. (That's all you need here; <a href="#c-math121-d7">MATH 121, Lesson 7</a> covers variance properly, including the two facts used next.) For independent random variables variances add, so the sum of the <em>N</em> values has variance <em>N</em>σ². Dividing the sum by <em>N</em> to get the average divides the variance by <em>N</em>², leaving σ²/<em>N</em>. The typical error is the standard deviation, the square root: σ/√<em>N</em>. So 100 times as many points make the error 10 times smaller. Nothing in that argument mentions the dimension, which is why the method works where grids fail; the price is slow convergence, since each extra digit of accuracy costs 100 times more points.</p>`,
     terms: [
-      ["Critical point", "A point where ∇f = 0."],
-      ["Saddle point", "A critical point that is a minimum in some directions and a maximum in others."],
-      ["Second derivative test", "D = f_xx f_yy − f_xy² classifies critical points as minima, maxima or saddles."],
-      ["Least squares", "Choosing model parameters to minimize the sum of squared errors."],
-      ["Gradient descent", "Minimizing f by repeatedly stepping opposite the gradient: x ← x − α∇f(x)."],
-      ["Learning rate", "The step size α in gradient descent."],
       ["Lagrange multiplier", "The number λ in ∇f = λ∇g, the condition met at the best point of f on the constraint curve g = c."],
-      ["Convex function", "A bowl-shaped function, for which every local minimum is a global minimum."],
       ["Double integral", "∬ f dA, the sum of f over a region of the plane; computed as an iterated integral."]
     ],
     quiz: [
-      { q: "At a local minimum of a smooth <em>f</em>(<em>x</em>, <em>y</em>):", choices: ["∇f points down", "∇f = 0", "f = 0", "D < 0"], answer: 1, why: "Every partial derivative is zero at an interior extreme point." },
-      { q: "At a critical point, <em>f<sub>xx</sub></em> = 4, <em>f<sub>yy</sub></em> = 1, <em>f<sub>xy</sub></em> = 3. The point is:", choices: ["A minimum", "A maximum", "A saddle", "Can't tell"], answer: 2, why: "D = 4 − 9 = −5 < 0." },
-      { q: "Gradient descent steps in which direction?", choices: ["Along ∇f", "Opposite ∇f", "Perpendicular to ∇f", "Randomly"], answer: 1, why: "−∇f is the direction of steepest decrease." },
-      { q: "For <em>f</em> = <em>x</em>² + 2<em>y</em>², which learning rate makes gradient descent diverge?", choices: ["0.05", "0.2", "0.45", "0.6"], answer: 3, why: "The y factor is 1 − 4α; it has magnitude above 1 when α > 0.5." },
-      { q: "∫<sub>0</sub><sup>2</sup>∫<sub>0</sub><sup>3</sup> <em>xy</em> <em>dy dx</em> equals:", choices: ["9", "6", "18", "4.5"], answer: 0, why: "∫₀³ y dy = 4.5, ∫₀² x dx = 2; product 9." }
+      { q: "∫<sub>0</sub><sup>2</sup>∫<sub>0</sub><sup>3</sup> <em>xy</em> <em>dy dx</em> equals:", choices: ["9", "6", "18", "4.5"], answer: 0, why: "∫₀³ y dy = 4.5, ∫₀² x dx = 2; product 9." },
+      { q: "At the best point of a constrained optimization problem (maximize <em>f</em> subject to <em>g</em> = <em>c</em>), the gradients ∇<em>f</em> and ∇<em>g</em> are:", choices: ["Perpendicular", "Parallel", "Both zero", "Unrelated"], answer: 1, why: "The level curve of f just touches the constraint curve there, so ∇f = λ∇g." },
+      { q: "In Monte Carlo integration, using 100 times as many random points makes the typical error:", choices: ["100 times smaller", "10 times smaller", "About the same", "2 times smaller"], answer: 1, why: "The error shrinks like 1/√N, and √100 = 10." }
     ],
     practice: [
-      { q: `<p>Find and classify the critical points of <em>f</em>(<em>x</em>, <em>y</em>) = <em>x</em>³ − 3<em>x</em> + <em>y</em>².</p>`, a: `<p><em>f<sub>x</sub></em> = 3<em>x</em>² − 3 = 0 gives <em>x</em> = ±1; <em>f<sub>y</sub></em> = 2<em>y</em> = 0 gives <em>y</em> = 0. <em>f<sub>xx</sub></em> = 6<em>x</em>, <em>f<sub>yy</sub></em> = 2, <em>f<sub>xy</sub></em> = 0. At (1, 0): <em>D</em> = 12 &gt; 0, <em>f<sub>xx</sub></em> &gt; 0: local minimum (value −2). At (−1, 0): <em>D</em> = −12: saddle.</p>` },
-      { q: `<p>Fit a least-squares line to (1, 2), (2, 3), (3, 5).</p>`, a: `<p>Σ<em>x</em> = 6, Σ<em>y</em> = 10, Σ<em>x</em>² = 14, Σ<em>xy</em> = 2 + 6 + 15 = 23, <em>n</em> = 3. Equations: 14<em>m</em> + 6<em>b</em> = 23, 6<em>m</em> + 3<em>b</em> = 10. Doubling the second: 12<em>m</em> + 6<em>b</em> = 20; subtract: 2<em>m</em> = 3, <em>m</em> = 1.5, <em>b</em> = (10 − 9)/3 = 1/3. Line: <em>y</em> = 1.5<em>x</em> + 1/3.</p>` },
       { q: `<p>Use a Lagrange multiplier to find the point on the line <em>x</em> + 2<em>y</em> = 10 closest to the origin. (Minimize the squared distance <em>x</em>² + <em>y</em>², which has the same minimum point and is easier to differentiate.)</p>`, a: `<p><em>f</em> = <em>x</em>² + <em>y</em>², <em>g</em> = <em>x</em> + 2<em>y</em>. Equations: 2<em>x</em> = λ, 2<em>y</em> = 2λ, <em>x</em> + 2<em>y</em> = 10. The first two give λ = 2<em>x</em> and <em>y</em> = λ = 2<em>x</em>. The constraint: <em>x</em> + 4<em>x</em> = 10, so <em>x</em> = 2, <em>y</em> = 4. The closest point is (2, 4), at distance √20 ≈ 4.47. (A line has no farthest point, so this single candidate is the minimum. Notice (2, 4) is a multiple of (1, 2), the gradient of <em>g</em>: the shortest path to a line is perpendicular to it.)</p>` },
-      { q: `<p>Run gradient descent by hand for two steps on <em>f</em>(<em>x</em>, <em>y</em>) = (<em>x</em> − 3)² + (<em>y</em> + 1)², from (0, 0) with α = 0.25. Where is it heading?</p>`, a: `<p>∇<em>f</em> = (2(<em>x</em> − 3), 2(<em>y</em> + 1)). At (0, 0): (−6, 2); step: (0, 0) − 0.25(−6, 2) = (1.5, −0.5). At (1.5, −0.5): (−3, 1); step: (2.25, −0.75). Each step halves the distance to the minimum at (3, −1).</p>` },
-      { q: `<p>Use gradient descent in Python to fit the least-squares line for the lesson's four points, starting from <em>m</em> = <em>b</em> = 0, and compare with <em>m</em> = 1.6, <em>b</em> = 1.1. Minimize the lesson's <em>E</em>, the <em>sum</em> of squared errors, using the partial derivatives worked out above. Try learning rates 0.01, 0.05 and 0.1 for 2000 steps each. Then try 0.1 again on the <em>average</em> error <em>E</em>/4.</p>`, a: `<pre><code>xs, ys = [0, 1, 2, 3], [1, 3, 4, 6]
-
-def grad(m, b):
-    gm = sum(-2 * x * (y - (m * x + b)) for x, y in zip(xs, ys))
-    gb = sum(-2 * (y - (m * x + b)) for x, y in zip(xs, ys))
-    return gm, gb
-
-for rate in (0.01, 0.05, 0.1):
-    m = b = 0.0
-    for _ in range(2000):
-        gm, gb = grad(m, b)
-        m, b = m - rate * gm, b - rate * gb
-    print(rate, m, b)</code></pre><p>0.01 and 0.05 converge to (1.6, 1.1) (0.05 is faster); 0.1 is too large for the sum and diverges, overflowing to <code>nan</code> ("not a number"). For the sum, rates up to about 0.059 converge for these four points. The average <em>E</em>/4 has a gradient 4 times smaller, so dividing <code>gm</code> and <code>gb</code> by 4 lets 0.1 (and even 0.2) converge to the same (1.6, 1.1): the same line, a different safe learning rate. Choosing the learning rate is a real practical problem in machine learning.</p>` },
       { q: `<p>Estimate ∬ e<sup>−(<em>x</em>² + <em>y</em>²)</sup> <em>dA</em> over the square [−3, 3] × [−3, 3] by Monte Carlo with 100,000 random points (the square has area 36). Compare with π (the integral over the whole plane). Then explain why this checks Lesson 3's claim that ∫<sub>−∞</sub><sup>∞</sup> e<sup>−<em>x</em>²</sup> <em>dx</em> = √π.</p>`, a: `<pre><code>import random, math
 N = 100_000
 total = sum(math.exp(-(random.uniform(-3, 3)**2 + random.uniform(-3, 3)**2)) for _ in range(N))
 est = 36 * total / N                          # area 36 times the average value
 print(est, math.pi)                           # about 3.14 (varies by a few hundredths), 3.14159...
-print(math.sqrt(est), math.sqrt(math.pi))     # about 1.77, 1.77245...</code></pre><p>The square misses only a tiny amount of the function's mass. The link to √π: e<sup>−(<em>x</em>² + <em>y</em>²)</sup> = e<sup>−<em>x</em>²</sup> e<sup>−<em>y</em>²</sup>. As an iterated integral, the inner integral in <em>y</em> treats e<sup>−<em>x</em>²</sup> as a constant, so it comes out as e<sup>−<em>x</em>²</sup> · <em>I</em>, where <em>I</em> = ∫<sub>−3</sub><sup>3</sup> e<sup>−<em>y</em>²</sup> <em>dy</em>. The outer integral then gives <em>I</em> · <em>I</em> = <em>I</em>². So the double integral is the <em>square</em> of the single one: if it is π, the single integral is √π ≈ 1.772. (Over [−3, 3] the single integral is 1.77241…, within 0.0001 of √π.)</p>` }
+print(math.sqrt(est), math.sqrt(math.pi))     # about 1.77, 1.77245...</code></pre><p>The square misses only a tiny amount of the function's mass. The link to √π: e<sup>−(<em>x</em>² + <em>y</em>²)</sup> = e<sup>−<em>x</em>²</sup> e<sup>−<em>y</em>²</sup>. As an iterated integral, the inner integral in <em>y</em> treats e<sup>−<em>x</em>²</sup> as a constant, so it comes out as e<sup>−<em>x</em>²</sup> · <em>I</em>, where <em>I</em> = ∫<sub>−3</sub><sup>3</sup> e<sup>−<em>y</em>²</sup> <em>dy</em>. The outer integral then gives <em>I</em> · <em>I</em> = <em>I</em>². So the double integral is the <em>square</em> of the single one: if it is π, the single integral is √π ≈ 1.772. (Over [−3, 3] the single integral is 1.77241…, within 0.0001 of √π.)</p>` },
+      { q: `<p>Compute ∬ (<em>x</em> + 2<em>y</em>) <em>dA</em> over the rectangle [0, 2] × [0, 1] as an iterated integral both ways round (integrate in <em>y</em> first, then in <em>x</em> first) and check that the answers agree.</p>`, a: `<p><em>y</em> first: ∫<sub>0</sub><sup>2</sup> [<em>xy</em> + <em>y</em>²]<sub>0</sub><sup>1</sup> <em>dx</em> = ∫<sub>0</sub><sup>2</sup> (<em>x</em> + 1) <em>dx</em> = 2 + 2 = 4. <em>x</em> first: ∫<sub>0</sub><sup>1</sup> [<em>x</em>²/2 + 2<em>xy</em>]<sub>0</sub><sup>2</sup> <em>dy</em> = ∫<sub>0</sub><sup>1</sup> (2 + 4<em>y</em>) <em>dy</em> = 2 + 2 = 4. They agree, as Fubini's theorem promises.</p>` }
     ],
     sources: ["openstaxcalc3", "eoc"]
   }

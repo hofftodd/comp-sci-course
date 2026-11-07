@@ -28,7 +28,7 @@ I am learning Python.</code></pre>`,
       ]
     }
   ],
-  u1: [
+  vars: [
     {
       id: "hms",
       title: "Seconds to hours, minutes and seconds",
@@ -75,7 +75,7 @@ Total: $57.23</code></pre>`,
       ]
     }
   ],
-  u2: [
+  loops: [
     {
       id: "fizzbuzz",
       title: "FizzBuzz",
@@ -230,6 +230,22 @@ Total: $57.23</code></pre>`,
   ],
   u5: [
     {
+      id: "stats",
+      title: "Smallest, largest and mean",
+      prompt: `<p>Write <code>stats(xs)</code> that returns a tuple <code>(smallest, largest, mean)</code> for a non-empty list of numbers, using one loop and <strong>without</strong> <code>min</code>, <code>max</code> or <code>sum</code>.</p>`,
+      starter: `def stats(xs):\n    pass\n`,
+      hint: `<p>Start <code>smallest</code> and <code>largest</code> at <code>xs[0]</code>, and a running total at 0. Return all three values separated by commas to make a tuple.</p>`,
+      solution: `def stats(xs):\n    smallest = largest = xs[0]\n    total = 0\n    for x in xs:\n        if x < smallest:\n            smallest = x\n        if x > largest:\n            largest = x\n        total += x\n    return smallest, largest, total / len(xs)\n`,
+      tests: [
+        { label: "The example", call: "stats([4, 8, 1, 7])", expect: "(1, 8, 5.0)" },
+        { label: "One item", call: "stats([5])", expect: "(5, 5, 5.0)" },
+        { label: "Negative numbers", call: "stats([-2, 2])", expect: "(-2, 2, 0.0)" },
+        { label: "Doesn't use min, max or sum", type: "source", code: `assert not any(f + "(" in __source__ for f in ("min", "max", "sum")), "Solve this with one loop, without min, max or sum."` }
+      ]
+    }
+  ],
+  dicts: [
+    {
       id: "dedupe",
       title: "Remove duplicates, keep order",
       prompt: `<p>Write <code>dedupe(xs)</code> that returns a <strong>new</strong> list with duplicates removed, keeping the first occurrence of each item in its original order: <code>[3, 1, 3, 2, 1]</code> gives <code>[3, 1, 2]</code>. Don't change the list you were given.</p>`,
@@ -255,20 +271,6 @@ Total: $57.23</code></pre>`,
         { label: "The example", call: "word_counts('the cat and the hat')", expect: "{'the': 2, 'cat': 1, 'and': 1, 'hat': 1}" },
         { label: "Empty text", call: "word_counts('')", expect: "{}" },
         { label: "Mixed case", call: "word_counts('A a A')", expect: "{'a': 3}" }
-      ]
-    },
-    {
-      id: "stats",
-      title: "Smallest, largest and mean",
-      prompt: `<p>Write <code>stats(xs)</code> that returns a tuple <code>(smallest, largest, mean)</code> for a non-empty list of numbers, using one loop and <strong>without</strong> <code>min</code>, <code>max</code> or <code>sum</code>.</p>`,
-      starter: `def stats(xs):\n    pass\n`,
-      hint: `<p>Start <code>smallest</code> and <code>largest</code> at <code>xs[0]</code>, and a running total at 0. Return all three values separated by commas to make a tuple.</p>`,
-      solution: `def stats(xs):\n    smallest = largest = xs[0]\n    total = 0\n    for x in xs:\n        if x < smallest:\n            smallest = x\n        if x > largest:\n            largest = x\n        total += x\n    return smallest, largest, total / len(xs)\n`,
-      tests: [
-        { label: "The example", call: "stats([4, 8, 1, 7])", expect: "(1, 8, 5.0)" },
-        { label: "One item", call: "stats([5])", expect: "(5, 5, 5.0)" },
-        { label: "Negative numbers", call: "stats([-2, 2])", expect: "(-2, 2, 0.0)" },
-        { label: "Doesn't use min, max or sum", type: "source", code: `assert not any(f + "(" in __source__ for f in ("min", "max", "sum")), "Solve this with one loop, without min, max or sum."` }
       ]
     },
     {

@@ -23,8 +23,8 @@ CSA.addCourse({
       { name: "Lesson quizzes", weight: 10, desc: "The quiz at the end of each lesson. Your best attempt counts, and your two lowest quiz scores are dropped." },
       { name: "Weekly problem sets", weight: 30, desc: "Programs based on each week's practice problems, submitted with a short note on how you tested them. Graded with the criteria below." },
       { name: "Programming projects", weight: 20, desc: "Two larger programs, due in week 6 and week 13, that combine several units. Each includes a five-minute walkthrough where you explain your code." },
-      { name: "Midterm exam", weight: 15, desc: "Reading and tracing code, predicting output, and writing short functions by hand. Covers lessons 1–6, from setup through lists and dictionaries." },
-      { name: "Final exam", weight: 20, desc: "Cumulative, with emphasis on lessons 7–11: recursion, testing, files, efficiency, and tools." },
+      { name: "Midterm exam", weight: 15, desc: "Reading and tracing code, predicting output, and writing short functions by hand. Covers lessons 1–9, from setup through lists and dictionaries." },
+      { name: "Final exam", weight: 20, desc: "Cumulative, with emphasis on lessons 10–14: recursion, testing, files, efficiency, and tools." },
       { name: "Participation", weight: 5, desc: "Coming to section or office hours, and one short reflection every two weeks on what you found hardest and how you worked through it." }
     ],
     criteria: [
@@ -96,7 +96,7 @@ CSA.addUnits("cs101", [
   <li><strong>Windows:</strong> open the Start menu and search for <em>Terminal</em> or <em>PowerShell</em>.</li>
   <li><strong>Linux:</strong> on Ubuntu, press Ctrl+Alt+T.</li>
 </ul>
-<p>Check that Python is installed by asking for its version. On macOS and Linux type <code>python3 --version</code>; on Windows type <code>py --version</code>. You should see something like <code>Python 3.13.1</code>. In this course, examples use <code>python3</code>; on Windows, type <code>py</code> instead. This rule holds <em>everywhere</em> in the course, including later commands such as <code>python3 -m pip install pytest</code> (on Windows: <code>py -m pip install pytest</code>) and <code>python3 -m pytest</code> (<code>py -m pytest</code>). Only the first word changes. Inside an activated virtual environment (<a href="#c-cs101-u7">Lesson 11</a>), plain <code>python</code> works on every system.</p>
+<p>Check that Python is installed by asking for its version. On macOS and Linux type <code>python3 --version</code>; on Windows type <code>py --version</code>. You should see something like <code>Python 3.13.1</code>. In this course, examples use <code>python3</code>; on Windows, type <code>py</code> instead. This rule holds <em>everywhere</em> in the course, including later commands such as <code>python3 -m pip install pytest</code> (on Windows: <code>py -m pip install pytest</code>) and <code>python3 -m pytest</code> (<code>py -m pytest</code>). Only the first word changes. Inside an activated virtual environment (<a href="#c-cs101-u7">Lesson 14</a>), plain <code>python</code> works on every system.</p>
 
 <h3>Moving around in the terminal</h3>
 <p>The terminal always has a <strong>current folder</strong> (also called the working directory). Commands act on files there. A few commands cover most daily work, and they are the same in macOS, Linux and Windows PowerShell:</p>
@@ -210,9 +210,9 @@ print("Lessons:", 11 x 90, "minutes")</code></pre>`, hint: `<p>Each run reports 
     id: "u1",
     title: "Values, types and expressions",
     minutes: 90,
-    summary: "How Python represents numbers, text and true/false values, how it evaluates expressions, how variables name values, and how a program talks with its user.",
+    summary: "Values and their types, arithmetic and the order of operations, and how a computer stores numbers: binary, bits and bytes, and why floats are approximate.",
     notes: `
-<p>Every program, however large, is built from a few simple ingredients: <strong>values</strong> (pieces of data), <strong>expressions</strong> that combine them, and <strong>variables</strong> that give them names. This lesson covers all three, then shows how a program reads input and prints output.</p>
+<p>Every program, however large, is built from a few simple ingredients: <strong>values</strong> (pieces of data), <strong>expressions</strong> that combine them, and <strong>variables</strong> that give them names. This lesson covers values, the types they come in, and the arithmetic you can do with them, then looks inside the computer: how numbers are stored in binary, and why decimal fractions can come out very slightly wrong. <a href="#c-cs101-vars">The next lesson</a> covers variables, text, and reading input and printing output.</p>
 
 <h3>Values and types</h3>
 <p>Every piece of data in Python is a <em>value</em>, and every value has a <em>type</em> that decides what you can do with it. Four types cover most of what you'll write this term:</p>
@@ -304,11 +304,59 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
 <h3>Floats are approximate</h3>
 <p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Three consequences:</p>
 <ul>
-  <li>Don't test floats with <code>==</code>: two calculations that should agree can differ in the last digit. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. By default, "nearly" means they differ by at most one billionth (10<sup>−9</sup>) of the larger one, so they agree in roughly their first 9 significant digits: <code>math.isclose(1.0, 1.0000000001)</code> is <code>True</code>, but <code>math.isclose(1.0, 1.000001)</code> is <code>False</code>. Rounding errors in the 16th digit are far smaller than that. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table near the end of this lesson shows where modules fit, and the Files and modules lesson explains <code>import</code> fully. This applies throughout the course: when a result is a float, check it with <code>math.isclose</code> unless you know it is exact. <code>==</code> is fine for ints and strings, and for floats that are whole numbers or simple halves and quarters, such as <code>6 / 3 == 2</code> or <code>1 / 4 == 0.25</code>, which binary stores exactly. When in doubt, use <code>math.isclose</code>.</li>
-  <li>Use <code>round(x, 2)</code> to show a sensible number of decimal places: <code>round(0.1 + 0.2, 2)</code> is <code>0.3</code>. (An <em>f-string</em> such as <code>f"{x:.2f}"</code> does the same job when printing; it is explained in the output section at the end of this lesson.)</li>
+  <li>Don't test floats with <code>==</code>: two calculations that should agree can differ in the last digit. Use <code>math.isclose(a, b)</code>, which checks whether they are nearly equal. By default, "nearly" means they differ by at most one billionth (10<sup>−9</sup>) of the larger one, so they agree in roughly their first 9 significant digits: <code>math.isclose(1.0, 1.0000000001)</code> is <code>True</code>, but <code>math.isclose(1.0, 1.000001)</code> is <code>False</code>. Rounding errors in the 16th digit are far smaller than that. It lives in <code>math</code>, a <em>module</em> (a file of extra functions that comes with Python), so first write <code>import math</code> on its own line, once, at the top of your program or in the console. Without it you get <code>NameError: name 'math' is not defined</code>. The table in <a href="#c-cs101-vars">the next lesson, Variables, input and output</a>, shows where modules fit, and the Files and modules lesson explains <code>import</code> fully. This applies throughout the course: when a result is a float, check it with <code>math.isclose</code> unless you know it is exact. <code>==</code> is fine for ints and strings, and for floats that are whole numbers or simple halves and quarters, such as <code>6 / 3 == 2</code> or <code>1 / 4 == 0.25</code>, which binary stores exactly. When in doubt, use <code>math.isclose</code>.</li>
+  <li>Use <code>round(x, 2)</code> to show a sensible number of decimal places: <code>round(0.1 + 0.2, 2)</code> is <code>0.3</code>. (An <em>f-string</em> such as <code>f"{x:.2f}"</code> does the same job when printing; it is explained in the output section of <a href="#c-cs101-vars">the next lesson</a>.)</li>
   <li>Subtracting two nearly equal floats loses accuracy. Each float is right to about 16 significant digits. If two floats agree in their first 12 digits, subtracting cancels those 12, and only about 4 trustworthy digits are left; the rest of the result is leftover rounding error. For example, <code>(1 + 1e-12) - 1</code> should be <code>1e-12</code> (that's 10<sup>−12</sup>; the notation is explained just below) but gives <code>1.000088900582341e-12</code>, wrong from the fifth digit. MATH 130 meets this when it estimates limits and derivatives with tiny steps.</li>
 </ul>
 <p>Very large and very small floats are written in <strong>scientific notation</strong> with an <code>e</code>, meaning "times ten to the power": <code>2.5e3</code> is 2.5 × 10<sup>3</sup> = <code>2500.0</code>, and <code>1e-10</code> is 1 × 10<sup>−10</sup> = 0.0000000001. Python prints tiny or huge floats this way too, and you can type them this way. You'll see <code>1e-10</code> used as "a very small tolerance" in later lessons and in MATH 130.</p>
+`,
+    terms: [
+      ["Value", "A piece of data, such as 3, 'hi' or True."],
+      ["Type", "The category of a value, such as int, float, str or bool. It determines which operations are allowed."],
+      ["Expression", "Code that evaluates to a value, such as 2 + 3 or len(name)."],
+      ["Modulo (%)", "The remainder after division: 17 % 5 is 2."]
+    ],
+    quiz: [
+      {
+  "q": "What does <code>17 // 5</code> evaluate to?",
+  "choices": [
+   "3.4",
+   "3",
+   "2",
+   "4"
+  ],
+  "answer": 1,
+  "why": "<code>//</code> is floor division: 17 divided by 5 is 3.4, rounded down to 3.",
+  "langs": {
+   "java": {
+    "q": "In Java, what does <code>17 / 5</code> evaluate to?",
+    "why": "Both values are <code>int</code>, so <code>/</code> is integer division: 3.4 loses its fraction and becomes 3."
+   },
+   "cpp": {
+    "q": "In C++, what does <code>17 / 5</code> evaluate to?",
+    "why": "Both values are <code>int</code>, so <code>/</code> is integer division: 3.4 loses its fraction and becomes 3."
+   }
+  }
+ },
+      { q: "What is <code>2 + 3 * 4 ** 2 // 5</code>?", choices: ["11", "16", "50", "9"], answer: 0, why: "4 ** 2 = 16, then 3 * 16 = 48, then 48 // 5 = 9, and finally 2 + 9 = 11." },
+      { q: "What decimal number is written <code>1101</code> in binary?", choices: ["11", "13", "1101", "8"], answer: 1, why: "The place values are 8, 4, 2, 1: 8 + 4 + 0 + 1 = 13." },
+      { q: "Why is <code>0.1 + 0.2 == 0.3</code> False in Python?", choices: ["A bug in Python", "0.1 and 0.2 can't be stored exactly in binary, so their sum is very slightly off", "== doesn't work on floats", "Floats are rounded to one decimal place"], answer: 1, why: "Like 1/3 in decimal, 0.1 has no exact binary form. Compare floats with math.isclose instead." }
+    ],
+    practice: [
+      { q: `<p>In the console, <code>0.1 + 0.2 == 0.3</code> is <code>False</code>. Explain why, and show how to check whether two floats are equal "enough".</p>`, a: `<p>0.1 and 0.2 can't be represented exactly in binary, so their sum is very slightly more than 0.3: <code>0.30000000000000004</code>. Compare with a tolerance instead:</p><pre><code>import math
+math.isclose(0.1 + 0.2, 0.3)   # True</code></pre>` },
+      { q: `<p>(a) Write 45 and 200 in binary. (b) What decimal number is <code>10110</code>? (c) How many different values can 12 bits hold? Check (a) and (b) in Python with <code>bin</code> and <code>int(s, 2)</code>.</p>`, a: `<p>(a) 45 = 32 + 8 + 4 + 1 = <code>101101</code>; 200 = 128 + 64 + 8 = <code>11001000</code>. (b) 16 + 4 + 2 = 22. (c) 2<sup>12</sup> = 4096. In Python, <code>bin(45)</code> is <code>'0b101101'</code> and <code>int("10110", 2)</code> is 22.</p>` },
+      { q: `<p>Predict, then check in the console: <code>100 // 7</code>, <code>100 % 7</code>, <code>-17 // 5</code> and <code>-17 % 5</code>. For the last pair, check that <code>(a // b) * b + a % b == a</code>.</p>`, a: `<p>14 and 2 (100 = 14 × 7 + 2). For −17: −17 / 5 = −3.4, which rounds down to −4, so <code>-17 // 5</code> is −4, and <code>-17 % 5</code> is 3, because −4 × 5 + 3 = −17.</p>` }
+    ],
+    sources: ["thinkpython", "mit6100l", "pytutorial"]
+  },
+  {
+    id: "vars",
+    title: "Variables, input and output",
+    minutes: 90,
+    summary: "Names that refer to values, a first look at strings, tracing code by hand, converting between types, and reading what the user types and printing results.",
+    notes: `
+<p>The <a href="#c-cs101-u1">previous lesson</a> was about values: their types, the arithmetic you can do with them, and how the computer stores numbers. This lesson is about using values in a program. You will give them names, take a first look at text, trace what a program does line by line, convert between types, and finally talk to the person running the program: reading what they type and printing results.</p>
 
 <h3>Strings, a first look</h3>
 <p>Strings support <code>+</code> (joining, called <em>concatenation</em>) and <code>*</code> (repetition), and <code>len()</code> gives their length. You can't add a string and a number directly; convert first:</p>
@@ -546,15 +594,10 @@ $1 ==&gt; 37</code></pre>
 <pre data-label="Terminal"><code>$ ./greet &lt; answers.txt</code></pre>
 <p>Here each read takes the next part of <code>answers.txt</code>. If the program asks for more than the file has, there is no crash and no exception: the read fails and <code>std::cin</code>'s end-of-file state is set. Check for it the same way as any failed read, for example <code>if (!std::getline(std::cin, name)) { ... }</code>. You can cause the same thing by pressing Ctrl+D (macOS and Linux) or Ctrl+Z then Enter (Windows) at a prompt.</p>
 </div>
-<p>Programs that run in the background, such as web servers, have no keyboard attached at all. They get their input from network requests and files instead.</p>
-`,
+<p>Programs that run in the background, such as web servers, have no keyboard attached at all. They get their input from network requests and files instead.</p>`,
     terms: [
-      ["Value", "A piece of data, such as 3, 'hi' or True."],
-      ["Type", "The category of a value, such as int, float, str or bool. It determines which operations are allowed."],
-      ["Expression", "Code that evaluates to a value, such as 2 + 3 or len(name)."],
       ["Statement", "A complete instruction, such as an assignment or a print call."],
       ["Variable", "A name bound to a value."],
-      ["Modulo (%)", "The remainder after division: 17 % 5 is 2."],
       ["Concatenation", "Joining strings end to end with +."],
       ["Augmented assignment", "A shortcut such as x += 1, meaning x = x + 1."],
       ["Tracing", "Following code by hand, recording each variable's value after each line."],
@@ -564,29 +607,7 @@ $1 ==&gt; 37</code></pre>
       ["f-string", "A string starting with f whose {expressions} are evaluated and inserted into the text."]
     ],
     quiz: [
-      ...[
- {
-  "q": "What does <code>17 // 5</code> evaluate to?",
-  "choices": [
-   "3.4",
-   "3",
-   "2",
-   "4"
-  ],
-  "answer": 1,
-  "why": "<code>//</code> is floor division: 17 divided by 5 is 3.4, rounded down to 3.",
-  "langs": {
-   "java": {
-    "q": "In Java, what does <code>17 / 5</code> evaluate to?",
-    "why": "Both values are <code>int</code>, so <code>/</code> is integer division: 3.4 loses its fraction and becomes 3."
-   },
-   "cpp": {
-    "q": "In C++, what does <code>17 / 5</code> evaluate to?",
-    "why": "Both values are <code>int</code>, so <code>/</code> is integer division: 3.4 loses its fraction and becomes 3."
-   }
-  }
- },
- {
+      {
   "q": "After <code>x = 4</code> then <code>x = x * x - 1</code>, what is <code>x</code>?",
   "choices": [
    "15",
@@ -597,7 +618,7 @@ $1 ==&gt; 37</code></pre>
   "answer": 0,
   "why": "The right side is evaluated with the old x: 4 × 4 − 1 = 15."
  },
- {
+      {
   "q": "What is the type of <code>input()</code>'s return value?",
   "choices": [
    "int",
@@ -632,7 +653,7 @@ $1 ==&gt; 37</code></pre>
    }
   }
  },
- {
+      {
   "q": "What must you do before calling <code>input()</code> in a Python program?",
   "choices": [
    "<code>import input</code>",
@@ -667,7 +688,7 @@ $1 ==&gt; 37</code></pre>
    }
   }
  },
- {
+      {
   "q": "An automated grader runs your program with no one at the keyboard. Where do your <code>input()</code> calls get their text?",
   "choices": [
    "They wait forever",
@@ -702,7 +723,7 @@ $1 ==&gt; 37</code></pre>
    }
   }
  },
- {
+      {
   "q": "What does <code>print(f\"{2 + 3} apples\")</code> display?",
   "choices": [
    "{2 + 3} apples",
@@ -736,9 +757,7 @@ $1 ==&gt; 37</code></pre>
     "why": "<code>+</code> binds more tightly than <code>&lt;&lt;</code>, so <code>2 + 3</code> is computed first and 5 is printed."
    }
   }
- }
-],
-      { q: "What is <code>2 + 3 * 4 ** 2 // 5</code>?", choices: ["11", "16", "50", "9"], answer: 0, why: "4 ** 2 = 16, then 3 * 16 = 48, then 48 // 5 = 9, and finally 2 + 9 = 11." },
+ },
       { q: "Which is a valid Python variable name?", choices: ["<code>2nd_place</code>", "<code>second-place</code>", "<code>second_place</code>", "<code>class</code>"], answer: 2, why: "Names can't start with a digit, can't contain hyphens, and can't be keywords such as <code>class</code>." },
       { q: "After <code>a, b = 1, 2</code> and then <code>a, b = b, a</code>, what are <code>a</code> and <code>b</code>?", choices: ["1 and 2", "2 and 1", "2 and 2", "1 and 1"], answer: 1, why: "The right side is evaluated first, giving (2, 1), and then both names are assigned at once." }
     ],
@@ -767,9 +786,7 @@ left = right
 right = temp
 
 # In one line
-left, right = right, left</code></pre><p>Without the temporary variable, <code>left = right</code> followed by <code>right = left</code> would leave both names with the same value: the original value of <code>left</code> is lost.</p>` },
-      { q: `<p>In the console, <code>0.1 + 0.2 == 0.3</code> is <code>False</code>. Explain why, and show how to check whether two floats are equal "enough".</p>`, a: `<p>0.1 and 0.2 can't be represented exactly in binary, so their sum is very slightly more than 0.3: <code>0.30000000000000004</code>. Compare with a tolerance instead:</p><pre><code>import math
-math.isclose(0.1 + 0.2, 0.3)   # True</code></pre>` }
+left, right = right, left</code></pre><p>Without the temporary variable, <code>left = right</code> followed by <code>right = left</code> would leave both names with the same value: the original value of <code>left</code> is lost.</p>` }
     ],
     sources: ["thinkpython", "mit6100l", "pytutorial"]
   }
@@ -778,11 +795,11 @@ math.isclose(0.1 + 0.2, 0.3)   # True</code></pre>` }
 CSA.addUnits("cs101", [
   {
     id: "u2",
-    title: "Branching and iteration",
+    title: "Branching",
     minutes: 90,
-    summary: "Make decisions with if, elif and else, and repeat work with while and for loops. Includes the accumulator pattern, nested loops, and searching by bisection.",
+    summary: "Comparisons and booleans, combining conditions with and, or and not, short-circuit evaluation and truthiness, and choosing what to run with if, elif and else.",
     notes: `
-<p>So far our programs run every line once, top to bottom. Real programs need to <strong>make decisions</strong> (do this only if something is true) and <strong>repeat work</strong> (do this for every student, or until the user types "quit"). These two ideas, branching and iteration, plus the values from the last lesson, are enough to compute anything a computer can compute.</p>
+<p>So far our programs run every line once, top to bottom. Real programs need to <strong>make decisions</strong>: do this only if something is true. This lesson covers the true/false values that decisions are built on, how to combine them, and the <code>if</code> statement that uses them. <a href="#c-cs101-loops">The next lesson</a> adds the other half, repeating work.</p>
 
 <h3>Comparisons and booleans</h3>
 <p>A comparison produces a <code>bool</code>: <code>True</code> or <code>False</code>.</p>
@@ -826,6 +843,50 @@ print("Have a good day.")</code></pre>
 <p>For a simple either-or value, Python has a one-line <strong>conditional expression</strong>:</p>
 <pre><code>label = "even" if n % 2 == 0 else "odd"</code></pre>
 <p>Read it as "label is 'even' if n is divisible by 2, otherwise 'odd'".</p>
+`,
+    terms: [
+      ["Boolean", "A value that is True or False."],
+      ["Short-circuit evaluation", "Stopping evaluation of and/or as soon as the result is known."],
+      ["Truthiness", "How Python treats non-boolean values in conditions: 0, empty strings, empty collections and None count as false."],
+      ["Block", "The indented lines that belong to an if, while, for or def."]
+    ],
+    quiz: [
+      { q: "In <code>x != 0 and 10 / x &gt; 1</code>, what happens when <code>x</code> is 0?", choices: ["ZeroDivisionError", "The expression is False", "The expression is True", "SyntaxError"], answer: 1, why: "Short-circuiting: <code>x != 0</code> is False, so Python never evaluates the division." },
+      { q: "With <code>day = \"Mon\"</code>, what does <code>if day == \"Sat\" or \"Sun\":</code> do?", choices: ["Skips the block", "Runs the block, because a non-empty string counts as true", "Raises an error", "Compares day to both strings"], answer: 1, why: "It means <code>(day == \"Sat\") or \"Sun\"</code>, and <code>\"Sun\"</code> is truthy. Write <code>day == \"Sat\" or day == \"Sun\"</code>." },
+      { q: "With <code>temp = 35</code>, what does this print?<pre><code>if temp &gt;= 0:\n    print(\"cold\")\nelif temp &gt;= 30:\n    print(\"hot\")</code></pre>", choices: ["cold", "hot", "cold, then hot", "Nothing"], answer: 0, why: "Python runs the block under the first true condition and skips the rest; 35 >= 0 is already true. Put the most specific condition first." }
+    ],
+    practice: [
+      { q: `<p>Write a program that reads a temperature in °C and prints <code>freezing</code> below 0, <code>cold</code> below 15, <code>mild</code> below 25, and <code>hot</code> otherwise. Test it at the boundaries: −1, 0, 14.9, 15, 24.9 and 25.</p>`, a: `<pre><code>temp = float(input("Temperature in °C: "))
+if temp &lt; 0:
+    print("freezing")
+elif temp &lt; 15:
+    print("cold")
+elif temp &lt; 25:
+    print("mild")
+else:
+    print("hot")</code></pre><p>The tests should give freezing, cold, cold, mild, mild and hot. Each <code>elif</code> only runs when every earlier condition was false, so <code>temp &lt; 15</code> really means "at least 0 and below 15".</p>` },
+      { q: `<p>Rewrite <code>if not (score &lt; 0 or score &gt; 100):</code> without <code>not</code>, as simply as you can. Then check that your version agrees with the original for −1, 0, 50, 100 and 101.</p>`, a: `<p><code>if 0 &lt;= score &lt;= 100:</code>. "Not (below 0 or above 100)" means "not below 0 and not above 100", which is "at least 0 and at most 100". (This is De Morgan\'s law: negating an <code>or</code> gives an <code>and</code> of the negations.)</p>` },
+      { q: `<p>A cinema charges $8 for children under 12, $5 for people 65 and over, and $12 for everyone else, with $2 off on Tuesdays. Write a program that reads an age and a three-letter day (such as <code>Tue</code>) and prints the price. What are the prices for (11, Mon), (12, Tue), (65, Tue) and (64, Sat)?</p>`, a: `<pre><code>age = int(input("Age: "))
+day = input("Day (Mon, Tue, ...): ")
+if age &lt; 12:
+    price = 8
+elif age &gt;= 65:
+    price = 5
+else:
+    price = 12
+if day == "Tue":
+    price -= 2
+print(f"Price: \${price}")</code></pre><p>$8, $10, $3 and $12. The Tuesday discount is a separate <code>if</code>, not an <code>elif</code>: it applies on top of whichever age price was chosen.</p>` }
+    ],
+    sources: ["mit6100l", "thinkpython", "pytutorial"]
+  },
+  {
+    id: "loops",
+    title: "Loops",
+    minutes: 90,
+    summary: "Repeating work with while and for loops, the accumulator pattern, break and continue, nested loops, and searching with loops, including bisection.",
+    notes: `
+<p><a href="#c-cs101-u2">The previous lesson</a> taught programs to make decisions. This lesson teaches them to repeat work: for every item in a list, every number in a range, or until something changes. Together, branching and loops, plus the values you already know, are enough to compute anything a computer can compute.</p>
 
 <h3>while loops: repeat until something changes</h3>
 <p>A <code>while</code> loop checks its condition, runs its block if the condition is true, then checks again, and so on. It stops the first time the condition is false.</p>
@@ -950,13 +1011,8 @@ while n != 1:
     n = n // 2 if n % 2 == 0 else 3 * n + 1
     steps += 1
 print(steps)   # 111</code></pre>
-<p>Starting from 27, it takes 111 steps and climbs as high as 9,232 before falling to 1. Every starting number ever tested eventually reaches 1, but nobody has proved that it always does. This is the <strong>Collatz conjecture</strong>, an open problem since 1937, and a reminder that a five-line loop can be beyond our ability to fully analyze.</p>
-`,
+<p>Starting from 27, it takes 111 steps and climbs as high as 9,232 before falling to 1. Every starting number ever tested eventually reaches 1, but nobody has proved that it always does. This is the <strong>Collatz conjecture</strong>, an open problem since 1937, and a reminder that a five-line loop can be beyond our ability to fully analyze.</p>`,
     terms: [
-      ["Boolean", "A value that is True or False."],
-      ["Short-circuit evaluation", "Stopping evaluation of and/or as soon as the result is known."],
-      ["Truthiness", "How Python treats non-boolean values in conditions: 0, empty strings, empty collections and None count as false."],
-      ["Block", "The indented lines that belong to an if, while, for or def."],
       ["Iteration", "Repeating a block of code."],
       ["Accumulator", "A variable that builds up a result across the passes of a loop, such as a running total."],
       ["Loop invariant", "A condition that is true at the start of every pass through a loop."],
@@ -964,9 +1020,7 @@ print(steps)   # 111</code></pre>
     ],
     quiz: [
       { q: "How many times does the body of <code>for i in range(3, 10, 2):</code> run?", choices: ["3", "4", "7", "5"], answer: 1, why: "It produces 3, 5, 7, 9. Four values; 10 is excluded." },
-      { q: "In <code>x != 0 and 10 / x &gt; 1</code>, what happens when <code>x</code> is 0?", choices: ["ZeroDivisionError", "The expression is False", "The expression is True", "SyntaxError"], answer: 1, why: "Short-circuiting: <code>x != 0</code> is False, so Python never evaluates the division." },
       { q: "Bisection on an interval of width 1 needs about how many steps to reach width 0.001?", choices: ["3", "10", "100", "1000"], answer: 1, why: "Each step halves the width. 2<sup>10</sup> = 1024, so 10 halvings get below 0.001." },
-      { q: "With <code>day = \"Mon\"</code>, what does <code>if day == \"Sat\" or \"Sun\":</code> do?", choices: ["Skips the block", "Runs the block, because a non-empty string counts as true", "Raises an error", "Compares day to both strings"], answer: 1, why: "It means <code>(day == \"Sat\") or \"Sun\"</code>, and <code>\"Sun\"</code> is truthy. Write <code>day == \"Sat\" or day == \"Sun\"</code>." },
       { q: "A program should keep asking for a password until the user types the right one. Which loop fits best?", choices: ["for i in range(10)", "while", "A nested for loop", "No loop is needed"], answer: 1, why: "You don't know in advance how many tries it will take, so loop while the condition (wrong password) holds." },
       { q: "In the accumulator loop that sums 1 to 5, what is true at the start of every pass?", choices: ["total equals i", "total equals 1 + 2 + … + (i − 1)", "total equals 15", "total is even"], answer: 1, why: "That is the loop invariant: total holds the sum of everything handled before this pass." }
     ],
@@ -1169,7 +1223,7 @@ print(count)   # 1</code></pre>
     if month in (4, 6, 9, 11):
         return 30
     return 31</code></pre>
-<p>Two small pieces of new notation here. <code>29 if is_leap_year(year) else 28</code> is a one-line choice: it gives 29 when the condition is true and 28 otherwise. <code>(4, 6, 9, 11)</code> is a <em>tuple</em>, a fixed group of values in parentheses (the Lists lesson covers tuples), and <code>month in (4, 6, 9, 11)</code> is <code>True</code> when <code>month</code> is one of them, just as <code>ch in "aeiou"</code> tests a character in Lesson 3.</p>
+<p>Two small pieces of new notation here. <code>29 if is_leap_year(year) else 28</code> is a one-line choice: it gives 29 when the condition is true and 28 otherwise. <code>(4, 6, 9, 11)</code> is a <em>tuple</em>, a fixed group of values in parentheses (the Lists lesson covers tuples), and <code>month in (4, 6, 9, 11)</code> is <code>True</code> when <code>month</code> is one of them, just as <code>ch in "aeiou"</code> tests a character in <a href="#c-cs101-loops">Lesson 5</a>.</p>
 <p>This is <strong>decomposition</strong>: breaking a problem into small functions, each with one clear job. A useful test: if describing a function needs the word "and", or if it's longer than your screen, split it.</p>
 
 <h3>Functions are values</h3>
@@ -1181,7 +1235,7 @@ def triple(n):
     return n * 3
 
 apply_twice(triple, 2)   # triple(triple(2)) = 18</code></pre>
-<p>For a tiny function you only need once, Python has <strong>lambda</strong>, a way to write a function in a single expression without giving it a name. <code>lambda n: n * 3</code> means "a function that takes <code>n</code> and returns <code>n * 3</code>". So <code>apply_twice(lambda n: n * 3, 2)</code> also gives 18. You'll see lambdas used with sorting (in the lists lesson) and in the math courses' code. For example, <a href="#c-math130-u2">MATH 130, Continuity</a> defines a function <code>bisect(f, lo, hi)</code> that finds where <code>f</code> crosses zero. <code>bisect</code> is not built into Python, so you must define it before calling it, or you get a <code>NameError</code>. Here is a short version you can type in and try:</p>
+<p>For a tiny function you only need once, Python has <strong>lambda</strong>, a way to write a function in a single expression without giving it a name. <code>lambda n: n * 3</code> means "a function that takes <code>n</code> and returns <code>n * 3</code>". So <code>apply_twice(lambda n: n * 3, 2)</code> also gives 18. You'll see lambdas used with sorting (in the dictionaries lesson) and in the math courses' code. For example, <a href="#c-math130-u2">MATH 130, Continuity</a> defines a function <code>bisect(f, lo, hi)</code> that finds where <code>f</code> crosses zero. <code>bisect</code> is not built into Python, so you must define it before calling it, or you get a <code>NameError</code>. Here is a short version you can type in and try:</p>
 <pre><code>def bisect(f, lo, hi, tol=1e-10):
     """Find x in [lo, hi] with f(x) close to 0; f(lo) and f(hi) must differ in sign."""
     while hi - lo &gt; tol:
@@ -1514,11 +1568,11 @@ assert compress("x") == "x1"</code></pre><p>The line after the loop is easy to f
   },
   {
     id: "u5",
-    title: "Lists, tuples, dictionaries and sets",
+    title: "Lists and tuples",
     minutes: 90,
-    summary: "Python's built-in collections: lists you can change, tuples you can't, dictionaries for lookup by key, and sets for membership. Also aliasing, comprehensions, and choosing the right structure.",
+    summary: "Lists and how to change them, aliasing and copying, building lists with comprehensions, and tuples and unpacking.",
     notes: `
-<p>Programs rarely work with one value at a time. A gradebook has many scores, a dictionary app has many words, a social network has many friendships. Python has four built-in <strong>collections</strong> for grouping values, each suited to a different job.</p>
+<p>Programs rarely work with one value at a time. A gradebook has many scores, a dictionary app has many words, a social network has many friendships. Python has four built-in <strong>collections</strong> for grouping values, each suited to a different job. This lesson covers the two that keep items in order, lists and tuples; <a href="#c-cs101-dicts">the next lesson</a> covers dictionaries and sets.</p>
 
 <h3>Lists</h3>
 <p>A <strong>list</strong> is an ordered sequence of values, written in square brackets. Lists support the same indexing, slicing, <code>len</code>, <code>in</code> and <code>for</code> loops as strings, but unlike strings they are <strong>mutable</strong>: you can change them in place.</p>
@@ -1574,7 +1628,7 @@ print(c)        # [1, 2, 3, 4, 5]</code></pre>
 </figure>
 <p>Aliasing matters most when you pass a list to a function. The parameter becomes another name for the caller's list, so a function that calls <code>append</code> on it changes the caller's list too. Sometimes that's what you want; if not, work on a copy. Strings and numbers don't have this issue, because they can't be changed in place.</p>
 <h4>A trap: <code>+=</code> on a list changes it in place</h4>
-<p>In <a href="#c-cs101-u1">Lesson 2</a> you learned that <code>count += 1</code> means <code>count = count + 1</code>. For numbers and strings that is exactly right: they can't be changed, so <code>+=</code> builds a new value and points the name at it. <strong>Lists are different.</strong> For a list, <code>b += [3]</code> changes the existing list in place (it works like <code>b.extend([3])</code>), while <code>b = b + [3]</code> builds a new list and points <code>b</code> at it. With an alias, you can see the difference:</p>
+<p>In <a href="#c-cs101-vars">Lesson 3</a> you learned that <code>count += 1</code> means <code>count = count + 1</code>. For numbers and strings that is exactly right: they can't be changed, so <code>+=</code> builds a new value and points the name at it. <strong>Lists are different.</strong> For a list, <code>b += [3]</code> changes the existing list in place (it works like <code>b.extend([3])</code>), while <code>b = b + [3]</code> builds a new list and points <code>b</code> at it. With an alias, you can see the difference:</p>
 <pre><code>a = [1, 2]
 b = a
 b += [3]         # changes the one shared list
@@ -1622,6 +1676,53 @@ def min_max(xs):
 
 low, high = min_max([7, 2, 9])  # low is 2, high is 9</code></pre>
 <p>Returning a tuple and unpacking it is the usual way for a function to return more than one value.</p>
+`,
+    terms: [
+      ["List", "An ordered, mutable sequence: [1, 2, 3]."],
+      ["Tuple", "An ordered, immutable sequence: (1, 2)."],
+      ["Mutable", "Able to be changed in place after creation."],
+      ["Aliasing", "Two names referring to the same object."],
+      ["Unpacking", "Assigning the parts of a tuple or list to separate names: x, y = point."],
+      ["Shallow copy", "A new outer list holding the same inner objects, as made by xs.copy(); a deep copy also copies everything inside."],
+      ["Comprehension", "A compact expression that builds a list, set or dict from anything a for loop can go through, such as a list, string or range."]
+    ],
+    quiz: [
+      { q: "After <code>a = [1, 2]; b = a; b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place (like <code>extend</code>). This differs from <code>b = b + [3]</code>, which would build a new list and leave <code>a</code> as <code>[1, 2]</code>; see \"A trap: += on a list\" above." },
+      { q: "What is <code>xs</code> after <code>xs = [3, 1, 2]</code> and <code>xs = xs.sort()</code>?", choices: ["[1, 2, 3]", "[3, 1, 2]", "None", "An error"], answer: 2, why: "<code>sort()</code> sorts in place and returns <code>None</code>, which is then assigned to <code>xs</code>." },
+      { q: "What does <code>[n * 2 for n in range(4) if n != 2]</code> produce?", choices: ["[0, 2, 4, 6]", "[0, 2, 6]", "[2, 6]", "[0, 1, 3]"], answer: 1, why: "n takes 0, 1, 3 (2 is skipped), doubled to 0, 2, 6." }
+    ],
+    practice: [
+      { q: `<p>Write <code>stats(xs)</code> that returns a tuple <code>(smallest, largest, mean)</code> for a non-empty list of numbers, using a single loop and no built-in <code>min</code>, <code>max</code> or <code>sum</code>.</p>`, a: `<pre><code>def stats(xs):
+    smallest = largest = xs[0]
+    total = 0
+    for x in xs:
+        if x &lt; smallest:
+            smallest = x
+        if x &gt; largest:
+            largest = x
+        total += x
+    return smallest, largest, total / len(xs)
+
+lo, hi, avg = stats([4, 8, 1, 7])   # (1, 8, 5.0)</code></pre>` },
+      { q: `<p>Given <code>grid = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]</code>, write code to compute (a) the sum of each row, (b) the sum of the main diagonal (1 + 5 + 9).</p>`, a: `<pre><code>row_sums = [sum(row) for row in grid]          # [6, 15, 24]
+diagonal = sum(grid[i][i] for i in range(len(grid)))   # 15</code></pre><p>The diagonal entries are where the row index equals the column index.</p>` },
+      { q: `<p>This function is meant to return a new list with an item added, leaving the original alone. Explain the bug and fix it.</p><pre><code>def with_item(xs, item):
+    xs.append(item)
+    return xs
+
+original = [1, 2]
+new = with_item(original, 3)
+print(original)   # expected [1, 2]</code></pre>`, a: `<p>The parameter <code>xs</code> is an alias for <code>original</code>, so <code>append</code> changes the caller's list, and <code>original</code> prints <code>[1, 2, 3]</code>. Fix: build a new list, with <code>return xs + [item]</code>, or copy first: <code>new_xs = xs.copy()</code>, append to that, and return it.</p>` }
+    ],
+    sources: ["thinkpython", "pytutorial", "mit6100l"]
+  },
+  {
+    id: "dicts",
+    title: "Dictionaries, sets and sorting",
+    minutes: 90,
+    summary: "Looking values up by key with dictionaries, hashing, counting with dictionaries, sets and their operations, sorting with a key, and choosing the right collection.",
+    notes: `
+<p><a href="#c-cs101-u5">The previous lesson</a> covered lists and tuples, which keep items in order and find them by position. This lesson covers the two collections that find items by value instead: dictionaries, which look up a value by its key, and sets, which answer "is this in here?" almost instantly. It ends with sorting by a key and a guide to choosing among all four collections.</p>
 
 <h3>Dictionaries</h3>
 <p>A <strong>dictionary</strong> (<code>dict</code>) stores <strong>key–value pairs</strong>, and you look values up by key instead of by position. Think of a real dictionary: the word is the key, the definition is the value.</p>
@@ -1706,41 +1807,19 @@ sorted(pairs, key=lambda p: (-p[1], p[0]))
     <tr><td>To find values by name or ID</td><td><code>dict</code></td><td>Student ID → record; word → count</td></tr>
     <tr><td>Fast "is it in here?" and no duplicates</td><td><code>set</code></td><td>Usernames already taken</td></tr>
   </tbody>
-</table>
-`,
+</table>`,
     terms: [
-      ["List", "An ordered, mutable sequence: [1, 2, 3]."],
-      ["Tuple", "An ordered, immutable sequence: (1, 2)."],
       ["Dictionary", "A mapping from keys to values: {\"a\": 1}."],
       ["Set", "An unordered collection with no duplicates: {1, 2}."],
-      ["Mutable", "Able to be changed in place after creation."],
-      ["Aliasing", "Two names referring to the same object."],
-      ["Unpacking", "Assigning the parts of a tuple or list to separate names: x, y = point."],
       ["Hashable", "Usable as a dictionary key or set member: the value has a hash that never changes. Immutable built-ins are hashable; lists are not."],
-      ["Hash", "A whole number computed from a value, used to choose where a dictionary or set stores it."],
-      ["Shallow copy", "A new outer list holding the same inner objects, as made by xs.copy(); a deep copy also copies everything inside."],
-      ["Comprehension", "A compact expression that builds a list, set or dict from anything a for loop can go through, such as a list, string or range."]
+      ["Hash", "A whole number computed from a value, used to choose where a dictionary or set stores it."]
     ],
     quiz: [
-      { q: "After <code>a = [1, 2]; b = a; b += [3]</code>, what is <code>a</code>?", choices: ["[1, 2]", "[1, 2, 3]", "[3]", "An error"], answer: 1, why: "<code>b</code> is an alias for the same list, and <code>+=</code> on a list changes it in place (like <code>extend</code>). This differs from <code>b = b + [3]</code>, which would build a new list and leave <code>a</code> as <code>[1, 2]</code>; see \"A trap: += on a list\" above." },
       { q: "Which of these can be a dictionary key?", choices: ["[1, 2]", "{1, 2}", "(1, 2)", "{'a': 1}"], answer: 2, why: "Only the tuple is immutable and hashable." },
-      { q: "What is <code>xs</code> after <code>xs = [3, 1, 2]</code> and <code>xs = xs.sort()</code>?", choices: ["[1, 2, 3]", "[3, 1, 2]", "None", "An error"], answer: 2, why: "<code>sort()</code> sorts in place and returns <code>None</code>, which is then assigned to <code>xs</code>." },
-      { q: "What does <code>[n * 2 for n in range(4) if n != 2]</code> produce?", choices: ["[0, 2, 4, 6]", "[0, 2, 6]", "[2, 6]", "[0, 1, 3]"], answer: 1, why: "n takes 0, 1, 3 (2 is skipped), doubled to 0, 2, 6." },
-      { q: "<code>ages = {\"Ada\": 36}</code>. What does <code>ages.get(\"Alan\", 0)</code> return?", choices: ["KeyError", "None", "0", "36"], answer: 2, why: "<code>get</code> returns the default when the key is missing, instead of raising KeyError." }
+      { q: "<code>ages = {\"Ada\": 36}</code>. What does <code>ages.get(\"Alan\", 0)</code> return?", choices: ["KeyError", "None", "0", "36"], answer: 2, why: "<code>get</code> returns the default when the key is missing, instead of raising KeyError." },
+      { q: "What is <code>len({3, 1, 3, 2, 1})</code>?", choices: ["5", "3", "2", "An error"], answer: 1, why: "A set keeps no duplicates, so {3, 1, 3, 2, 1} is {1, 2, 3}." }
     ],
     practice: [
-      { q: `<p>Write <code>stats(xs)</code> that returns a tuple <code>(smallest, largest, mean)</code> for a non-empty list of numbers, using a single loop and no built-in <code>min</code>, <code>max</code> or <code>sum</code>.</p>`, a: `<pre><code>def stats(xs):
-    smallest = largest = xs[0]
-    total = 0
-    for x in xs:
-        if x &lt; smallest:
-            smallest = x
-        if x &gt; largest:
-            largest = x
-        total += x
-    return smallest, largest, total / len(xs)
-
-lo, hi, avg = stats([4, 8, 1, 7])   # (1, 8, 5.0)</code></pre>` },
       { q: `<p>Write <code>dedupe(xs)</code> that removes duplicates but keeps the first occurrence of each item <strong>in its original order</strong>: <code>[3, 1, 3, 2, 1]</code> becomes <code>[3, 1, 2]</code>. Why doesn't <code>list(set(xs))</code> work?</p>`, a: `<pre><code>def dedupe(xs):
     seen = set()
     result = []
@@ -1749,8 +1828,6 @@ lo, hi, avg = stats([4, 8, 1, 7])   # (1, 8, 5.0)</code></pre>` },
             seen.add(x)
             result.append(x)
     return result</code></pre><p>Sets are unordered, so <code>list(set(xs))</code> removes duplicates but may scramble the order. The set here is used only for fast "have I seen this?" checks.</p>` },
-      { q: `<p>Given <code>grid = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]</code>, write code to compute (a) the sum of each row, (b) the sum of the main diagonal (1 + 5 + 9).</p>`, a: `<pre><code>row_sums = [sum(row) for row in grid]          # [6, 15, 24]
-diagonal = sum(grid[i][i] for i in range(len(grid)))   # 15</code></pre><p>The diagonal entries are where the row index equals the column index.</p>` },
       { q: `<p>Using <code>word_counts</code> from the notes, print the three most common words in a text with their counts.</p>`, hint: `<p>Sort the <code>(word, count)</code> pairs from <code>.items()</code> by count, largest first.</p>`, a: `<pre><code>counts = word_counts(text)
 top = sorted(counts.items(), key=lambda pair: pair[1], reverse=True)[:3]
 for word, n in top:
@@ -1765,14 +1842,7 @@ for word, n in top:
 bob = {"grace", "linus", "margaret"}
 alice &amp; bob    # {'grace', 'linus'}
 alice - bob    # {'ada', 'alan'}
-alice | bob    # all five names</code></pre>` },
-      { q: `<p>This function is meant to return a new list with an item added, leaving the original alone. Explain the bug and fix it.</p><pre><code>def with_item(xs, item):
-    xs.append(item)
-    return xs
-
-original = [1, 2]
-new = with_item(original, 3)
-print(original)   # expected [1, 2]</code></pre>`, a: `<p>The parameter <code>xs</code> is an alias for <code>original</code>, so <code>append</code> changes the caller's list, and <code>original</code> prints <code>[1, 2, 3]</code>. Fix: build a new list, with <code>return xs + [item]</code>, or copy first: <code>new_xs = xs.copy()</code>, append to that, and return it.</p>` }
+alice | bob    # all five names</code></pre>` }
     ],
     sources: ["thinkpython", "pytutorial", "mit6100l"]
   },
@@ -1996,8 +2066,8 @@ python3 -m pytest --version         # check: prints something like "pytest 9.2.0
 <pre data-label="Terminal"><code>python3 -m venv .venv
 source .venv/bin/activate           # Windows: .venv\\Scripts\\activate
 python -m pip install pytest</code></pre>
-<p>(On Windows PowerShell, if activation says "running scripts is disabled", see the note in <a href="#c-cs101-u7">Lesson 11</a>, "Packages, pip and virtual environments".)</p>
-<p>After activating, use <code>python</code> for the rest of that terminal session, and run <code>source .venv/bin/activate</code> again in each new terminal. The toolkit lesson, <a href="#c-cs101-u7">Lesson 11</a>, explains pip and virtual environments properly; these commands are all you need until then.</p>
+<p>(On Windows PowerShell, if activation says "running scripts is disabled", see the note in <a href="#c-cs101-u7">Lesson 14</a>, "Packages, pip and virtual environments".)</p>
+<p>After activating, use <code>python</code> for the rest of that terminal session, and run <code>source .venv/bin/activate</code> again in each new terminal. The toolkit lesson, <a href="#c-cs101-u7">Lesson 14</a>, explains pip and virtual environments properly; these commands are all you need until then.</p>
 <p>Suppose <code>stats.py</code> contains a <code>mean</code> function. Put tests in a file whose name starts with <code>test_</code>, in the same folder. Each test is a function whose name also starts with <code>test_</code>:</p>
 <pre><code># test_stats.py
 import pytest
@@ -2498,7 +2568,7 @@ def has_duplicate_fast(xs):     # O(n): one pass with a set
     <tr><td>Get by position: <code>xs[i]</code></td><td>O(1)</td><td>not applicable</td></tr>
   </tbody>
 </table>
-<p>Sets and dictionaries use a <strong>hash table</strong>: they compute a number from each key, its <em>hash</em>, that tells them where to store it, so finding a key doesn't require searching. The Lists lesson showed the first step (<a href="#c-cs101-u5">"What hashable means"</a>). Here is a small worked example, with 8 slots, whole-number keys (whose hash is the number itself), and slot = hash % 8:</p>
+<p>Sets and dictionaries use a <strong>hash table</strong>: they compute a number from each key, its <em>hash</em>, that tells them where to store it, so finding a key doesn't require searching. The Dictionaries lesson showed the first step (<a href="#c-cs101-dicts">"What hashable means"</a>). Here is a small worked example, with 8 slots, whole-number keys (whose hash is the number itself), and slot = hash % 8:</p>
 <table>
   <thead><tr><th>Insert key</th><th>12 % 8</th><th>7 % 8</th><th>33 % 8</th><th>20 % 8</th></tr></thead>
   <tbody>
@@ -2521,7 +2591,7 @@ start = time.perf_counter()
 for _ in range(100):
     (n - 1) in as_set
 print("set: ", time.perf_counter() - start)</code></pre>
-<p>On a typical laptop the list version takes around a second and the set version well under a millisecond. (The underscores in <code>1_000_000</code> are just for readability. The loop variable <code>_</code> is the "I don't use this value" name from <a href="#c-cs101-u2">Lesson 3, for loops</a>: the loop just repeats 100 times.)</p>
+<p>On a typical laptop the list version takes around a second and the set version well under a millisecond. (The underscores in <code>1_000_000</code> are just for readability. The loop variable <code>_</code> is the "I don't use this value" name from <a href="#c-cs101-loops">Lesson 5, for loops</a>: the loop just repeats 100 times.)</p>
 
 <h3>Sorting: selection sort</h3>
 <p>Sorting is one of the most studied problems in computer science, because so much else depends on it, binary search included. The simplest method, <strong>selection sort</strong>, repeatedly finds the smallest remaining item and moves it to the front:</p>

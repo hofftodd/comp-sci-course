@@ -116,7 +116,7 @@ acct.withdraw(1)              # ValueError: insufficient funds, from an account 
 <p>Nothing fails at the moment of the bad assignment. The trouble shows up later, somewhere else, in code that trusted the invariant, and that makes the bug hard to trace back. The underscore protects against accidents by people who read it; it can't stop someone who ignores it. The next lesson shows <em>properties</em>, which go one step further: they let the <em>public</em> name <code>a.balance</code> run a check on every assignment, so the obvious way to change the balance is also the safe one and a bad value is rejected immediately.</p>
 
 <h3>Objects in memory</h3>
-<p>Objects follow the same rules as lists in <a href="#c-cs101-u5">CS 101's lesson on lists and dictionaries</a>: variables are names that refer to objects, and assignment never copies.</p>
+<p>Objects follow the same rules as lists in <a href="#c-cs101-u5">CS 101's lesson on lists</a>: variables are names that refer to objects, and assignment never copies.</p>
 <pre><code>c = a          # c and a are the same account
 c.deposit(10)
 print(a.balance)   # 160: there's only one object</code></pre>
@@ -453,7 +453,7 @@ print(Point(1, 2) in pts)  # False: right bucket, but the point there is now (10
         if amount &lt;= 0:
             raise ValueError("deposit must be positive")
         self._balance += amount</code></pre><p>With no setter, <code>account.balance = 10</code> raises <code>AttributeError</code>.</p>` },
-      { q: `<p>Use a frozen dataclass to represent a playing card with a rank (2 to 14) and a suit. Then sort a list of cards by rank, and put cards in a set. Why does the set work?</p>`, hint: `<p>Sort with a <code>key</code> function, as in <a href="#c-cs101-u5">CS 101's lists lesson</a> ("Sorting with a key"): <code>key=lambda c: c.rank</code> sorts the cards by their rank.</p>`, a: `<pre><code>from dataclasses import dataclass
+      { q: `<p>Use a frozen dataclass to represent a playing card with a rank (2 to 14) and a suit. Then sort a list of cards by rank, and put cards in a set. Why does the set work?</p>`, hint: `<p>Sort with a <code>key</code> function, as in <a href="#c-cs101-dicts">CS 101's dictionaries lesson</a> ("Sorting with a key"): <code>key=lambda c: c.rank</code> sorts the cards by their rank.</p>`, a: `<pre><code>from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Card:
@@ -976,7 +976,7 @@ total = sum(numbers(non_blank(read_lines("data.txt"))))</code></pre>
 
 <h3>Functions are values</h3>
 <p>In Python, a function is an object like any other: you can store it in a variable, put it in a list, pass it to another function, or return it from one. You've already done this with <code>sorted(words, key=len)</code>, which passes the function <code>len</code> itself (no parentheses) for <code>sorted</code> to call. A function that takes or returns functions is a <strong>higher-order function</strong>.</p>
-<p>You met <strong>lambda</strong> in <a href="#c-cs101-u3">CS 101, Functions and abstraction</a>, and used it as a sort key in <a href="#c-cs101-u5">CS 101's lists lesson</a>. As a reminder, a lambda creates a short function, used once, without a name:</p>
+<p>You met <strong>lambda</strong> in <a href="#c-cs101-u3">CS 101, Functions and abstraction</a>, and used it as a sort key in <a href="#c-cs101-dicts">CS 101's dictionaries lesson</a>. As a reminder, a lambda creates a short function, used once, without a name:</p>
 <pre><code>students = [("Ada", 92), ("Alan", 85), ("Grace", 97)]
 by_score = sorted(students, key=lambda s: s[1], reverse=True)
 

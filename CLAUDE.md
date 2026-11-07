@@ -29,6 +29,10 @@ Reviews done so far: `docs/reviews/`. (The Year 1 Fall and Spring student review
 >
 > Return a Markdown document titled "Student review: [term]", with one short paragraph about your background, then a numbered list grouped by course (### heading per course) and lesson (#### heading with the lesson id and title). Number items continuously across the whole document. End with an "Across courses" section for problems that span courses.
 
+## Lesson length
+
+Each core lesson is planned as about 90 minutes. Check estimates with `node scripts/lesson_time.js .` (its model is in the script's header). When a lesson runs long and its content is good, split it into two lessons rather than trimming it: keep the original id on the first half so progress and links survive, give each half its own introduction, quiz (at least three questions) and practice (at least three problems), move sidebars and programming problems with their material, and update every "Lesson N" reference, link target and rubric lesson range. Trim only content that is redundant or off-topic.
+
 ## Checks
 
 From the repository root:
