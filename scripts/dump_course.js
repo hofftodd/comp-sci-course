@@ -1,5 +1,6 @@
 // Print a course as plain text, the way a Year 1 student sees it (Java/C++ blocks removed).
-// Superscripts and subscripts are kept (as Unicode where possible, otherwise ^(...) and _(...)),
+// Superscripts are kept (as Unicode where possible, otherwise ^(...)); subscripts use Unicode digits and
+// an underscore for letters (x₁, v_x, Σ_(i=1)); line breaks inside table cells become "; ",
 // table cells are separated with " | ", figures appear as [figure: description], short bold
 // symbols (vectors) appear as **v**, key terms are printed as plain text (they aren't HTML), blank lines in code are kept, and key terms and hints are included.
 // Usage (from the repository root): node scripts/dump_course.js . <courseId> > course.txt
@@ -21,6 +22,14 @@ const script = (s, map, mark) => {
   const plain = s.replace(/<[^>]+>/g, "");
   return [...plain].every(ch => ch in map) ? [...plain].map(ch => map[ch]).join("") : `${mark}(${plain})`;
 };
+// Subscripts: Unicode has subscript digits but only a few subscript letters (no y, for example), so
+// letters are always written with an underscore (v_x, v_y, a_n, Σ_(i=1)) to keep one consistent style.
+const SUBDIGITS = Object.fromEntries(Object.entries(SUB).filter(([k]) => !/[a-z]/.test(k)));
+const sub = s => {
+  const plain = s.replace(/<[^>]+>/g, "");
+  if ([...plain].every(ch => ch in SUBDIGITS)) return [...plain].map(ch => SUBDIGITS[ch]).join("");
+  return plain.length === 1 ? `_${plain}` : `_(${plain})`;
+};
 
 const txt = s => s
   .replace(/<pre data-lang="(java|cpp)">[\s\S]*?<\/pre>/g, "")
@@ -29,10 +38,10 @@ const txt = s => s
   .replace(/<svg[^>]*aria-label="([^"]*)"[\s\S]*?<\/svg>/g, "[figure: $1]")
   .replace(/<svg[\s\S]*?<\/svg>/g, "[figure]")
   .replace(/<sup>([\s\S]*?)<\/sup>/g, (_, s) => script(s, SUP, "^"))
-  .replace(/<sub>([\s\S]*?)<\/sub>/g, (_, s) => script(s, SUB, "_"))
+  .replace(/<sub>([\s\S]*?)<\/sub>/g, (_, s) => sub(s))
   .replace(/<(strong|b)>([^<]{1,3})<\/\1>/g, "**$2**")
   .replace(/<pre[^>]*>/g, "\n```\n").replace(/<\/pre>/g, "\n```\n")
-  .replace(/<\/t[dh]>/g, " | ")
+  .replace(/<br\s*\/?>/g, "; ").replace(/<\/t[dh]>/g, " | ")
   .replace(/<\/(p|li|h3|h4|tr|figcaption|thead|tbody)>/g, "\n").replace(/<h3>/g, "\n### ").replace(/<h4>/g, "\n#### ").replace(/<li>/g, "- ")
   .replace(/<[^>]+>/g, "")
   .replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&")

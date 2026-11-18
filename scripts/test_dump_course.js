@@ -19,7 +19,9 @@ const firstMatch = (re) => { const m = all.match(re); return m ? JSON.stringify(
 
 // 1. Superscripts and subscripts survive (bug: "2n" for 2ⁿ, "Σi=14" for a sum from 1 to 4).
 check("superscript n renders as ⁿ", text.math120.includes("2ⁿ"));
-check("sum limits render as subscript and superscript", /Σᵢ₌₁[⁰-⁹ⁿ]/.test(text.math130));
+check("sum limits render as subscript and superscript", /Σ_\(i=1\)[⁰-⁹ⁿ]/.test(text.math130));
+check("<sub> letters use one style (bug: fₓ next to f_(y))", all.includes("v_x") && all.includes("v_y") && !/[^_]_\([a-zA-Z]\)/.test(prose), firstMatch(/[^_]_\([a-zA-Z]\)/));
+check("line breaks in table cells are kept apart (bug: \"!race podiums\")", text.math121.includes("!; race podiums"));
 check("superscript letters render as Unicode (bug: n^(r))", text.math121.includes("nʳ") && !/\^\([a-z]\)/.test(all), firstMatch(/\^\([a-z]\)/));
 check("negative exponents render (10⁻¹)", all.includes("10⁻¹"));
 
