@@ -83,7 +83,23 @@ window.CSA = {
     openstaxphys: { title: "University Physics Volume 1", author: "William Moebs, Samuel J. Ling, Jeff Sanny, OpenStax", url: "https://openstax.org/details/books/university-physics-volume-1", license: "CC BY 4.0", kind: "Textbook" },
     feynman: { title: "The Feynman Lectures on Physics, Volume I", author: "Richard P. Feynman, Robert B. Leighton, Matthew Sands, Caltech", url: "https://www.feynmanlectures.caltech.edu/I_toc.html", license: "", kind: "Textbook" },
     newton1687: { title: "Philosophiæ Naturalis Principia Mathematica (1687), English translation by Andrew Motte (1729)", author: "Isaac Newton, via Wikisource", url: "https://en.wikisource.org/wiki/The_Mathematical_Principles_of_Natural_Philosophy_(1729)", license: "Public domain", kind: "Primary source" },
-    nasahidden: { title: "Katherine Johnson biography", author: "NASA", url: "https://www.nasa.gov/people/katherine-johnson/", license: "U.S. government work", kind: "Biography" }
+    nasahidden: { title: "Katherine Johnson biography", author: "NASA", url: "https://www.nasa.gov/people/katherine-johnson/", license: "U.S. government work", kind: "Biography" },
+    googletw: { title: "Technical Writing One and Two (courses)", author: "Google for Developers", url: "https://developers.google.com/tech-writing", license: "", kind: "Course" },
+    diataxis: { title: "Diátaxis: a systematic approach to technical documentation", author: "Daniele Procida", url: "https://diataxis.fr/", license: "", kind: "Guide" },
+    writethedocs: { title: "A beginner's guide to writing documentation, and the Write the Docs guide", author: "Write the Docs community", url: "https://www.writethedocs.org/guide/", license: "CC BY-NC-SA 4.0", kind: "Guide" },
+    beams: { title: "How to Write a Git Commit Message", author: "Chris Beams (2014)", url: "https://cbea.ms/git-commit/", license: "", kind: "Article" },
+    tatham: { title: "How to Report Bugs Effectively", author: "Simon Tatham (1999)", url: "https://www.chiark.greenend.org.uk/~sgtatham/bugs.html", license: "", kind: "Article" },
+    engprac: { title: "Google Engineering Practices: How to do a code review", author: "Google", url: "https://google.github.io/eng-practices/review/reviewer/", license: "", kind: "Guide" },
+    designdocs: { title: "Design Docs at Google", author: "Malte Ubl, Industrial Empathy (2020)", url: "https://www.industrialempathy.com/posts/design-docs-at-google/", license: "", kind: "Article" },
+    gopen90: { title: "The Science of Scientific Writing", author: "George D. Gopen and Judith A. Swan, American Scientist 78(6), 1990", url: "https://www.americanscientist.org/blog/the-long-view/the-science-of-scientific-writing", license: "", kind: "Article" },
+    orwell46: { title: "Politics and the English Language (1946)", author: "George Orwell, via the Orwell Foundation", url: "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/", license: "", kind: "Essay" },
+    strunk: { title: "The Elements of Style (1918 edition)", author: "William Strunk Jr., via Project Gutenberg", url: "https://www.gutenberg.org/ebooks/37134", license: "Public domain", kind: "Primary source" },
+    plainlang: { title: "Federal Plain Language Guidelines", author: "Plain Language Action and Information Network (PLAIN)", url: "https://www.plainlanguage.gov/guidelines/", license: "U.S. government work", kind: "Guidelines" },
+    sift: { title: "SIFT (The Four Moves)", author: "Mike Caulfield (2019)", url: "https://hapgood.us/2019/06/19/sift-the-four-moves/", license: "CC BY 4.0", kind: "Article" },
+    purdueowl: { title: "Purdue OWL: Research and Citation Resources", author: "Purdue University Online Writing Lab", url: "https://owl.purdue.edu/owl/research_and_citation/resources.html", license: "", kind: "Reference" },
+    ieeeref: { title: "IEEE Reference Guide", author: "IEEE Author Center", url: "https://ieeeauthorcenter.ieee.org/wp-content/uploads/IEEE-Reference-Guide.pdf", license: "", kind: "Style guide" },
+    knuth84: { title: "Literate Programming", author: "Donald E. Knuth, The Computer Journal 27(2), 1984", url: "", license: "", kind: "Paper" },
+    caib: { title: "Columbia Accident Investigation Board Report, Volume I (2003)", author: "Columbia Accident Investigation Board", url: "", license: "U.S. government work", kind: "Report" }
   },
 
   /* How a reader can get each source. open = openly licensed; pd = public domain or
@@ -98,7 +114,10 @@ window.CSA = {
     mactutorcalc: "free", eniac: "free", chmrev: "free", propublica: "free", gendershades: "free",
     wcag: "free", euaiact: "free", composing: "open", pythonds: "open", pytestdocs: "open", kay93: "library",
     liskov87: "library", osi: "open", xzcve: "pd", grinstead: "open", keller: "open", openstaxcalc2: "open",
-    openstaxcalc3: "open", mactutorseries: "free", openstaxphys: "open", feynman: "free", newton1687: "pd", nasahidden: "pd"
+    openstaxcalc3: "open", mactutorseries: "free", openstaxphys: "open", feynman: "free", newton1687: "pd", nasahidden: "pd",
+    googletw: "free", diataxis: "free", writethedocs: "open", beams: "free", tatham: "free", engprac: "free",
+    designdocs: "free", gopen90: "free", orwell46: "free", strunk: "pd", plainlang: "pd", sift: "open", purdueowl: "free",
+    ieeeref: "free", knuth84: "library", caib: "pd"
   },
 
   courses: {},

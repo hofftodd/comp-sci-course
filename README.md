@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, except the WRIT 100 elective. The other six terms are planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. The other six terms are planned and shown on the home page.
 
 ## What's in Year 1
 
@@ -18,7 +18,7 @@ instructor approves each change before students see it.
 | MATH 120 Discrete Mathematics I | 4 | 6 | From Boole to Shannon · Proof assistants and verified software |
 | MATH 130 Calculus I | 4 | 11 | Calculus inside machine learning · Two thousand years of calculus |
 | CS 100 Computing in Society | 2 | 6 | The hidden history of computing · Risk scores and the math of fairness |
-| WRIT 100 Writing for Technical Audiences (elective) | 3 | planned | |
+| WRIT 100 Writing for Technical Audiences (elective) | 3 | 9 | |
 
 ### Spring
 
