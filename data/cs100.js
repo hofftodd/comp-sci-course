@@ -524,7 +524,7 @@ CSA.addOptional("cs100", [
 <p>Before machines, a computer was a person who computed, often a woman, paid less than male engineers. Teams of human computers calculated star positions at the Harvard Observatory in the 1880s, artillery tables during both world wars, and trajectories at NACA (the National Advisory Committee for Aeronautics, the U.S. government's aviation research agency) and at NASA, which replaced it in 1958.</p>
 
 <h3>The ENIAC six</h3>
-<p>Kathleen McNulty, Jean Jennings, Betty Snyder, Marlyn Wescoff, Frances Bilas and Ruth Lichterman programmed ENIAC with no manuals and no programming languages, working from the machine's wiring diagrams. They developed techniques such as breakpoints for debugging. Betty Snyder Holberton later helped design COBOL and early sorting software. Their story was largely forgotten until Kathy Kleiman's research beginning in the 1980s.</p>
+<p>Kathleen McNulty, Jean Jennings, Betty Snyder, Marlyn Wescoff, Frances Bilas and Ruth Lichterman programmed ENIAC with no manuals and no programming languages, working from the machine's wiring diagrams. They developed ways to find and fix mistakes in programs (<strong>debugging</strong>), such as the <strong>breakpoint</strong>: a chosen spot where the machine pauses so the programmer can inspect what it has done so far. Betty Snyder Holberton later helped design COBOL, an early programming language for business records, and wrote early software for <strong>sorting</strong>, putting records in order (for example, by name or date). Their story was largely forgotten until Kathy Kleiman's research beginning in the 1980s.</p>
 
 <h3>Bletchley Park</h3>
 <p>About three-quarters of the roughly ten thousand people working at Britain's codebreaking center during World War II were women. They operated the Bombe machines and Colossus, and many were bound by secrecy for decades.</p>
@@ -596,8 +596,8 @@ CSA.addOptional("cs100", [
   <thead><tr><th>Definition</th><th>Requires</th><th>Who it protects</th></tr></thead>
   <tbody>
     <tr><td>Calibration</td><td>A given score means the same risk in every group</td><td>Decision makers relying on the score</td></tr>
-    <tr><td>Equal false-positive rates</td><td>Innocent people in every group are equally likely to be flagged</td><td>People wrongly labeled high-risk</td></tr>
-    <tr><td>Equal false-negative rates</td><td>Every group's high-risk people are equally likely to be caught</td><td>Public safety, equally across groups</td></tr>
+    <tr><td>Equal false-positive rates</td><td>In every group, people who did <em>not</em> reoffend are equally likely to be wrongly labeled high risk</td><td>People wrongly labeled high-risk</td></tr>
+    <tr><td>Equal false-negative rates</td><td>In every group, people who <em>did</em> reoffend are equally likely to be wrongly labeled low risk (missed)</td><td>Public safety, equally across groups</td></tr>
   </tbody>
 </table>
 

@@ -65,7 +65,7 @@ CSA.addCourse({
       minutes: 90,
       summary: "Why technical writing exists, who your reader is, what they need from you, and how to plan a document before you write it.",
       notes: `
-<p>Programmers write all day. Some of it is code. The rest is READMEs, comments, commit messages, bug reports, messages to teammates, design proposals, and answers to questions. Studies of developers' time differ in their numbers, but they agree that reading and writing words, not typing code, takes a large share of the job. This course is about that other writing: <strong>technical writing</strong>, writing whose job is to help a specific reader understand something or do something.</p>
+<p>Programmers write all day. Some of it is code. The rest is READMEs (the file that introduces a project: what it is and how to use it), comments, commit messages (notes recorded with each saved change to a project), bug reports, messages to teammates, design proposals, and answers to questions. Studies of developers' time differ in their numbers, but they agree that reading and writing words, not typing code, takes a large share of the job. This course is about that other writing: <strong>technical writing</strong>, writing whose job is to help a specific reader understand something or do something.</p>
 <p>That definition already contains the course's main idea. Technical writing is judged by what happens in the reader's head, not by how it sounds. A clear, plain explanation that the reader follows on first reading is better than an impressive one they have to read three times.</p>
 
 <h3>The reader is not you</h3>
@@ -76,7 +76,7 @@ CSA.addCourse({
 <h3>Three questions before you write</h3>
 <p>Before you write anything longer than a few sentences, answer three questions. They take two minutes and save hours of rewriting.</p>
 <ol>
-<li><strong>Who is the reader?</strong> Be specific. "Anyone" is not an answer. "A first-year student who knows Python but has never used Git" is. If you have several kinds of reader, decide which one comes first.</li>
+<li><strong>Who is the reader?</strong> Be specific. "Anyone" is not an answer. "A first-year student who knows Python but has never used Git" is. (Git is a tool that records the history of a project's files; you don't need to know it for this course, and CS 101 teaches it in its last lesson.) If you have several kinds of reader, decide which one comes first.</li>
 <li><strong>What do they already know, and what do they need to learn?</strong> The distance between the two is the job of your document. Too little, and the reader is lost; too much, and they are bored and stop reading.</li>
 <li><strong>What should they be able to do afterwards?</strong> Install the program? Decide between two designs? Fix the bug? A document with a clear purpose is easy to write, because every sentence either serves the purpose or can be cut.</li>
 </ol>
@@ -225,7 +225,7 @@ average, it finds any key in constant time.</code></pre>
           a: `<p>For example: "On a 1 GB file, version 2.0 loads in 3 seconds instead of 11 and uses 200 MB of memory instead of 900 MB. Files under 10 MB, about 80% of what our users open, load in under a second either way." Precision forced two discoveries: the improvement depends on file size, and for most files it may not be noticeable. Vague words had hidden both.</p>`
         },
         {
-          q: `<p><strong>Old before new.</strong> Reorder the second and third sentences so each begins with information from the sentence before: "Git stores a project's history as a series of commits. A message and a pointer to the previous commit are stored with each commit. Following the chain of these pointers from the newest commit is how Git reconstructs the history."</p>`,
+          q: `<p><strong>Old before new.</strong> Reorder the second and third sentences so each begins with information from the sentence before. (A <em>commit</em> is a saved snapshot of a project's files; you need nothing more to do this.) "Git stores a project's history as a series of commits. A message and a pointer to the previous commit are stored with each commit. Following the chain of these pointers from the newest commit is how Git reconstructs the history."</p>`,
           a: `<p>"Git stores a project's history as a series of commits. Each commit stores a message and a pointer to the previous commit. By following these pointers back from the newest commit, Git reconstructs the history." Each sentence now starts with something the reader just met (commits, then the pointers) and ends with what's new.</p>`
         }
       ],
@@ -394,15 +394,15 @@ turning any data into a fixed-size number.</code></pre>
           a: `<p>"At a coffee shop, people join the line at the back and are served from the front: whoever arrived first is served first. A queue in a program works the same way. The program adds items to the back and takes them from the front, for example print jobs waiting for a printer. A queue is a collection where items are removed in the same order they were added: first in, first out."</p>`
         },
         {
-          q: `<p><strong>Analogy limits.</strong> A common analogy says "a computer's memory is like a library, and an address is like a shelf number." Name one way this analogy helps and one place it breaks that a student might be misled by.</p>`,
+          q: `<p><strong>Analogy limits.</strong> Here is what you need to know about memory. A computer's memory is a long row of numbered storage cells. Each cell always holds one small number, and its number in the row is its <em>address</em>. A program reads a cell by giving its address, which copies the value out and leaves it in place; it writes a cell by giving an address and a new value, which replaces the old one. A common analogy says "a computer's memory is like a library, and an address is like a shelf number." Name one way this analogy helps and one place it breaks that a student might be misled by.</p>`,
           a: `<p>It helps: each address identifies exactly one location, and you need the address to find what's stored there. It breaks: a library book can be taken away, leaving the shelf empty, but a memory location always holds <em>some</em> value; writing to a location replaces its contents rather than adding a second book; and reading a location doesn't remove anything. A student might wrongly think reading memory "takes" the data.</p>`
         },
         {
-          q: `<p><strong>Worked example.</strong> Write a worked example of binary search for 23 in the sorted list [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]. Show the low, high and middle positions at each step (positions counted from 0, middle rounded down).</p>`,
+          q: `<p><strong>Worked example.</strong> <em>Binary search</em> finds an item in a sorted list. It keeps two positions, <em>low</em> and <em>high</em>: the first and last positions where the item could still be, starting with the whole list. Each step looks at the <em>middle</em> position, halfway between low and high (rounded down). If the item there is the one sought, the search stops. If the sought item is larger, it can only be to the right, so low becomes middle + 1; if smaller, high becomes middle − 1. (That is all you need; CS 101 covers it later in the term.) Write a worked example of binary search for 23 in the sorted list [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]. Show the low, high and middle positions at each step (positions counted from 0).</p>`,
           a: `<p>Step 1: low = 0, high = 9, middle = 4, item 16. 23 &gt; 16, so search the right half: low = 5.</p><p>Step 2: low = 5, high = 9, middle = 7, item 56. 23 &lt; 56, so search the left half: high = 6.</p><p>Step 3: low = 5, high = 6, middle = 5, item 23. Found at position 5, after 3 comparisons. (A linear search would have needed 6.)</p>`
         },
         {
-          q: `<p><strong>Numbers.</strong> Make each number meaningful to a general reader with a comparison: (a) a hard drive holds 2 TB; (b) a network round trip from New York to London takes about 70 ms; (c) training a large AI model used about 1,000 MWh of electricity.</p>`,
+          q: `<p><strong>Numbers.</strong> Make each number meaningful to a general reader with a comparison: (a) a hard drive holds 2 TB; (b) a network round trip from New York to London takes about 70 ms; (c) training a large AI model used about 1,000 MWh of electricity. (Units: 1 TB, a terabyte, is 1,000 GB or 1,000,000 MB. 1 ms is a thousandth of a second. 1 MWh, a megawatt-hour, is 1,000 kWh, the kilowatt-hours on a home electricity bill; a 1,000-watt microwave running for an hour uses 1 kWh.)</p>`,
           a: `<p>(a) 2 TB is about 500,000 phone photos at 4 MB each. (b) 70 ms is about a quarter of the time a blink takes (roughly 300 ms), yet light in fiber needs most of it just to cross the ocean and back. (c) The average U.S. home uses about 10 MWh a year, so 1,000 MWh is roughly a year's electricity for 100 homes. Any comparison should be checked: state the assumptions (4 MB per photo, 10 MWh per home) so a reader can verify it.</p>`
         },
         {
@@ -438,14 +438,14 @@ CSA.addUnits("writ100", [
 <p>A tutorial that stops every few steps to explain design history loses the learner. A reference page padded with a story is slow to search. When you write a page, decide which of the four it is, and keep the others out (link to them instead).</p>
 
 <h3>The README</h3>
-<p>A <strong>README</strong> is the front page of a project: the first file people see in a repository. Its reader is someone who has just arrived and is deciding whether this project is what they need and how to start. A good README answers, in this order:</p>
+<p>A <strong>README</strong> is the front page of a project: the first file people see in a repository (the folder that holds a project's files, often shared online). Its reader is someone who has just arrived and is deciding whether this project is what they need and how to start. A good README answers, in this order:</p>
 <ol>
 <li><strong>What is this?</strong> The name and one or two sentences on what it does and for whom.</li>
 <li><strong>Why would I use it?</strong> The problem it solves, if the first sentence didn't make it obvious.</li>
 <li><strong>How do I install it?</strong> Exact commands, the requirements (such as "Python 3.10 or later"), and which folder to run them in.</li>
 <li><strong>How do I use it?</strong> The smallest example that does something real, with its output.</li>
 <li><strong>Where do I learn more or get help?</strong> Links to fuller documentation, how to report problems, how to contribute.</li>
-<li><strong>License.</strong> What others may do with the code (CS 101's sidebar on licenses explains why this matters).</li>
+<li><strong>License.</strong> What others may do with the code. Without a license, copyright law gives others no permission to copy, change or share it, so even code you mean to give away needs one. (CS 101's last lesson has a sidebar on common licenses.)</li>
 </ol>
 <p>Test your README the way a reader will use it: on a fresh computer, or with a classmate who has never seen the project, follow it literally, and fix every step that fails or assumes something unstated.</p>
 
@@ -533,7 +533,7 @@ items = sorted(items)   # binary search below requires sorted input</code></pre>
 <p>Most writing in a software team is short: a commit message, a bug report, a comment on a teammate's code, a question in a chat channel. Each is read by someone busy, often months later, who needs to act on it. Each has a well-understood shape.</p>
 
 <h3>Commit messages</h3>
-<p>A <strong>commit message</strong> describes one change to a codebase. Its readers are teammates reviewing the change today and, much more often, someone in the future asking "why was this line changed?" with a tool like <code>git log</code> (from CS 101, which lists past commits with their messages) or <code>git blame</code> (which shows, next to each line of a file, the commit that last changed it). The code shows <em>what</em> changed; the message should say <em>why</em>.</p>
+<p>A <strong>commit message</strong> describes one change to a codebase. Its readers are teammates reviewing the change today and, much more often, someone in the future asking "why was this line changed?" with a tool like <code>git log</code> (which lists past commits with their messages) or <code>git blame</code> (which shows, next to each line of a file, the commit that last changed it). Git is a tool that records a project's history as a series of saved changes called <em>commits</em>, each with a message; you need nothing more about it here, and CS 101 teaches it in its last lesson. The code shows <em>what</em> changed; the message should say <em>why</em>.</p>
 <p>The conventions most teams follow (summarized well by Chris Beams in 2014):</p>
 <ul>
 <li>A <strong>subject line</strong> of about 50 characters or fewer, capitalized, with no period at the end.</li>
@@ -560,7 +560,7 @@ all of them; three tries keeps the worst case under 10 seconds.</code></pre>
 <p>Stick to facts in the report and keep guesses about the cause labelled as guesses. A confident wrong diagnosis can send the programmer the wrong way.</p>
 
 <h3>Code review comments</h3>
-<p>In a <strong>code review</strong>, a teammate reads a proposed change before it is merged and comments on it. Review catches bugs and spreads knowledge, but only if comments are useful and the author can take them well. Google's published code review guide, among others, suggests:</p>
+<p>On a team, a programmer usually makes a change in a separate copy of the project (a <em>branch</em>) and then asks for it to be added to the main version; adding it is called <strong>merging</strong>. In a <strong>code review</strong>, a teammate reads the proposed change before it is merged and comments on it. Review catches bugs and spreads knowledge, but only if comments are useful and the author can take them well. Google's published code review guide, among others, suggests:</p>
 <ul>
 <li><strong>Comment on the code, not the person.</strong> "This loop reads the file twice" rather than "You read the file twice".</li>
 <li><strong>Explain why.</strong> "Could we use a set here? Lookups in this list make the function O(n²) for large inputs" teaches; "Use a set" only commands.</li>
@@ -838,11 +838,11 @@ all of them; three tries keeps the worst case under 10 seconds.</code></pre>
 </ul>
 <p>Uses to avoid or handle with care:</p>
 <ul>
-<li><strong>Letting it write for you.</strong> In this course, the ideas, structure and sentences must be your own (see the course policies). Outside it, AI-drafted text still needs a human who understands and stands behind every claim.</li>
+<li><strong>Letting it write for you.</strong> In this course, the ideas, structure and sentences must be your own. The course policy on AI assistants (on the course page) allows them for brainstorming, feedback on a draft and grammar checks, and requires you to say how you used them. Outside it, AI-drafted text still needs a human who understands and stands behind every claim.</li>
 <li><strong>Trusting its facts or sources.</strong> Language models generate plausible text, which is not the same as true text. Check every fact against a source you can cite, and never cite a reference you haven't found and read (Lesson 8).</li>
 <li><strong>Accepting its style by default.</strong> AI tools often produce padded, generic prose: exactly the needless words Lesson 2 cuts. Revise its suggestions as hard as your own drafts.</li>
 </ul>
-<p>Whatever you use, say how you used it, as the course policy requires.</p>
+<p>Whatever you use, say how you used it, as that policy requires: for example, "I asked an AI tool which parts of my draft were unclear, and rewrote the second paragraph myself."</p>
 
 <h3>Editing checklist</h3>
 <p>For the final pass, a short checklist catches the errors that remain:</p>

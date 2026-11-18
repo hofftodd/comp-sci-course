@@ -118,6 +118,7 @@ cd ..           # move up one level, to the parent folder</code></pre>
 &gt;&gt;&gt; print("Hello, world")
 Hello, world</code></pre>
 <p>Python's arithmetic symbols are <code>+</code>, <code>-</code>, <code>*</code> (multiply) and <code>/</code> (divide), with multiplication and division done before addition and subtraction, as in algebra. <code>**</code> means "to the power of", so <code>2 ** 100</code> is 2<sup>100</sup>. <code>+</code> also joins two strings (pieces of text in quotes), and <code>*</code> between a string and a whole number repeats the string: <code>"ab" * 2</code> is <code>'abab'</code>. The next lesson covers all of these properly.</p>
+<p>Notice the quotes. When the console shows the value of an expression that is a string, it puts quotes around it, so you can see it is text (and see any spaces at its ends). The quotes are not part of the value: <code>'Hello, world'</code> has 12 characters, with no quote marks among them. <code>print</code> is different: it writes the text itself, for a person to read, so no quotes appear. Later lessons show values in comments the console's way, as in <code># 'abab'</code>.</p>
 <p>The console is perfect for trying small things. Everything disappears when you leave it, which you do with <code>exit()</code>, or Ctrl+D on macOS and Linux, or Ctrl+Z then Enter on Windows.</p>
 
 <h3>Your first program</h3>
@@ -930,7 +931,7 @@ print(f"Correct! You took {guesses} guesses.")</code></pre>
     <tr><td><code>range(5, 0, -1)</code></td><td>5, 4, 3, 2, 1</td></tr>
   </tbody>
 </table>
-<p>The stop value is never included. <code>range(5)</code> has five numbers, starting at 0. A <code>for</code> loop also works directly on a string, one character at a time:</p>
+<p>The stop value is never included. <code>range(5)</code> has five numbers, starting at 0. (In your math courses, the <em>range</em> of a function means its set of outputs. That is a different idea that shares the name; in Python code, <code>range</code> is always this sequence of numbers.) A <code>for</code> loop also works directly on a string, one character at a time:</p>
 <pre><code>for ch in "loop":
     print(ch)      # prints l, o, o, p on separate lines</code></pre>
 <p>The word <code>in</code> also works as a test on its own: <code>ch in "aeiou"</code> is <code>True</code> when the character <code>ch</code> appears in the string <code>"aeiou"</code>, so it's a short way to write <code>ch == "a" or ch == "e" or ...</code>. And when a loop just needs to repeat and never uses its variable, programmers name the variable <code>_</code> (an underscore), which signals "I don't use this value": <code>for _ in range(3): print("hi")</code> prints <code>hi</code> three times.</p>

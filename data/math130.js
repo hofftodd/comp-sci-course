@@ -68,10 +68,10 @@ CSA.addUnits("math130", [
 <p class="note">Python in this course: CS 101 runs alongside MATH 130, so a lesson here may show optional Python before CS 101 teaches it. Where it does, the lesson explains that code in plain words where it is used, often in a note beginning "Reading the Python".</p>
 
 <h3>Functions, domain and range</h3>
-<p>A <strong>function</strong> <em>f</em> assigns to each input <em>x</em> in its <strong>domain</strong> exactly one output <em>f</em>(<em>x</em>). The set of outputs is its <strong>range</strong>. When a function is given by a formula, its domain is usually every real number for which the formula makes sense. Two restrictions come up constantly:</p>
+<p>A <strong>function</strong> <em>f</em> assigns to each input <em>x</em> in its <strong>domain</strong> exactly one output <em>f</em>(<em>x</em>). The set of outputs is its <strong>range</strong>. (Python's <code>range(n)</code>, from CS 101, is something else: the numbers 0 to <em>n</em> − 1. Here "range" always means a function's outputs.) When a function is given by a formula, its domain is usually every real number for which the formula makes sense. Two restrictions come up constantly:</p>
 <ul>
   <li>You can't divide by zero: <em>f</em>(<em>x</em>) = 1/(<em>x</em> − 3) has domain all <em>x</em> ≠ 3.</li>
-  <li>You can't take the square root (or any even root) of a negative number, or the logarithm of a non-positive one: √(<em>x</em> − 2) needs <em>x</em> ≥ 2, and ln <em>x</em> needs <em>x</em> &gt; 0.</li>
+  <li>You can't take the square root (or any even root) of a negative number, or the logarithm of a non-positive one: √(<em>x</em> − 2) needs <em>x</em> ≥ 2, and ln <em>x</em> (the natural logarithm, defined later in this lesson) needs <em>x</em> &gt; 0.</li>
 </ul>
 <p>The <strong>graph</strong> of <em>f</em> is the set of points (<em>x</em>, <em>f</em>(<em>x</em>)). A curve is the graph of a function exactly when every vertical line crosses it at most once (the vertical line test): one input, one output.</p>
 
@@ -160,9 +160,12 @@ CSA.addUnits("math130", [
     <tr><td>cos θ</td><td>1</td><td>√3/2</td><td>√2/2</td><td>1/2</td><td>0</td><td>−1</td></tr>
   </tbody>
 </table>
-<p>Also tan θ = sin θ / cos θ, and the identity sin² θ + cos² θ = 1 (which is the Pythagorean theorem on the unit circle). Sine and cosine repeat every 2π, which is why they model anything periodic: sound waves, seasons, alternating current.</p>
+<p>Also tan θ = sin θ / cos θ, and the identity sin² θ + cos² θ = 1 (which is the Pythagorean theorem on the unit circle). Here sin² θ means (sin θ)², the sine squared; a small 2 after a trigonometric function is a power. (The one exception is the −1 in sin<sup>−1</sup>, explained below.) Sine and cosine repeat every 2π, which is why they model anything periodic: sound waves, seasons, alternating current.</p>
 <p>Three more functions are reciprocals of these, and they appear in derivative formulas: the <strong>secant</strong> sec θ = 1/cos θ, the <strong>cosecant</strong> csc θ = 1/sin θ, and the <strong>cotangent</strong> cot θ = cos θ/sin θ. Each is undefined where its denominator is 0. Dividing sin² θ + cos² θ = 1 by cos² θ gives a second identity you'll use with them:</p>
 <p class="math">1 + tan² θ = sec² θ</p>
+<p>Two more identities, the <strong>angle-addition formulas</strong>, give the sine and cosine of a sum of two angles:</p>
+<p class="math">sin(a + b) = sin a cos b + cos a sin b<br>cos(a + b) = cos a cos b − sin a sin b</p>
+<p>Their proof is a geometric argument with two rotated triangles, found in any precalculus text; this course states them without proof. You can check them on the table: with <em>a</em> = π/6 and <em>b</em> = π/3, sin(π/2) = (1/2)(1/2) + (√3/2)(√3/2) = 1/4 + 3/4 = 1, and cos(π/2) = (√3/2)(1/2) − (1/2)(√3/2) = 0. They are needed in Lesson 6, to find the derivatives of sin and cos.</p>
 
 <h3>Combining and transforming functions</h3>
 <p>The <strong>composition</strong> (<em>f</em> ∘ <em>g</em>)(<em>x</em>) = <em>f</em>(<em>g</em>(<em>x</em>)) feeds one function's output into another. Spotting compositions is the key skill for the chain rule later: √(<em>x</em>² + 1) is the square root function applied to <em>x</em>² + 1, and <em>e</em><sup>3x</sup> is the exponential applied to 3<em>x</em>.</p>
@@ -306,13 +309,33 @@ CSA.addUnits("math130", [
 <h3>The squeeze theorem</h3>
 <p>If <em>g</em>(<em>x</em>) ≤ <em>f</em>(<em>x</em>) ≤ <em>h</em>(<em>x</em>) near <em>a</em>, and <em>g</em> and <em>h</em> have the same limit <em>L</em> at <em>a</em>, then <em>f</em> is squeezed to <em>L</em> too. The same theorem holds for limits as <em>x</em> → ∞: there, "near <em>a</em>" becomes "for all sufficiently large <em>x</em>".</p>
 <p><strong>Example.</strong> <em>x</em>² sin(1/<em>x</em>) oscillates wildly near 0, but since −1 ≤ sin(1/<em>x</em>) ≤ 1, we have −<em>x</em>² ≤ <em>x</em>² sin(1/<em>x</em>) ≤ <em>x</em>². Both outer functions go to 0, so lim<sub><em>x</em>→0</sub> <em>x</em>² sin(1/<em>x</em>) = 0.</p>
-<p><strong>The most important trigonometric limit.</strong> Take an angle <em>x</em> between 0 and π/2 (in radians) at the center <em>O</em> of the unit circle, with one side along the <em>x</em>-axis to <em>A</em> = (1, 0) and the other meeting the circle at <em>P</em> = (cos <em>x</em>, sin <em>x</em>). Three regions, each inside the next, have these areas:</p>
+<p><strong>The most important trigonometric limit.</strong> Take an angle <em>x</em> between 0 and π/2 (in radians) at the center <em>O</em> of the unit circle, with one side along the <em>x</em>-axis to <em>A</em> = (1, 0) and the other meeting the circle at <em>P</em> = (cos <em>x</em>, sin <em>x</em>). The figure below shows three regions, each inside the next. Their areas are:</p>
 <ul>
   <li>the triangle <em>OAP</em>: base 1, height sin <em>x</em>, so area ½ sin <em>x</em>;</li>
   <li>the sector (pie slice) <em>OAP</em>: a fraction <em>x</em>/(2π) of the circle's area π, so area ½<em>x</em>;</li>
   <li>the larger triangle <em>OAT</em>, where <em>T</em> is the point at which side <em>OP</em>, extended, meets the vertical tangent line at <em>A</em>. It has a right angle at <em>A</em> and the angle <em>x</em> at <em>O</em>. Since tan = opposite/adjacent, tan <em>x</em> = <em>AT</em>/<em>OA</em> = <em>AT</em>/1, so its height <em>AT</em> is tan <em>x</em>, and with base 1 its area is ½ tan <em>x</em>.</li>
 </ul>
-<p>So sin <em>x</em> ≤ <em>x</em> ≤ tan <em>x</em>. Dividing by sin <em>x</em> (positive) gives 1 ≤ <em>x</em>/sin <em>x</em> ≤ 1/cos <em>x</em>, and flipping each fraction reverses the inequalities: cos <em>x</em> ≤ (sin <em>x</em>)/<em>x</em> ≤ 1. (For negative <em>x</em> the same holds, because both cos <em>x</em> and (sin <em>x</em>)/<em>x</em> are unchanged when <em>x</em> is replaced by −<em>x</em>.) Since cos <em>x</em> → 1, the squeeze theorem gives</p>
+<figure class="fig">
+<svg viewBox="0 0 300 220" role="img" aria-label="Quarter of the unit circle with center O and A = (1, 0). The point P on the circle is at angle x. Triangle OAP sits inside the sector OAP, which sits inside the larger triangle OAT, where T is on the vertical tangent line at A, directly above A.">
+  <line x1="20" y1="190" x2="250" y2="190" class="ax"/><line x1="40" y1="205" x2="40" y2="25" class="ax"/>
+  <path d="M190 190 A150 150 0 0 0 40 40" class="ax"/>
+  <line x1="190" y1="205" x2="190" y2="25" class="ax dash"/>
+  <polygon points="40,190 190,190 190,63.7" class="warm"/>
+  <path d="M40 190 L190 190 A150 150 0 0 0 154.7 93.4 Z" class="soft"/>
+  <polygon points="40,190 190,190 154.7,93.4" class="outline"/>
+  <line x1="154.7" y1="93.4" x2="154.7" y2="190" class="ax dash"/>
+  <circle cx="154.7" cy="93.4" r="3.5" class="dot"/><circle cx="190" cy="63.7" r="3.5" class="dot"/>
+  <text x="26" y="206">O</text><text x="194" y="206">A</text>
+  <text x="146" y="80">P</text><text x="196" y="62">T</text>
+  <text x="66" y="182" class="m">x</text>
+  <text x="120" y="150" class="m">sin x</text>
+  <text x="196" y="130" class="m">tan x</text>
+  <text x="196" y="38" class="m">tangent at A</text>
+</svg>
+<figcaption>Smallest: triangle <em>OAP</em> (outlined), height sin <em>x</em>. Middle: the sector <em>OAP</em>, bounded by the arc from <em>A</em> to <em>P</em>. Largest: triangle <em>OAT</em>, height tan <em>x</em>, whose extra part shows in a second color. Each region lies inside the next.</figcaption>
+</figure>
+<p>Why each region lies inside the next: the triangle <em>OAP</em> is cut off by the straight chord from <em>A</em> to <em>P</em>, which lies inside the circle, so the triangle is inside the sector. The whole circle lies to the left of the tangent line at <em>A</em> (the line through <em>A</em> and <em>T</em>), which touches it only at <em>A</em>; so the arc from <em>A</em> to <em>P</em> does too, and it lies between the sides <em>OA</em> and <em>OT</em>. So the sector is inside the triangle <em>OAT</em>. A region inside another has no more area, so ½ sin <em>x</em> ≤ ½<em>x</em> ≤ ½ tan <em>x</em>. Multiplying by 2:</p>
+<p>sin <em>x</em> ≤ <em>x</em> ≤ tan <em>x</em>. Dividing by sin <em>x</em> (positive) gives 1 ≤ <em>x</em>/sin <em>x</em> ≤ 1/cos <em>x</em>, and flipping each fraction reverses the inequalities: cos <em>x</em> ≤ (sin <em>x</em>)/<em>x</em> ≤ 1. (For negative <em>x</em> the same holds, because both cos <em>x</em> and (sin <em>x</em>)/<em>x</em> are unchanged when <em>x</em> is replaced by −<em>x</em>.) Since cos <em>x</em> → 1, the squeeze theorem gives</p>
 <p class="math">lim<sub>x→0</sub> (sin x)/x = 1</p>
 <p>This limit is why the derivative of sin <em>x</em> is cos <em>x</em>, and it only holds in radians. Numerically:</p>
 <div class="multi">
@@ -409,7 +432,7 @@ for k in range(1, 13):
   <li><strong>Infinite:</strong> the function blows up near <em>a</em>, as 1/<em>x</em>² does at 0.</li>
 </ul>
 <p>(Some functions fail in stranger ways, like sin(1/<em>x</em>) at 0, which oscillates infinitely often with no limit at all.)</p>
-<p>A note on wording. A formula like 1/<em>x</em>² gives no value at 0, so in the sense of <a href="#c-math120-u5">MATH 120, Functions</a> it is a function on all real numbers <em>except</em> 0, not on ℝ. It is continuous at every point of that domain. When we say it "has an infinite discontinuity at 0", we mean only that 0 is a gap in the domain where condition 1 above fails, so no rule that needs continuity at 0, or on an interval containing 0, can be applied to it.</p>
+<p>A note on wording. A formula like 1/<em>x</em>² gives no value at 0, so by the definition in <a href="#c-math130-pre">Lesson 1</a> (a formula's domain is every real number for which it makes sense) its domain is all real numbers <em>except</em> 0, not all of ℝ. It is continuous at every point of that domain. When we say it "has an infinite discontinuity at 0", we mean only that 0 is a gap in the domain where condition 1 above fails, so no rule that needs continuity at 0, or on an interval containing 0, can be applied to it.</p>
 
 <h3>Which functions are continuous?</h3>
 <p>Polynomials, sin, cos and <em>e</em><sup>x</sup> are continuous everywhere. Rational functions are continuous wherever the denominator isn't zero; √<em>x</em> and ln <em>x</em> are continuous on their domains. Sums, differences, products and compositions of continuous functions are continuous, and quotients are too wherever the denominator isn't zero. So most formulas you write down are continuous except at obvious trouble spots.</p>
@@ -639,7 +662,7 @@ CSA.addUnits("math130", [
     minutes: 90,
     summary: "The rules that make derivatives fast: constant, power, sum, product and quotient rules, and the derivatives of exponential, logarithmic and trigonometric functions.",
     notes: `
-<p>Computing every derivative from the limit definition would be slow and error-prone. Instead, we prove a small set of <strong>rules</strong> once, from the definition, and then combine them. This lesson covers the rules for sums, products and quotients and for the basic functions. Together with the chain rule in <a href="#c-math130-chain">the next lesson</a>, they let you differentiate almost any formula you'll meet.</p>
+<p>Computing every derivative from the limit definition would be slow and error-prone. Instead, we find a small set of <strong>rules</strong> once and then combine them. This lesson covers the rules for sums, products and quotients and for the basic functions. Most are proved here from the definition. A few are only stated here, and each of those says where its proof is: some come in the next lesson, because they need the chain rule. Together with the chain rule in <a href="#c-math130-chain">the next lesson</a>, they let you differentiate almost any formula you'll meet.</p>
 
 <h3>The basic rules</h3>
 <table>
@@ -651,6 +674,13 @@ CSA.addUnits("math130", [
     <tr><td>Sum and difference</td><td>(<em>f</em> ± <em>g</em>)′ = <em>f</em>′ ± <em>g</em>′</td><td>(<em>x</em>³ − <em>x</em>)′ = 3<em>x</em>² − 1</td></tr>
   </tbody>
 </table>
+<p><strong>Where these come from.</strong> Each follows from the difference quotient (<em>f</em>(<em>x</em> + <em>h</em>) − <em>f</em>(<em>x</em>))/<em>h</em> of <a href="#c-math130-u3">Lesson 5</a> and the limit laws of <a href="#c-math130-u1">Lesson 3</a>.</p>
+<ul>
+  <li><strong>Constant:</strong> the quotient is (<em>c</em> − <em>c</em>)/<em>h</em> = 0 for every <em>h</em>, so its limit is 0.</li>
+  <li><strong>Constant multiple and sum:</strong> the quotient for <em>c</em> · <em>f</em> is <em>c</em> times the quotient for <em>f</em>, and the quotient for <em>f</em> + <em>g</em> is the sum of their two quotients. A limit of a constant multiple or of a sum is the constant multiple or the sum of the limits.</li>
+  <li><strong>Power, for a whole number <em>n</em> ≥ 1:</strong> (<em>x</em> + <em>h</em>)<sup>n</sup> is a product of <em>n</em> factors (<em>x</em> + <em>h</em>). Multiplying out, choosing <em>x</em> from every factor gives <em>x</em><sup>n</sup>; choosing <em>h</em> from exactly one factor and <em>x</em> from the rest can be done in <em>n</em> ways and gives <em>n</em><em>x</em><sup>n−1</sup><em>h</em>; every other term has <em>h</em>² or a higher power of <em>h</em>. (For <em>n</em> = 3: (<em>x</em> + <em>h</em>)³ = <em>x</em>³ + 3<em>x</em>²<em>h</em> + 3<em>x</em><em>h</em>² + <em>h</em>³.) So the quotient is <em>n</em><em>x</em><sup>n−1</sup> plus terms that each still contain <em>h</em>, and its limit as <em>h</em> → 0 is <em>n</em><em>x</em><sup>n−1</sup>.</li>
+  <li><strong>Power, for other <em>n</em>:</strong> for negative whole numbers it follows from the quotient rule, as shown after that rule below. For every real <em>n</em>, the proof needs the chain rule, so it is in <a href="#c-math130-chain">the next lesson</a>. Until then, the cases <em>n</em> = −1 and ½ worked out from the definition in Lesson 5 agree with it.</li>
+</ul>
 <p>The power rule works for negative and fractional powers too, so rewrite roots and fractions as powers first:</p>
 <ul>
   <li>1/<em>x</em>³ = <em>x</em><sup>−3</sup>, so its derivative is −3<em>x</em><sup>−4</sup> = −3/<em>x</em>⁴.</li>
@@ -663,12 +693,17 @@ CSA.addUnits("math130", [
 <p>The derivative of a product is <em>not</em> the product of the derivatives. Instead:</p>
 <p class="math">(f · g)′ = f′ · g + f · g′</p>
 <p>Why? Picture <em>f</em> · <em>g</em> as the area of a rectangle with sides <em>f</em> and <em>g</em>. If both sides grow a little, the area grows by a strip along one side (<em>f</em>′ · <em>g</em>) plus a strip along the other (<em>f</em> · <em>g</em>′); the tiny corner piece is negligible.</p>
+<p>The picture is a guide; here is the proof. Add and subtract <em>f</em>(<em>x</em>)<em>g</em>(<em>x</em> + <em>h</em>) in the numerator of the difference quotient:</p>
+<p class="math">(f(x+h)g(x+h) − f(x)g(x))/h = ((f(x+h) − f(x))/h) · g(x+h) + f(x) · ((g(x+h) − g(x))/h)</p>
+<p>As <em>h</em> → 0, the first fraction approaches <em>f</em>′(<em>x</em>) and the last approaches <em>g</em>′(<em>x</em>). And <em>g</em>(<em>x</em> + <em>h</em>) approaches <em>g</em>(<em>x</em>), because a differentiable function is continuous (<a href="#c-math130-u3">Lesson 5</a>). So the whole expression approaches <em>f</em>′(<em>x</em>)<em>g</em>(<em>x</em>) + <em>f</em>(<em>x</em>)<em>g</em>′(<em>x</em>).</p>
 <p><strong>Example.</strong> (<em>x</em>² sin <em>x</em>)′ = 2<em>x</em> sin <em>x</em> + <em>x</em>² cos <em>x</em>.</p>
 
 <h3>The quotient rule</h3>
 <p class="math">(f / g)′ = (f′ · g − f · g′) / g²</p>
+<p>Where it comes from: call the quotient <em>q</em> = <em>f</em>/<em>g</em>, so <em>f</em> = <em>q</em> · <em>g</em>. Assuming <em>q</em> has a derivative (a complete proof checks this too, with a difference quotient like the one above), the product rule gives <em>f</em>′ = <em>q</em>′<em>g</em> + <em>q</em><em>g</em>′. Solve for <em>q</em>′: <em>q</em>′ = (<em>f</em>′ − <em>q</em><em>g</em>′)/<em>g</em>, and putting <em>q</em> = <em>f</em>/<em>g</em> and multiplying top and bottom by <em>g</em> gives (<em>f</em>′<em>g</em> − <em>f</em><em>g</em>′)/<em>g</em>².</p>
 <p>A memory aid: "low d-high minus high d-low, over low squared". The order in the numerator matters because of the minus sign.</p>
 <p><strong>Example.</strong> ((<em>x</em> + 1)/(<em>x</em> − 1))′ = (1 · (<em>x</em> − 1) − (<em>x</em> + 1) · 1)/(<em>x</em> − 1)² = −2/(<em>x</em> − 1)².</p>
+<p><strong>The power rule for negative whole numbers.</strong> For a whole number <em>m</em> ≥ 1, <em>x</em><sup>−m</sup> = 1/<em>x</em><sup>m</sup>, so by the quotient rule and the whole-number power rule, (1/<em>x</em><sup>m</sup>)′ = (0 · <em>x</em><sup>m</sup> − 1 · <em>m</em><em>x</em><sup>m−1</sup>)/<em>x</em><sup>2m</sup> = −<em>m</em><em>x</em><sup>m−1−2m</sup> = −<em>m</em><em>x</em><sup>−m−1</sup>. That is <em>n</em><em>x</em><sup>n−1</sup> with <em>n</em> = −<em>m</em>.</p>
 
 <h3>Exponential, logarithmic and trigonometric functions</h3>
 <table>
@@ -689,11 +724,11 @@ CSA.addUnits("math130", [
 <p><strong>Why <em>e</em><sup>x</sup> is its own derivative.</strong> Use the definition. Since <em>e</em><sup>x + h</sup> = <em>e</em><sup>x</sup> · <em>e</em><sup>h</sup>,</p>
 <p class="math">(e<sup>x+h</sup> − e<sup>x</sup>) / h = e<sup>x</sup> · (e<sup>h</sup> − 1) / h</p>
 <p>The second factor, (<em>e</em><sup>h</sup> − 1)/<em>h</em>, is the slope of the graph of <em>e</em><sup>x</sup> at 0 as <em>h</em> → 0, and <em>e</em> was chosen in <a href="#c-math130-pre">Lesson 1</a> to be exactly the base that makes this slope 1. (<a href="#c-math130-u1">Lesson 3</a>'s Practice 6 checks numerically that lim (<em>e</em><sup>h</sup> − 1)/<em>h</em> = 1.) So the whole quotient approaches <em>e</em><sup>x</sup> · 1 = <em>e</em><sup>x</sup>. For any other base the same steps give <em>b</em><sup>x</sup> times the slope of <em>b</em><sup>x</sup> at 0, which is about 0.693 for 2; the derivation of (<em>a</em><sup>x</sup>)′ in <a href="#c-math130-chain">the next lesson</a> shows that this number is ln <em>a</em>.</p>
-<p><strong>Why sin <em>x</em> has derivative cos <em>x</em>.</strong> This one needs two facts. The first is the angle-addition formula from trigonometry, sin(<em>x</em> + <em>h</em>) = sin <em>x</em> cos <em>h</em> + cos <em>x</em> sin <em>h</em>. The second is a companion to lim (sin <em>h</em>)/<em>h</em> = 1 from <a href="#c-math130-u1">Lesson 3</a>: lim<sub><em>h</em>→0</sub> (cos <em>h</em> − 1)/<em>h</em> = 0. To see it, multiply top and bottom by the conjugate cos <em>h</em> + 1 and use cos² <em>h</em> − 1 = −sin² <em>h</em>:</p>
+<p><strong>Why sin <em>x</em> has derivative cos <em>x</em>.</strong> This one needs two facts. The first is the angle-addition formula from <a href="#c-math130-trig">Lesson 2</a>, sin(<em>x</em> + <em>h</em>) = sin <em>x</em> cos <em>h</em> + cos <em>x</em> sin <em>h</em>. The second is a companion to lim (sin <em>h</em>)/<em>h</em> = 1 from <a href="#c-math130-u1">Lesson 3</a>: lim<sub><em>h</em>→0</sub> (cos <em>h</em> − 1)/<em>h</em> = 0. To see it, multiply top and bottom by the conjugate cos <em>h</em> + 1 and use cos² <em>h</em> − 1 = −sin² <em>h</em>:</p>
 <p class="math">(cos h − 1)/h = −sin² h / (h(cos h + 1)) = −(sin h / h) · (sin h / (cos h + 1)) → −1 · 0/2 = 0</p>
 <p>Now the difference quotient splits into two familiar pieces:</p>
 <p class="math">(sin(x + h) − sin x)/h = sin x · (cos h − 1)/h + cos x · (sin h)/h → sin x · 0 + cos x · 1 = cos x</p>
-<p>The limit (sin <em>h</em>)/<em>h</em> → 1 holds only when angles are measured in radians, which is why the rule needs radians. The derivative of cos <em>x</em> comes the same way from cos(<em>x</em> + <em>h</em>) = cos <em>x</em> cos <em>h</em> − sin <em>x</em> sin <em>h</em>, which gives −sin <em>x</em>.</p>
+<p>The limit (sin <em>h</em>)/<em>h</em> → 1 holds only when angles are measured in radians, which is why the rule needs radians. The derivative of cos <em>x</em> comes the same way from the other angle-addition formula, cos(<em>x</em> + <em>h</em>) = cos <em>x</em> cos <em>h</em> − sin <em>x</em> sin <em>h</em>, which gives −sin <em>x</em>.</p>
 <p>Exponential growth has a natural interpretation: for <em>e</em><sup>x</sup>, the rate of growth always equals the current amount, like a population whose growth rate is proportional to its size.</p>
 `,
     terms: [
@@ -782,6 +817,7 @@ CSA.addUnits("math130", [
 <p>With the chain rule and implicit differentiation, each rule in the table in <a href="#c-math130-u4">Differentiation rules</a> takes only a line or two.</p>
 <ul>
   <li><strong><em>a</em><sup>x</sup>.</strong> Since <em>a</em> = <em>e</em><sup>ln <em>a</em></sup>, we can write <em>a</em><sup>x</sup> = <em>e</em><sup>x ln <em>a</em></sup>. This is <em>e</em><sup>u</sup> with inner function <em>u</em> = <em>x</em> ln <em>a</em>, whose derivative is the constant ln <em>a</em>. By the chain rule, (<em>a</em><sup>x</sup>)′ = <em>e</em><sup>x ln <em>a</em></sup> · ln <em>a</em> = <em>a</em><sup>x</sup> ln <em>a</em>.</li>
+  <li><strong><em>x</em><sup>n</sup>, for any real <em>n</em> (with <em>x</em> &gt; 0).</strong> Write <em>x</em><sup>n</sup> = <em>e</em><sup>n ln <em>x</em></sup>, which is <em>e</em><sup>u</sup> with <em>u</em> = <em>n</em> ln <em>x</em> and <em>u</em>′ = <em>n</em>/<em>x</em> (using the rule for ln just below). By the chain rule, (<em>x</em><sup>n</sup>)′ = <em>e</em><sup>n ln <em>x</em></sup> · <em>n</em>/<em>x</em> = <em>x</em><sup>n</sup> · <em>n</em>/<em>x</em> = <em>n</em><em>x</em><sup>n−1</sup>. This completes the power rule stated in the previous lesson.</li>
   <li><strong>ln <em>x</em>.</strong> ln is the inverse of <em>e</em><sup>x</sup>: <em>y</em> = ln <em>x</em> means <em>e</em><sup>y</sup> = <em>x</em>. Differentiate both sides implicitly: <em>e</em><sup>y</sup> · <em>y</em>′ = 1, so <em>y</em>′ = 1/<em>e</em><sup>y</sup> = 1/<em>x</em>.</li>
   <li><strong>arctan <em>x</em>.</strong> <em>y</em> = arctan <em>x</em> means tan <em>y</em> = <em>x</em>, with −π/2 &lt; <em>y</em> &lt; π/2. Differentiate implicitly: sec² <em>y</em> · <em>y</em>′ = 1, so <em>y</em>′ = 1/sec² <em>y</em>. By the identity sec² <em>y</em> = 1 + tan² <em>y</em> = 1 + <em>x</em>², this is <strong>1/(1 + <em>x</em>²)</strong>.</li>
   <li><strong>arcsin <em>x</em>.</strong> <em>y</em> = arcsin <em>x</em> means sin <em>y</em> = <em>x</em>, with −π/2 ≤ <em>y</em> ≤ π/2. Then cos <em>y</em> · <em>y</em>′ = 1, so <em>y</em>′ = 1/cos <em>y</em>. On that interval cos <em>y</em> ≥ 0, so cos <em>y</em> = √(1 − sin² <em>y</em>) = √(1 − <em>x</em>²), giving 1/√(1 − <em>x</em>²).</li>
@@ -957,7 +993,7 @@ print(x)   # about 3.0</code></pre><p><em>f</em>′(<em>x</em>) = 2<em>x</em> �
     <tr><td>lim<sub>x→0</sub> (1 − cos <em>x</em>)/<em>x</em>²</td><td>0/0</td><td>lim sin <em>x</em>/(2<em>x</em>), then lim cos <em>x</em>/2</td><td>1/2</td></tr>
   </tbody>
 </table>
-<p>The last example applies the rule twice, since the first application still gives 0/0. The middle rows matter in computer science: they say <strong>exponentials grow faster than any power, and powers grow faster than logarithms</strong>. Applying the rule <em>n</em> times shows <em>x</em><sup>n</sup>/<em>e</em><sup>x</sup> → 0 for every <em>n</em>. That's the calculus behind the ordering O(log <em>n</em>) &lt; O(<em>n</em>) &lt; O(<em>n</em>²) &lt; O(2<sup>n</sup>) that <a href="#c-cs101-algo">CS 101, Searching, sorting and efficiency</a> uses to rank algorithms; there, O(<em>g</em>(<em>n</em>)) means, roughly, "grows no faster than <em>g</em>(<em>n</em>)".</p>
+<p>The first two rows are only consistency checks, not proofs. <a href="#c-math130-u4">Lesson 6</a> used these very limits to find that sin′ = cos and (<em>e</em><sup>x</sup>)′ = <em>e</em><sup>x</sup>, so computing them with those derivatives would be circular reasoning. They only show that the rule agrees with what we already know. The last example applies the rule twice, since the first application still gives 0/0. The middle rows matter in computer science: they say <strong>exponentials grow faster than any power, and powers grow faster than logarithms</strong>. Applying the rule <em>n</em> times shows <em>x</em><sup>n</sup>/<em>e</em><sup>x</sup> → 0 for every <em>n</em>. That's the calculus behind the ordering O(log <em>n</em>) &lt; O(<em>n</em>) &lt; O(<em>n</em>²) &lt; O(2<sup>n</sup>) that <a href="#c-cs101-algo">CS 101, Searching, sorting and efficiency</a> uses to rank algorithms; there, O(<em>g</em>(<em>n</em>)) means, roughly, "grows no faster than <em>g</em>(<em>n</em>)".</p>
 <p><strong>Use it only on 0/0 or ∞/∞.</strong> lim<sub><em>x</em>→0</sub> (<em>x</em> + 1)/(<em>x</em> + 2) is simply 1/2 by substitution; applying L'Hôpital would wrongly give 1. Other indeterminate forms, such as 0 · ∞, can be rewritten as a quotient first: as <em>x</em> → 0⁺, <em>x</em> ln <em>x</em> = (ln <em>x</em>)/(1/<em>x</em>) is −∞/∞ (ln <em>x</em> → −∞), and the rule gives (1/<em>x</em>)/(−1/<em>x</em>²) = −<em>x</em> → 0.</p>
 
 <h3>Newton's method</h3>

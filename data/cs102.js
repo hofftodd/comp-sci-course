@@ -596,6 +596,7 @@ print(stretch(Rectangle(2, 3)))      # 20
 print(stretch(Square(2)))            # 16</code></pre>
 <p>Trace the square: <code>set_width(5)</code> makes both sides 5; then <code>set_height(4)</code> makes both sides 4, undoing the width. The area is 4 × 4 = 16. Each class is reasonable on its own, but a <code>Square</code> can't be safely used where a <code>Rectangle</code> is expected.</p>
 <p>The principle being broken is named after Barbara Liskov, who stated it in 1987: the <strong>Liskov substitution principle</strong> says objects of a subclass must be usable anywhere objects of the superclass are, without surprises. Liskov received the Turing Award in 2008 for her work on data abstraction.</p>
+<p>The trouble came from the setters. A <code>Rectangle</code> with setters promises that its width and height can be changed separately, and a <code>Square</code> can't keep that promise. If shapes have no setters, so that their sides are fixed when they are made, a <code>Rectangle</code> promises only to report its area and perimeter correctly, and a <code>Square</code> keeps both promises. Then <code>Square</code> is a safe subclass of <code>Rectangle</code>. The shapes programming problem in this lesson uses shapes like this, so its <code>Square</code> subclass is fine. The rule of thumb: before subclassing, check that the subclass keeps every promise the superclass's methods make, not just that the "is a" sentence sounds true.</p>
 
 <h3>Designing a hierarchy</h3>
 <ul>
@@ -1226,7 +1227,7 @@ $ python -m pytest</code></pre>
 </ul>
 
 <h3>Parametrized tests</h3>
-<p>When many cases test the same behavior, list them as data instead of copying the test:</p>
+<p>When many cases test the same behavior, list them as data instead of copying the test. This test goes in <code>test_fraction.py</code>, which already starts with <code>import pytest</code> and <code>from fraction import Fraction</code>:</p>
 <pre><code>@pytest.mark.parametrize("a, b, expected", [
     (Fraction(1, 2), Fraction(1, 2), Fraction(1)),
     (Fraction(1, 3), Fraction(-1, 3), Fraction(0)),
@@ -1237,8 +1238,11 @@ def test_add_cases(a, b, expected):
 <p>pytest runs and reports each row as a separate test. <code>@pytest.mark.parametrize(...)</code> is a decorator with arguments (<a href="#c-cs102-c5">Lesson 5</a>): the call with the names and rows builds a decorator, which marks the test function so pytest knows to run it once per row, passing the row's values as the parameters <code>a</code>, <code>b</code> and <code>expected</code>.</p>
 
 <h3>Fixtures</h3>
-<p>A <strong>fixture</strong> provides a fresh object to each test that asks for it by naming it as a parameter:</p>
-<pre><code>@pytest.fixture
+<p>A <strong>fixture</strong> provides a fresh object to each test that asks for it by naming it as a parameter. This example tests the <code>BankAccount</code> class from <a href="#c-cs102-c1">Lesson 1</a>. Following the same layout, save that class in <code>bank.py</code> and these tests in <code>test_bank.py</code> next to it:</p>
+<pre data-label="test_bank.py"><code>import pytest
+from bank import BankAccount
+
+@pytest.fixture
 def account():
     return BankAccount("Ada", 100)
 
@@ -1275,7 +1279,34 @@ gateway.charge.assert_called_once_with("ada@example.com", 108.0)   # 10% off 120
 </ol>
 <p>Then repeat with the next small test. Writing the test first forces you to decide what the code should do, and what its interface looks like from the caller's side, before deciding how.</p>
 <h4>An example: a word-frequency counter</h4>
-<p>Red: <code>def test_empty(): assert word_counts("") == {}</code>. Green: <code>def word_counts(text): return {}</code>. That looks like cheating, but it's correct for every test so far. Red: <code>assert word_counts("a b a") == {"a": 2, "b": 1}</code>. Green: a loop with a dictionary. Red: <code>assert word_counts("A a") == {"a": 2}</code> (ignore case). Green: add <code>.lower()</code>. Red: <code>assert word_counts("hi, hi!") == {"hi": 2}</code> (ignore punctuation). Green: strip punctuation. Refactor: tidy the function, perhaps using <code>collections.Counter</code>, a ready-made dictionary of counts: <code>Counter(text.split())</code> counts each word in one step, and <code>Counter("a b a".split()) == {"a": 2, "b": 1}</code> is <code>True</code>. The four tests confirm the rewrite changed nothing. Each step took a minute, and the code was never broken for long.</p>
+<p>Red: <code>def test_empty(): assert word_counts("") == {}</code>. Green: <code>def word_counts(text): return {}</code>. That looks like cheating, but it's correct for every test so far. Red: <code>assert word_counts("a b a") == {"a": 2, "b": 1}</code>. Green: a loop with a dictionary. Red: <code>assert word_counts("A a") == {"a": 2}</code> (ignore case). Green: add <code>.lower()</code>. Red: <code>assert word_counts("hi, hi!") == {"hi": 2}</code> (ignore punctuation). Green: strip punctuation from each word. You know <code>strip()</code> from CS 101, which removes spaces from both ends of a string. Given a string argument, it removes any of <em>those</em> characters from both ends instead: <code>"hi,".strip(",.!?;:")</code> is <code>'hi'</code>. A word made only of punctuation, such as a lone <code>"!"</code>, becomes the empty string, so the loop skips it. After four cycles the function and its tests are:</p>
+<pre data-label="words.py"><code>def word_counts(text):
+    counts = {}
+    for word in text.lower().split():
+        word = word.strip(",.!?;:")
+        if word:                          # skip words that were only punctuation
+            counts[word] = counts.get(word, 0) + 1
+    return counts</code></pre>
+<pre data-label="test_words.py"><code>from words import word_counts
+
+def test_empty():
+    assert word_counts("") == {}
+
+def test_repeats():
+    assert word_counts("a b a") == {"a": 2, "b": 1}
+
+def test_ignores_case():
+    assert word_counts("A a") == {"a": 2}
+
+def test_ignores_punctuation():
+    assert word_counts("hi, hi!") == {"hi": 2}</code></pre>
+<p>Refactor: tidy the function. The standard library's <code>collections.Counter</code> is a ready-made dictionary of counts: give it any sequence and it counts each item, so <code>Counter("a b a".split()) == {"a": 2, "b": 1}</code> is <code>True</code>. On its own, <code>Counter(text.split())</code> would fail two of our tests, because it neither lowercases nor strips punctuation. So the rewrite keeps those steps and lets <code>Counter</code> replace only the counting loop:</p>
+<pre data-label="words.py"><code>from collections import Counter
+
+def word_counts(text):
+    words = [w.strip(",.!?;:") for w in text.lower().split()]
+    return Counter(w for w in words if w)</code></pre>
+<p>A <code>Counter</code> is a kind of dictionary, so it compares equal to a dictionary with the same counts, and the tests don't need to change. Running <code>python -m pytest</code> again shows all four still pass, which confirms the rewrite changed nothing. Each step took a minute, and the code was never broken for long.</p>
 
 <h3>Refactoring</h3>
 <p><strong>Refactoring</strong> means changing code's structure without changing its behavior: renaming, extracting a function, splitting a class, replacing a loop with a comprehension. The term was popularized by Martin Fowler's 1999 book <em>Refactoring</em>. It's only safe with tests, which is why TDD puts it in every cycle. Common refactorings:</p>

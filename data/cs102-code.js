@@ -116,6 +116,7 @@ len(t)             # 4</code></pre>`,
   <li><code>Circle(r)</code> (use <code>math.pi</code>)</li>
   <li><code>Square(side)</code>, a subclass of <code>Rectangle</code> that reuses its methods</li>
 </ul>
+<p>These shapes have no setters: their sizes are fixed when they are created. That is what makes <code>Square</code> a safe subclass of <code>Rectangle</code> here, unlike the mutable rectangle in the lesson's "When 'is a' is wrong" section.</p>
 <p>Then write a function <code>total_area(shapes)</code> that adds up the areas of any list of shapes, without checking their types. Creating a plain <code>Shape()</code> must raise <code>TypeError</code>.</p>`,
       starter: `import math\nfrom abc import ABC, abstractmethod\n\nclass Shape(ABC):\n    pass\n`,
       hint: `<p>Mark both methods in <code>Shape</code> with <code>@abstractmethod</code>. <code>Square.__init__</code> only needs one line: <code>super().__init__(side, side)</code>. <code>total_area</code> is a one-liner with <code>sum</code>.</p>`,
