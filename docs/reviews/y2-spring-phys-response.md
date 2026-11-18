@@ -1,0 +1,29 @@
+## Professor's response (PHYS 250)
+
+26. **em1, dipole field.** Added the hand derivation after the dipole code: the two point-charge fields on the axis, combined over a common denominator to E_x = −2kqdx/(x² − d²/4)², then the far-field limit −2kp/x³ with p = qd. Checked that the exact formula gives the printed −0.1798, −0.02248 and −0.002809.
+
+27. **em1, charge on a conductor's surface.** Wrote out the Gauss's-law step: a closed surface drawn anywhere inside the metal has zero field on it, so zero flux, so no enclosed charge. Because such a surface can enclose any part of the interior, all extra charge must be on the surface.
+
+28. **em2, Laplace's equation as an average.** Laplace's equation is now derived from Gauss's law: zero flux out of a small charge-free box gives ∂E_x/∂x + ∂E_y/∂y = 0, then E = −∇V. The second derivative is shown as a difference of slopes, (V_right − 2V + V_left)/h². Adding the x and y versions and setting the sum to zero makes V the average of its four neighbours. Added a numerical check with V = x² − y² at (0.3, 0.2): the centre value is 0.05 and so is the average of the neighbours.
+
+29. **em2, parallel-plate field.** Spelled out the Gauss's-law argument. The charge sits on the facing surfaces at Q/A per square metre, and symmetry makes the field perpendicular to the plates. The Gaussian box has one face in the metal, where the field is zero, one face in the gap, and sides parallel to the field. That gives Ea = Qa/(ε₀A) wherever the gap face is, so the field is uniform.
+
+30. **em2, capacitor networks.** Added a paragraph to the em2 notes that derives both rules. In parallel the capacitors share V and their charges add, so C = C₁ + C₂. In series they carry the same ±Q, because the joining conductor is isolated and neutral, and their voltages add, so 1/C = 1/C₁ + 1/C₂. In `data/phys250-code.js`, the capacitor_network prompt now points to the notes, and its mention of resistors is a forward pointer to Lesson 3. The tests are unchanged and pass.
+
+31. **em4, Boris method.** The method is now presented as the averaged-velocity update v′ = v + (q/m)·½(v + v′) × B Δt. Dotting with v′ + v shows |v′| = |v|, and dotting with B shows the component along B doesn't change, so each step is a rotation. The text says this is a 3×3 linear system and that Boris's t/s formula is its closed-form solution. A new code check confirms that the formula satisfies the averaged equation and keeps |v|² (prints `True 1.34 1.34`). The original speed comparison still prints `2.682 1.0`.
+
+32. **em4/em6, Ampère's law and no magnetic charges.** Added a section to em4, "Ampère's law, and no magnetic charges". It defines circulation and states ∮B·dl = μ₀I_through, with "through" defined by a surface whose edge is the loop. It rederives the long-wire field and the solenoid field from the law. It also states that there are no magnetic charges, so field lines close on themselves and the flux of B out of a closed surface is zero (Gauss's law for magnetism). Both laws are now key terms. The em6 introduction cites Lesson 4 for both.
+
+33. **em6, displacement current.** Rewrote the argument with two surfaces that share one loop: a flat disc crossed by the wire (current I) and a bag through the capacitor gap (no current). Displacement current is now defined as ε₀ dΦ_E/dt, where Φ_E is the electric flux, so the area is included. Lesson 2's E = Q/(ε₀A) then shows it equals dQ/dt = I. The corrected law ∮B·dl = μ₀(I + ε₀ dΦ_E/dt) is written out. The key term is updated.
+
+34. **em6, energy densities and intensity.** Derived u_E = ½ε₀E² from a parallel-plate capacitor's ½CV², and u_B = B²/(2μ₀) from a solenoid's ½LI², with L = NΦ/I taken from Lesson 5's two EMF expressions. In a wave u_B = u_E because B = E/c. Averaging sin² over a cycle and multiplying by c gives I = ½cε₀E₀². Checked the sunlight figure: 1,360 W/m² gives E₀ ≈ 1,012 V/m. Added an "Energy density" key term.
+
+35. **em6, spectrum table.** Recomputed every frequency range from c = fλ: infrared 300 GHz to 4.3 × 10¹⁴ Hz, visible 4.3 to 7.5 × 10¹⁴ Hz, ultraviolet 7.5 × 10¹⁴ to 3 × 10¹⁶ Hz, X-rays and gamma rays above 3 × 10¹⁶ Hz. The radio and microwave rows were already right. A sentence under the table works the 1 mm boundary as an example.
+
+36. **em6, FDTD equations.** Derived the two 1D equations: ∂E/∂x = −∂B/∂t from Faraday's law on a rectangle in the xy-plane, and ∂E/∂t = −c²∂B/∂x from Ampère–Maxwell on a rectangle in the xz-plane, with orientations and signs shown. They are then written in c = 1 units, with a check that g(x − t) solves both. The text explains the staggered grid: b[i] lies between e[i] and e[i+1], and each update is an Euler step of one equation. The code now uses the physical signs (`-=`) in the notes and in the fdtd_problem solution. This only negates b, so E and the printed result (184) are unchanged, and the problem's tests pass.
+
+37. **em2, dynamic power (cross-course).** The CS 230 reference is now a forward pointer ("Near the end of the term, CS 230 Lesson 8 uses this..."), and the factor of ½ is explained. The supply delivers QV = CV² when charging. Half of it is stored and, by energy conservation, half becomes heat. Discharging turns the stored half into heat too. So each charge-and-discharge cycle costs CV², giving about CV²f, which matches CS 230's formula with no ½.
+
+38. **em3 sidebar, spanning tree (cross-course).** The sidebar now defines a spanning tree in place: wires that connect every junction without forming a loop. The CS 220 reference is a forward pointer ("Later this term, CS 220 Lesson 6 builds minimum spanning trees").
+
+Checks: `node --check` on both data files, `validate_content.js`, `check_problems.py` (166 problems, 0 found), `check_lesson_code.py` (no phys250 mismatches), and `test_dump_course.js` all pass. The slow lesson-time estimates are now em1 70, em2 73, em4 77 and em6 73 minutes, all within 100.
