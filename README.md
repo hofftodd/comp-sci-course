@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written as a first draft and is being reviewed. The other five terms are planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had one round of student review. The other five terms are planned and shown on the home page.
 
 ## What's in Year 1
 
@@ -31,7 +31,7 @@ instructor approves each change before students see it.
 
 ## What's in Year 2
 
-### Fall (first draft)
+### Fall
 
 | Course | Credits | Core units | Programming problems |
 |---|---|---|---|

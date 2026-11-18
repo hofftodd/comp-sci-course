@@ -224,11 +224,11 @@ for i in range(n):
 scores[2] = 90;
 // scores[5] = 1;            // would throw ArrayIndexOutOfBoundsException
 System.out.println(scores.length);   // 5</code></pre>
-<pre data-label="C++"><code>int scores[5] = {0};         // five ints on the stack, fixed size
+<pre data-label="C++"><code>int scores[5] = {0};         // five ints, all 0, fixed size
 scores[2] = 90;
 // scores[5] = 1;            // compiles, but writes past the end: undefined behavior
 std::cout &lt;&lt; sizeof(scores) / sizeof(scores[0]) &lt;&lt; "\\n";   // 5</code></pre>
-<p>(You don't need to write Java or C++ in this course; these boxes show how the same ideas look in languages that expose them more directly. CS 210 teaches C, C++'s ancestor.) Notice the different attitudes to safety: Java checks every index and throws an exception; C++ trusts the programmer, and writing past the end silently corrupts whatever is next in memory. Python, like Java, checks.</p>
+<p>(You don't need to write Java or C++ in this course; these boxes show how the same ideas look in languages that expose them more directly. CS 210 teaches C, C++'s ancestor.) A C++ array has no length to ask for. Instead, <code>sizeof</code> gives the number of bytes something takes in memory: <code>sizeof(scores)</code> is the whole array's size (20 bytes for five 4-byte ints) and <code>sizeof(scores[0])</code> is one slot's size (4), so dividing them gives the number of slots, 5. Notice the different attitudes to safety: Java checks every index and throws an exception; C++ trusts the programmer, and writing past the end silently corrupts whatever is next in memory. Python, like Java, checks.</p>
 
 <h3>Dynamic arrays</h3>
 <p>A <strong>dynamic array</strong> gives the illusion of an array that grows. It keeps an ordinary fixed array, usually with some unused slots at the end, and two numbers: its <strong>size</strong> (how many slots are in use) and its <strong>capacity</strong> (how many slots the underlying array has). Appending writes into the next unused slot. When the array is full, it allocates a new, larger array, copies every item across, and then appends.</p>
@@ -241,10 +241,15 @@ std::cout &lt;&lt; sizeof(scores) / sizeof(scores[0]) &lt;&lt; "\\n";   // 5</co
     def __len__(self):
         return self._size
 
-    def __getitem__(self, i):
+    def __getitem__(self, i):              # a[i]
         if not 0 &lt;= i &lt; self._size:
             raise IndexError("index out of range")
         return self._slots[i]
+
+    def __setitem__(self, i, item):        # a[i] = item
+        if not 0 &lt;= i &lt; self._size:
+            raise IndexError("index out of range")
+        self._slots[i] = item
 
     def append(self, item):
         if self._size == self._capacity:
@@ -262,7 +267,9 @@ std::cout &lt;&lt; sizeof(scores) / sizeof(scores[0]) &lt;&lt; "\\n";   // 5</co
 a = DynamicArray()
 for x in range(10):
     a.append(x)
-print(len(a), a._capacity, a[9])   # 10 16 9</code></pre>
+a[9] = 90
+print(len(a), a._capacity, a[9])   # 10 16 90</code></pre>
+<p>As CS 102 showed for <code>__len__</code>, Python turns operators into calls of special methods: <code>len(a)</code> calls <code>a.__len__()</code>, reading <code>a[i]</code> calls <code>a.__getitem__(i)</code>, and assigning <code>a[i] = x</code> calls <code>a.__setitem__(i, x)</code>.</p>
 <p>(We use a Python list of fixed length to stand for the raw block of memory, and never call its <code>append</code>. Real implementations allocate memory directly; CS 210 shows how.)</p>
 <p>Most appends cost Θ(1). But an append that triggers a resize copies every item, costing Θ(<em>n</em>). So the <em>worst case</em> for one append is Θ(<em>n</em>). Is a dynamic array therefore slow? No, and proving it needs a new idea.</p>
 
@@ -355,7 +362,7 @@ for i in range(20):
 <p>Python's <code>dict</code> and <code>set</code> find a key among millions in about the same time as among ten. CS 101 explained that they use the key's <em>hash</em> to decide where to store it. This lesson builds a hash table and analyzes it.</p>
 
 <h3>From direct addressing to hashing</h3>
-<p>If keys were small whole numbers, say student numbers from 0 to 999, we could use an array of 1,000 slots and store each student at the slot with their number. Every lookup is one array access: Θ(1). This is <strong>direct addressing</strong>. It fails when the possible keys are many and the actual keys are few: a table indexed by every possible 20-character string would need more slots than there are atoms on Earth.</p>
+<p>If keys were small whole numbers, say student numbers from 0 to 999, we could use an array of 1,000 slots and store each student at the slot with their number. Every lookup is one array access: Θ(1). This is <strong>direct addressing</strong>. It fails when the possible keys are many and the actual keys are few: a table indexed by every possible 20-character string would be impossibly large. Even with only the 26 lowercase letters there are 26<sup>20</sup> ≈ 2 × 10<sup>28</sup> such strings, more than the number of atoms in a human body (about 7 × 10<sup>27</sup>). At 8 bytes per slot, the table would need about 1.6 × 10<sup>29</sup> bytes, or 1.6 × 10<sup>17</sup> terabytes.</p>
 <p><strong>Hashing</strong> keeps the idea but shrinks the table. A <strong>hash function</strong> turns any key into a whole number, its <strong>hash</strong>, and we use the hash modulo the table size <em>m</em> as the slot number:</p>
 <p class="math">slot(key) = hash(key) mod m</p>
 <p>A good hash function is fast, gives equal keys equal hashes (always), and spreads different keys evenly across the slots, so that keys that look similar (like <code>"item1"</code> and <code>"item2"</code>) land far apart. Python's built-in <code>hash()</code> does this for numbers, strings, tuples and other immutable values.</p>
@@ -480,6 +487,7 @@ print(m.get("bee"), m._size)   # 3 3</code></pre>
       summary: "Why an ordinary binary search tree can degrade to a list, how rotations rebalance a tree without breaking its order, AVL trees and their O(log n) height guarantee, and the balanced trees used in real libraries.",
       notes: `
 <p>CS 102 Lesson 8 built binary search trees (BSTs) and found their weakness: their height depends on the order of insertion. Insert keys in sorted order and the "tree" is a linked list of height <em>n</em>, so searches cost Θ(<em>n</em>). A <strong>balanced search tree</strong> repairs its shape after each insertion and deletion, guaranteeing height O(log <em>n</em>) whatever the order. This lesson builds the oldest kind, the AVL tree.</p>
+<p>In this course, the <strong>height</strong> of a tree is the number of <em>nodes</em> on its longest path from the root down to a leaf. A single node has height 1, and an empty tree has height 0. CS 102 Lesson 8 counted <em>edges</em> instead, so its heights are one less than ours. The choice changes no Θ or O bound. Every height in CS 201, including the heaps of Lesson 5, counts nodes.</p>
 
 <h3>Why bother? Order</h3>
 <p>Lesson 3's hash tables are already fast for lookups. Search trees earn their place by keeping keys <strong>in order</strong>. A balanced BST supports, each in O(log <em>n</em>):</p>
@@ -580,7 +588,9 @@ print(root.key, height(root))  # 4 3</code></pre>
 <h3>Why the height is O(log n)</h3>
 <p>Let <em>N</em>(<em>h</em>) be the fewest nodes an AVL tree of height <em>h</em> can have. The sparsest such tree has a root, one subtree of height <em>h</em> − 1 and, as unbalanced as allowed, one of height <em>h</em> − 2, each as sparse as possible:</p>
 <p class="math">N(h) = N(h − 1) + N(h − 2) + 1,   N(1) = 1, N(2) = 2</p>
-<p>This is the Fibonacci recurrence plus one. Its values are 1, 2, 4, 7, 12, 20, 33, …, and like the Fibonacci numbers they grow exponentially, by a factor approaching φ ≈ 1.618 per step (MATH 121 Lesson 3). So a tree with <em>n</em> nodes has <em>n</em> ≥ <em>N</em>(<em>h</em>) ≥ <em>c</em> · φ<sup><em>h</em></sup> for some constant <em>c</em>, and solving for <em>h</em> gives <em>h</em> = O(log <em>n</em>). More precisely, an AVL tree's height is at most about 1.44 log₂ <em>n</em>: never more than 44% taller than a perfectly balanced tree.</p>
+<p>This is the Fibonacci recurrence plus one. Its values are 1, 2, 4, 7, 12, 20, 33, …, and like the Fibonacci numbers they grow exponentially, by a factor approaching φ ≈ 1.618 per step (MATH 121 Lesson 3). So a tree with <em>n</em> nodes has <em>n</em> ≥ <em>N</em>(<em>h</em>) ≥ <em>c</em> · φ<sup><em>h</em></sup> for some constant <em>c</em> &gt; 0. Solve for <em>h</em> by taking log₂ of both sides:</p>
+<p class="math">log₂ n ≥ log₂ c + h · log₂ φ,   so   h ≤ (log₂ n − log₂ c) / log₂ φ</p>
+<p>Since log₂ φ ≈ 0.694 and 1/0.694 ≈ 1.44, this says <em>h</em> ≤ 1.44 log₂ <em>n</em> plus a constant, so <em>h</em> = O(log <em>n</em>). A perfectly balanced tree has height about log₂ <em>n</em>, so an AVL tree is never more than about 44% taller. (Working with the exact values of <em>N</em>(<em>h</em>) instead of the constant <em>c</em> gives a bound with nothing added: <em>h</em> &lt; 1.44 log₂(<em>n</em> + 2) for every AVL tree. This is "the AVL bound" that the programming problem checks.)</p>
 
 <h3>Balanced trees in real libraries</h3>
 <p>AVL trees are strictly balanced, which makes lookups fast. Most libraries use <strong>red-black trees</strong> instead: a looser balance rule (no root-to-leaf path is more than twice as long as any other) that needs fewer rotations on insertion and deletion. Java's <code>TreeMap</code> and <code>TreeSet</code> and C++'s <code>std::map</code> and <code>std::set</code> are red-black trees in the standard implementations. Databases and file systems use <strong>B-trees</strong>, which store hundreds of keys per node so that a tree of height 3 or 4 can index billions of records, each level costing one disk read.</p>
@@ -589,7 +599,12 @@ m.put(30, "c"); m.put(10, "a"); m.put(20, "b");
 System.out.println(m.firstKey());       // 10
 System.out.println(m.ceilingKey(15));   // 20: the smallest key ≥ 15
 System.out.println(m.subMap(10, 25));   // {10=a, 20=b}: keys in [10, 25)</code></pre>
-<p>Python's standard library has no balanced tree. For ordered data, Python programmers often keep a sorted list and use the <code>bisect</code> module (Θ(log <em>n</em>) search but Θ(<em>n</em>) insertion), or install the third-party <code>sortedcontainers</code> package.</p>
+<p>Python's standard library has no balanced tree. For ordered data, Python programmers often keep a sorted list and use the standard <code>bisect</code> module, which does binary search on a sorted list. <code>bisect.bisect_left(xs, x)</code> returns the position where <code>x</code> would go to keep <code>xs</code> sorted, in Θ(log <em>n</em>) time, and <code>bisect.insort(xs, x)</code> inserts <code>x</code> at that position. Searching is fast, but insertion is Θ(<em>n</em>), because every later item must shift (Lesson 2). The other common choice is the third-party <code>sortedcontainers</code> package, installed with <code>pip</code>.</p>
+<pre><code>import bisect
+xs = [10, 20, 30, 40]
+print(bisect.bisect_left(xs, 25))   # 2: 25 belongs before 30
+bisect.insort(xs, 25)
+print(xs)                           # [10, 20, 25, 30, 40]</code></pre>
 `,
       terms: [
         ["Balanced search tree", "A binary search tree that restructures itself to keep its height O(log n)."],
@@ -617,7 +632,7 @@ System.out.println(m.subMap(10, 25));   // {10=a, 20=b}: keys in [10, 25)</code>
           a: `<p>1, 2, 4, 7, 12, 20, 33, 54, 88, 143. A tree of height 10 needs at least 143 nodes, so 100 nodes give height at most 9 (since <em>N</em>(9) = 88 ≤ 100). A perfectly balanced tree with 100 nodes has height 7 (2⁶ − 1 = 63 &lt; 100 ≤ 127 = 2⁷ − 1). So AVL is at most 2 levels worse here.</p>`
         },
         {
-          q: `<p>Write <code>count_in_range(node, lo, hi)</code> that counts the keys <em>k</em> in a BST with lo ≤ <em>k</em> ≤ hi, skipping subtrees that can't contain any. What is its cost on a balanced tree when the answer is <em>k</em>?</p>`,
+          q: `<p>Write <code>count_in_range(node, lo, hi)</code> that counts the keys <em>x</em> in a BST with lo ≤ <em>x</em> ≤ hi, skipping subtrees that can't contain any. The tree is balanced and holds <em>n</em> keys, and <em>m</em> of them lie in the range. What is the function's cost, in terms of <em>n</em> and <em>m</em>?</p>`,
           a: `<pre><code>def count_in_range(node, lo, hi):
     if node is None:
         return 0
@@ -625,7 +640,7 @@ System.out.println(m.subMap(10, 25));   // {10=a, 20=b}: keys in [10, 25)</code>
         return count_in_range(node.right, lo, hi)
     if node.key &gt; hi:
         return count_in_range(node.left, lo, hi)
-    return 1 + count_in_range(node.left, lo, hi) + count_in_range(node.right, lo, hi)</code></pre><p>It visits the nodes in range, plus at most two root-to-leaf paths along the boundaries: O(log <em>n</em> + <em>k</em>). (Storing each subtree's size in its node allows counting in O(log <em>n</em>) without visiting the <em>k</em> nodes.)</p>`
+    return 1 + count_in_range(node.left, lo, hi) + count_in_range(node.right, lo, hi)</code></pre><p>It visits the nodes in range, plus at most two root-to-leaf paths along the boundaries: O(log <em>n</em> + <em>m</em>). (Storing each subtree's size in its node allows counting in O(log <em>n</em>) without visiting the <em>m</em> nodes.)</p>`
         },
         {
           q: `<p>Show that a rotation preserves the BST property by listing the in-order traversal of both trees in the figure. Then explain why <code>rotate_right</code> must update <em>y</em>'s height before <em>x</em>'s.</p>`,
@@ -665,7 +680,7 @@ CSA.addUnits("cs201", [
 <text x="296" y="118" text-anchor="middle" class="m">0</text><text x="328" y="118" text-anchor="middle" class="m">1</text><text x="360" y="118" text-anchor="middle" class="m">2</text><text x="392" y="118" text-anchor="middle" class="m">3</text><text x="424" y="118" text-anchor="middle" class="m">4</text><text x="456" y="118" text-anchor="middle" class="m">5</text><text x="488" y="118" text-anchor="middle" class="m">6</text>
 <text x="392" y="150" text-anchor="middle" class="m">index</text></g>
 </svg><figcaption>A min-heap and its array. The children of index 1 (key 3) are at indexes 3 and 4 (keys 7 and 4); every parent is at most its children.</figcaption></figure>
-<p>A heap of <em>n</em> items has height ⌊log₂ <em>n</em>⌋ + 1 levels, so any path from the root to a leaf has O(log <em>n</em>) nodes.</p>
+<p>A heap of <em>n</em> items has height ⌊log₂ <em>n</em>⌋ + 1 (counting nodes, as in Lesson 4: a heap of 7 items has 3 full levels and height 3). So any path from the root to a leaf has O(log <em>n</em>) nodes.</p>
 
 <h3>Insert: sift up</h3>
 <p>To insert, append the new item at the end of the array (the next free spot in the last level, keeping the shape). Heap order may now fail between the new item and its parent. If the item is smaller than its parent, swap them, and repeat until it is not smaller than its parent or reaches the root. This is <strong>sift-up</strong>: O(log <em>n</em>) swaps at most.</p>
@@ -725,9 +740,9 @@ print([h.pop() for _ in range(len(h))])   # [1, 2, 3, 5, 8, 9]</code></pre>
     for i in range(len(a) // 2 - 1, -1, -1):   # last non-leaf down to the root
         h._sift_down(i)
     return h</code></pre>
-<p>Why is this O(<em>n</em>)? Sift-down from a node costs at most its height. Half the nodes are leaves (height 0, and skipped), a quarter have height 1, an eighth height 2, and so on. The total is at most</p>
-<p class="math">n · (1/4 · 1 + 1/8 · 2 + 1/16 · 3 + …) = n · Σ h/2<sup>h+1</sup> = n</p>
-<p>(The series Σ<sub>h≥1</sub> <em>h</em>/2<sup><em>h</em></sup> = 2, a standard sum, so Σ <em>h</em>/2<sup><em>h</em>+1</sup> = 1.) Most nodes are near the bottom, where sift-down is cheap; only a few are near the top, where it's expensive. Pushing one at a time does the opposite: most items are inserted at the bottom and may sift all the way up.</p>
+<p>Why is this O(<em>n</em>)? A node of height <em>h</em> (Lesson 4's convention, so a leaf has height 1) can sift down at most <em>h</em> − 1 levels, one swap per level. About half the nodes are leaves (height 1: no swaps, and skipped), a quarter have height 2 (at most 1 swap), an eighth have height 3 (at most 2 swaps), and so on. The total number of swaps is at most</p>
+<p class="math">n · (1/4 · 1 + 1/8 · 2 + 1/16 · 3 + …) = n · Σ<sub>j≥1</sub> j/2<sup>j+1</sup> = (n/2) · Σ<sub>j≥1</sub> j/2<sup>j</sup></p>
+<p>The last sum is S = 1/2 + 2/4 + 3/8 + 4/16 + …. Halve every term and shift it one place right: S/2 = 1/4 + 2/8 + 3/16 + …. Subtracting term by term, S − S/2 = 1/2 + 1/4 + 1/8 + … = 1, a geometric series. (Subtracting term by term is valid because S converges: MATH 131 Lesson 4 proves it with the ratio test, in a practice problem about this very series.) So S/2 = 1, S = 2, and the total is at most (<em>n</em>/2) · 2 = <em>n</em> swaps. Most nodes are near the bottom, where sift-down is cheap; only a few are near the top, where it's expensive. Pushing one at a time does the opposite: most items are inserted at the bottom and may sift all the way up.</p>
 
 <h3>Heapsort</h3>
 <p>A heap gives a sorting algorithm. Build a <em>max</em>-heap of the array in O(<em>n</em>). Then repeatedly swap the root (the largest item) with the last item of the heap, shrink the heap by one, and sift the new root down. The largest items collect at the end of the array in order. <strong>Heapsort</strong>, published by J. W. J. Williams in 1964, sorts in O(<em>n</em> log <em>n</em>) time in the worst case using O(1) extra memory: it is in place. It isn't stable (Lesson 6) and, because it jumps around the array, it is usually slower in practice than a good quicksort or merge sort.</p>
@@ -845,6 +860,23 @@ def quicksort(a, lo=0, hi=None):
 
 print(quicksort([3, 7, 1, 8, 2, 5]))   # [1, 2, 3, 5, 7, 8]</code></pre>
 <p>Partitioning costs Θ(<em>n</em>). If the pivot always lands near the middle, the recursion looks like merge sort's, T(<em>n</em>) = 2T(<em>n</em>/2) + Θ(<em>n</em>) = Θ(<em>n</em> log <em>n</em>). If it always lands at an end (for example, sorting an already sorted list with the last item as pivot), one side is empty and T(<em>n</em>) = T(<em>n</em> − 1) + Θ(<em>n</em>) = Θ(<em>n</em>²), and the recursion is <em>n</em> levels deep.</p>
+<p>Deep recursion has its own cost: each pending call keeps a frame on the call stack (Lesson 1), and Python stops with <code>RecursionError</code> after about 1,000 nested calls. A standard trick limits the depth. Make the <em>second</em> recursive call disappear: put the body in a <code>while</code> loop, recurse only on the <em>smaller</em> part, and then change <code>lo</code> or <code>hi</code> so that the next pass of the loop sorts the larger part.</p>
+<pre><code>def quicksort_shallow(a, lo=0, hi=None):
+    if hi is None:
+        hi = len(a) - 1
+    while lo &lt; hi:
+        p = partition(a, lo, hi)
+        if p - lo &lt; hi - p:              # the left part is smaller
+            quicksort_shallow(a, lo, p - 1)
+            lo = p + 1                   # loop again on the right part
+        else:
+            quicksort_shallow(a, p + 1, hi)
+            hi = p - 1                   # loop again on the left part
+    return a
+
+xs = list(range(2000))                   # already sorted: the worst case
+print(quicksort_shallow(xs) == list(range(2000)))   # True, with no RecursionError</code></pre>
+<p>Each recursive call gets at most half of the current range, so the recursion is at most log₂ <em>n</em> calls deep. The running time is unchanged: Θ(<em>n</em>²) on this sorted input, just without the deep stack.</p>
 <p>The cure is to choose the pivot <strong>at random</strong>. MATH 121 Lesson 7 proved, with indicator variables, that randomized quicksort makes about 2<em>n</em> ln <em>n</em> ≈ 1.39 <em>n</em> log₂ <em>n</em> comparisons on average, for <em>every</em> input. No input is bad any more; only unlucky coin flips are, and they are astronomically unlikely to be very unlucky. Quicksort is in place apart from its recursion stack and has excellent constants, so it's often the fastest general-purpose sort in practice.</p>
 
 <h3>Stability</h3>
@@ -856,9 +888,9 @@ print(by_grade)   # [('Al', 'A'), ('Di', 'A'), ('Bo', 'B'), ('Cy', 'B')]</code><
 
 <h3>The lower bound for comparison sorting</h3>
 <p>Merge sort, heapsort and randomized quicksort all take about <em>n</em> log <em>n</em> comparisons. Could a cleverer algorithm do better? Not if it learns about the items only by comparing them.</p>
-<p>Picture any comparison sort as a <strong>decision tree</strong>. Each internal node is a comparison ("is <em>a</em>[<em>i</em>] &lt; <em>a</em>[<em>j</em>]?") with two branches; each leaf is a final answer, a particular ordering of the input. For the algorithm to be correct on every input, it must be able to produce each of the <em>n</em>! possible orderings, so the tree has at least <em>n</em>! leaves. A binary tree of height <em>h</em> has at most 2<sup><em>h</em></sup> leaves, so the worst-case number of comparisons <em>h</em> satisfies</p>
+<p>Picture any comparison sort as a <strong>decision tree</strong>. Each internal node is a comparison ("is <em>a</em>[<em>i</em>] &lt; <em>a</em>[<em>j</em>]?") with two branches; each leaf is a final answer, a particular ordering of the input. For the algorithm to be correct on every input, it must be able to produce each of the <em>n</em>! possible orderings, so the tree has at least <em>n</em>! leaves. Let <em>h</em> be the largest number of comparisons on any path from the root to a leaf: the worst-case number of comparisons. Each comparison at most doubles the number of places a path can end (one comparison gives at most 2 leaves, two give at most 4), so the tree has at most 2<sup><em>h</em></sup> leaves, and</p>
 <p class="math">2<sup>h</sup> ≥ n!,   so   h ≥ log₂(n!)</p>
-<p>And log₂(<em>n</em>!) is Θ(<em>n</em> log <em>n</em>). For a quick lower bound: the largest <em>n</em>/2 factors of <em>n</em>! are each at least <em>n</em>/2, so <em>n</em>! ≥ (<em>n</em>/2)<sup><em>n</em>/2</sup> and log₂(<em>n</em>!) ≥ (<em>n</em>/2) log₂(<em>n</em>/2). (Stirling's formula, from MATH 131 Lesson 1, gives the precise value, about <em>n</em> log₂ <em>n</em> − 1.44<em>n</em>.) So <strong>every comparison sort needs Ω(<em>n</em> log <em>n</em>) comparisons in the worst case</strong>, and merge sort and heapsort are optimal up to constant factors.</p>
+<p>And log₂(<em>n</em>!) is Θ(<em>n</em> log <em>n</em>). For a quick lower bound: the largest <em>n</em>/2 factors of <em>n</em>! are each at least <em>n</em>/2, so <em>n</em>! ≥ (<em>n</em>/2)<sup><em>n</em>/2</sup> and log₂(<em>n</em>!) ≥ (<em>n</em>/2) log₂(<em>n</em>/2). (For a precise value, use Stirling's approximation from MATH 131 Lesson 1, ln <em>n</em>! ≈ <em>n</em> ln <em>n</em> − <em>n</em>. To change natural logarithms into base 2, divide by ln 2: log₂(<em>n</em>!) = ln(<em>n</em>!)/ln 2 ≈ <em>n</em> log₂ <em>n</em> − <em>n</em>/ln 2, and 1/ln 2 ≈ 1.44. So log₂(<em>n</em>!) is about <em>n</em> log₂ <em>n</em> − 1.44<em>n</em>.) So <strong>every comparison sort needs Ω(<em>n</em> log <em>n</em>) comparisons in the worst case</strong>, and merge sort and heapsort are optimal up to constant factors.</p>
 
 <h3>Beating the bound: counting and radix sort</h3>
 <p>The lower bound assumes the algorithm only compares. If keys are small whole numbers, we can use them as array indexes instead. <strong>Counting sort</strong> sorts <em>n</em> integers in the range 0 to <em>k</em> − 1 by counting how many times each value occurs, then writing them out in order: Θ(<em>n</em> + <em>k</em>). When <em>k</em> is O(<em>n</em>), that's linear.</p>
@@ -915,8 +947,9 @@ print(counting_sort([3, 1, 4, 1, 5, 2, 0], 6))   # [0, 1, 1, 2, 3, 4, 5]</code><
           a: `<p>Pivot 5, <em>i</em> = 0. <em>j</em> = 0: 3 &lt; 5, swap a[0] with itself, <em>i</em> = 1. <em>j</em> = 1: 7, no. <em>j</em> = 2: 1 &lt; 5, swap a[1], a[2] → [3, 1, 7, 8, 2, 5], <em>i</em> = 2. <em>j</em> = 3: 8, no. <em>j</em> = 4: 2 &lt; 5, swap a[2], a[4] → [3, 1, 2, 8, 7, 5], <em>i</em> = 3. Finally swap a[3] with the pivot → [3, 1, 2, 5, 7, 8]. Returns 3.</p>`
         },
         {
-          q: `<p>How many comparisons does any comparison sort need, in the worst case, to sort 5 items? Compute log₂(5!) and round up. Can you find a strategy that achieves it?</p>`,
-          a: `<p>5! = 120 and log₂ 120 ≈ 6.91, so at least 7 comparisons. Seven is achievable: the Ford–Johnson "merge insertion" algorithm sorts 5 items in 7 comparisons. Merge sort needs up to 8 on 5 items.</p>`
+          q: `<p>How many comparisons does any comparison sort need, in the worst case, to sort 5 items? Compute log₂(5!) and round up. Then complete the strategy in the hint and check that it never needs more than that many comparisons.</p>`,
+          hint: `<p>Call the items a, b, c, d, e. (1) Compare a with b and c with d, and rename so that a &lt; b and c &lt; d. (2) Compare b with d, and rename the pairs so that b &lt; d. You now know a &lt; b &lt; d, and also c &lt; d. (3) Insert e into the sorted chain a, b, d by binary search: compare it with b first. (4) Insert c, which you know is less than d, into the part of the chain that comes before d. How many items can that part hold, and how many comparisons does binary search need for it? Binary search needs <em>k</em> comparisons to choose among up to 2<sup><em>k</em></sup> positions.</p>`,
+          a: `<p>5! = 120 and log₂ 120 ≈ 6.91, so at least 7 comparisons. The strategy in the hint uses exactly 7 in the worst case. Steps 1 and 2 take 3 comparisons. Step 3 chooses among 4 positions for e in a chain of 3 (before a, between a and b, between b and d, after d), so it takes 2. In step 4 the part before d holds a and b, and possibly e: at most 3 items, so 4 possible positions for c, and binary search takes 2 more. Total 3 + 2 + 2 = 7. (Trying all 120 orders of five numbers confirms it never needs an eighth.) This is the smallest case of the Ford–Johnson "merge insertion" algorithm. Merge sort needs up to 8 comparisons on 5 items.</p>`
         },
         {
           q: `<p>Sort [329, 457, 657, 839, 436, 720, 355] with least-significant-digit radix sort. Show the list after each pass.</p>`,
@@ -1092,8 +1125,10 @@ print(topological_order(prereqs))
         root = x
         while self.parent[root] != root:
             root = self.parent[root]
-        while self.parent[x] != root:       # path compression
-            self.parent[x], x = root, self.parent[x]
+        while x != root:                    # path compression
+            next_x = self.parent[x]         # remember where x pointed
+            self.parent[x] = root           # point x straight at the root
+            x = next_x                      # move up the old path
         return root
 
     def union(self, x, y):
@@ -1109,7 +1144,7 @@ print(topological_order(prereqs))
 uf = UnionFind("ABCDEF")
 uf.union("A", "B"); uf.union("C", "D"); uf.union("B", "D")
 print(uf.find("A") == uf.find("C"), uf.find("E") == uf.find("A"))   # True False</code></pre>
-<p>With both improvements, a sequence of <em>m</em> operations on <em>n</em> items takes O(<em>m</em> α(<em>n</em>)) time, where α is the inverse of the Ackermann function, a function that grows so slowly that α(<em>n</em>) ≤ 4 for any <em>n</em> that could ever be stored in a computer. Robert Tarjan proved this bound in 1975, and later work showed it can't be improved. In practice, each operation is constant time. Union-find is the heart of Kruskal's minimum-spanning-tree algorithm, which you'll meet in Algorithms I.</p>
+<p>With both improvements, a sequence of <em>m</em> operations on <em>n</em> items takes O(<em>m</em> α(<em>n</em>)) time, where α is the <strong>inverse Ackermann function</strong>. The Ackermann function, defined by Wilhelm Ackermann in 1928, grows faster than any tower of powers. In the version used for this bound, its values at <em>k</em> = 0, 1, 2, 3 are 2, 3, 7 and 2047, and its value at <em>k</em> = 4 is larger than 2<sup>2048</sup>, a number with more than 600 digits. Its inverse, α(<em>n</em>), is the smallest <em>k</em> whose value is at least <em>n</em>. So α grows so slowly that α(<em>n</em>) ≤ 4 for any <em>n</em> that could ever be stored in a computer. You don't need the definition itself: only the fact that α(<em>n</em>) is a very slowly growing function, at most 4 in practice. Robert Tarjan proved this bound in 1975, and later work showed it can't be improved. In practice, each operation is constant time. Union-find is the heart of Kruskal's minimum-spanning-tree algorithm, which you'll meet in Algorithms I.</p>
 
 <h3>Tries</h3>
 <p>A <strong>trie</strong> (from "retrieval", usually pronounced "try") stores a set of strings as a tree of characters. Each edge is labeled with a character; each node represents the prefix spelled by the path from the root; and a node is marked if that prefix is itself a stored word.</p>
@@ -1172,7 +1207,7 @@ print(t.contains("ca"), t.contains("cat"), t.with_prefix("ca"))
 <tr><td>Hash table</td><td>Θ(1) exp.</td><td>Θ(1) exp. am.</td><td>Θ(1) exp.</td><td>Θ(n)</td><td>The default for lookup by key</td></tr>
 <tr><td>Balanced BST</td><td>Θ(log n)</td><td>Θ(log n)</td><td>Θ(log n)</td><td>Θ(log n)</td><td>Sorted order, ranges</td></tr>
 <tr><td>Binary heap</td><td>Θ(n)</td><td>Θ(log n)</td><td>Θ(log n) min only</td><td>Θ(1) find-min</td><td>Priority queues</td></tr>
-<tr><td>Union-find</td><td colspan="3">find and union: nearly Θ(1) am.</td><td>—</td><td>Merging groups</td></tr>
+<tr><td>Union-find</td><td>find: nearly Θ(1) am.</td><td>union: nearly Θ(1) am.</td><td>not supported</td><td>not supported</td><td>Merging groups</td></tr>
 <tr><td>Trie</td><td>Θ(L)</td><td>Θ(L)</td><td>Θ(L)</td><td>prefix queries</td><td>Strings, autocomplete</td></tr>
 </tbody>
 </table>

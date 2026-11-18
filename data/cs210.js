@@ -96,11 +96,11 @@ int main(void) {
     printf("%d\\n", -1 &lt; 0u);        /* 0: -1 becomes 4294967295 */
     return 0;
 }</code></pre>
-<p>The last line shows a classic trap. When C compares a signed and an unsigned integer, it converts the signed one to unsigned, so −1 becomes 4,294,967,295 and "−1 &lt; 0" is false. In C, overflow of <em>unsigned</em> arithmetic is defined to wrap around; overflow of <em>signed</em> arithmetic is undefined behavior (CS 101's sidebar on integers), which compilers may assume never happens.</p>
+<p>The last line shows a classic trap. The <code>u</code> at the end of <code>0u</code> makes the constant <em>unsigned</em>: <code>0u</code> is the number 0 with type <code>unsigned int</code>, while plain <code>0</code> is a signed <code>int</code>. When C compares a signed and an unsigned integer, it converts the signed one to unsigned, so −1 becomes 4,294,967,295 and "−1 &lt; 0" is false. In C, overflow of <em>unsigned</em> arithmetic is defined to wrap around; overflow of <em>signed</em> arithmetic is undefined behavior (CS 101's sidebar on integers), which compilers may assume never happens.</p>
 <p>Overflow causes real failures. In 1996 the first Ariane 5 rocket self-destructed 37 seconds after launch when a 64-bit floating-point value was converted to a 16-bit signed integer that couldn't hold it (CS 101's optional ethics lesson tells the story). In 2014, the YouTube view counter for the music video "Gangnam Style" approached 2<sup>31</sup> − 1 = 2,147,483,647, the limit of a signed 32-bit integer; YouTube switched to 64-bit counters. And many systems count time as signed 32-bit seconds since 1 January 1970, which overflows at 03:14:07 UTC on 19 January 2038, the "Year 2038 problem".</p>
 
 <h3>Simulating fixed width in Python</h3>
-<p>Python's integers never overflow, but we can simulate <em>w</em>-bit arithmetic by keeping only the low <em>w</em> bits, then reading the pattern as signed if needed:</p>
+<p>Python's integers never overflow, but we can simulate <em>w</em>-bit arithmetic by keeping only the low <em>w</em> bits, then reading the pattern as signed if needed. The function below uses two operators that the next section explains in full. <code>1 &lt;&lt; w</code> ("shift 1 left by <em>w</em> places") is 2<sup><em>w</em></sup>, so <code>(1 &lt;&lt; w) - 1</code> is <em>w</em> ones in binary. And <code>x &amp; m</code> keeps exactly the bits of <em>x</em> where <em>m</em> has a 1. Together, <code>x &amp; ((1 &lt;&lt; w) - 1)</code> keeps the low <em>w</em> bits of <em>x</em>, which is <em>x</em> mod 2<sup><em>w</em></sup>.</p>
 <pre><code>def wrap(x, w):
     """The w-bit two's complement value with the same low w bits as x."""
     x &amp;= (1 &lt;&lt; w) - 1                 # keep the low w bits (unsigned value)
@@ -184,7 +184,9 @@ print(wrap(2**31, 32))       # -2147483648</code></pre>
 <h3>Scientific notation in binary</h3>
 <p>Decimal scientific notation writes 6,022 as 6.022 × 10<sup>3</sup>: a sign, a significand with one digit before the point, and an exponent. <strong>Floating point</strong> does the same in base 2. Every nonzero number can be written as</p>
 <p class="math">(−1)<sup>s</sup> × 1.f × 2<sup>E</sup></p>
-<p>where 1.<em>f</em> is a binary number between 1 and 2. For example, 6.5 = 110.1 in binary = 1.101 × 2<sup>2</sup>, so <em>s</em> = 0, <em>f</em> = 101 and <em>E</em> = 2. Because the digit before the point is always 1, it doesn't need to be stored: the format gets one bit of precision for free.</p>
+<p>where 1.<em>f</em> is a binary number between 1 and 2.</p>
+<p>Binary digits after the point work like decimal ones, but each place is worth half the one before: ½, ¼, ⅛, and so on. So 0.1 in binary is ½, 0.01 is ¼, and 110.1 in binary is 4 + 2 + ½ = 6.5. To convert a decimal fraction to binary, double it again and again. Each time, the whole-number part (0 or 1) is the next binary digit; drop it and keep doubling the fraction that remains. For 0.75: doubling gives 1.5, so the first digit is 1, leaving 0.5; doubling 0.5 gives 1.0, so the next digit is 1, leaving 0, and we stop. So 0.75 = 0.11 in binary (½ + ¼). Some fractions never reach 0 and repeat forever, as "Precision and rounding" below shows for 0.1.</p>
+<p>For example, 6.5 = 110.1 in binary = 1.101 × 2<sup>2</sup>, so <em>s</em> = 0, <em>f</em> = 101 and <em>E</em> = 2. Because the digit before the point is always 1, it doesn't need to be stored: the format gets one bit of precision for free.</p>
 
 <h3>The IEEE 754 formats</h3>
 <p>The IEEE 754 standard (1985), which William Kahan led and CS 101's sidebar described, fixes how many bits each part gets:</p>
@@ -212,7 +214,7 @@ print(float32_bits(0.1))     # 3dcccccd</code></pre>
 <h3>Special values</h3>
 <p>The smallest and largest exponent fields are reserved:</p>
 <ul>
-<li><strong>Exponent all zeros: zero and subnormal numbers.</strong> With fraction 0, the value is ±0 (yes, there are two zeros; they compare equal). With a nonzero fraction, the number is <em>subnormal</em>: 0.<em>f</em> × 2<sup>−126</sup> in single precision, with no hidden 1. Subnormals fill the gap between 0 and the smallest normal number, so that <em>x</em> − <em>y</em> is zero only when <em>x</em> = <em>y</em>.</li>
+<li><strong>Exponent all zeros: zero and subnormal numbers.</strong> With fraction 0, the value is ±0 (yes, there are two zeros; they compare equal). With a nonzero fraction, the number is <em>subnormal</em>: 0.<em>f</em> × 2<sup>−126</sup> in single precision, with no hidden 1. Subnormals fill the gap between 0 and the smallest normal number, so that <em>x</em> − <em>y</em> is zero only when <em>x</em> = <em>y</em>. A result too small even for a subnormal (below about 1.4 × 10<sup>−45</sup> in single precision, or 4.9 × 10<sup>−324</sup> in double) rounds to 0. This loss of tiny results, first to subnormals with fewer digits and then to 0, is called <strong>underflow</strong>. In Python, <code>1e-200 * 1e-200</code> is <code>0.0</code>. Multiplying many small numbers, such as hundreds of probabilities, underflows in the same way, which is why such programs add logarithms instead of multiplying.</li>
 <li><strong>Exponent all ones: infinity and NaN.</strong> With fraction 0, the value is ±∞, produced by overflow (<code>1e308 * 10</code> in Python is <code>inf</code>) and in C by dividing a nonzero number by zero. With a nonzero fraction, it is <strong>NaN</strong> ("not a number"), the result of meaningless operations like ∞ − ∞ or 0/0 in C. NaN is not equal to anything, including itself: <code>x != x</code> is the classic test for NaN.</li>
 </ul>
 <pre><code>inf = float("inf")
@@ -251,6 +253,7 @@ print(math.isclose(0.1 + 0.2, 0.3))   # True</code></pre>
         ["IEEE 754", "The standard floating-point formats and rules, used by nearly all hardware: single (32-bit) and double (64-bit)."],
         ["Bias", "A constant added to the exponent so it can be stored as an unsigned field: 127 for single, 1023 for double precision."],
         ["Subnormal number", "A tiny number with exponent field 0 and no hidden leading 1, filling the gap near zero."],
+        ["Underflow", "A result too small in magnitude to store with full precision: it becomes a subnormal with fewer digits, or rounds to 0."],
         ["NaN", "\"Not a number\": the result of an undefined operation such as ∞ − ∞; it is not equal to itself."],
         ["Machine epsilon", "The gap between 1 and the next float: 2^−52 ≈ 2.2 × 10^−16 for doubles."],
         ["Catastrophic cancellation", "The loss of significant digits when subtracting two nearly equal numbers."]
@@ -312,7 +315,7 @@ int main(void) {
 <li>Every variable, parameter and return value has a declared <strong>type</strong> that never changes: <code>int square(int x)</code> takes an <code>int</code> and returns one. The compiler checks types before the program runs.</li>
 <li>Blocks are marked with braces <code>{ }</code>, and statements end with semicolons. Indentation is for readers only.</li>
 <li>The <code>for</code> loop has three parts: start (<code>int i = 1</code>), condition (<code>i &lt;= 3</code>), and step (<code>i++</code>, which adds 1).</li>
-<li><code>printf</code> prints using a format string: <code>%d</code> for an <code>int</code>, <code>%f</code> for a <code>double</code>, <code>%s</code> for a string, <code>%c</code> for a character. Unlike Python's <code>print</code>, it adds no newline unless you write <code>\\n</code>.</li>
+<li><code>printf</code> prints using a format string: <code>%d</code> for an <code>int</code>, <code>%f</code> for a <code>double</code>, <code>%s</code> for a string, <code>%c</code> for a character. Unlike Python's <code>print</code>, it adds no newline unless you write <code>\\n</code>. A number between <code>%</code> and <code>f</code> sets the decimal places: <code>printf("%.1f", 2.0 / 3)</code> prints <code>0.7</code>, and <code>%.2f</code> would print <code>0.67</code>, rounding the last digit. (Plain <code>%f</code> prints six decimal places: <code>0.666667</code>.) Other types have their own codes: <code>%u</code> for an <code>unsigned int</code>, <code>%ld</code> for a <code>long</code>, and <code>%zu</code> for a <code>size_t</code> (below).</li>
 <li>Execution starts at <code>main</code>. Its return value goes to the operating system: 0 means success.</li>
 </ul>
 
@@ -334,10 +337,10 @@ int main(void) {
 <tr><td><code>int32_t</code>, <code>uint8_t</code>, …</td><td>exactly as named</td><td>fixed-width integers from <code>&lt;stdint.h&gt;</code></td></tr>
 </tbody>
 </table>
-<p>The C standard sets only minimum sizes, so <code>int</code> and <code>long</code> can differ between systems; <code>sizeof(type)</code> gives the size in bytes, and the <code>&lt;stdint.h&gt;</code> types are exact everywhere. Everything from Lesson 1 applies: an <code>int</code> overflows past 2,147,483,647.</p>
+<p>The C standard sets only minimum sizes, so <code>int</code> and <code>long</code> can differ between systems, while the <code>&lt;stdint.h&gt;</code> types are exact everywhere. The <code>sizeof</code> operator gives the size in bytes of a type, <code>sizeof(int)</code>, or of a variable, <code>sizeof(x)</code>. Its result has type <code>size_t</code>, an unsigned integer type used for sizes and counts, which <code>printf</code> prints with <code>%zu</code>. Everything from Lesson 1 applies: an <code>int</code> overflows past 2,147,483,647.</p>
 
 <h3>Arithmetic differences</h3>
-<p>Integer division in C <em>truncates toward zero</em>, while Python's <code>//</code> rounds down (toward −∞). The remainder follows the quotient so that <code>(a / b) * b + a % b == a</code> holds in both languages:</p>
+<p>Integer division in C <em>truncates toward zero</em>, while Python's <code>//</code> rounds down (toward −∞). In each language the remainder follows the quotient, so that dividing and multiplying back gives <em>a</em>: in C, <code>(a / b) * b + a % b == a</code>; in Python, where <code>/</code> is true division, the same rule is <code>(a // b) * b + a % b == a</code>. Because the quotients differ for negative numbers, so do the remainders:</p>
 <table>
 <thead><tr><th>Expression</th><th>C</th><th>Python</th></tr></thead>
 <tbody>
@@ -410,13 +413,8 @@ int main(void) {
 }</code></pre><p>With all-<code>int</code> operands, <code>/ 9</code> is integer division truncating toward zero: for 0 °F, −160 / 9 is −17 instead of −17.8. Dividing by <code>9.0</code> makes the arithmetic happen in <code>double</code>. (<code>%.1f</code> prints one decimal place.)</p>`
         },
         {
-          q: `<p>Write <code>c_div(a, b)</code> and <code>c_mod(a, b)</code> in Python that give C's integer division and remainder for <code>b != 0</code>. Test them on (7, 2), (−7, 2), (7, −2) and (−7, −2).</p>`,
-          a: `<pre><code>def c_div(a, b):
-    q = abs(a) // abs(b)
-    return q if (a &lt; 0) == (b &lt; 0) else -q
-
-def c_mod(a, b):
-    return a - b * c_div(a, b)</code></pre><p>Results: (3, 1), (−3, −1), (−3, 1), (3, −1). The remainder always has the sign of <em>a</em> in C; in Python it has the sign of <em>b</em>.</p>`
+          q: `<p>Work out by hand, without running anything, what C gives for <code>a / b</code> and <code>a % b</code>, and what Python gives for <code>a // b</code> and <code>a % b</code>, for (<em>a</em>, <em>b</em>) = (7, 2), (−7, 2), (7, −2) and (−7, −2). Check that each language's identity from the notes holds in all four cases. What rule decides the sign of the remainder in each language? (The programming problem <em>C's integer division</em> then asks you to compute C's results in Python.)</p>`,
+          a: `<p>C, quotient truncated toward zero: 3 and 1; −3 and −1; −3 and 1; 3 and −1. Python, quotient rounded down: 3 and 1; −4 and 1; −4 and −1; 3 and −1. Check for (−7, 2): in C, (−3)(2) + (−1) = −7; in Python, (−4)(2) + 1 = −7. The other cases work the same way. In C the remainder has the sign of <em>a</em> (or is 0); in Python it has the sign of <em>b</em> (or is 0).</p>`
         },
         {
           q: `<p>What does this print, and what is wrong with it? <code>char word[5] = "hello"; printf("%s\\n", word);</code></p>`,
@@ -440,7 +438,7 @@ int *p = &amp;x;         /* p is a pointer to int; it holds x's address */
 printf("%d\\n", *p);  /* 42: the int at that address */
 *p = 7;              /* writes through the pointer */
 printf("%d\\n", x);   /* 7: x itself changed */</code></pre>
-<p>The type <code>int *</code> means "pointer to int". The type matters: it tells the compiler how many bytes to read at the address (4 for an <code>int</code>) and how to interpret them. A pointer that points nowhere is set to <code>NULL</code> (address 0); dereferencing it crashes the program with a <em>segmentation fault</em>.</p>
+<p>The type <code>int *</code> means "pointer to int". The type matters: it tells the compiler how many bytes to read at the address (4 for an <code>int</code>) and how to interpret them. A pointer that points nowhere is set to <code>NULL</code> (address 0); dereferencing it crashes the program with a <strong>segmentation fault</strong>. The operating system gives each running program only certain ranges of addresses to use, and address 0 is never one of them. When a program reads or writes an address outside its ranges, the hardware stops the access and the operating system ends the program. The shell then prints <code>Segmentation fault</code> (often shortened to "segfault"). Lesson 8 says more about how the operating system gives each program its own addresses.</p>
 
 <h3>Why pointers: changing the caller's variables</h3>
 <p>C passes arguments by value: a function gets copies. To let a function change the caller's variables, pass their addresses:</p>
@@ -467,6 +465,7 @@ int *p = nums;                         /* same as &amp;nums[0] */
 printf("%d %d\\n", *p, *(p + 2));       /* 10 30 */
 printf("%d\\n", p[1]);                  /* 20: p[1] means *(p + 1) */</code></pre>
 <p>This is why a function receiving an array (Lesson 3) gets only an address: <code>int xs[]</code> as a parameter is the same as <code>int *xs</code>.</p>
+<p>How far may a pointer go? C allows exactly one position past the end of an array. For <code>nums</code> above, <code>nums + 3</code> (also written <code>&amp;nums[3]</code>) is a legal address to compute and to compare with other pointers into the array; loops often use it as their stopping point. But it doesn't point at an element, so reading or writing <code>*(nums + 3)</code>, that is <code>nums[3]</code>, is undefined behavior. Even computing an address further out, such as <code>nums + 4</code> or <code>nums - 1</code>, is undefined behavior, although it usually seems to work.</p>
 
 <h3>The stack and the heap</h3>
 <p>A running C program keeps its data in several regions of memory:</p>
@@ -518,6 +517,7 @@ WRITE of size 4 at 0x50200000001c thread T0
         ["Pointer", "A variable whose value is a memory address, with a type saying what kind of value is stored there."],
         ["Dereference", "Accessing the value at a pointer's address, written *p."],
         ["NULL", "A pointer value (address 0) meaning \"points to nothing\"; dereferencing it crashes the program."],
+        ["Segmentation fault", "The crash that happens when a program touches an address the operating system hasn't given it, such as NULL."],
         ["Pointer arithmetic", "Adding an integer to a pointer moves it by that many elements of its type; a[i] means *(a + i)."],
         ["Stack", "Memory for each active function call's local variables, created and destroyed automatically."],
         ["Heap", "Memory requested with malloc and returned with free, which lives until it is freed."],
@@ -552,7 +552,7 @@ printf("%d %d\\n", smallest, largest);   /* -2 9 */</code></pre>`
           a: `<p>Each double is 8 bytes: 0x1008, 0x1048 (0x1000 + 72) and 0x1050 (0x1000 + 80). C explicitly allows computing the one-past-the-end address (loops use it as a stopping point), but reading or writing <code>v[10]</code> is undefined behavior.</p>`
         },
         {
-          q: `<p>Find every memory bug in this function and fix it:</p><pre data-label="C"><code>char *copy_upper(char *s) {
+          q: `<p>Find every memory bug in this function and fix it. (<code>toupper(c)</code>, from <code>&lt;ctype.h&gt;</code>, returns the uppercase form of a lowercase letter and returns any other character unchanged: <code>toupper('a')</code> is <code>'A'</code> and <code>toupper('!')</code> is <code>'!'</code>. Assume <code>&lt;ctype.h&gt;</code>, <code>&lt;stdlib.h&gt;</code> and <code>&lt;string.h&gt;</code> are included.)</p><pre data-label="C"><code>char *copy_upper(char *s) {
     char *out = malloc(strlen(s));
     for (int i = 0; s[i] != '\\0'; i++)
         out[i] = toupper(s[i]);
@@ -598,6 +598,9 @@ CSA.addUnits("cs210", [
     leaq    (%rdi,%rdi,2), %rax   # rax = rdi + 2 * rdi   (times 3)
     ret                           # return; the result is in rax</code></pre>
 <p>Some conventions of this syntax (called AT&amp;T syntax, the default on Linux): register names start with <code>%</code>, constants with <code>$</code>, and the destination comes <em>last</em>, so <code>addq %rsi, %rdi</code> means "<code>rdi</code> += <code>rsi</code>". The <code>q</code> suffix ("quad word") means a 64-bit operation. By the calling rules on Linux and macOS, the first two arguments arrive in <code>%rdi</code> and <code>%rsi</code>, and the return value goes in <code>%rax</code> (Lesson 6 covers the rules). Notice the compiler's trick: it multiplied by 3 with <code>leaq</code>, an instruction meant for computing addresses, because <em>x</em> + 2<em>x</em> is cheaper than a multiplication.</p>
+<p>The operand <code>(%rdi,%rdi,2)</code> is an example of x86-64's general <strong>address form</strong>, written <code>offset(base,index,scale)</code>. It stands for the number</p>
+<p class="math">offset + base + index × scale</p>
+<p>where <em>base</em> and <em>index</em> are registers, <em>scale</em> is 1, 2, 4 or 8, and <em>offset</em> is a constant. Any part may be left out: a missing offset is 0, a missing scale is 1, and a missing base or index counts as 0, though the commas stay. So <code>(%rdi,%rdi,2)</code> is rdi + 2 · rdi, <code>8(%rsp)</code> is rsp + 8, and <code>4(,%rsi,8)</code> is 4 + 8 · rsi. Most instructions use this form to name a memory location; <code>leaq</code> ("load effective address") computes the number itself and stores it, without touching memory, which is why compilers borrow it for arithmetic.</p>
 
 <h3>Branches and loops become jumps</h3>
 <p>Machine code has no <code>if</code>, <code>while</code> or <code>for</code>. It has <strong>compare</strong> instructions, which set status flags, and <strong>jumps</strong>, which change the program counter either always (<code>jmp</code>) or only when the flags say so (<code>jle</code>: jump if less or equal; <code>jne</code>: jump if not equal; and so on). Labels like <code>.L4</code> name jump targets.</p>
@@ -609,7 +612,7 @@ CSA.addUnits("cs210", [
     return total;
 }</code></pre>
 <pre data-label="x86-64"><code>sum_to:
-    testq   %rdi, %rdi       # compare n with 0
+    testq   %rdi, %rdi       # compare n with 0 (see below)
     jle     .L5              # if n &lt;= 0, skip the loop
     addq    $1, %rdi         # rdi = n + 1, the loop's stopping value
     movl    $1, %eax         # i = 1      (in rax)
@@ -625,7 +628,13 @@ CSA.addUnits("cs210", [
 .L5:
     movl    $0, %edx         # n &lt;= 0: total = 0
     jmp     .L2</code></pre>
-<p>The <code>for</code> loop became a test before the loop, a body, and a backward jump. (<code>movl</code> writes a 32-bit value; on x86-64 that also clears the register's top 32 bits, so it's a shorter way to set a small 64-bit value.) The compiler also rearranged the loop to compare <code>i</code> with <em>n</em> + 1 using "not equal", which is equivalent here and simpler. Optimized code often differs from the source's shape like this; compiling with <code>-O0</code> gives a more literal translation, and a debugger such as <code>gdb</code> can step through it one instruction at a time.</p>
+<p>The <code>for</code> loop became a test before the loop, a body, and a backward jump. Three details:</p>
+<ul>
+<li><code>testq a, b</code> computes a AND b, bit by bit (Lesson 1), throws the result away and keeps only the flags, which record whether the result was zero or negative. ANDing <em>n</em> with itself gives <em>n</em>, so <code>testq %rdi, %rdi</code> is a short way to compare <em>n</em> with 0, and <code>jle</code> then jumps if <em>n</em> ≤ 0. (<code>cmpq b, a</code> does the same for a − b: it sets the flags from the subtraction and discards the result.)</li>
+<li><code>%eax</code> is the name for the low 32 bits of <code>%rax</code>, and <code>%edx</code> for the low 32 bits of <code>%rdx</code>. Each 64-bit register has such a 32-bit name, used with 32-bit instructions like <code>movl</code> ("l" for "long", 32 bits here). So <code>movl $1, %eax</code> sets rax to 1.</li>
+<li><code>movl</code> writes a 32-bit value; on x86-64 that also clears the register's top 32 bits, so it's a shorter way to set a small 64-bit value.</li>
+</ul>
+<p>The compiler also rearranged the loop to compare <code>i</code> with <em>n</em> + 1 using "not equal", which is equivalent here and simpler. Optimized code often differs from the source's shape like this; compiling with <code>-O0</code> gives a more literal translation, and a debugger such as <code>gdb</code> can step through it one instruction at a time.</p>
 
 <h3>A teaching machine</h3>
 <p>Real ISAs have hundreds of instructions. To experiment, this course uses a tiny made-up machine with 8 registers, <code>r0</code> to <code>r7</code>, all starting at 0, and these instructions:</p>
@@ -650,7 +659,7 @@ loop:   jlt r1 r2 done    # if n &lt; i, stop
         addi r2 1         # i += 1
         jmp loop
 done:   halt</code></pre>
-<p>A simulator for this machine is a short Python program: find the labels, then fetch, decode and execute in a loop, exactly the cycle above. Writing it is the first problem of this lesson. Simulators like this are how processor designers test a new ISA before any hardware exists.</p>
+<p>A simulator for this machine is a short Python program: find the labels, then fetch, decode and execute in a loop, exactly the cycle above. Writing it is this lesson's first programming problem, <em>Simulating the teaching machine</em>. Simulators like this are how processor designers test a new ISA before any hardware exists.</p>
 
 <h3>Why read assembly?</h3>
 <p>You will rarely write assembly. But reading it lets you see what the compiler really did: whether a loop was vectorized, why a "harmless" change slowed a program down, what a crash in a library without source code was doing. Security work depends on it: malware analysis and finding vulnerabilities start from machine code. The online tool Compiler Explorer (godbolt.org) shows the assembly for C, C++, Rust and many other languages side by side with the source, and is a good place to experiment.</p>
@@ -684,7 +693,7 @@ done:   halt</code></pre><p>Compare GCC's <code>max2</code>, which uses a "condi
         },
         {
           q: `<p>Compile this function with <code>gcc -O1 -S</code> (or on godbolt.org) and explain each line of the output: <code>long f(long x) { return x * 8 + 1; }</code></p>`,
-          a: `<p>A typical result is <code>leaq 1(,%rdi,8), %rax</code> then <code>ret</code>: one instruction computes 8·x + 1 using address arithmetic (base none, index rdi, scale 8, displacement 1) and puts it in rax. Exact output varies with compiler version, but you should see no multiply instruction. Many Linux compilers also put <code>endbr64</code> first: a marker instruction for a processor security feature (control-flow protection), which <code>-fcf-protection=none</code> turns off; the listings in the notes were made with it off.</p>`
+          a: `<p>A typical result is <code>leaq 1(,%rdi,8), %rax</code> then <code>ret</code>: one instruction computes 8·x + 1 using the address form from the notes (offset 1, no base, index rdi, scale 8: 1 + 8 · rdi) and puts it in rax. Exact output varies with compiler version, but you should see no multiply instruction. Many Linux compilers also put <code>endbr64</code> first: a marker instruction for a processor security feature (control-flow protection), which <code>-fcf-protection=none</code> turns off; the listings in the notes were made with it off.</p>`
         }
       ],
       sources: ["csapp", "patthen"]
@@ -713,7 +722,7 @@ done:   halt</code></pre><p>Compare GCC's <code>max2</code>, which uses a "condi
 <ul>
 <li>The first six integer or pointer arguments go in <code>%rdi</code>, <code>%rsi</code>, <code>%rdx</code>, <code>%rcx</code>, <code>%r8</code>, <code>%r9</code>; more go on the stack.</li>
 <li>The return value goes in <code>%rax</code>.</li>
-<li>Some registers are <em>callee-saved</em>: a function that uses them must restore their old values before returning. The rest are <em>caller-saved</em>: the caller must save them itself if it needs them after the call.</li>
+<li>Some registers are <strong>callee-saved</strong>: a function that uses them must restore their old values before returning. These are <code>%rbx</code>, <code>%rbp</code> and <code>%r12</code> to <code>%r15</code> (and <code>%rsp</code>, which every function must leave as it found it). The rest are <strong>caller-saved</strong>: <code>%rax</code>, <code>%rcx</code>, <code>%rdx</code>, <code>%rsi</code>, <code>%rdi</code> and <code>%r8</code> to <code>%r11</code>. Any call may change them, so a caller that needs one of their values after the call must save it first, for example by pushing it on the stack.</li>
 </ul>
 <p>Windows uses a different convention, one reason compiled code isn't portable between operating systems.</p>
 
@@ -762,7 +771,7 @@ done:   halt</code></pre><p>Compare GCC's <code>max2</code>, which uses a "condi
     gets(name);                 /* reads a line of ANY length into 16 bytes */
     printf("Hello, %s\\n", name);
 }</code></pre>
-<p>This is a <strong>stack buffer overflow</strong>, one of the most important vulnerabilities in computing history. The Morris worm of 1988, one of the first worms to spread across the internet, used exactly this bug in a Unix network service that called <code>gets</code>. The function <code>gets</code> can never be used safely, and was removed from the C standard in 2011; <code>fgets(name, sizeof name, stdin)</code> takes the buffer size.</p>
+<p>This is a <strong>stack buffer overflow</strong>, one of the most important vulnerabilities in computing history. The Morris worm of 1988, one of the first worms to spread across the internet, used exactly this bug in a Unix network service that called <code>gets</code>. The function <code>gets</code> can never be used safely, and was removed from the C standard in 2011. Its replacement, <code>fgets(name, sizeof name, stdin)</code>, takes the buffer size. With a buffer of <em>n</em> bytes, <code>fgets</code> reads characters from standard input (<code>stdin</code>) until it has read a newline or <em>n</em> − 1 characters, whichever comes first, and then adds the terminator, so it never writes past the buffer. If the whole line fits, the newline is kept as the last character before the terminator. If the line is too long, the rest of it, newline included, stays unread in the input, where the next read will find it. <code>fgets</code> returns <code>NULL</code> if there was no input left to read.</p>
 <p>Modern systems add layers of defense, none of which makes unchecked copying safe:</p>
 <ul>
 <li><strong>Stack canaries:</strong> the compiler places a random value between local arrays and the return address and checks it before returning; an overflow that reaches the return address changes the canary and the program stops.</li>
@@ -860,9 +869,11 @@ done:   halt</code></pre><p>Compare GCC's <code>max2</code>, which uses a "condi
 <tr><td>20</td><td>1</td><td>1</td><td>0</td><td>miss (slot 1 empty)</td></tr>
 </tbody>
 </table>
-<p>Addresses 0 and 64 fight over slot 0 even though the rest of the cache is empty: a <strong>conflict miss</strong>. A <strong>set-associative</strong> cache reduces this by letting each line go in any of several slots (a <em>set</em>); when the set is full, it usually evicts the <strong>least recently used</strong> (LRU) line. Real L1 caches are typically 8- to 12-way set associative.</p>
+<p>Addresses 0 and 64 fight over slot 0 even though the rest of the cache is empty: a <strong>conflict miss</strong>. A <strong>set-associative</strong> cache reduces this by letting each line go in any of several slots (a <em>set</em>); when the set is full, it usually evicts the <strong>least recently used</strong> (LRU) line. A cache whose sets have <em>k</em> slots is called <em>k</em>-way set associative. The address is split in the same three fields, but the index now chooses a <em>set</em> instead of a slot: a cache with <em>S</em> sets uses log₂ <em>S</em> index bits, and the cache compares the tag with every slot of that set. (A direct-mapped cache is the 1-way case, with one slot per set.) Real L1 caches are typically 8- to 12-way set associative.</p>
+<p>Misses come in three kinds. A <strong>compulsory miss</strong> happens on the first use of a line, which can't already be in the cache. A <strong>capacity miss</strong> happens when the program's <strong>working set</strong>, the data it uses during a stretch of time, is larger than the whole cache, so lines are evicted before they're used again. A <strong>conflict miss</strong>, as above, happens when lines compete for the same slot or set although other parts of the cache are free. More associativity reduces conflict misses; a bigger cache reduces capacity misses.</p>
 
 <h3>Loop order matters</h3>
+<p>The example in this section uses three pieces of C not yet shown. <code>#define N 4096</code> gives the constant 4096 a name: before compiling, every <code>N</code> in the file is replaced by 4096 (Lesson 8 shows the stage that does this). <code>int grid[N][N]</code> is a <strong>two-dimensional array</strong>, N rows of N <code>int</code>s, stored as one block, and <code>grid[r][c]</code> is the item in row <em>r</em> and column <em>c</em>. Because <code>grid</code> is declared outside any function, it is a global variable: it lives in the fixed region for globals (Lesson 4) instead of on the stack, which at 8 MB (Lesson 6) is far too small for 64 MB. The word <code>static</code> in front of it keeps the name private to this file, so other files linked with it (Lesson 8) can't see it.</p>
 <p>C stores a two-dimensional array <strong>row by row</strong> ("row-major" order): <code>grid[r][c]</code> and <code>grid[r][c + 1]</code> are neighbors in memory, while <code>grid[r + 1][c]</code> is a whole row away. Summing the same array in two orders:</p>
 <pre data-label="C"><code>#define N 4096
 static int grid[N][N];              /* 4096 x 4096 ints = 64 MB */
@@ -894,7 +905,7 @@ for (int c = 0; c &lt; N; c++)         /* column by column: 16 KB jumps */
         { q: "Summing an int array sequentially with 64-byte cache lines causes about how many misses per element?", choices: ["1", "1/16", "16", "0"], answer: 1, why: "Each line holds 16 four-byte ints; one miss brings in all 16." },
         { q: "A direct-mapped cache has 64-byte lines and 256 slots. How many bits are the offset and index?", choices: ["6 and 8", "8 and 6", "64 and 256", "5 and 7"], answer: 0, why: "2⁶ = 64 bytes per line and 2⁸ = 256 slots." },
         { q: "Why is summing a C array column by column slow?", choices: ["It does more additions", "Each access is in a different cache line, so most accesses miss", "C forbids it", "It overflows"], answer: 1, why: "Row-major storage puts column neighbors a whole row apart." },
-        { q: "Which kind of miss does set associativity reduce?", choices: ["Misses on first use", "Conflict misses, where lines compete for one slot", "Misses caused by too large a working set", "Disk misses"], answer: 1, why: "Several slots per set let competing lines coexist." }
+        { q: "Which kind of miss does set associativity reduce?", choices: ["Compulsory misses, on a line's first use", "Conflict misses, where lines compete for one slot", "Capacity misses, from a working set larger than the cache", "Disk misses"], answer: 1, why: "Several slots per set let competing lines coexist. A line's first use misses however the cache is organized, and a working set larger than the whole cache needs a bigger cache." }
       ],
       practice: [
         {
@@ -973,7 +984,15 @@ int main(void) {
 <pre data-label="Output"><code>child: my pid is 4218
 hello from echo
 parent: child 4218 exited with 0</code></pre>
-<p>(The process ID differs every run.) This is exactly what a shell does for every command you type: fork, exec the command in the child, wait. The <code>fflush</code> line is a lesson in itself: <code>printf</code> collects output in a buffer in the process's memory, and <code>exec</code> replaces that memory, so anything not yet written out would be lost.</p>
+<p>(The process ID differs every run.) The new names in the program:</p>
+<ul>
+<li><code>pid_t</code> is the integer type for process IDs, and <code>getpid()</code> returns the current process's ID.</li>
+<li><code>execlp(file, arg0, arg1, …, (char *)NULL)</code> runs the program <code>file</code>, searching the folders where the shell looks for commands (that's the <code>p</code>; the <code>l</code> means the arguments are given as a list). The remaining arguments become the new program's command-line arguments, the strings a Python program would find in <code>sys.argv</code>. By convention the first of them, argument 0, is the program's own name. That is why <code>"echo"</code> appears twice: once to say which file to run, and once as argument 0. A C function can't count how many arguments it was given, so the list ends with a null pointer as a marker. The cast <code>(char *)</code> makes that <code>NULL</code> a pointer of the same type as the strings.</li>
+<li><code>perror("execlp")</code> prints its argument, a colon and a description of the last error (taken from <code>errno</code>, Lesson 3), for example <code>execlp: No such file or directory</code>. It is reached only if <code>execlp</code> failed: when it succeeds, the child is running <code>echo</code> and never comes back to this code.</li>
+<li><code>waitpid(pid, &amp;status, 0)</code> waits until the child with that ID ends, then stores information about how it ended in <code>status</code>, through the pointer (Lesson 4). The 0 means no special options.</li>
+<li><code>status</code> packs several facts into one <code>int</code>, and the macro <code>WEXITSTATUS(status)</code> extracts the exit code, the value the child's <code>main</code> returned.</li>
+</ul>
+<p>This is exactly what a shell does for every command you type: fork, exec the command in the child, wait. The <code>fflush</code> line is a lesson in itself: <code>printf</code> collects output in a buffer in the process's memory, and <code>exec</code> replaces that memory, so anything not yet written out would be lost.</p>
 
 <h3>System calls</h3>
 <p>A process can't touch hardware or other processes directly. To read a file, print, allocate more memory, or create a process, it asks the operating system's <strong>kernel</strong> through a <strong>system call</strong>: a special instruction that switches the processor into a privileged mode and runs kernel code on the process's behalf. <code>fork</code>, <code>execve</code>, <code>read</code>, <code>write</code> and <code>open</code> are system calls; library functions like <code>printf</code> and <code>malloc</code> are ordinary code that makes system calls when it needs to.</p>
