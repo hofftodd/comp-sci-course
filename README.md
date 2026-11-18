@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had one round of student review. The other five terms are planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had two rounds of student review. Year 2 Spring is written and awaiting its first student review. The other four terms are planned and shown on the home page.
 
 ## What's in Year 1
 
@@ -44,6 +44,20 @@ Year 2 Fall is still taught with Python for every auto-graded problem. CS 201 sh
 versions of key structures for comparison, and CS 210 teaches C, whose examples were compiled and run
 with GCC; its graded problems simulate the same ideas (bits, floats, memory, a small CPU, caches) in Python.
 
+### Spring
+
+| Course | Credits | Core units | Programming problems |
+|---|---|---|---|
+| CS 220 Algorithms I | 4 | 8 | 16 |
+| CS 230 Computer Architecture and Digital Logic | 4 | 8 | 14 |
+| CS 240 Software Engineering I | 4 | 8 | 17 |
+| PHYS 250 Physics II: Electricity and Magnetism with Computation (elective) | 4 | 6 | 12 |
+
+Year 2 Spring also uses Python for every graded problem. CS 230 shows RISC-V assembly (its encodings were
+checked with an assembler) and simulates gates, adders, state machines and a processor in Python. CS 240's
+problems exercise each practice directly: tests that kill mutants, a three-way merge, a REST handler, a
+linter built on Python's `ast` module, and retries with backoff.
+
 Every course opens with a **rubric**: what is graded and how much it counts, the criteria with four
 performance levels, the grade scale, and policies. Each core lesson is designed for about 90 minutes:
 notes with worked examples and diagrams, key terms, 5–8 **practice problems** with optional hints and
@@ -56,10 +70,11 @@ idea is used in practice. Year 1 is taught in Python.
 
 - **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
   the student's browser.
-- **Auto-graded programming problems**: 107 in all. CS 101 has 31, two or three per lesson; CS 102
+- **Auto-graded programming problems**: 166 in all. CS 101 has 31, two or three per lesson; CS 102
   has 17 (classes, generators, writing tests that catch bugs, linked lists, trees); PHYS 150 has a
   simulation problem per lesson; Year 2 Fall has 53 (data structures, systems simulations, linear
-  algebra and statistics). Each comes with
+  algebra and statistics); Year 2 Spring has 59 (algorithms, hardware simulations, software
+  engineering practice and electromagnetism simulations). Each comes with
   starter code, a hint, a reference solution and automatic tests: edge cases, hidden tests, speed
   tests that catch slow algorithms, and checks such as "don't use the built-in `max`". Students
   write real Python in the page; it runs in their browser with Pyodide (CPython compiled to
