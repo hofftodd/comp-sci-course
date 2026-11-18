@@ -61,7 +61,7 @@ CSA.addCourse({
       minutes: 90,
       summary: "Solving a problem by splitting it into smaller copies of itself: recurrences, the master theorem that solves the common ones, and two algorithms that beat the obvious method: Karatsuba multiplication and counting inversions.",
       notes: `
-<p>Merge sort (CS 101), binary search (CS 101) and quicksort (CS 201) share a shape. They split a problem into smaller problems of the same kind, solve those recursively, and combine the answers. This shape is called <strong>divide and conquer</strong>, and it is the first of the design techniques this course studies. This lesson gives a tool for analyzing such algorithms quickly, then two examples where dividing well beats the obvious algorithm.</p>
+<p>Merge sort and binary search (CS 101 Lesson 13) and quicksort (CS 201 Lesson 6) share a shape. They split a problem into smaller problems of the same kind, solve those recursively, and combine the answers. This shape is called <strong>divide and conquer</strong>, and it is the first of the design techniques this course studies. This lesson gives a tool for analyzing such algorithms quickly, then two examples where dividing well beats the obvious algorithm.</p>
 
 <h3>The recurrences</h3>
 <p>A divide-and-conquer algorithm that splits a problem of size <em>n</em> into <em>a</em> subproblems of size <em>n</em>/<em>b</em>, and does <em>f</em>(<em>n</em>) work to split and combine, has running time</p>
@@ -75,13 +75,13 @@ CSA.addCourse({
 <ul>
 <li>If <em>d</em> &gt; log<sub><em>b</em></sub> <em>a</em> (the ratio is below 1: the top level dominates), T(<em>n</em>) = Θ(<em>n</em><sup><em>d</em></sup>).</li>
 <li>If <em>d</em> = log<sub><em>b</em></sub> <em>a</em> (ratio exactly 1: every level is equal), T(<em>n</em>) = Θ(<em>n</em><sup><em>d</em></sup> log <em>n</em>).</li>
-<li>If <em>d</em> &lt; log<sub><em>b</em></sub> <em>a</em> (ratio above 1: the leaves dominate), T(<em>n</em>) = Θ(<em>n</em><sup>log<sub><em>b</em></sub> <em>a</em></sup>).</li>
+<li>If <em>d</em> &lt; log<sub><em>b</em></sub> <em>a</em> (ratio above 1: the leaves dominate), T(<em>n</em>) = Θ(<em>n</em><sup><em>k</em></sup>), where <em>k</em> = log<sub><em>b</em></sub> <em>a</em>.</li>
 </ul></div>
-<p>(The condition <em>d</em> &gt; log<sub><em>b</em></sub> <em>a</em> is the same as <em>b</em><sup><em>d</em></sup> &gt; <em>a</em>, that is, <em>r</em> &lt; 1. In the third case there are <em>a</em><sup>log<sub><em>b</em></sub> <em>n</em></sup> = <em>n</em><sup>log<sub><em>b</em></sub> <em>a</em></sup> leaves, each doing constant work.)</p>
+<p>(The condition <em>d</em> &gt; log<sub><em>b</em></sub> <em>a</em> is the same as <em>b</em><sup><em>d</em></sup> &gt; <em>a</em>, that is, <em>r</em> &lt; 1. In the third case the answer is the number of leaves, each doing constant work. The sizes shrink by a factor of <em>b</em> per level, so the tree has <em>h</em> = log<sub><em>b</em></sub> <em>n</em> levels below the root and <em>a</em><sup><em>h</em></sup> leaves. To see that this is <em>n</em><sup><em>k</em></sup>, use <em>a</em> = <em>b</em><sup><em>k</em></sup> (the definition of <em>k</em> = log<sub><em>b</em></sub> <em>a</em>) and <em>b</em><sup><em>h</em></sup> = <em>n</em> (the definition of <em>h</em>): <em>a</em><sup><em>h</em></sup> = (<em>b</em><sup><em>k</em></sup>)<sup><em>h</em></sup> = (<em>b</em><sup><em>h</em></sup>)<sup><em>k</em></sup> = <em>n</em><sup><em>k</em></sup>. For Karatsuba below, <em>a</em> = 3 and <em>b</em> = 2: 3<sup><em>h</em></sup> leaves with <em>h</em> = log₂ <em>n</em>, which is <em>n</em><sup>1.585</sup>.)</p>
 <table>
 <thead><tr><th>Algorithm</th><th>Recurrence</th><th>a, b, d</th><th>Case</th><th>Result</th></tr></thead>
 <tbody>
-<tr><td>Binary search</td><td>T(n/2) + Θ(1)</td><td>1, 2, 0</td><td>d = log₂ 1 = 0</td><td>Θ(log n)</td></tr>
+<tr><td>Binary search</td><td>T(n/2) + Θ(1)</td><td>1, 2, 0</td><td>d = log₂ 1 = 0</td><td>Θ(log n): about log₂ n halvings, so 10 steps for 1,000 items</td></tr>
 <tr><td>Merge sort</td><td>2T(n/2) + Θ(n)</td><td>2, 2, 1</td><td>d = log₂ 2 = 1</td><td>Θ(n log n)</td></tr>
 <tr><td>Naive recursive multiplication (below)</td><td>4T(n/2) + Θ(n)</td><td>4, 2, 1</td><td>d &lt; log₂ 4 = 2</td><td>Θ(n²)</td></tr>
 <tr><td>Karatsuba (below)</td><td>3T(n/2) + Θ(n)</td><td>3, 2, 1</td><td>d &lt; log₂ 3 ≈ 1.585</td><td>Θ(n<sup>1.585</sup>)</td></tr>
@@ -92,21 +92,21 @@ CSA.addCourse({
 
 <h3>Karatsuba multiplication</h3>
 <p>Multiplying two <em>n</em>-digit numbers the way you learned in school takes Θ(<em>n</em>²) single-digit multiplications. In 1960 Andrey Kolmogorov, one of the great mathematicians of the century, conjectured in a seminar that nothing faster was possible. Within a week a 23-year-old student in the seminar, Anatoly Karatsuba, found a faster method.</p>
-<p>Split each number into a high half and a low half. With <em>m</em> = <em>n</em>/2 digits in each half, <em>x</em> = <em>a</em> · 10<sup><em>m</em></sup> + <em>b</em> and <em>y</em> = <em>c</em> · 10<sup><em>m</em></sup> + <em>d</em>, so</p>
-<p class="math">xy = ac · 10<sup>2m</sup> + (ad + bc) · 10<sup>m</sup> + bd</p>
-<p>That needs four half-size products (<em>ac</em>, <em>ad</em>, <em>bc</em>, <em>bd</em>): T(<em>n</em>) = 4T(<em>n</em>/2) + Θ(<em>n</em>), which the table shows is still Θ(<em>n</em>²). Karatsuba's trick computes the middle term with only <em>one</em> more product:</p>
-<p class="math">ad + bc = (a + b)(c + d) − ac − bd</p>
-<p>Three half-size products instead of four gives T(<em>n</em>) = 3T(<em>n</em>/2) + Θ(<em>n</em>) = Θ(<em>n</em><sup>log₂ 3</sup>) ≈ Θ(<em>n</em><sup>1.585</sup>). For 1234 × 5678: <em>a</em> = 12, <em>b</em> = 34, <em>c</em> = 56, <em>d</em> = 78. Then <em>ac</em> = 672, <em>bd</em> = 2652, and (12 + 34)(56 + 78) − 672 − 2652 = 6164 − 3324 = 2840. So the product is 672 · 10<sup>4</sup> + 2840 · 10<sup>2</sup> + 2652 = 7,006,652.</p>
+<p>Split each number into a high half and a low half. (The letters here are new names, not the master theorem's <em>a</em>, <em>b</em> and <em>d</em>: subscript 1 marks a high half and 0 a low half.) With <em>m</em> = <em>n</em>/2 digits in each half, <em>x</em> = <em>x</em>₁ · 10<sup><em>m</em></sup> + <em>x</em>₀ and <em>y</em> = <em>y</em>₁ · 10<sup><em>m</em></sup> + <em>y</em>₀, so</p>
+<p class="math">xy = x₁y₁ · 10<sup>2m</sup> + (x₁y₀ + x₀y₁) · 10<sup>m</sup> + x₀y₀</p>
+<p>That needs four half-size products (<em>x</em>₁<em>y</em>₁, <em>x</em>₁<em>y</em>₀, <em>x</em>₀<em>y</em>₁, <em>x</em>₀<em>y</em>₀): T(<em>n</em>) = 4T(<em>n</em>/2) + Θ(<em>n</em>), which the table shows is still Θ(<em>n</em>²). Karatsuba's trick computes the middle term with only <em>one</em> more product:</p>
+<p class="math">x₁y₀ + x₀y₁ = (x₁ + x₀)(y₁ + y₀) − x₁y₁ − x₀y₀</p>
+<p>Three half-size products instead of four gives T(<em>n</em>) = 3T(<em>n</em>/2) + Θ(<em>n</em>) (in the table, <em>a</em> = 3 subproblems, each of size <em>n</em>/<em>b</em> with <em>b</em> = 2, and Θ(<em>n</em><sup><em>d</em></sup>) = Θ(<em>n</em>) extra work for the additions and shifts, so <em>d</em> = 1). That is Θ(<em>n</em><sup>log₂ 3</sup>) ≈ Θ(<em>n</em><sup>1.585</sup>). For 1234 × 5678: <em>x</em>₁ = 12, <em>x</em>₀ = 34, <em>y</em>₁ = 56, <em>y</em>₀ = 78. Then <em>x</em>₁<em>y</em>₁ = 672, <em>x</em>₀<em>y</em>₀ = 2652, and (12 + 34)(56 + 78) − 672 − 2652 = 6164 − 3324 = 2840. So the product is 672 · 10<sup>4</sup> + 2840 · 10<sup>2</sup> + 2652 = 7,006,652.</p>
 <pre><code>def karatsuba(x, y):
     if x &lt; 10 or y &lt; 10:                 # a single digit: multiply directly
         return x * y
     m = max(len(str(x)), len(str(y))) // 2
-    a, b = divmod(x, 10 ** m)             # x = a·10^m + b
-    c, d = divmod(y, 10 ** m)
-    ac = karatsuba(a, c)
-    bd = karatsuba(b, d)
-    middle = karatsuba(a + b, c + d) - ac - bd
-    return ac * 10 ** (2 * m) + middle * 10 ** m + bd
+    x1, x0 = divmod(x, 10 ** m)           # x = x1·10^m + x0
+    y1, y0 = divmod(y, 10 ** m)
+    high = karatsuba(x1, y1)
+    low = karatsuba(x0, y0)
+    middle = karatsuba(x1 + x0, y1 + y0) - high - low
+    return high * 10 ** (2 * m) + middle * 10 ** m + low
 
 print(karatsuba(1234, 5678))   # 7006652</code></pre>
 <p>Python's own integers use Karatsuba for large numbers. Even faster methods exist, based on the fast Fourier transform. In 2019 David Harvey and Joris van der Hoeven gave an <em>O</em>(<em>n</em> log <em>n</em>) algorithm, believed to be optimal, though it only pays off for astronomically large numbers.</p>
@@ -153,7 +153,7 @@ print(sort_and_count([2, 4, 1, 3, 5])[1])   # 3: (2,1), (4,1), (4,3)</code></pre
         },
         {
           q: `<p>Multiply 46 × 13 with one level of Karatsuba (<em>m</em> = 1), showing the three products.</p>`,
-          a: `<p><em>a</em> = 4, <em>b</em> = 6, <em>c</em> = 1, <em>d</em> = 3. <em>ac</em> = 4, <em>bd</em> = 18, (4 + 6)(1 + 3) = 40, so the middle term is 40 − 4 − 18 = 18. Result: 4 · 100 + 18 · 10 + 18 = 598 = 46 × 13.</p>`
+          a: `<p><em>x</em>₁ = 4, <em>x</em>₀ = 6, <em>y</em>₁ = 1, <em>y</em>₀ = 3. <em>x</em>₁<em>y</em>₁ = 4, <em>x</em>₀<em>y</em>₀ = 18, (4 + 6)(1 + 3) = 40, so the middle term is 40 − 4 − 18 = 18. Result: 4 · 100 + 18 · 10 + 18 = 598 = 46 × 13.</p>`
         },
         {
           q: `<p>Strassen's algorithm (1969) multiplies two <em>n</em> × <em>n</em> matrices by splitting each into four (<em>n</em>/2) × (<em>n</em>/2) blocks and using 7 block multiplications instead of 8, plus Θ(<em>n</em>²) additions. Write its recurrence and solve it. How does it compare with the usual Θ(<em>n</em>³)?</p>`,
@@ -202,7 +202,8 @@ print(schedule([(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11)
 
 <h3>Scheduling to minimize lateness</h3>
 <p>A machine must process jobs one at a time. Job <em>i</em> takes <em>t</em><sub><em>i</em></sub> hours and is due at time <em>d</em><sub><em>i</em></sub>. A job's <strong>lateness</strong> is how far past its deadline it finishes (0 if on time). To minimize the <em>largest</em> lateness, the greedy rule <strong>earliest deadline first</strong> is optimal, even though it ignores the lengths of the jobs.</p>
-<p>The exchange argument: in any schedule, call a pair of adjacent jobs an <em>inversion</em> if the later one has the earlier deadline. Swapping such a pair moves the earlier-deadline job up, which can only help it; the other job now finishes when the earlier-deadline job used to, and since its deadline is later, its lateness is no worse than the earlier-deadline job's was. So swapping inversions never increases the maximum lateness, and repeatedly swapping turns any optimal schedule into the earliest-deadline one.</p>
+<p>The exchange argument: in any schedule, call a pair of adjacent jobs an <em>inversion</em> if the later one has the earlier deadline. Swapping such a pair moves the earlier-deadline job up, which can only help it; the other job now finishes when the earlier-deadline job used to, and since its deadline is later, its lateness is no worse than the earlier-deadline job's was. So swapping inversions never increases the maximum lateness.</p>
+<p>Now take any optimal schedule. First, if the machine ever sits idle, move later jobs earlier to close the gap: no job finishes later, so no lateness grows. (Earliest deadline first never leaves the machine idle.) Then, while the schedule has an adjacent inversion, swap it. Each swap reduces the number of pairs that are out of deadline order, anywhere in the schedule, by exactly one, so the swapping stops. When it stops, every adjacent pair is in deadline order, and a list in which every neighbor is in order is sorted by deadline: that is an earliest-deadline-first schedule. Each step kept the maximum lateness as small as the optimum, so this schedule is optimal too. Jobs with equal deadlines can come in any order: swapping two of them doesn't change their larger lateness (both have the same deadline and between them finish at the same two times), so every earliest-deadline schedule, however it breaks ties, has the same maximum lateness.</p>
 
 <h3>Huffman coding</h3>
 <p>Text is stored as bits. A fixed-length code gives every symbol the same number of bits: 3 bits suffice for 6 symbols. A <strong>variable-length code</strong> gives frequent symbols short codes and rare ones long codes, and can do much better. To be decodable without separators, it must be a <strong>prefix code</strong>: no codeword is the beginning of another. Then a bit string can be read left to right, and a codeword is recognized the moment it's complete.</p>
@@ -443,7 +444,7 @@ print(knapsack([(1, 1), (3, 4), (4, 5), (5, 7)], 7))   # (9, [1, 2])</code></pre
 <p>The <strong>edit distance</strong> (or Levenshtein distance, after Vladimir Levenshtein, 1965) between two strings is the fewest single-character insertions, deletions and substitutions that turn one into the other. "kitten" → "sitting" takes 3: substitute k → s, substitute e → i, insert g. Spell checkers suggest words at small edit distance; biologists align DNA with weighted versions of it.</p>
 <ol>
 <li>Subproblems: <em>E</em>[<em>i</em>][<em>j</em>] = the edit distance between the first <em>i</em> characters of <em>x</em> and the first <em>j</em> of <em>y</em>.</li>
-<li>Recurrence: consider the last characters. Either delete <em>x</em>[<em>i</em>] (1 + <em>E</em>[<em>i</em> − 1][<em>j</em>]), insert <em>y</em>[<em>j</em>] (1 + <em>E</em>[<em>i</em>][<em>j</em> − 1]), or match them, at cost 0 if equal and 1 for a substitution (<em>E</em>[<em>i</em> − 1][<em>j</em> − 1] + [<em>x</em><sub><em>i</em></sub> ≠ <em>y</em><sub><em>j</em></sub>]). Take the minimum.</li>
+<li>Recurrence: consider the last characters. Either delete <em>x</em>[<em>i</em>] (1 + <em>E</em>[<em>i</em> − 1][<em>j</em>]), insert <em>y</em>[<em>j</em>] (1 + <em>E</em>[<em>i</em>][<em>j</em> − 1]), or match them, at cost 0 if equal and 1 for a substitution (<em>E</em>[<em>i</em> − 1][<em>j</em> − 1] + [<em>x</em><sub><em>i</em></sub> ≠ <em>y</em><sub><em>j</em></sub>], where square brackets around a condition mean 1 if it is true and 0 if it is false). Take the minimum.</li>
 <li>Base cases: <em>E</em>[<em>i</em>][0] = <em>i</em> (delete everything) and <em>E</em>[0][<em>j</em>] = <em>j</em> (insert everything).</li>
 <li>Answer <em>E</em>[<em>m</em>][<em>n</em>]; cost Θ(<em>mn</em>).</li>
 </ol>
@@ -544,7 +545,7 @@ G = {"A": [("B", 4), ("C", 2)], "B": [("C", 5), ("D", 10)], "C": [("E", 3)],
 dist, prev = dijkstra(G, "A")
 print(dist)   # {'A': 0, 'B': 4, 'C': 2, 'E': 5, 'D': 9, 'F': 20}</code></pre>
 <p>The vertices are finished in the order A (0), C (2), B (4), E (5), D (9), F (20). D's estimate was first 14 (through B), then improved to 9 (through C and E) before D was finished. Following <code>prev</code> back from F gives the path A → C → E → D → F.</p>
-<p>Instead of decreasing a key in the heap, this version pushes a new entry and skips outdated ones when they come out. Each edge causes at most one push, so the heap holds at most <em>E</em> entries, and the running time is O((<em>V</em> + <em>E</em>) log <em>V</em>).</p>
+<p>Instead of decreasing a key in the heap, this version pushes a new entry and skips outdated ones when they come out. Each edge causes at most one push, so the heap holds at most <em>E</em> entries and each push or pop costs O(log <em>E</em>). There are at most <em>E</em> pushes and <em>E</em> pops, plus O(<em>V</em>) work to visit the vertices, so the time is O(<em>V</em> + <em>E</em> log <em>E</em>). A simple graph has at most one edge per pair of vertices, so <em>E</em> &lt; <em>V</em>², and log <em>E</em> &lt; log <em>V</em>² = 2 log <em>V</em>. The two logarithms differ by at most a constant factor, so the time is also O((<em>V</em> + <em>E</em>) log <em>V</em>), the bound usually quoted.</p>
 
 <h3>Why Dijkstra is correct</h3>
 <p>Claim: when a vertex <em>u</em> is finished, <em>d</em>[<em>u</em>] = dist(<em>u</em>). Suppose not, and let <em>u</em> be the first vertex finished with a wrong estimate. Take a true shortest path from <em>s</em> to <em>u</em>. It starts among finished vertices and ends outside them, so it has a first edge (<em>x</em>, <em>y</em>) leaving the finished set. Since <em>x</em> was finished correctly and its edges were relaxed, <em>d</em>[<em>y</em>] ≤ dist(<em>x</em>) + <em>w</em>(<em>x</em>, <em>y</em>) = dist(<em>y</em>). Because weights are non-negative, the rest of the path from <em>y</em> to <em>u</em> can't be negative, so dist(<em>y</em>) ≤ dist(<em>u</em>) &lt; <em>d</em>[<em>u</em>]. So <em>d</em>[<em>y</em>] &lt; <em>d</em>[<em>u</em>], and the algorithm would have chosen <em>y</em> before <em>u</em>. Contradiction.</p>
@@ -652,7 +653,7 @@ print(T, sum(w for _, _, w in T))
 <p>Edge A–C (3) is skipped because A and C are already connected through B; C–D (5) because B–D connected D. Sorting dominates: O(<em>E</em> log <em>E</em>).</p>
 
 <h3>Prim's algorithm</h3>
-<p>Prim's algorithm (Vojtěch Jarník in 1930, rediscovered by Robert Prim in 1957 and Dijkstra in 1959) grows one tree from a starting vertex. At each step it adds the lightest edge connecting the tree to a vertex outside it: the lightest edge across the cut (tree, rest). It looks like Dijkstra's algorithm, with one change: the priority of a vertex is the weight of the single cheapest edge reaching it, not a path length. With a heap it takes O(<em>E</em> log <em>V</em>).</p>
+<p>Prim's algorithm (Vojtěch Jarník in 1930, rediscovered by Robert Prim in 1957 and Dijkstra in 1959) grows one tree from a starting vertex. At each step it adds the lightest edge connecting the tree to a vertex outside it: the lightest edge across the cut (tree, rest). It looks like Dijkstra's algorithm, with one change: priorities are single edge weights, not path lengths. The code below keeps <em>edges</em> in its heap, as (weight, far end) pairs: whenever a vertex joins the tree, every edge from it to a vertex outside is pushed. An edge can go stale (its far end joins the tree by another edge first), so a popped edge whose far end is already in the tree is skipped, exactly like Dijkstra's outdated entries. The first edge popped for each outside vertex is the cheapest one reaching it from the tree. (Versions that use a decrease-key operation keep each outside vertex in the heap once, with that cheapest weight as its priority. They choose the same edges.) With a heap it takes O(<em>E</em> log <em>V</em>), by the same argument as Dijkstra's.</p>
 <pre><code>import heapq
 
 def prim(graph, start):
@@ -835,7 +836,7 @@ print(max_flow(caps, "s", "t"))   # 15</code></pre>
       minutes: 90,
       summary: "The problems no one knows how to solve efficiently: polynomial time, the class NP of problems with quickly checkable answers, reductions, NP-completeness and the Cook–Levin theorem, the P versus NP question, and practical ways to cope with hard problems.",
       notes: `
-<p>Every problem so far had an algorithm running in polynomial time: O(<em>n</em><sup><em>k</em></sup>) for some fixed <em>k</em>. Many important problems have resisted every attempt to find one: scheduling with conflicts, routing a delivery truck through all its stops, packing a knapsack exactly (Lesson 4), and thousands more. This lesson explains the theory that groups them together.</p>
+<p>Almost every problem so far had an algorithm running in polynomial time: O(<em>n</em><sup><em>k</em></sup>) for some fixed <em>k</em>, where <em>n</em> is the size of the input. The exception was Lesson 4's 0/1 knapsack, whose Θ(<em>nW</em>) table is only pseudo-polynomial: when the weights are numbers with many digits, no known algorithm is fast. Many important problems have resisted every attempt to find a polynomial-time algorithm: scheduling with conflicts, routing a delivery truck through all its stops, the knapsack problem with large weights, and thousands more. This lesson explains the theory that groups them together.</p>
 
 <h3>P: efficiently solvable</h3>
 <p>We treat polynomial time as the working definition of "efficient". <strong>P</strong> is the class of <strong>decision problems</strong> (problems with yes/no answers) solvable in polynomial time. Restricting to yes/no questions loses little: "is there a route of length at most <em>k</em>?" is as hard as "what is the shortest route?" up to polynomial factors, since we can search over <em>k</em>. Shortest paths, MSTs, maximum flow, sorting and LCS are all in P.</p>

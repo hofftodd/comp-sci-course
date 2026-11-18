@@ -182,7 +182,7 @@ print(equivalent(lambda a, b, c: a | (b &amp; c), lambda a, b, c: (a | b) &amp; 
 <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
 </tbody>
 </table>
-<p>The sum is 1 when an odd number of inputs are 1: sum = <em>a</em> ⊕ <em>b</em> ⊕ <em>c</em>. The carry-out is the majority function from Lesson 1: <em>c</em><sub>out</sub> = <em>ab</em> + <em>c</em>(<em>a</em> ⊕ <em>b</em>). (A <em>half adder</em> is the same without a carry-in: sum = <em>a</em> ⊕ <em>b</em>, carry = <em>ab</em>.)</p>
+<p>The sum is 1 when an odd number of inputs are 1: sum = <em>a</em> ⊕ <em>b</em> ⊕ <em>c</em>. The carry-out is the majority function from Lesson 1 (1 when at least two inputs are 1), written in a form that reuses the sum's <em>a</em> ⊕ <em>b</em>: <em>c</em><sub>out</sub> = <em>ab</em> + <em>c</em>(<em>a</em> ⊕ <em>b</em>). To see that it is the same function as <em>bc</em> + <em>ac</em> + <em>ab</em>, check the three possibilities for <em>a</em> and <em>b</em>. If both are 1, both formulas give 1. If both are 0, both give 0 (<em>a</em> ⊕ <em>b</em> = 0, and <em>c</em> alone is not a majority). If exactly one is 1, <em>a</em> ⊕ <em>b</em> = 1 and <em>ab</em> = 0, so the new formula gives <em>c</em>; the majority is also <em>c</em>, since <em>c</em> decides whether there are one or two 1s. (A <em>half adder</em> is the same without a carry-in: sum = <em>a</em> ⊕ <em>b</em>, carry = <em>ab</em>.)</p>
 
 <h3>The ripple-carry adder</h3>
 <p>Chain <em>n</em> full adders, feeding each carry-out into the next column's carry-in, and you have an <em>n</em>-bit adder. Here it is in Python, with numbers as lists of bits, least significant first:</p>
@@ -212,7 +212,26 @@ print(from_bits(s), c)   # 1 1: 11 + 6 = 17 = 16 + 1, so the 4-bit result is 1 w
 <h3>Carry lookahead</h3>
 <p>The fix is to compute carries in parallel. Column <em>i</em> <strong>generates</strong> a carry if <em>g</em><sub><em>i</em></sub> = <em>a</em><sub><em>i</em></sub><em>b</em><sub><em>i</em></sub> (both bits 1), and <strong>propagates</strong> an incoming carry if <em>p</em><sub><em>i</em></sub> = <em>a</em><sub><em>i</em></sub> ⊕ <em>b</em><sub><em>i</em></sub> (exactly one bit is 1). Then</p>
 <p class="math">c<sub>i+1</sub> = g<sub>i</sub> + p<sub>i</sub>c<sub>i</sub> = g<sub>i</sub> + p<sub>i</sub>g<sub>i−1</sub> + p<sub>i</sub>p<sub>i−1</sub>g<sub>i−2</sub> + … + p<sub>i</sub>⋯p<sub>0</sub>c<sub>0</sub></p>
-<p>Every carry is now a two-level formula in the inputs, computable at once, though the formulas grow with <em>i</em>. Real <strong>carry-lookahead</strong> adders combine (<em>g</em>, <em>p</em>) pairs in a tree, block by block, getting all carries in Θ(log <em>n</em>) gate levels: 6 levels of combining for 64 bits instead of 64 ripple stages. This is the divide-and-conquer idea from CS 220 Lesson 1, in hardware.</p>
+<p>Every carry is now a two-level formula in the inputs, computable at once, though the formulas grow with <em>i</em>. Real <strong>carry-lookahead</strong> adders instead combine (<em>g</em>, <em>p</em>) pairs in a tree, block by block. Give a block of adjacent columns a pair (<em>G</em>, <em>P</em>): <em>G</em> = 1 if the block produces a carry out of its top column even with no carry in, and <em>P</em> = 1 if a carry into the block would pass all the way through it. Two neighboring blocks, a high one (<em>G</em><sub>h</sub>, <em>P</em><sub>h</sub>) and a low one (<em>G</em><sub>l</sub>, <em>P</em><sub>l</sub>), form one bigger block with</p>
+<p class="math">G = G<sub>h</sub> + P<sub>h</sub>G<sub>l</sub>,   P = P<sub>h</sub>P<sub>l</sub></p>
+<p>The big block generates a carry if the high block does, or if the low block does and the high block passes it on; a carry passes through the big block only if it passes through both. Each combine is two gate levels. Start with the <em>n</em> single columns (<em>g</em><sub><em>i</em></sub>, <em>p</em><sub><em>i</em></sub>), combine neighbors in pairs, then pairs of pairs, and so on: the block size doubles each level, so after log₂ <em>n</em> levels one block covers all <em>n</em> bits, and its carry-out is <em>G</em> + <em>Pc</em><sub>0</sub>.</p>
+<pre><code>def combine(high, low):
+    """(G, P) of two adjacent blocks -&gt; (G, P) of the block they form."""
+    gh, ph = high
+    gl, pl = low
+    return gh | (ph &amp; gl), ph &amp; pl
+
+def block_gp(xs, ys):
+    pairs = [(a &amp; b, a ^ b) for a, b in zip(xs, ys)]   # one (g, p) per column
+    while len(pairs) &gt; 1:                              # one tree level per pass
+        pairs = [combine(pairs[i + 1], pairs[i]) for i in range(0, len(pairs), 2)]
+    return pairs[0]
+
+G, P = block_gp(to_bits(11, 4), to_bits(6, 4))
+print(G, P)   # 1 0: the 4-bit block generates a carry out, so 11 + 6 carries
+G, P = block_gp(to_bits(9, 4), to_bits(6, 4))
+print(G, P)   # 0 1: 9 + 6 = 15 = 1111, so a carry in would pass straight through</code></pre>
+<p>(The function needs a power-of-two width.) The carries into the middle columns come from the same tree: the carry into a block is <em>G</em> + <em>Pc</em> of the blocks below it, and a second pass back down the tree delivers it to every column, also in Θ(log <em>n</em>) levels. So all carries take Θ(log <em>n</em>) gate levels: 6 levels of combining for 64 bits instead of 64 ripple stages. This is the divide-and-conquer idea from CS 220 Lesson 1, in hardware.</p>
 
 <h3>Subtraction</h3>
 <p>Two's complement (CS 210 Lesson 1) makes subtraction free: <em>a</em> − <em>b</em> = <em>a</em> + (−<em>b</em>) = <em>a</em> + <em>b</em>′ + 1. Invert every bit of <em>b</em> (an XOR with 1 on each bit does it) and set the adder's carry-in to 1. One adder, plus a row of XOR gates controlled by a "subtract" signal, does both operations. Overflow is detected the way CS 210 described: when the carry into the top column differs from the carry out of it.</p>
@@ -312,7 +331,7 @@ for S, R in [(1, 0), (0, 0), (0, 1), (0, 0)]:
 <p>Processors coordinate all their memory elements with a <strong>clock</strong>: a signal that alternates between 0 and 1 billions of times a second (a 3 GHz clock has a period of about 0.33 ns). The clock divides time into <strong>cycles</strong>. During each cycle, combinational logic computes new values from the stored ones; at the end of the cycle, the memory elements capture the new values all at once.</p>
 
 <h3>Edge-triggered flip-flops</h3>
-<p>A D latch is "transparent" while enabled: if its output feeds back through logic to its own input, values could race around the loop several times within one cycle. The solution is the <strong>edge-triggered D flip-flop</strong>, which samples <em>D</em> only at the instant the clock rises from 0 to 1 (the <em>rising edge</em>), and holds that value for the whole next cycle. It can be built from two D latches in a row, enabled on opposite halves of the clock. With flip-flops, each cycle's results are captured exactly once, so a loop through logic and back is safe. The clock period must be long enough for the slowest combinational path (Lesson 1's critical path) to settle before the next edge: this sets the maximum clock speed.</p>
+<p>A D latch is "transparent" while enabled: if its output feeds back through logic to its own input, values could race around the loop several times within one cycle. The solution is the <strong>edge-triggered D flip-flop</strong>, which samples <em>D</em> only at the instant the clock rises from 0 to 1 (the <em>rising edge</em>), and holds that value for the whole next cycle. It can be built from two D latches in a row, enabled on opposite halves of the clock. The first latch is enabled while the clock is 0, so it follows <em>D</em>; the second is enabled while the clock is 1 and copies the first latch's output to <em>Q</em>. When the clock rises, the first latch closes, holding whatever <em>D</em> was at that instant, and the second opens and passes that held value to <em>Q</em>. While the clock is 1, <em>D</em> can change freely, because the first latch is closed. When the clock falls, the second latch closes, holding <em>Q</em>, and the first opens again, but its changes can't reach <em>Q</em> until the next rise. At no moment are both latches open, so <em>Q</em> changes only at a rising edge, to the value <em>D</em> had then. With flip-flops, each cycle's results are captured exactly once, so a loop through logic and back is safe. The clock period must be long enough for the slowest combinational path (Lesson 1's critical path) to settle before the next edge: this sets the maximum clock speed.</p>
 
 <h3>Registers and counters</h3>
 <p>A <strong>register</strong> is a row of flip-flops sharing a clock: a 64-bit register is 64 flip-flops. A processor's <strong>register file</strong> is an array of registers (32 in RISC-V) with decoders to choose which one to write and multiplexers to choose which ones to read.</p>
@@ -384,7 +403,7 @@ print(detect_101([1, 0, 1, 0, 1, 1, 0, 1]))   # [0, 0, 1, 0, 1, 0, 0, 1]</code><
 <h3>The programmer's view</h3>
 <p>The base instruction set, RV32I (with a 64-bit variant, RV64I), specifies:</p>
 <ul>
-<li><strong>32 registers</strong>, x0 to x31, each 32 bits (64 in RV64). Register x0 always reads as 0 and ignores writes, which turns out to be very useful. The registers also have ABI names that describe their conventional roles: a0–a7 for arguments and return values, t0–t6 for temporaries, s0–s11 for values saved across calls, sp for the stack pointer, ra for the return address.</li>
+<li><strong>32 registers</strong>, x0 to x31, each 32 bits (64 in RV64). Register x0 always reads as 0 and ignores writes, which turns out to be very useful. The registers also have <strong>ABI names</strong> that describe their conventional roles. The ABI (<em>application binary interface</em>) is the set of rules that compiled code agrees on so that separately compiled functions can call each other, like CS 210's x86-64 calling convention: which registers carry arguments and return values, which ones a function must preserve. The hardware treats x10 and a0 identically; the name records the convention: a0–a7 for arguments and return values, t0–t6 for temporaries, s0–s11 for values saved across calls, sp for the stack pointer, ra for the return address.</li>
 <li>A <strong>program counter</strong>.</li>
 <li>Byte-addressed memory, little-endian (CS 210 Lesson 1).</li>
 <li>About 40 instructions, all exactly <strong>32 bits</strong> long.</li>
@@ -403,16 +422,21 @@ jal  ra, func        # jump to func, saving the return address in ra</code></pre
 <p>There's no "move" or "load constant" instruction: <code>addi x5, x0, 42</code> puts 42 in x5 (adding to x0, which is always 0), and <code>add x5, x6, x0</code> copies x6. The assembler accepts <code>li</code> and <code>mv</code> as shorthand for these. Removing special cases this way keeps the hardware simple.</p>
 
 <h3>Encoding</h3>
-<p>Each instruction is a 32-bit number, divided into fields. The <strong>opcode</strong> (the low 7 bits) says which kind of instruction it is; other fields name registers (5 bits each, enough for 32 registers) and give constants. RISC-V has six formats; the main ones:</p>
+<p>Each instruction is a 32-bit number, divided into fields. The <strong>opcode</strong> (the low 7 bits) says which kind of instruction it is; other fields name registers (5 bits each, enough for 32 registers) and give constants. RISC-V has six formats. Each cell below gives a field and, in parentheses, the instruction bits it occupies; a field that spans several columns occupies all of their bits.</p>
 <table>
-<thead><tr><th>Format</th><th>Bits 31–25</th><th>24–20</th><th>19–15</th><th>14–12</th><th>11–7</th><th>6–0</th><th>Used by</th></tr></thead>
+<thead><tr><th>Format</th><th>Bits 31–25</th><th>Bits 24–20</th><th>Bits 19–15</th><th>Bits 14–12</th><th>Bits 11–7</th><th>Bits 6–0</th><th>Used by</th></tr></thead>
 <tbody>
-<tr><td>R</td><td>funct7</td><td>rs2</td><td>rs1</td><td>funct3</td><td>rd</td><td>opcode</td><td>add, sub, and, or, slt</td></tr>
-<tr><td>I</td><td colspan="2">imm[11:0]</td><td>rs1</td><td>funct3</td><td>rd</td><td>opcode</td><td>addi, lw, jalr</td></tr>
-<tr><td>S</td><td>imm[11:5]</td><td>rs2</td><td>rs1</td><td>funct3</td><td>imm[4:0]</td><td>opcode</td><td>sw</td></tr>
+<tr><td>R</td><td>funct7 (31–25)</td><td>rs2 (24–20)</td><td>rs1 (19–15)</td><td>funct3 (14–12)</td><td>rd (11–7)</td><td>opcode (6–0)</td><td>add, sub, and, or, slt</td></tr>
+<tr><td>I</td><td colspan="2">imm[11:0] (31–20)</td><td>rs1 (19–15)</td><td>funct3 (14–12)</td><td>rd (11–7)</td><td>opcode (6–0)</td><td>addi, lw, jalr</td></tr>
+<tr><td>S</td><td>imm[11:5] (31–25)</td><td>rs2 (24–20)</td><td>rs1 (19–15)</td><td>funct3 (14–12)</td><td>imm[4:0] (11–7)</td><td>opcode (6–0)</td><td>sw</td></tr>
+<tr><td>B</td><td>imm[12, 10:5] (31–25)</td><td>rs2 (24–20)</td><td>rs1 (19–15)</td><td>funct3 (14–12)</td><td>imm[4:1, 11] (11–7)</td><td>opcode (6–0)</td><td>beq, bne, blt, bge</td></tr>
+<tr><td>U</td><td colspan="4">imm[31:12] (31–12)</td><td>rd (11–7)</td><td>opcode (6–0)</td><td>lui</td></tr>
+<tr><td>J</td><td colspan="4">imm[20, 10:1, 11, 19:12] (31–12)</td><td>rd (11–7)</td><td>opcode (6–0)</td><td>jal</td></tr>
 </tbody>
 </table>
-<p>(rd is the destination register, rs1 and rs2 the source registers, and imm[11:0] means bits 11 to 0 of the immediate.) The registers always sit in the same bit positions in every format, so the processor can start reading registers before it has even finished decoding the instruction. That's why S-format splits its immediate into two pieces: to keep rs2 where R-format has it.</p>
+<p>(rd is the destination register, rs1 and rs2 the source registers, and imm[11:0] means bits 11 to 0 of the immediate. imm[12, 10:5] means immediate bit 12 followed by bits 10 to 5, from the instruction's bit 31 down.) The registers always sit in the same bit positions in every format, so the processor can start reading registers before it has even finished decoding the instruction. That's why S-format splits its immediate into two pieces: to keep rs2 where R-format has it.</p>
+<p>The other three formats follow the same rule. <strong>B</strong> (branches) is S with its immediate bits shuffled. The immediate is the distance in bytes from the branch to its target; instructions sit at even addresses, so that distance is always even, its bit 0 is always 0 and isn't stored, and the 12 stored bits are bits 12 to 1 (targets up to 4,096 bytes away in either direction). <code>beq x5, x6, label</code> branches when x5 = x6. <strong>U</strong> holds a 20-bit constant for the upper bits of a register: <code>lui x5, 0x12345</code> ("load upper immediate") sets x5 = 0x12345000, and an <code>addi</code> can then fill in the low 12 bits. <strong>J</strong> is U with its bits shuffled, holding <code>jal</code>'s jump distance (again even: 20 stored bits, bits 20 to 1, so up to about a million bytes away). The shuffles look odd, but they keep each immediate bit in the same instruction bit across formats as often as possible, which saves wiring in the decoder.</p>
+<p>Two jumps matter for function calls. <code>jal rd, label</code> jumps to the label and saves the address of the next instruction (the return address) in rd. <code>jalr rd, imm(rs1)</code>, in I format, jumps to the address rs1 + imm, again saving the return address in rd. A call is <code>jal ra, func</code>; a return is <code>jalr x0, 0(ra)</code>, which jumps back to the saved address and throws away its own return address by writing it to x0.</p>
 <p><strong>Encoding <code>add x5, x6, x7</code>.</strong> R-format, opcode 0110011 (0x33), funct3 000, funct7 0000000 (sub differs only in funct7 = 0100000). rd = 5, rs1 = 6, rs2 = 7:</p>
 <pre data-label="Bits"><code>funct7   rs2   rs1   funct3 rd    opcode
 0000000  00111 00110 000    00101 0110011   = 0x007302B3</code></pre>
@@ -539,7 +563,7 @@ CSA.addUnits("cs230", [
 <p>("–" means "doesn't matter", because nothing is written.) The table is a truth table, so the control unit is exactly the kind of circuit Lesson 1 built.</p>
 
 <h3>A simulator</h3>
-<p>A processor simulator is the datapath in software: a loop that fetches, decodes, executes and writes back. Here, instructions are given already decoded as tuples to keep the code short; the CS 230 labs decode real 32-bit words (Lesson 4).</p>
+<p>A processor simulator is the datapath in software: a loop that fetches, decodes, executes and writes back. Here, instructions are given already decoded as tuples to keep the code short; decoding real 32-bit words means undoing Lesson 4's encoding, which the processor lab (described in the course rubric at the top of the course page) asks you to do.</p>
 <pre><code>def run(program, regs=None, mem=None, max_steps=10_000):
     x = [0] * 32 if regs is None else regs
     mem = {} if mem is None else mem
@@ -630,7 +654,11 @@ instr 3                 IF   ID   EX   MEM  WB</code></pre>
 <p>Overlapping creates <strong>hazards</strong>: situations where the next instruction can't safely proceed in the next cycle. A <strong>data hazard</strong> occurs when an instruction needs a result that an earlier instruction hasn't written yet:</p>
 <pre data-label="RISC-V"><code>add x5, x6, x7       # writes x5 in WB (cycle 5)
 sub x8, x5, x9       # reads x5 in ID (cycle 3): too early!</code></pre>
-<p>Waiting (inserting empty cycles, called <strong>stalls</strong> or <strong>bubbles</strong>) would cost two cycles. But the sum already exists at the end of add's EX stage, cycle 3, and sub needs it at the start of its own EX stage, cycle 4. <strong>Forwarding</strong> (or bypassing) adds wires and muxes that pass the value straight from the pipeline register after EX into the ALU's input, so no stall is needed. The forwarding unit compares the destination register of instructions ahead in the pipeline with the source registers of the one in EX.</p>
+<p>Waiting (inserting empty cycles, called <strong>stalls</strong> or <strong>bubbles</strong>) would cost two cycles, not three, because of how the register file is built: it is written in the first half of a cycle and read in the second. So an instruction can read, in its ID stage, a value written in WB during the same cycle. sub's ID can therefore move from cycle 3 to cycle 5, the cycle of add's WB: a delay of two cycles.</p>
+<pre data-label="Pipeline"><code>cycle:        1    2    3    4    5    6    7    8
+add           IF   ID   EX   MEM  WB
+sub                IF   --   --   ID   EX   MEM  WB      (-- = stall)</code></pre>
+<p>But the sum already exists at the end of add's EX stage, cycle 3, and sub needs it at the start of its own EX stage, cycle 4. <strong>Forwarding</strong> (or bypassing) adds wires and muxes that pass the value straight from the pipeline register after EX into the ALU's input, so no stall is needed. The forwarding unit compares the destination register of instructions ahead in the pipeline with the source registers of the one in EX.</p>
 <p>One case forwarding can't fully fix: a value loaded from memory exists only after MEM.</p>
 <pre data-label="RISC-V"><code>lw  x5, 0(x6)        # x5 available after MEM (end of cycle 4)
 add x7, x5, x8       # needs x5 at the start of its EX (cycle 4): one cycle short</code></pre>
@@ -642,7 +670,7 @@ add x7, x5, x8       # needs x5 at the start of its EX (cycle 4): one cycle shor
 <li><strong>Stall</strong> until the outcome is known: simple, but every branch costs cycles, and roughly one instruction in five or six is a branch.</li>
 <li><strong>Predict</strong> the outcome and keep fetching. If the prediction was wrong, <strong>flush</strong> the wrongly fetched instructions (turn them into bubbles) and fetch the right ones: a penalty of a few cycles, paid only on mispredictions.</li>
 </ul>
-<p>The simplest prediction is "not taken". Real processors use <strong>dynamic branch prediction</strong>: they remember each branch's recent behavior. A 2-bit saturating counter per branch predicts "taken" after it has been taken twice in a row and switches only after two mispredictions, so a loop branch that is taken 99 times and then falls through costs one misprediction per loop, not two. Modern predictors, using patterns of many recent branches, are right well over 90% of the time on typical programs, and deep pipelines of 15–20 stages depend on it, because each misprediction throws away many cycles of work.</p>
+<p>The simplest prediction is "not taken". Real processors use <strong>dynamic branch prediction</strong>: they remember each branch's recent behavior. A common scheme keeps a <strong>2-bit saturating counter</strong> per branch, a number from 0 to 3: 0 and 1 mean "predict not taken" (strongly and weakly), 2 and 3 mean "predict taken" (weakly and strongly). Each time the branch is taken the counter goes up by 1, and each time it isn't the counter goes down by 1, but it never goes below 0 or above 3 ("saturating"). A counter at 3 that sees one surprise only drops to 2 and still predicts taken; it takes two wrong predictions in a row to change its mind. (A counter at 1 changes its mind after a single taken branch.) So a loop branch that is taken 99 times and then falls through costs one misprediction per loop, not two. Modern predictors, using patterns of many recent branches, are right well over 90% of the time on typical programs, and deep pipelines of 15–20 stages depend on it, because each misprediction throws away many cycles of work.</p>
 <p>Structural hazards (two instructions needing the same hardware in the same cycle) are avoided by design: separate instruction and data memories (in practice, separate caches), and a register file written in the first half of a cycle and read in the second.</p>
 
 <h3>Beyond the basic pipeline</h3>
@@ -844,6 +872,6 @@ CSA.addAsides("cs230", {
     { kind: "ethics", title: "Spectre and Meltdown", html: `<p>In January 2018, researchers disclosed Spectre and Meltdown, attacks that exploit speculative execution: a processor that predicts a branch runs instructions that might later be thrown away. Their results are discarded, but they leave traces in the cache (CS 210 Lesson 7), and by timing memory accesses, an attacker can read data the speculative instructions touched, such as passwords or keys from another program. Nearly every high-performance processor from the previous two decades was affected. The fixes, in operating systems, browsers and new chips, cost measurable performance. The episode showed that optimizations invisible to a program's results can still leak information through timing.</p>` }
   ],
   ar8: [
-    { kind: "history", title: "The Apollo Guidance Computer", html: `<p>The computer that guided Apollo 11 to the Moon in 1969 was built from about 2,800 integrated circuits, each holding two three-input NOR gates (Lesson 1). It ran at about 1 MHz (its basic machine cycle was about 12 µs) with 2,048 words of erasable memory. Its software, led by Margaret Hamilton at MIT, was designed to drop low-priority work when overloaded, which saved the landing when the computer raised alarms during the descent. A phone today has billions of transistors and millions of times its speed.</p>` }
+    { kind: "history", title: "The Apollo Guidance Computer", html: `<p>The computer that guided Apollo 11 to the Moon in 1969 was built from about 2,800 integrated circuits, each holding two three-input NOR gates (Lesson 1). Its clock ticked about a million times a second (1.024 MHz, so about 1 µs per tick), but one step of its work, a memory access, took 12 ticks: its basic machine cycle was about 12 µs (11.7 µs), and an addition took two such cycles, so it managed about 40,000 additions a second. It had 2,048 words of erasable memory. Its software, led by Margaret Hamilton at MIT, was designed to drop low-priority work when overloaded, which saved the landing when the computer raised alarms during the descent. A phone today has billions of transistors and millions of times its speed.</p>` }
   ]
 });

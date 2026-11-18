@@ -280,7 +280,7 @@ size = 14
 <li>Never commit generated files, secrets or large binaries; list them in <code>.gitignore</code>. A secret pushed once is in the history forever and must be treated as leaked.</li>
 <li>Use <code>git revert</code> to undo a commit that others have: it adds a new commit that reverses it, instead of rewriting history.</li>
 </ul>
-<p>When a bug appears and nobody knows which change caused it, <code>git bisect</code> finds the commit by binary search (CS 101 Lesson 13): you mark one commit good and one bad, and Git checks out the midpoint for you to test. With 1,000 commits between them, about 10 tests find the culprit. Small, working commits make this possible.</p>
+<p>When a bug appears and nobody knows which change caused it, <code>git bisect</code> finds the commit by binary search (CS 101 Lesson 13): you mark one commit good and one bad, and Git checks out the midpoint for you to test. Each test halves the range, so with 1,000 commits between them about log₂ 1000 ≈ 10 tests find the culprit. Small, working commits make this possible.</p>
 `,
       terms: [
         ["Commit", "A snapshot of the whole project with a message, author and pointer to its parent commit(s)."],
@@ -355,7 +355,7 @@ size = 14
 
 print([letter(s) for s in (0, 59.9, 60, 79.99, 80, 89, 90, 100)])
 # ['F', 'F', 'D', 'C', 'B', 'B', 'A', 'A']</code></pre>
-<p>The classes are: invalid low (below 0), F, D, C, B, A, and invalid high (above 100). Boundaries: −0.1 and 0; 59.9 and 60; 69.9 and 70; and so on up to 100 and 100.1. About 14 tests, chosen this way, catch far more than 100 random scores would, because random scores rarely land on an edge.</p>
+<p>The classes are: invalid low (below 0), F, D, C, B, A, and invalid high (above 100). There are six boundaries between them (0, 60, 70, 80, 90 and 100), and each gets a test on either side: −0.1 and 0; 59.9 and 60; 69.9 and 70; 79.9 and 80; 89.9 and 90; 100 and 100.1. These 12 tests, catch far more than 100 random scores would, because random scores rarely land on an edge.</p>
 
 <h3>Test doubles</h3>
 <p>A <strong>test double</strong> stands in for a real dependency in a test, the way a stunt double stands in for an actor. CS 102 Lesson 6 wrote fakes by hand. The vocabulary distinguishes several kinds:</p>
@@ -539,7 +539,7 @@ print(render_html(average(parse_scores(lines))))   # &lt;h1&gt;Average: 83.0&lt;
 <p>Now each piece can be tested with plain values, the logic can be reused for a terminal report or a web page, and two bugs in the original became visible and were fixed on the way: a blank line crashed it, and an empty file divided by zero. Only a thin outer function still opens files and prints. Keeping the core of a program free of input and output ("functional core, imperative shell") is one of the most useful habits in design.</p>
 
 <h3>Depend on abstractions</h3>
-<p>Coupling is worst when high-level logic depends directly on low-level details. In the last lesson, <code>remind_overdue</code> took its mailer as a parameter instead of constructing an SMTP connection inside. Its only assumption about the mailer is that it has a <code>send(to, text)</code> method: an interface, which CS 102 expressed as a <code>Protocol</code>. The policy (who gets reminded) doesn't depend on the mechanism (how mail is sent). Both depend on the small interface between them. This is the <strong>dependency inversion principle</strong>, and passing the dependency in is <strong>dependency injection</strong>. The payoff is that the mechanism can change (a different email provider, a text message, a fake in tests) without touching the policy.</p>
+<p>Coupling is worst when high-level logic depends directly on low-level details. In the last lesson, <code>remind_overdue</code> took its mailer as a parameter instead of constructing an SMTP connection inside. (SMTP, the Simple Mail Transfer Protocol, is the standard way a program hands an email to a mail server for delivery; Python's <code>smtplib</code> module speaks it. A function that opens such a connection itself sends real email whenever it runs.) Its only assumption about the mailer is that it has a <code>send(to, text)</code> method: an interface, which CS 102 expressed as a <code>Protocol</code>. The policy (who gets reminded) doesn't depend on the mechanism (how mail is sent). Both depend on the small interface between them. This is the <strong>dependency inversion principle</strong>, and passing the dependency in is <strong>dependency injection</strong>. The payoff is that the mechanism can change (a different email provider, a text message, a fake in tests) without touching the policy.</p>
 <p>Related principles you'll meet under the acronym SOLID include the <em>open–closed principle</em> (add behavior by adding code, such as a new class implementing an interface, rather than editing working code), the <em>Liskov substitution principle</em> from CS 102 Lesson 3 (a subclass must work wherever its parent is expected), and <em>interface segregation</em> (prefer several small interfaces to one large one, so clients depend only on what they use).</p>
 
 <h3>DRY, but not too DRY; YAGNI</h3>
@@ -613,7 +613,7 @@ print(price("weekly", 10, 9), price("student", 10, 3))   # 70 24.0</code></pre>
       ],
       quiz: [
         { q: "A function reads a CSV file, computes statistics and prints HTML. Which principle does it violate?", choices: ["YAGNI", "Single responsibility: it has three reasons to change", "Liskov substitution", "None"], answer: 1, why: "File format, statistics and output format are separate concerns." },
-        { q: "Why is a function that takes its mailer as a parameter easier to test than one that creates an SMTP connection inside?", choices: ["It runs faster", "A test can pass in a fake or mock, so no real email is involved", "Parameters are always better", "It isn't"], answer: 1, why: "That's dependency injection." },
+        { q: "Why is a function that takes its mailer as a parameter easier to test than one that creates an SMTP connection (a connection to a real mail server) inside?", choices: ["It runs faster", "A test can pass in a fake or mock, so no real email is involved", "Parameters are always better", "It isn't"], answer: 1, why: "That's dependency injection." },
         { q: "Which situation best calls for applying DRY?", choices: ["Two functions both check len(x) > 0 for unrelated reasons", "The sales tax rate is written as 0.07 in six files", "Two tests have similar setup code", "Two variables are both named i"], answer: 1, why: "The tax rate is one piece of knowledge in six places; changing it means finding all six." },
         { q: "What must be true of a refactoring?", choices: ["It makes the code faster", "It doesn't change the code's behavior", "It adds a feature", "It removes tests"], answer: 1, why: "By definition: structure changes, behavior doesn't." },
         { q: "You must change code that has no tests. What should you do first?", choices: ["Rewrite it", "Write characterization tests that record its current behavior", "Refactor quickly before anyone notices", "Delete it"], answer: 1, why: "Then any change in behavior during refactoring is caught." },
@@ -741,6 +741,7 @@ def reader_for(filename):
     raise ValueError(f"no reader for {filename}")
 
 print(reader_for("scores.csv").read("name,score\\nana,90\\n"))   # [{'name': 'ana', 'score': '90'}]</code></pre>
+<p>Two standard-library tools appear in <code>CsvReader</code>. <code>io.StringIO(text)</code> wraps a string in an object that behaves like an open text file, reading from the string instead of the disk, so code written for files works on text already in memory. <code>csv.DictReader</code> (CS 101 Lesson 12) reads a CSV file and yields one dictionary per row after the first, using that first row's names as keys; the values stay strings.</p>
 <p>Python's <code>open()</code> is a factory: depending on the mode, it returns a text or a binary file object of different classes.</p>
 
 <h3>Adapter: make an interface fit</h3>
@@ -1021,7 +1022,7 @@ print(handle("GET", "/books/99"))                           # (404, {'error': 'n
 <p>Every mistake is cheapest to fix right after it's made (Lesson 1). This lesson is about systems that catch mistakes within minutes: machines that check every change automatically, and colleagues who read it.</p>
 
 <h3>Continuous integration</h3>
-<p><strong>Continuous integration</strong> (CI) means that everyone merges their work into the shared main branch often, at least daily, and that every change is automatically built and tested on a clean machine before it's merged. A CI service (GitHub Actions, GitLab CI and others) watches the repository; on every push or pull request it starts a fresh virtual machine, checks out the code, installs the dependencies and runs a <strong>pipeline</strong> of checks. The result appears on the pull request as a green tick or a red cross, and a protected main branch accepts only green changes.</p>
+<p><strong>Continuous integration</strong> (CI) means that everyone merges their work into the shared main branch often, at least daily, and that every change is automatically built and tested on a clean machine before it's merged. A CI service (GitHub Actions, GitLab CI and others) watches the repository; on every push or pull request it starts a fresh <strong>virtual machine</strong> (a complete simulated computer, with its own operating system and disk, run as a program on a real server; it has nothing to do with CS 230's virtual memory except the idea of a convincing imitation), so every run begins from the same clean state. It checks out the code, installs the dependencies and runs a <strong>pipeline</strong> of checks. The result appears on the pull request as a green tick or a red cross, and a protected main branch accepts only green changes.</p>
 <p>A pipeline is configured in a file in the repository, usually in YAML. This GitHub Actions workflow runs the checks on every push and pull request:</p>
 <pre data-label=".github/workflows/ci.yml"><code>name: CI
 on: [push, pull_request]
@@ -1201,6 +1202,7 @@ log.warning("payment slow: %.1f s", 4.2)
 print(stream.getvalue(), end="")
 # INFO orders: order 1042 created for user 7
 # WARNING orders: payment slow: 4.2 s</code></pre>
+<p>Some details of the example. The logs go to an <code>io.StringIO</code> (Lesson 5: a string that behaves like a file) so that the example can print what was recorded; a real program would leave out <code>stream</code> and log to the screen or a file. <code>format</code> says how each record is laid out, with placeholders for fields of the record: <code>%(levelname)s</code> for its level, <code>%(name)s</code> for the logger's name and <code>%(message)s</code> for the message. <code>force=True</code> replaces any logging configuration set up earlier in the same program; without it, a second <code>basicConfig</code> call is silently ignored. The messages use the <em>%-formatting</em> that Python had before f-strings: in <code>"order %d created for user %d"</code>, each <code>%d</code> is replaced by the next argument as a whole number, <code>%s</code> by any value as with <code>str()</code>, and <code>%.1f</code> by a float with one decimal place. The values are passed as separate arguments, not formatted in advance, so a message below the configured level (the <code>debug</code> line here) is never formatted at all, which saves time.</p>
 <p>Good log messages say what happened with the identifiers needed to investigate it (order, user and request IDs), at the right level. Never log passwords, tokens, card numbers or other personal data you don't need (MATH 230 and CS 100 discussed privacy law). Beyond logs, services export <strong>metrics</strong> (counts and timings: requests per second, error rate, the 99th-percentile latency) and <strong>traces</strong> (one request's path through many services). Together these make a system <em>observable</em>: you can answer questions about its behavior from outside.</p>
 
 <h3>Service-level objectives and error budgets</h3>
