@@ -6,7 +6,7 @@ CSA.addCourse({
   kind: "required",
   term: "y2s",
   summary: "How teams build software that lasts: working out what to build, sharing code with version control, testing in depth, design principles and refactoring, design patterns, APIs and data formats, continuous integration and code review, and keeping software reliable and secure. A term-long team project puts each lesson into practice.",
-  prereqs: ["CS 102 Programming II", "CS 201 Data Structures and Algorithms", "WRIT 100 Writing for Technical Audiences"],
+  prereqs: ["CS 102 Programming II", "CS 201 Data Structures", "WRIT 100 Writing for Technical Audiences"],
   outcomes: [
     "Turn a vague request into user stories with testable acceptance criteria, and plan work in short iterations",
     "Collaborate through branches, pull requests and merges, and resolve merge conflicts",
