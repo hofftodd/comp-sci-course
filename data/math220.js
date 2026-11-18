@@ -50,7 +50,7 @@ CSA.addCourse({
     scale: [["A", "93–100"], ["A−", "90–92"], ["B+", "87–89"], ["B", "83–86"], ["B−", "80–82"], ["C+", "77–79"], ["C", "73–76"], ["C−", "70–72"], ["D", "60–69"], ["F", "below 60"]],
     policies: [
       "<b>Show your work:</b> an answer without reasoning earns little credit, even if it's correct.",
-      "<b>Software:</b> you may use Python (with or without NumPy) to check computations, and must for large ones. Exams are by hand.",
+      "<b>Software:</b> you may use Python (with or without NumPy, introduced at the end of Lesson 1) to check computations, and must for large ones. Exams are by hand.",
       "<b>Collaboration and AI:</b> discuss problems with classmates; write your own solutions and name collaborators. AI tools may explain concepts, and you must say how you used them; submitted solutions must be your own work.",
       "<b>Late work:</b> problem sets are accepted up to two days late for 80% credit."
     ]
@@ -76,7 +76,7 @@ def scale(c, v):
     return [c * a for a in v]
 
 print(add([1, 2], [3, -1]), scale(3, [1, 2]))   # [4, 1] [3, 6]</code></pre>
-<p>(The NumPy library, which you'll use for larger computations, makes <code>+</code> and <code>*</code> on arrays work component by component and is much faster.)</p>
+<p>(The NumPy library, introduced at the end of this lesson, makes <code>+</code> and <code>*</code> work component by component on its arrays, and is much faster.)</p>
 
 <h3>Linear combinations and span</h3>
 <p>A <strong>linear combination</strong> of vectors <b>v</b><sub>1</sub>, …, <b>v</b><sub><em>k</em></sub> is any sum <em>c</em><sub>1</sub><b>v</b><sub>1</sub> + … + <em>c</em><sub><em>k</em></sub><b>v</b><sub><em>k</em></sub> with scalar coefficients. This one idea runs through the whole course. The set of all linear combinations of some vectors is their <strong>span</strong>.</p>
@@ -123,6 +123,45 @@ query = [1, 0, 0, 1]
 docs = [[3, 0, 1, 2], [1, 1, 0, 2], [0, 2, 0, 1]]
 print([round(cosine(query, d), 3) for d in docs])   # [0.945, 0.866, 0.316]</code></pre>
 <p>Document 1 matches best, even though Document 2 has the same number of "chart"s: Document 1's words are mostly the query's words. Because cosine ignores length, a long document isn't favored just for being long. Early search engines ranked results this way, and modern AI systems compare <em>embeddings</em>, vectors of hundreds of numbers representing the meaning of text or images, with the same formula.</p>
+
+<h3>NumPy in five minutes</h3>
+<p>Plain lists are fine for small examples, and every programming problem in this course uses them, so that you write each step yourself. For larger computations, the lessons use <strong>NumPy</strong>, the standard Python library for arrays of numbers. Later lessons' NumPy code uses only what this section shows, plus one <code>np.linalg</code> function per lesson, explained where it appears.</p>
+<p>NumPy isn't part of Python's standard library, so install it once. In a terminal (not inside Python), run <code>python3 -m pip install numpy</code>; on Windows, <code>py -m pip install numpy</code>. <code>pip</code> is Python's installer for outside packages. By convention the library is imported under the short name <code>np</code>.</p>
+<pre><code>import numpy as np
+
+u = np.array([1, 2, 2])     # an array: like a list, but of numbers only
+v = np.array([3, 0, -1])
+print(u + v)                # [4 2 1]
+print(3 * u)                # [3 6 6]
+print(u * v)                # [ 3  0 -2]
+print(u @ v)                # 1
+print(np.sqrt(u @ u))       # 3.0
+print(u.shape, u[0], u[-1]) # (3,) 1 2</code></pre>
+<p>Arithmetic on arrays is <strong>element-wise</strong>: <code>u + v</code> and <code>u * v</code> combine matching entries, and <code>3 * u</code> multiplies every entry by 3. (On lists, <code>+</code> would join them and <code>*</code> would repeat them.) The <code>@</code> operator is the dot product, so <code>np.sqrt(u @ u)</code> is the length ‖<b>u</b>‖ = 3. An array's <code>shape</code> is a tuple of its sizes: <code>(3,)</code> means one dimension of length 3. Indexing works as for lists. NumPy prints arrays without commas, and prints a float such as 1.0 as <code>1.</code>.</p>
+<p>A <strong>2-D array</strong> is a table of numbers, given as a list of its rows. Lesson 2 calls such a table a <em>matrix</em>. Its shape is (rows, columns). An index takes a row and a column, separated by a comma and counted from 0, and a <code>:</code> on its own means "all of them":</p>
+<pre><code>M = np.array([[1, 2, 3],
+              [4, 5, 6]])
+print(M.shape)              # (2, 3): 2 rows, 3 columns
+print(M[0, 2])              # 3: row 0, column 2
+print(M[1])                 # [4 5 6]: row 1
+print(M[:, 0])              # [1 4]: all rows, column 0; that is, column 0
+print(M[:, -1])             # [3 6]: the last column
+print(M.T)                  # the transpose: rows become columns
+# [[1 4]
+#  [2 5]
+#  [3 6]]
+print(M.mean(axis=0))       # [2.5 3.5 4.5]: the mean of each column
+print(M.mean(axis=1))       # [2. 5.]: the mean of each row
+print(M - M.mean(axis=0))   # each column minus its own mean
+# [[-1.5 -1.5 -1.5]
+#  [ 1.5  1.5  1.5]]</code></pre>
+<ul>
+<li><code>M.T</code> is the <strong>transpose</strong> of <code>M</code>, the same numbers with rows and columns swapped. Lesson 3 uses it.</li>
+<li>Functions such as <code>mean</code> and <code>sum</code> take an <code>axis</code>. With <code>axis=0</code> they work down the rows and give one result per column. With <code>axis=1</code> they work across the columns and give one result per row. With no axis, they use every entry.</li>
+<li>Combining a 2-D array with a 1-D array whose length is the number of columns applies the 1-D array to every row. So <code>M - M.mean(axis=0)</code> subtracts each column's mean from that column.</li>
+<li>With 2-D arrays, <code>@</code> is the matrix product of Lessons 2 and 3: <code>M @ x</code> is <em>M</em><b>x</b>.</li>
+</ul>
+<p>The linear-algebra functions live in <code>np.linalg</code>. Lesson 2 uses <code>np.linalg.solve</code>, Lesson 4 mentions <code>np.linalg.inv</code>, Lesson 6 uses <code>np.linalg.lstsq</code> and Lesson 8 uses <code>np.linalg.eigh</code>. Each is explained where it appears. MATH 230 Lesson 8 uses one more function, <code>np.polyfit</code>, and explains it there.</p>
 `,
       terms: [
         ["Vector", "An ordered list of n real numbers (its components); an element of ℝⁿ."],
@@ -132,7 +171,9 @@ print([round(cosine(query, d), 3) for d in docs])   # [0.945, 0.866, 0.316]</cod
         ["Dot product", "u · v = u₁v₁ + … + uₙvₙ, a number; equal to ‖u‖‖v‖cos θ."],
         ["Norm", "The length of a vector, ‖v‖ = √(v · v)."],
         ["Orthogonal", "Perpendicular; u and v are orthogonal when u · v = 0."],
-        ["Cosine similarity", "u · v / (‖u‖‖v‖), the cosine of the angle between two vectors; measures how alike their directions are."]
+        ["Cosine similarity", "u · v / (‖u‖‖v‖), the cosine of the angle between two vectors; measures how alike their directions are."],
+        ["NumPy array", "NumPy's list of numbers (1-D) or table of numbers (2-D), on which arithmetic is element-wise and @ is the dot or matrix product."],
+        ["Element-wise", "Applied to matching entries separately: for arrays, u * v multiplies u's first entry by v's first entry, and so on."]
       ],
       quiz: [
         { q: "What is (2, −1, 3) · (1, 4, 2)?", choices: ["4", "6", "(2, −4, 6)", "12"], answer: 0, why: "2 − 4 + 6 = 4." },
@@ -211,7 +252,7 @@ print([round(cosine(query, d), 3) for d in docs])   # [0.945, 0.866, 0.316]</cod
 ⎡ 1  3  2 |  13⎤
 ⎢ 0 −5 −5 | −25⎥
 ⎣ 0  0  2 |   6⎦</code></pre>
-<p>The pivots are 1, −5 and 2. In the first step the multipliers 2 and −1 were chosen to make the entries below the first pivot zero; in the second, the multiplier −4/5 cleared the entry below the second pivot. Now <strong>back substitution</strong> solves from the bottom up:</p>
+<p>The pivots are 1, −5 and 2. Each step subtracts a multiple of the pivot row from a row below it. The number it is multiplied by, called the <strong>multiplier</strong>, is the entry to be cleared divided by the pivot. In the first step the multipliers are 2/1 = 2 for row 2 and −1/1 = −1 for row 3; subtracting −1 times R1 is the same as adding R1, which is why the step is written R3 ← R3 + 1·R1. In the second step the multiplier is 4/(−5) = −4/5, and subtracting −4/5 times R2 is adding 4/5 times it. Now <strong>back substitution</strong> solves from the bottom up:</p>
 <ul>
 <li>2<em>z</em> = 6, so <em>z</em> = 3;</li>
 <li>−5<em>y</em> − 5(3) = −25, so <em>y</em> = 2;</li>
@@ -230,8 +271,8 @@ print([round(cosine(query, d), 3) for d in docs])   # [0.945, 0.866, 0.316]</cod
 <p>Example of the last case: <em>x</em> + 2<em>y</em> = 3 and 2<em>x</em> + 4<em>y</em> = 6. Subtracting twice the first from the second gives 0 = 0. Only <em>x</em> has a pivot; <em>y</em> is free. The solutions are <em>x</em> = 3 − 2<em>t</em>, <em>y</em> = <em>t</em> for any <em>t</em>: a whole line. Change the 6 to 7 and the second equation becomes 0 = 1: no solutions, two parallel lines.</p>
 
 <h3>Elimination on a computer</h3>
-<p>For <em>n</em> equations in <em>n</em> unknowns, eliminating below each of the <em>n</em> pivots updates up to an (<em>n</em> − 1) × (<em>n</em> − 1) block, then a smaller one, and so on. The total is about (2/3)<em>n</em>³ arithmetic operations: Θ(<em>n</em>³). Doubling the size makes it 8 times slower. Back substitution is only Θ(<em>n</em>²). Systems from real applications often have special structure (most coefficients zero, or a band along the diagonal) that specialized algorithms exploit.</p>
-<p>In floating point (CS 210 Lesson 2), elimination needs care. Dividing by a tiny pivot produces huge multipliers that magnify rounding errors. Consider 0.0001<em>x</em> + <em>y</em> = 1 and <em>x</em> + <em>y</em> = 2. Eliminating with the tiny pivot 0.0001 multiplies the first row by 10,000 before subtracting, which swamps the second equation's information. The standard fix is <strong>partial pivoting</strong>: before eliminating in a column, swap rows so the entry with the largest absolute value becomes the pivot. Every serious linear algebra library does this. NumPy's <code>numpy.linalg.solve</code> calls LAPACK, a Fortran library refined since the 1990s, which uses elimination with partial pivoting.</p>
+<p>Count the work for <em>n</em> equations in <em>n</em> unknowns. Clearing the first column changes the <em>n</em> − 1 rows below the first pivot, and in each of them about <em>n</em> entries: one multiplication and one subtraction per entry, so about 2<em>n</em>² operations. The second column then needs about 2(<em>n</em> − 1)², the third 2(<em>n</em> − 2)², and so on down to 2 · 1². The total is about 2(1² + 2² + … + <em>n</em>²). That sum of squares is close to the area under <em>y</em> = <em>x</em>² from 0 to <em>n</em>, which is ∫<sub>0</sub><sup><em>n</em></sup> <em>x</em>² <em>dx</em> = <em>n</em>³/3 (MATH 130); its exact value is <em>n</em>(<em>n</em> + 1)(2<em>n</em> + 1)/6, which is also about <em>n</em>³/3 for large <em>n</em>. So elimination takes about (2/3)<em>n</em>³ arithmetic operations: Θ(<em>n</em>³). Doubling the size makes it 8 times slower. Back substitution is only Θ(<em>n</em>²). Systems from real applications often have special structure (most coefficients zero, or a band along the diagonal) that specialized algorithms exploit.</p>
+<p>In floating point (CS 210 Lesson 2), elimination needs care. Dividing by a tiny pivot produces huge multipliers that magnify rounding errors. Consider 0.0001<em>x</em> + <em>y</em> = 1 and <em>x</em> + <em>y</em> = 2. Eliminating with the tiny pivot 0.0001 multiplies the first row by 10,000 before subtracting, which swamps the second equation's information. The standard fix is <strong>partial pivoting</strong>: before eliminating in a column, swap rows so the entry with the largest absolute value becomes the pivot. Every serious linear algebra library does this. NumPy's <code>np.linalg.solve(A, b)</code> calls LAPACK, a Fortran library refined since the 1990s, which uses elimination with partial pivoting. In NumPy (Lesson 1's last section), the matrix is a 2-D array given row by row, and the solution comes back as an array of floats:</p>
 <pre><code>import numpy as np
 A = np.array([[1, 3, 2], [2, 1, -1], [-1, 1, 4]])
 b = np.array([13, 1, 13])
@@ -389,12 +430,13 @@ print(matmul(S, R))        # [[0, -2], [1, 0]]: rotate, then stretch</code></pre
 <p class="math">[a b; c d]<sup>−1</sup> = (1/(ad − bc)) · [d −b; −c a],   provided ad − bc ≠ 0</p>
 <p>For example, <em>M</em> = [3 1; 2 4] has <em>ad</em> − <em>bc</em> = 12 − 2 = 10, so <em>M</em><sup>−1</sup> = (1/10)[4 −1; −2 3] = [0.4 −0.1; −0.2 0.3]. Check: <em>MM</em><sup>−1</sup> has (1, 1) entry 3(0.4) + 1(−0.2) = 1 and (1, 2) entry 3(−0.1) + 1(0.3) = 0, and so on.</p>
 <p>For larger matrices, <strong>Gauss–Jordan elimination</strong> computes the inverse: row-reduce the augmented matrix [<em>A</em> | <em>I</em>] until the left half becomes <em>I</em>; the right half is then <em>A</em><sup>−1</sup>. (Each row operation is itself multiplication by a simple matrix, and their product, the record of everything done to turn <em>A</em> into <em>I</em>, is <em>A</em><sup>−1</sup>.) Two useful rules: (<em>AB</em>)<sup>−1</sup> = <em>B</em><sup>−1</sup><em>A</em><sup>−1</sup> (undo the last step first, like taking off shoes before socks), and (<em>A</em><sup>T</sup>)<sup>−1</sup> = (<em>A</em><sup>−1</sup>)<sup>T</sup>.</p>
-<div class="callout"><p><strong>Don't invert to solve.</strong> To solve <em>A</em><b>x</b> = <b>b</b> on a computer, use elimination (<code>numpy.linalg.solve</code>), not <code>inv(A) @ b</code>. Computing the inverse takes about three times as much work and is less accurate. The inverse is a tool for thinking and for formulas, not usually for computing.</p></div>
+<div class="callout"><p><strong>Don't invert to solve.</strong> To solve <em>A</em><b>x</b> = <b>b</b> on a computer, use elimination (<code>np.linalg.solve(A, b)</code>, Lesson 2), not <code>np.linalg.inv(A) @ b</code>, which first computes the inverse matrix with <code>np.linalg.inv</code> and then multiplies it by <b>b</b> with <code>@</code> (Lesson 1's NumPy section). Computing the inverse takes about three times as much work and is less accurate. The inverse is a tool for thinking and for formulas, not usually for computing.</p></div>
 
 <h3>The determinant</h3>
 <p>A linear transformation of the plane turns the unit square (with corners at <b>0</b>, <b>e</b><sub>1</sub>, <b>e</b><sub>2</sub> and <b>e</b><sub>1</sub> + <b>e</b><sub>2</sub>) into a parallelogram whose sides are the matrix's columns. The <strong>determinant</strong>, det <em>A</em>, is the signed area of that parallelogram: the factor by which <em>A</em> scales every area. For a 2 × 2 matrix:</p>
 <p class="math">det [a b; c d] = ad − bc</p>
 <p>The same number appeared in the inverse formula, and for a good reason. If det <em>A</em> = 0, the parallelogram is flat: the columns lie on one line, the whole plane is squashed onto a line or a point, information is lost, and <em>A</em> is singular. If det <em>A</em> ≠ 0, <em>A</em> is invertible. The <em>sign</em> records orientation: a negative determinant means the transformation flips the plane over, as a reflection does.</p>
+<p>The sign also depends on the order of the columns. Write det [<b>u</b> <b>v</b>] for the 2 × 2 matrix with columns <b>u</b> and <b>v</b>. Turning from <b>e</b><sub>1</sub> = (1, 0) to <b>e</b><sub>2</sub> = (0, 1) is a counterclockwise turn of 90°, and det [<b>e</b><sub>1</sub> <b>e</b><sub>2</sub>] = det <em>I</em> = 1 is positive. In general, det [<b>u</b> <b>v</b>] is positive when the shorter turn from <b>u</b> to <b>v</b> (less than 180°) is counterclockwise, as from <b>e</b><sub>1</sub> to <b>e</b><sub>2</sub>; negative when it is clockwise; and zero when <b>u</b> and <b>v</b> lie on one line. Swapping the columns reverses the turn and changes the sign: det [<b>e</b><sub>2</sub> <b>e</b><sub>1</sub>] = 0 · 0 − 1 · 1 = −1. (Why: with <b>u</b> = (<em>a</em>, <em>c</em>) at angle α and <b>v</b> = (<em>b</em>, <em>d</em>) at angle β, <em>ad</em> − <em>bc</em> = ‖<b>u</b>‖ ‖<b>v</b>‖ (cos α sin β − sin α cos β) = ‖<b>u</b>‖ ‖<b>v</b>‖ sin(β − α), and sin(β − α) is positive exactly when the turn from α to β is counterclockwise and less than 180°.) Finally, the triangle with corners <b>0</b>, <b>u</b> and <b>v</b> is half of the parallelogram (the diagonal from <b>u</b> to <b>v</b> cuts it into two equal triangles), so its area is |det [<b>u</b> <b>v</b>]|/2.</p>
 <ul>
 <li>Rotations have determinant 1: they preserve area and orientation.</li>
 <li>[2 0; 0 3] has determinant 6: it scales areas by 6.</li>
@@ -490,7 +532,7 @@ CSA.addUnits("math220", [
 <p>Lesson 2's line of solutions, <em>x</em> = 3 − 2<em>t</em>, <em>y</em> = <em>t</em>, is exactly this shape: one solution (3, 0) plus any multiple of (−2, 1), which spans the null space of [1 2; 2 4].</p>
 
 <h3>Rank</h3>
-<p>The <strong>rank</strong> of <em>A</em> is the number of pivots elimination produces. It equals the dimension of the column space (the pivot columns of <em>A</em> form a basis of it), and, less obviously, the dimension of the row space too. Each free column contributes one independent vector to the null space, so</p>
+<p>The <strong>rank</strong> of <em>A</em> is the number of pivots elimination produces. It equals the dimension of the column space (the pivot columns of <em>A</em> form a basis of it). It also equals the dimension of the <strong>row space</strong>, the span of the rows of <em>A</em> (a subspace of ℝ<sup><em>n</em></sup>). That is less obvious, but elimination shows it: row operations replace rows by combinations of rows, so they never change the row space, and at the end the nonzero rows, one per pivot, are independent and span it. Each free column contributes one independent vector to the null space, so</p>
 <p class="math">rank(A) + dim N(A) = n   (the number of columns)</p>
 <p>This is the <strong>rank–nullity theorem</strong>: each column either adds a new direction to the output or adds a direction of input that is lost. For example,</p>
 <pre data-label="Matrix"><code>    ⎡1  2  3⎤
@@ -506,7 +548,8 @@ B = ⎢2  4  6⎥
         ["Dimension", "The number of vectors in any basis of a subspace."],
         ["Column space", "C(A), the span of A's columns; Ax = b is solvable exactly when b is in it."],
         ["Null space", "N(A), all x with Ax = 0; the solutions of Ax = b are one solution plus the null space."],
-        ["Rank", "The number of pivots; the dimension of the column space."],
+        ["Row space", "The span of the rows of a matrix; its dimension is also the rank."],
+        ["Rank", "The number of pivots; the dimension of the column space (and of the row space)."],
         ["Rank–nullity theorem", "rank(A) + dim N(A) = number of columns of A."]
       ],
       quiz: [
@@ -565,12 +608,14 @@ c + 3m = 4            ⎢1 2⎥         ⎢4⎥
 <p>Four equations in two unknowns, with no exact solution. The normal equations:</p>
 <p class="math">A<sup>T</sup>A = [4 6; 6 14],   A<sup>T</sup><b>b</b> = (12, 23)</p>
 <p>(<em>A</em><sup>T</sup><em>A</em> has entries 4 = number of points, 6 = Σ<em>x</em>, 14 = Σ<em>x</em>²; <em>A</em><sup>T</sup><b>b</b> has Σ<em>y</em> = 12 and Σ<em>xy</em> = 0 + 3 + 8 + 12 = 23.) Solving 4<em>c</em> + 6<em>m</em> = 12 and 6<em>c</em> + 14<em>m</em> = 23: multiplying the first by 1.5 and subtracting gives 5<em>m</em> = 5, so <em>m</em> = 1 and <em>c</em> = 1.5. The best line is <em>y</em> = 1.5 + <em>x</em>. Its errors at the four points are −0.5, 0.5, 0.5, −0.5: they sum to zero and are orthogonal to the <em>x</em>-values (0, 1, 2, 3), as the normal equations require.</p>
+<p>In NumPy (Lesson 1's last section), <code>np.ones(4)</code> is an array of four 1s, and <code>np.column_stack</code> puts arrays side by side as the columns of a 2-D array, which builds <em>A</em>. <code>np.linalg.lstsq(A, y, rcond=None)</code> finds the least-squares solution. It returns four things (the solution, the sum of squared errors, the rank of <em>A</em> and the singular values of Lesson 8), and <code>[0]</code> keeps the first. <code>rcond=None</code> selects NumPy's recommended rule for when a tiny number counts as zero; older versions of NumPy print a warning without it.</p>
 <pre><code>import numpy as np
 x = np.array([0, 1, 2, 3])
 y = np.array([1, 3, 4, 4])
 A = np.column_stack([np.ones(4), x])
-coef, *_ = np.linalg.lstsq(A, y, rcond=None)
-print(coef)     # [1.5 1. ]</code></pre>
+print(A.shape)     # (4, 2)
+coef = np.linalg.lstsq(A, y, rcond=None)[0]
+print(coef)        # [1.5 1. ]: c = 1.5, m = 1</code></pre>
 <p>The same method fits any model that is linear in its unknown coefficients: a parabola <em>c</em> + <em>mx</em> + <em>qx</em>² (add a column of <em>x</em>²), or a sum of sines and cosines. It is the basis of linear regression in statistics (MATH 230 Lesson 8) and of countless calibrations in engineering. Least squares was published by Legendre in 1805 and developed by Gauss, who used it to predict where the newly discovered asteroid Ceres would reappear, and was right.</p>
 
 <h3>Orthonormal bases</h3>
@@ -593,7 +638,9 @@ for q in gram_schmidt([[3, 4], [1, 0]]):
     print([round(a, 2) for a in q])
 # [0.6, 0.8]
 # [0.8, -0.6]</code></pre>
-<p>A square matrix <em>Q</em> with orthonormal columns is called <strong>orthogonal</strong>. It satisfies <em>Q</em><sup>T</sup><em>Q</em> = <em>I</em>, so its inverse is just its transpose, and it preserves lengths and angles: ‖<em>Q</em><b>x</b>‖ = ‖<b>x</b>‖. Rotations and reflections are orthogonal matrices. Writing <em>A</em> = <em>QR</em>, with <em>Q</em> from Gram–Schmidt and <em>R</em> triangular, gives the most reliable way to compute least squares on a computer, because forming <em>A</em><sup>T</sup><em>A</em> can magnify rounding errors.</p>
+<p>A square matrix <em>Q</em> with orthonormal columns is called <strong>orthogonal</strong>. It satisfies <em>Q</em><sup>T</sup><em>Q</em> = <em>I</em>, so its inverse is just its transpose, and it preserves lengths and angles: ‖<em>Q</em><b>x</b>‖ = ‖<b>x</b>‖. Rotations and reflections are orthogonal matrices.</p>
+<p>Gram–Schmidt also gives a way to write any matrix <em>A</em> with independent columns <b>a</b><sub>1</sub>, …, <b>a</b><sub><em>n</em></sub> as a product <em>A</em> = <em>QR</em>. <em>Q</em> holds the orthonormal vectors <b>q</b><sub>1</sub>, …, <b>q</b><sub><em>n</em></sub> as its columns (if <em>A</em> isn't square, <em>Q</em> isn't either, but still <em>Q</em><sup>T</sup><em>Q</em> = <em>I</em>). <em>R</em> is <em>n</em> × <em>n</em> and records the numbers Gram–Schmidt computed. Each <b>a</b><sub><em>j</em></sub> is a combination of <b>q</b><sub>1</sub>, …, <b>q</b><sub><em>j</em></sub> only, with coefficients <b>q</b><sub><em>i</em></sub> · <b>a</b><sub><em>j</em></sub>, so column <em>j</em> of <em>R</em> holds those dot products in rows 1 to <em>j</em> and zeros below. <em>R</em> is therefore triangular, with zeros below the diagonal. Its diagonal entries are the lengths that Gram–Schmidt divided by. Because <em>Q</em><sup>T</sup><em>Q</em> = <em>I</em>, multiplying <em>A</em> = <em>QR</em> by <em>Q</em><sup>T</sup> gives <em>R</em> = <em>Q</em><sup>T</sup><em>A</em>. For the example above, <b>a</b><sub>1</sub> = (3, 4) = 5<b>q</b><sub>1</sub> and <b>a</b><sub>2</sub> = (1, 0) = 0.6<b>q</b><sub>1</sub> + 0.8<b>q</b><sub>2</sub>, so <em>R</em> = [5 0.6; 0 0.8].</p>
+<p>Substituting <em>A</em> = <em>QR</em> into the normal equations gives <em>R</em><sup>T</sup><em>Q</em><sup>T</sup><em>QR</em><b>x̂</b> = <em>R</em><sup>T</sup><em>Q</em><sup>T</sup><b>b</b>, which simplifies (since <em>Q</em><sup>T</sup><em>Q</em> = <em>I</em> and <em>R</em><sup>T</sup> is invertible) to <em>R</em><b>x̂</b> = <em>Q</em><sup>T</sup><b>b</b>, solved by back substitution. This is the most reliable way to compute least squares on a computer, because forming <em>A</em><sup>T</sup><em>A</em> can magnify rounding errors.</p>
 `,
       terms: [
         ["Projection", "The closest point to b on a line or subspace; the error b − p is orthogonal to it."],
@@ -648,10 +695,10 @@ for q in gram_schmidt([[3, 4], [1, 0]]):
 <p><em>A</em><b>v</b> = λ<b>v</b> means (<em>A</em> − λ<em>I</em>)<b>v</b> = <b>0</b> with <b>v</b> ≠ <b>0</b>, so <em>A</em> − λ<em>I</em> must be singular (Lesson 4): its determinant is zero. That gives an equation for λ alone, the <strong>characteristic equation</strong>:</p>
 <p class="math">det(A − λI) = 0</p>
 <p>For [2 1; 1 2]: det [2 − λ, 1; 1, 2 − λ] = (2 − λ)² − 1 = λ² − 4λ + 3 = (λ − 3)(λ − 1). The eigenvalues are 3 and 1. For each, solve (<em>A</em> − λ<em>I</em>)<b>v</b> = <b>0</b> to find the eigenvectors: for λ = 3, [−1 1; 1 −1]<b>v</b> = <b>0</b> gives <b>v</b> = (1, 1).</p>
-<p>Two checks come free: the eigenvalues add up to the <strong>trace</strong> (the sum of the diagonal: 2 + 2 = 4 = 3 + 1) and multiply to the determinant (4 − 1 = 3 = 3 × 1). An <em>n</em> × <em>n</em> matrix has a characteristic polynomial of degree <em>n</em>, so <em>n</em> eigenvalues counted with multiplicity, though some may be complex: a 90° rotation turns every direction, and its eigenvalues are ±<em>i</em>. Large matrices aren't handled with the polynomial at all; libraries use iterative algorithms, such as the QR algorithm, built on Lesson 6's orthogonal matrices.</p>
+<p>Two checks come free: the eigenvalues add up to the <strong>trace</strong> (the sum of the diagonal: 2 + 2 = 4 = 3 + 1) and multiply to the determinant (4 − 1 = 3 = 3 × 1). An <em>n</em> × <em>n</em> matrix has a characteristic polynomial of degree <em>n</em>, so it has at most <em>n</em> eigenvalues. It may have fewer. The 90° rotation [0 −1; 1 0] turns every direction, so no real vector is only stretched, and indeed its characteristic equation, λ² + 1 = 0, has no real solution. (With complex numbers, which this course doesn't use, such equations always have solutions, and the theory extends to them.) The matrices in this course's eigenvalue examples and problems all have real eigenvalues. Large matrices aren't handled with the polynomial at all; libraries use iterative algorithms, such as the QR algorithm, built on Lesson 6's orthogonal matrices.</p>
 
 <h3>Diagonalization and powers</h3>
-<p>If an <em>n</em> × <em>n</em> matrix has <em>n</em> independent eigenvectors, put them in the columns of <em>P</em> and the eigenvalues on the diagonal of <em>D</em>. Then <em>AP</em> = <em>PD</em>, so</p>
+<p>If an <em>n</em> × <em>n</em> matrix has <em>n</em> independent eigenvectors, put them in the columns of <em>P</em> and the eigenvalues on the diagonal of <em>D</em>. Then <em>AP</em> = <em>PD</em>. To see why, compare the two sides column by column. Column <em>j</em> of <em>AP</em> is <em>A</em> times column <em>j</em> of <em>P</em> (Lesson 3), which is <em>A</em><b>v</b><sub><em>j</em></sub> = λ<sub><em>j</em></sub><b>v</b><sub><em>j</em></sub>. Column <em>j</em> of <em>PD</em> is <em>P</em> times column <em>j</em> of <em>D</em>, which has λ<sub><em>j</em></sub> in position <em>j</em> and zeros elsewhere, so it is λ<sub><em>j</em></sub> times column <em>j</em> of <em>P</em>: again λ<sub><em>j</em></sub><b>v</b><sub><em>j</em></sub>. Since the eigenvectors are independent, <em>P</em> is invertible (Lesson 4), and multiplying both sides of <em>AP</em> = <em>PD</em> on the right by <em>P</em><sup>−1</sup> gives</p>
 <p class="math">A = PDP<sup>−1</sup>   and   A<sup>k</sup> = PD<sup>k</sup>P<sup>−1</sup></p>
 <p>The middle steps cancel in <em>A</em><sup><em>k</em></sup> = <em>PDP</em><sup>−1</sup><em>PDP</em><sup>−1</sup>⋯, and <em>D</em><sup><em>k</em></sup> just raises each eigenvalue to the <em>k</em>th power. In the eigenvector basis, <em>A</em> is simply a scaling. The long-run behavior of <em>A</em><sup><em>k</em></sup><b>x</b> is controlled by the largest eigenvalue: components along eigenvectors with |λ| &gt; 1 grow, those with |λ| &lt; 1 die away.</p>
 <p><strong>Fibonacci numbers.</strong> The rule <em>F</em><sub><em>n</em>+1</sub> = <em>F</em><sub><em>n</em></sub> + <em>F</em><sub><em>n</em>−1</sub> is a matrix step: (<em>F</em><sub><em>n</em>+1</sub>, <em>F</em><sub><em>n</em></sub>) = [1 1; 1 0](<em>F</em><sub><em>n</em></sub>, <em>F</em><sub><em>n</em>−1</sub>). The matrix's characteristic equation is λ² − λ − 1 = 0, with roots φ = (1 + √5)/2 ≈ 1.618 and (1 − √5)/2 ≈ −0.618. Because the second has size less than 1, its part dies away and <em>F</em><sub><em>n</em></sub> grows like φ<sup><em>n</em></sup>: the same answer MATH 121's recurrence lesson found from the characteristic equation, which was this eigenvalue problem in disguise. (Also, [1 1; 1 0]<sup>10</sup> = [89 55; 55 34], containing <em>F</em><sub>11</sub>, <em>F</em><sub>10</sub> and <em>F</em><sub>9</sub>.)</p>
@@ -677,6 +724,12 @@ v, lam = power_iteration([[2, 1], [1, 2]], [1, 0], 5)
 print([round(x, 3) for x in v], round(lam, 4))   # [0.71, 0.704] 3.0</code></pre>
 <p>After 5 steps the vector is close to (1, 1)/√2 ≈ (0.707, 0.707) and the estimate of λ is 2.99997. The error shrinks by the ratio of the two largest eigenvalues, here 1/3, at each step.</p>
 <p>In 1998 Larry Page and Sergey Brin, then Stanford graduate students, described <strong>PageRank</strong>, the ranking behind Google's early search engine. Imagine a "random surfer" who, at each step, follows a random link on the current page with probability 0.85, and with probability 0.15 jumps to a page chosen at random from the whole web. This is a Markov chain on web pages, and a page's PageRank is its probability in the steady state: how often the surfer is there in the long run. Pages linked to by many pages, or by important pages, rank high. With billions of pages no one solves the eigenvector equation directly; power iteration, run for some dozens of steps, gives it.</p>
+<p><strong>Why the random jump?</strong> A surfer who only follows links runs into two problems.</p>
+<ul>
+<li>A <strong>dangling page</strong> has no outgoing links, so the surfer has nowhere to go. The usual rule, used in this lesson's programming problem, is that from a dangling page the surfer jumps to a page chosen at random.</li>
+<li>A group of pages that link only to one another is a <strong>trap</strong>: once the surfer enters, it never leaves. In the long run all the probability collects in traps, and every other page, however many links point to it, gets rank 0. Worse, if there are two separate traps, the steady state isn't <strong>unique</strong>: there is more than one. Suppose A and B link only to each other, and C and D only to each other. Then (0.5, 0.5, 0, 0), (0, 0, 0.5, 0.5) and every mixture (<em>t</em>/2, <em>t</em>/2, (1 − <em>t</em>)/2, (1 − <em>t</em>)/2) are all left unchanged by a step, and which one the surfer approaches depends on where it started. A ranking that depends on the starting page is no ranking at all.</li>
+</ul>
+<p>The random jump fixes both. At every step, every page can be reached with probability at least 0.15/<em>N</em>, where <em>N</em> is the number of pages, so no group of pages can hold the surfer forever. A theorem stated here without proof (the Perron–Frobenius theorem) says that when every entry of a transition matrix is positive, as the jump makes it, there is exactly one steady state, and power iteration reaches it from any starting vector. You can check this on the trap example: with the jump, every starting vector leads to (0.25, 0.25, 0.25, 0.25).</p>
 <p>For four pages where A links to B and C, B links to C, C links to A, and D links to C, the steady state is about (0.373, 0.196, 0.394, 0.038): C, linked from three pages, ranks first, and A, linked only from C but receiving all of C's weight, ranks a close second. D, which nobody links to, gets only the random jumps.</p>
 `,
       terms: [
@@ -731,7 +784,13 @@ print([round(x, 3) for x in v], round(lam, 4))   # [0.71, 0.704] 3.0</code></pre
 <p>where <em>U</em> (<em>m</em> × <em>m</em>) and <em>V</em> (<em>n</em> × <em>n</em>) are orthogonal matrices (Lesson 6) and Σ is an <em>m</em> × <em>n</em> matrix that is zero except for non-negative numbers σ<sub>1</sub> ≥ σ<sub>2</sub> ≥ … on its diagonal, the <strong>singular values</strong>.</p>
 <p>Read right to left, it says that <em>every</em> linear transformation is: a rotation (or reflection) <em>V</em><sup>T</sup>, then a stretch along the axes by the singular values Σ, then another rotation <em>U</em>. In two dimensions, <em>A</em> turns the unit circle into an ellipse; the singular values are the lengths of the ellipse's semi-axes, and the columns of <em>U</em> point along those axes.</p>
 <p>For example, <em>A</em> = [3 0; 4 5] has singular values 3√5 ≈ 6.708 and √5 ≈ 2.236. It stretches one direction by about 6.7 and the perpendicular one by about 2.2. (Their product, 15, is |det <em>A</em>|: the area scaling of Lesson 4, as it must be, since rotations don't change area.)</p>
-<p>Where do they come from? <em>A</em><sup>T</sup><em>A</em> is symmetric, and its eigenvalues are never negative. The singular values are the square roots of its eigenvalues, and its eigenvectors are the columns of <em>V</em>. For a symmetric matrix with positive eigenvalues, like [2 1; 1 2], the SVD and the eigendecomposition coincide.</p>
+<p>Where do they come from? Start with the square matrix <em>A</em><sup>T</sup><em>A</em>, which has two useful properties.</p>
+<ul>
+<li>It is <strong>symmetric</strong>: equal to its own transpose. By Lesson 3's rule (<em>BC</em>)<sup>T</sup> = <em>C</em><sup>T</sup><em>B</em><sup>T</sup>, (<em>A</em><sup>T</sup><em>A</em>)<sup>T</sup> = <em>A</em><sup>T</sup>(<em>A</em><sup>T</sup>)<sup>T</sup> = <em>A</em><sup>T</sup><em>A</em>.</li>
+<li>Its eigenvalues are never negative. If <em>A</em><sup>T</sup><em>A</em><b>v</b> = λ<b>v</b> with <b>v</b> a unit vector, take the dot product of both sides with <b>v</b>. The right side gives λ<b>v</b> · <b>v</b> = λ. The left side is <b>v</b><sup>T</sup><em>A</em><sup>T</sup><em>A</em><b>v</b> = (<em>A</em><b>v</b>)<sup>T</sup>(<em>A</em><b>v</b>) = ‖<em>A</em><b>v</b>‖². So λ = ‖<em>A</em><b>v</b>‖² ≥ 0.</li>
+</ul>
+<p>A third fact is stated here without proof (it is called the <strong>spectral theorem</strong>): every symmetric <em>n</em> × <em>n</em> matrix has <em>n</em> real eigenvalues and an orthonormal basis of eigenvectors. You can check it on any example with NumPy's <code>np.linalg.eigh</code>, used below, which is designed for symmetric matrices.</p>
+<p>The columns <b>v</b><sub>1</sub>, …, <b>v</b><sub><em>n</em></sub> of <em>V</em> are these orthonormal eigenvectors of <em>A</em><sup>T</sup><em>A</em>, in order of decreasing eigenvalue, and are called the <strong>right singular vectors</strong> of <em>A</em>. The singular values are the square roots of the eigenvalues: σ<sub><em>i</em></sub> = √λ<sub><em>i</em></sub> = ‖<em>A</em><b>v</b><sub><em>i</em></sub>‖. The columns of <em>U</em> are the <strong>left singular vectors</strong>. For each nonzero σ<sub><em>i</em></sub>, the column is <b>u</b><sub><em>i</em></sub> = <em>A</em><b>v</b><sub><em>i</em></sub>/σ<sub><em>i</em></sub>, the direction in which <em>A</em> sends <b>v</b><sub><em>i</em></sub>, scaled to length 1. (Multiplying <em>A</em> = <em>U</em>Σ<em>V</em><sup>T</sup> on the right by <em>V</em> gives <em>AV</em> = <em>U</em>Σ, which says exactly <em>A</em><b>v</b><sub><em>i</em></sub> = σ<sub><em>i</em></sub><b>u</b><sub><em>i</em></sub>.) Any remaining columns of <em>U</em> just complete an orthonormal basis. The <b>u</b><sub><em>i</em></sub> are also the eigenvectors of <em>AA</em><sup>T</sup>. For a symmetric matrix with positive eigenvalues, like [2 1; 1 2], the SVD and the eigendecomposition coincide.</p>
 
 <h3>Low-rank approximation</h3>
 <p>Multiplying out <em>U</em>Σ<em>V</em><sup>T</sup> writes <em>A</em> as a sum of simple pieces:</p>
@@ -744,15 +803,17 @@ print([round(x, 3) for x in v], round(lam, 4))   # [0.71, 0.704] 3.0</code></pre
 <p><strong>Principal component analysis</strong> (PCA) finds the directions in which a set of data points varies most. Suppose each data point is a vector of measurements. The recipe:</p>
 <ol>
 <li><strong>Center</strong> the data: subtract the mean of each measurement, so the cloud of points sits around the origin.</li>
-<li>Compute the <strong>covariance matrix</strong> <em>C</em> = <em>X</em><sup>T</sup><em>X</em>/(<em>n</em> − 1), where the rows of <em>X</em> are the centered points. Its diagonal holds each measurement's variance; its off-diagonal entries show how pairs of measurements vary together (MATH 230 Lesson 4).</li>
-<li>Find the eigenvectors of <em>C</em> (equivalently, the right singular vectors of <em>X</em>). The eigenvector with the largest eigenvalue is the <strong>first principal component</strong>, the direction of greatest spread; its eigenvalue is the variance of the data along it. The next is the direction of greatest remaining spread, perpendicular to the first, and so on.</li>
+<li>Compute the <strong>covariance matrix</strong> <em>C</em> = <em>X</em><sup>T</sup><em>X</em>/(<em>n</em> − 1), where the <em>n</em> rows of <em>X</em> are the centered points. Entry (<em>j</em>, <em>k</em>) of <em>X</em><sup>T</sup><em>X</em> is the dot product of columns <em>j</em> and <em>k</em> of <em>X</em>: the sum, over all points, of (deviation of measurement <em>j</em> from its mean) × (deviation of measurement <em>k</em> from its mean). Divided by <em>n</em> − 1, this is the <strong>sample covariance</strong> of the two measurements. It is positive when they tend to be above their means together, and negative when one tends to be above while the other is below. On the diagonal (<em>j</em> = <em>k</em>) it is the <strong>sample variance</strong>, the sum of squared deviations divided by <em>n</em> − 1. (MATH 230 Lesson 4 defines covariance for random variables and gives these data versions; MATH 230 Lesson 6 explains why the denominator is <em>n</em> − 1 rather than <em>n</em>. For PCA only the directions matter, and dividing by <em>n</em> instead would give the same eigenvectors.)</li>
+<li>Find the eigenvectors of <em>C</em>. (These are also the right singular vectors of <em>X</em>, because <em>C</em> is <em>X</em><sup>T</sup><em>X</em> divided by a number.) The eigenvector with the largest eigenvalue is the <strong>first principal component</strong>, the direction of greatest spread; its eigenvalue is the variance of the data along it. The next is the direction of greatest remaining spread, perpendicular to the first, and so on.</li>
 </ol>
 <p>Example: the points (2, 1), (3, 3), (4, 3), (5, 5), (6, 5) have mean (4, 3.4) and covariance matrix [2.5 2.5; 2.5 2.8]. Its eigenvalues are about 5.15 and 0.15, with the first principal component along about (0.686, 0.728). That direction carries 5.15/(5.15 + 0.15) ≈ 97% of the variance: the data is nearly one-dimensional, lying close to a line, and projecting each point onto that line loses little.</p>
+<p>In NumPy, using only Lesson 1's last section and one new function: <code>pts.mean(axis=0)</code> is the mean of each column, (4, 3.4), and subtracting it centers every point. <code>centered.T @ centered</code> is <em>X</em><sup>T</sup><em>X</em>. <code>np.linalg.eigh(C)</code>, for symmetric matrices, returns two arrays: the eigenvalues in increasing order, and a 2-D array whose <em>columns</em> are the matching unit eigenvectors. So <code>vectors[:, -1]</code>, the last column, is the eigenvector of the largest eigenvalue. <code>np.round(a, 3)</code> rounds every entry to 3 decimal places.</p>
 <pre><code>import numpy as np
 pts = np.array([[2, 1], [3, 3], [4, 3], [5, 5], [6, 5]])
 centered = pts - pts.mean(axis=0)
 C = centered.T @ centered / (len(pts) - 1)
-values, vectors = np.linalg.eigh(C)      # eigh: for symmetric matrices, ascending order
+print(C)                                 # [[2.5 2.5] [2.5 2.8]], printed on two lines
+values, vectors = np.linalg.eigh(C)
 print(np.round(values, 3))               # [0.146 5.154]
 print(np.round(vectors[:, -1], 3))       # [0.686 0.728] (or its negative)</code></pre>
 <p>PCA reduces data with hundreds of measurements to the few combinations that matter, for plotting, for compressing, or as a first step before machine learning. It has a well-known limitation: it finds only linear structure, and it measures importance by variance, so measurements in larger units dominate unless the data is standardized first.</p>
@@ -761,7 +822,9 @@ print(np.round(vectors[:, -1], 3))       # [0.686 0.728] (or its negative)</code
         ["Singular value decomposition", "A = UΣVᵀ, with U and V orthogonal and Σ diagonal with non-negative singular values: rotate, stretch, rotate."],
         ["Singular values", "The diagonal entries of Σ, in decreasing order; the square roots of the eigenvalues of AᵀA."],
         ["Rank-k approximation", "The sum of the first k terms σᵢuᵢvᵢᵀ of the SVD; the closest rank-k matrix to A (Eckart–Young)."],
-        ["Covariance matrix", "XᵀX/(n − 1) for centered data X; variances on the diagonal and covariances off it."],
+        ["Right and left singular vectors", "The columns vᵢ of V (orthonormal eigenvectors of AᵀA) and uᵢ of U, with Avᵢ = σᵢuᵢ."],
+        ["Symmetric matrix", "A square matrix equal to its transpose, such as AᵀA; it has real eigenvalues and orthonormal eigenvectors."],
+        ["Covariance matrix", "XᵀX/(n − 1) for centered data X; sample variances on the diagonal and sample covariances off it."],
         ["Principal component", "An eigenvector of the covariance matrix; the first is the direction of greatest variance in the data."]
       ],
       quiz: [

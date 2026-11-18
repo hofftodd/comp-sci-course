@@ -50,7 +50,7 @@ CSA.addCourse({
     scale: [["A", "93–100"], ["A−", "90–92"], ["B+", "87–89"], ["B", "83–86"], ["B−", "80–82"], ["C+", "77–79"], ["C", "73–76"], ["C−", "70–72"], ["D", "60–69"], ["F", "below 60"]],
     policies: [
       "<b>Show your work:</b> answers need reasoning; a simulation alone doesn't replace a calculation unless the problem says so.",
-      "<b>Software:</b> Python's <code>random</code> and <code>statistics</code> modules are enough for the course; NumPy and pandas are welcome for the project.",
+      "<b>Software:</b> Python's <code>random</code> and <code>statistics</code> modules are enough for the course, except for one practice problem in Lesson 8 that uses NumPy (introduced at the end of MATH 220 Lesson 1). NumPy and pandas are welcome for the project.",
       "<b>Collaboration and AI:</b> discuss freely; write your own solutions and name collaborators. Say how you used any AI tool, and check every number it gives you.",
       "<b>Late work:</b> problem sets are accepted up to two days late for 80% credit."
     ]
@@ -85,7 +85,7 @@ CSA.addCourse({
 <h3>Naive Bayes classification</h3>
 <p>A spam filter must decide whether an email is spam from the words it contains. Treat each word as a piece of evidence. The <strong>naive Bayes</strong> classifier makes one simplifying ("naive") assumption: given the class (spam or not), the words appear independently of one another. Then the odds form applies word by word:</p>
 <p class="math">odds(spam | words) = odds(spam) × Π<sub>w</sub> P(w | spam) / P(w | ham)</p>
-<p>("Ham" is the traditional name for legitimate email.) The probabilities are estimated by counting in a set of emails already labeled. Suppose 40% of training emails are spam, and:</p>
+<p>The symbol Π (capital pi) means a product, just as Σ means a sum: Π<sub><em>w</em></sub> multiplies the ratio for every word <em>w</em> in the email. ("Ham" is the traditional name for legitimate email.) The probabilities are estimated by counting in a set of emails already labeled. Suppose 40% of training emails are spam, and:</p>
 <table>
 <thead><tr><th>Word</th><th>Fraction of spam containing it</th><th>Fraction of ham containing it</th><th>Likelihood ratio</th></tr></thead>
 <tbody>
@@ -95,7 +95,9 @@ CSA.addCourse({
 </tbody>
 </table>
 <p>An email containing "winner" and "free" has odds 0.4/0.6 × 20 × 5 = 66.7: probability 66.7/67.7 ≈ 0.985 of being spam. One containing "free" and "meeting" has odds 0.667 × 5 × 0.2 = 0.667, the same as the prior: the words cancel out.</p>
-<p>Two practical details. A word never seen in spam during training would get probability 0 and veto everything else, so counts are <strong>smoothed</strong>: add 1 to every count (Laplace smoothing). And multiplying hundreds of small probabilities underflows floating point (CS 210 Lesson 2), so implementations add logarithms instead. The independence assumption is plainly false ("free" and "winner" go together), yet naive Bayes works surprisingly well for classification, because getting the <em>order</em> of the classes right doesn't require exact probabilities.</p>
+<p>These calculations use only the words that are present. A word's <em>absence</em> is evidence too. If 20% of spam contains "winner", then 80% doesn't, against 99% of ham, so an email <em>without</em> "winner" has likelihood ratio (1 − 0.20)/(1 − 0.01) = 0.80/0.99 ≈ 0.81 for that word: weak evidence against spam. A fuller filter multiplies in a ratio for every word in its vocabulary, P(<em>w</em> | spam)/P(<em>w</em> | ham) if the word is present and (1 − P(<em>w</em> | spam))/(1 − P(<em>w</em> | ham)) if it is absent. This lesson's programming problem does that.</p>
+<p>Two practical details. A word never seen in spam during training would get probability 0 and veto everything else, so counts are <strong>smoothed</strong>: add 1 to every count (<strong>Laplace smoothing</strong>). Here each spam message either contains the word or doesn't, so there are two counts, and adding 1 to each adds 2 to the total: if <em>c</em> of the <em>s</em> spam messages contain the word, the estimate of P(word | spam) becomes (<em>c</em> + 1)/(<em>s</em> + 2) instead of <em>c</em>/<em>s</em>. It is as if two extra spam messages had been seen, one with the word and one without, so no estimate is ever exactly 0 or 1.</p>
+<p>Second, multiplying hundreds of small probabilities <strong>underflows</strong>. A float can't hold a positive number smaller than about 5 × 10<sup>−324</sup> (CS 210 Lesson 2 shows how floats are stored and where their range ends), and a result below that is rounded to exactly 0. In Python, <code>0.01 ** 200</code> should be 10<sup>−400</sup> but prints <code>0.0</code>, and then every class has probability 0. So implementations add logarithms instead: log(<em>ab</em>) = log <em>a</em> + log <em>b</em>, and a sum of a few hundred logarithms such as log 0.01 ≈ −4.6 is an ordinary number. The independence assumption is plainly false ("free" and "winner" go together), yet naive Bayes works surprisingly well for classification, because getting the <em>order</em> of the classes right doesn't require exact probabilities.</p>
 <pre><code>import math
 
 def spam_probability(words, prior, p_spam, p_ham):
@@ -108,6 +110,7 @@ def spam_probability(words, prior, p_spam, p_ham):
 p_spam = {"winner": 0.20, "meeting": 0.02, "free": 0.30}
 p_ham = {"winner": 0.01, "meeting": 0.10, "free": 0.06}
 print(round(spam_probability(["winner", "free"], 0.4, p_spam, p_ham), 3))   # 0.985</code></pre>
+<p>The last line of the function turns log odds <em>L</em> back into a probability. The odds are <em>o</em> = e<sup><em>L</em></sup>, and a probability with odds <em>o</em> is <em>o</em>/(1 + <em>o</em>) (since <em>o</em> = <em>p</em>/(1 − <em>p</em>) solves to <em>p</em> = <em>o</em>/(1 + <em>o</em>)). Dividing the top and bottom of e<sup><em>L</em></sup>/(1 + e<sup><em>L</em></sup>) by e<sup><em>L</em></sup> gives 1/(e<sup>−<em>L</em></sup> + 1), the form in the code. It avoids computing e<sup><em>L</em></sup> itself, which would overflow for a very large <em>L</em>.</p>
 `,
       terms: [
         ["Prior and posterior", "The probability of a hypothesis before and after taking evidence into account."],
@@ -116,7 +119,8 @@ print(round(spam_probability(["winner", "free"], 0.4, p_spam, p_ham), 3))   # 0.
         ["Odds", "P(H) / P(not H); posterior odds = prior odds × likelihood ratio."],
         ["Likelihood ratio", "P(E | H) / P(E | not H), the factor by which evidence multiplies the odds."],
         ["Naive Bayes", "A classifier that assumes features are independent given the class, and multiplies their likelihood ratios."],
-        ["Laplace smoothing", "Adding 1 to every count so no feature gets probability 0."]
+        ["Laplace smoothing", "Adding 1 to every count so no feature gets probability 0; for a word present or absent, (c + 1)/(s + 2)."],
+        ["Underflow", "A floating-point result too small to represent, rounded to 0."]
       ],
       quiz: [
         { q: "A condition affects 1 in 1,000 people. A test catches every case and has a 1% false-positive rate. About what fraction of positive results are true?", choices: ["99%", "50%", "About 9%", "0.1%"], answer: 2, why: "Per 100,000 people: 100 true positives and about 999 false ones, so 100/1099 ≈ 9%." },
@@ -176,7 +180,9 @@ print(true_pos / pos)</code></pre><p>Expect a value within about 0.005 of 0.1667
 <h3>Poisson</h3>
 <p>Many things are counted in a fixed interval of time or space: requests reaching a web server per second, typos per page, radioactive decays per minute, emails per hour. If events happen independently, at a steady average rate λ per interval, the count follows the <strong>Poisson</strong>(λ) distribution:</p>
 <p class="math">P(X = k) = e<sup>−λ</sup> λ<sup>k</sup> / k!,   k = 0, 1, 2, …,   E[X] = Var(X) = λ</p>
-<p>Where does it come from? Divide the interval into <em>n</em> tiny pieces, each with an event with probability λ/<em>n</em>. The count is binomial(<em>n</em>, λ/<em>n</em>), and as <em>n</em> → ∞ its PMF approaches the Poisson formula. (The (1 − λ/<em>n</em>)<sup><em>n</em></sup> factor tends to e<sup>−λ</sup>, the limit from MATH 130.) So the Poisson also approximates a binomial with large <em>n</em> and small <em>p</em>, with λ = <em>np</em>. For <em>n</em> = 1000, <em>p</em> = 0.002:</p>
+<p>Where does it come from? Divide the interval into <em>n</em> tiny pieces, each with an event with probability λ/<em>n</em>. The count is binomial(<em>n</em>, λ/<em>n</em>), and as <em>n</em> → ∞ its PMF approaches the Poisson formula. To see this, write C(<em>n</em>, <em>k</em>) = <em>n</em>(<em>n</em> − 1)⋯(<em>n</em> − <em>k</em> + 1)/<em>k</em>! and split the binomial probability into four factors:</p>
+<p class="math">C(n, k)(λ/n)<sup>k</sup>(1 − λ/n)<sup>n−k</sup> = [n(n − 1)⋯(n − k + 1) / n<sup>k</sup>] · (λ<sup>k</sup>/k!) · (1 − λ/n)<sup>n</sup> · (1 − λ/n)<sup>−k</sup></p>
+<p>Hold <em>k</em> fixed and let <em>n</em> grow. The first factor is (<em>n</em>/<em>n</em>)((<em>n</em> − 1)/<em>n</em>)⋯((<em>n</em> − <em>k</em> + 1)/<em>n</em>), a product of <em>k</em> fractions that each tend to 1, so it tends to 1. The second doesn't depend on <em>n</em>. The third tends to e<sup>−λ</sup>, the limit from MATH 130. The fourth tends to 1<sup>−<em>k</em></sup> = 1. So the product tends to e<sup>−λ</sup>λ<sup><em>k</em></sup>/<em>k</em>!. So the Poisson also approximates a binomial with large <em>n</em> and small <em>p</em>, with λ = <em>np</em>. For <em>n</em> = 1000, <em>p</em> = 0.002:</p>
 <table>
 <thead><tr><th>k</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
 <tbody>
@@ -274,6 +280,11 @@ print(1 - sum(exp(-3) * 3**k / factorial(k) for k in range(6)))   # 0.0839...</c
 <li><strong>The 68–95–99.7 rule:</strong> a normal variable is within 1σ of its mean with probability about 0.683, within 2σ with 0.954, within 3σ with 0.997.</li>
 <li>The CDF has no formula in elementary functions (the integral of e<sup>−<em>x</em>²</sup>, as MATH 131 noted), so it is computed numerically.</li>
 </ul>
+<p>The standard normal CDF is written Φ(<em>z</em>) (capital phi). Because the integral can't be written with ordinary functions, mathematicians gave a closely related one its own name, the <strong>error function</strong>:</p>
+<p class="math">erf(x) = (2/√π) ∫<sub>0</sub><sup>x</sup> e<sup>−t²</sup> dt</p>
+<p>Libraries compute it accurately (Python has <code>math.erf</code>), and Φ follows from it. The standard normal density is symmetric about 0, so half its area lies below 0 and Φ(<em>z</em>) = 1/2 + ∫<sub>0</sub><sup><em>z</em></sup> (1/√(2π)) e<sup>−<em>x</em>²/2</sup> <em>dx</em>. Substituting <em>x</em> = √2 <em>t</em> (so <em>dx</em> = √2 <em>dt</em>, and <em>t</em> runs from 0 to <em>z</em>/√2) turns the integral into (1/√π) ∫<sub>0</sub><sup><em>z</em>/√2</sup> e<sup>−<em>t</em>²</sup> <em>dt</em> = erf(<em>z</em>/√2)/2. So</p>
+<p class="math">Φ(z) = (1 + erf(z/√2)) / 2</p>
+<p>Check: <code>(1 + math.erf(2 / math.sqrt(2))) / 2</code> is 0.97725, and <code>NormalDist().cdf(2)</code> gives the same. The <code>statistics</code> module's <code>NormalDist</code> does this for you:</p>
 <pre><code>from statistics import NormalDist
 
 Z = NormalDist()                       # standard normal
@@ -304,6 +315,7 @@ print(round(Z.inv_cdf(0.975), 3))      # 1.96: the 97.5th percentile</code></pre
         ["Exponential distribution", "Density λe^(−λx) for x ≥ 0: waiting times between Poisson events; mean 1/λ; memoryless."],
         ["Normal distribution", "The bell curve N(μ, σ²); sums of many small independent effects are approximately normal."],
         ["z-score", "(x − μ)/σ, the number of standard deviations a value is from the mean."],
+        ["Error function", "erf(x) = (2/√π)∫₀ˣ e^(−t²) dt; the standard normal CDF is Φ(z) = (1 + erf(z/√2))/2."],
         ["Heavy tail", "A distribution with extreme values much more likely than under a normal model."]
       ],
       quiz: [
@@ -363,12 +375,20 @@ print(round(Z.inv_cdf(0.975), 3))      # 1.96: the 97.5th percentile</code></pre
 <p>Positive covariance means they tend to move together; negative, in opposite directions. For the testers: E[<em>XY</em>] = P(<em>X</em> = 1, <em>Y</em> = 1) = 0.2, so Cov = 0.2 − 0.4 × 0.3 = 0.08.</p>
 <p>Covariance depends on units (measuring in centimeters instead of meters multiplies it by 100). The <strong>correlation</strong> removes the units:</p>
 <p class="math">ρ(X, Y) = Cov(X, Y) / (σ<sub>X</sub> σ<sub>Y</sub>)</p>
-<p>It always lies between −1 and 1 (by the Cauchy–Schwarz inequality of MATH 220 Lesson 1: correlation is the cosine of the angle between the centered variables). It is ±1 exactly when <em>Y</em> is a linear function of <em>X</em>. For the testers, Var(<em>X</em>) = 0.4 × 0.6 = 0.24 and Var(<em>Y</em>) = 0.3 × 0.7 = 0.21, so ρ = 0.08/√(0.24 × 0.21) ≈ 0.36: a moderate positive relationship.</p>
+<p>It always lies between −1 and 1 (shown below, after the variance of a sum). It is ±1 exactly when <em>Y</em> is a linear function of <em>X</em>. For the testers, Var(<em>X</em>) = 0.4 × 0.6 = 0.24 and Var(<em>Y</em>) = 0.3 × 0.7 = 0.21, so ρ = 0.08/√(0.24 × 0.21) ≈ 0.36: a moderate positive relationship.</p>
+<p><strong>Covariance and correlation of data.</strong> Given <em>n</em> data pairs (<em>x</em><sub><em>i</em></sub>, <em>y</em><sub><em>i</em></sub>) rather than a known distribution, we use the same formulas with averages over the data in place of expectations. The <strong>sample covariance</strong> is</p>
+<p class="math">s<sub>xy</sub> = Σ (x<sub>i</sub> − x̄)(y<sub>i</sub> − ȳ) / (n − 1)</p>
+<p>and the <strong>sample correlation</strong> is <em>r</em> = <em>s</em><sub><em>xy</em></sub>/(<em>s</em><sub><em>x</em></sub><em>s</em><sub><em>y</em></sub>), where <em>s</em><sub><em>x</em></sub> and <em>s</em><sub><em>y</em></sub> are the sample standard deviations, computed with the same denominator: <em>s</em><sub><em>x</em></sub>² = Σ(<em>x</em><sub><em>i</em></sub> − <em>x̄</em>)²/(<em>n</em> − 1). Dividing by <em>n</em> − 1 rather than <em>n</em> is a small correction that Lesson 6 explains (dividing by <em>n</em> comes out slightly too small on average); <em>r</em> is the same either way, because the denominators cancel. Python's <code>statistics.covariance</code> and <code>statistics.correlation</code> compute these, as in the example at the end of this lesson.</p>
+<p>For data, the correlation has a picture from MATH 220 Lesson 1. The centered lists <b>u</b> = (<em>x</em><sub>1</sub> − <em>x̄</em>, …, <em>x</em><sub><em>n</em></sub> − <em>x̄</em>) and <b>v</b> = (<em>y</em><sub>1</sub> − <em>ȳ</em>, …, <em>y</em><sub><em>n</em></sub> − <em>ȳ</em>) are vectors in ℝ<sup><em>n</em></sup>, and after the (<em>n</em> − 1)s cancel, <em>r</em> = <b>u</b> · <b>v</b>/(‖<b>u</b>‖ ‖<b>v</b>‖): the cosine of the angle between them. That is why <em>r</em> is between −1 and 1 (Cauchy–Schwarz), and why it is ±1 exactly when one vector is a multiple of the other, that is, when the points lie on a line.</p>
 <p>Independent variables have covariance 0. The converse is false: if <em>X</em> is uniform on [−1, 1] and <em>Y</em> = <em>X</em>², then <em>Y</em> is completely determined by <em>X</em>, yet Cov(<em>X</em>, <em>Y</em>) = E[<em>X</em>³] − E[<em>X</em>]E[<em>X</em>²] = 0. <strong>Correlation measures only linear relationship.</strong></p>
 
 <h3>Variance of a sum</h3>
 <p>Expectation always adds. Variance adds only when there's no covariance:</p>
 <p class="math">Var(X + Y) = Var(X) + Var(Y) + 2 Cov(X, Y)</p>
+<p>(Expand E[((<em>X</em> − μ<sub><em>X</em></sub>) + (<em>Y</em> − μ<sub><em>Y</em></sub>))²]: the two squares give the variances, and the cross term gives 2 Cov.) Scaling and shifting behave simply. For numbers <em>a</em> and <em>b</em>, <em>aX</em> + <em>b</em> has mean <em>a</em>μ + <em>b</em>, so its deviation from its mean is <em>a</em>(<em>X</em> − μ), and</p>
+<p class="math">Var(aX + b) = E[a²(X − μ)²] = a² Var(X)</p>
+<p>Adding a constant doesn't change the spread, and multiplying by <em>a</em> multiplies the variance by <em>a</em>² (and the standard deviation by |<em>a</em>|). In particular Var(−<em>Y</em>) = Var(<em>Y</em>), and in the same way Cov(<em>X</em>, −<em>Y</em>) = −Cov(<em>X</em>, <em>Y</em>), so Var(<em>X</em> − <em>Y</em>) = Var(<em>X</em>) + Var(<em>Y</em>) − 2 Cov(<em>X</em>, <em>Y</em>).</p>
+<p>These rules prove that −1 ≤ ρ ≤ 1. Let <em>U</em> = <em>X</em>/σ<sub><em>X</em></sub> and <em>V</em> = <em>Y</em>/σ<sub><em>Y</em></sub>, which have variance 1 and Cov(<em>U</em>, <em>V</em>) = Cov(<em>X</em>, <em>Y</em>)/(σ<sub><em>X</em></sub>σ<sub><em>Y</em></sub>) = ρ (scaling one variable by a number scales the covariance by that number, as Practice 2 shows). A variance is never negative, so 0 ≤ Var(<em>U</em> + <em>V</em>) = 2 + 2ρ and 0 ≤ Var(<em>U</em> − <em>V</em>) = 2 − 2ρ. Together these say −1 ≤ ρ ≤ 1. (This is the Cauchy–Schwarz inequality of MATH 220 Lesson 1 again, with covariance playing the part of the dot product.)</p>
 <p>This is why diversification works: a portfolio of two investments whose returns are negatively correlated varies less than either alone. It's also why redundancy only helps if failures are independent: two backup disks in the same machine, which fail together in a fire or power surge, protect less than their individual failure rates suggest.</p>
 
 <h3>Correlation is not causation</h3>
@@ -387,6 +407,7 @@ print(round(correlation(hours, score), 3))   # 0.994</code></pre>
         ["Independent random variables", "Variables whose joint probabilities are the products of their marginals."],
         ["Covariance", "Cov(X, Y) = E[XY] − E[X]E[Y]; positive when the variables tend to move together."],
         ["Correlation", "Cov(X, Y)/(σ_X σ_Y), between −1 and 1; measures linear relationship."],
+        ["Sample covariance and correlation", "For data: s_xy = Σ(xᵢ − x̄)(yᵢ − ȳ)/(n − 1), and r = s_xy/(s_x s_y)."],
         ["Confounder", "A third factor that influences both variables, creating a correlation without a direct causal link."],
         ["Randomized experiment", "A study that assigns treatments by chance, so confounders are balanced and causal effects can be estimated."]
       ],
@@ -432,7 +453,9 @@ CSA.addUnits("math230", [
 <h3>Bounds from the mean and variance</h3>
 <p><strong>Markov's inequality.</strong> If <em>X</em> ≥ 0, then for any <em>a</em> &gt; 0,</p>
 <p class="math">P(X ≥ a) ≤ E[X] / a</p>
-<p>Reason: E[<em>X</em>] ≥ E[<em>X</em> restricted to where <em>X</em> ≥ <em>a</em>] ≥ <em>a</em> · P(<em>X</em> ≥ <em>a</em>). If a server's mean response time is 200 ms, at most 20% of responses take a second or more, whatever the distribution. The bound is often loose, but it needs only the mean.</p>
+<p>Reason, for a discrete <em>X</em> (for a continuous one, replace the sums by integrals):</p>
+<p class="math">E[X] = Σ<sub>x</sub> x P(X = x) ≥ Σ<sub>x ≥ a</sub> x P(X = x) ≥ Σ<sub>x ≥ a</sub> a P(X = x) = a P(X ≥ a)</p>
+<p>The first step drops the terms with <em>x</em> &lt; <em>a</em>, which can only make the sum smaller because no term is negative (<em>X</em> ≥ 0). The second replaces each remaining <em>x</em> by <em>a</em>, which is no larger. Dividing by <em>a</em> gives the inequality. If a server's mean response time is 200 ms, at most 20% of responses take a second or more, whatever the distribution. The bound is often loose, but it needs only the mean.</p>
 <p><strong>Chebyshev's inequality.</strong> Applying Markov to (<em>X</em> − μ)² gives, for any <em>k</em> &gt; 0,</p>
 <p class="math">P(|X − μ| ≥ kσ) ≤ 1/k²</p>
 <p>Any distribution puts at most 1/4 of its probability 2 standard deviations or more from its mean, and at most 1/9 at 3σ or more. (For a normal distribution, the true values are about 0.046 and 0.003: Chebyshev is a worst case.)</p>
@@ -461,7 +484,7 @@ print(round(statistics.mean(averages), 3), round(statistics.stdev(averages), 3))
 <p>A poll asks <em>n</em> randomly chosen people a yes/no question. Each answer is Bernoulli(<em>p</em>), so the sample proportion <em>p̂</em> has standard error √(<em>p</em>(1 − <em>p</em>)/<em>n</em>), which is at most √(0.25/<em>n</em>). The CLT gives a 95% <strong>margin of error</strong> of about 1.96 √(0.25/<em>n</em>) ≈ 1/√<em>n</em>: about ±3.1 percentage points for 1,000 people. Notice what doesn't appear in the formula: the size of the population. A random sample of 1,000 is as accurate for a country of 300 million as for a city of 300,000. What matters is that the sample is random. A huge but biased sample, such as an online poll that people choose to answer, can be far worse than a small random one.</p>
 
 <h3>Stronger bounds</h3>
-<p>For bounded variables, much sharper bounds than Chebyshev's hold. <strong>Hoeffding's inequality</strong> says that the average of <em>n</em> independent variables between 0 and 1 satisfies P(|<em>X̄</em> − μ| ≥ ε) ≤ 2e<sup>−2<em>n</em>ε²</sup>. For <em>n</em> = 1000 and ε = 0.05, that's 2e<sup>−5</sup> ≈ 0.013, compared with Chebyshev's 0.1. Exponentially small tail bounds of this kind (Chernoff bounds) are the main tool for analyzing randomized algorithms and for learning theory, which asks how much data a machine learning model needs.</p>
+<p>For bounded variables, much sharper bounds than Chebyshev's hold. <strong>Hoeffding's inequality</strong> says that the average of <em>n</em> independent variables between 0 and 1 satisfies P(|<em>X̄</em> − μ| ≥ ε) ≤ 2e<sup>−2<em>n</em>ε²</sup>. For <em>n</em> = 1000 and ε = 0.05, that's 2e<sup>−5</sup> ≈ 0.013. Chebyshev's bound for the same case is σ²/(<em>n</em>ε²), and a variable between 0 and 1 has σ² ≤ 1/4: since <em>X</em>² ≤ <em>X</em> when 0 ≤ <em>X</em> ≤ 1, Var(<em>X</em>) = E[<em>X</em>²] − μ² ≤ μ − μ² = μ(1 − μ), which is at most 1/4 (at μ = 1/2). So Chebyshev gives only (1/4)/(1000 × 0.05²) = 0.1. Exponentially small tail bounds of this kind (Chernoff bounds) are the main tool for analyzing randomized algorithms and for learning theory, which asks how much data a machine learning model needs.</p>
 `,
       terms: [
         ["Markov's inequality", "For X ≥ 0, P(X ≥ a) ≤ E[X]/a."],
@@ -516,7 +539,9 @@ print(round(statistics.mean(averages), 3), round(statistics.stdev(averages), 3))
 <p>The sample mean <em>X̄</em> is an unbiased estimator of μ with standard error σ/√<em>n</em> (Lesson 5).</p>
 <p>The <strong>sample variance</strong> divides by <em>n</em> − 1, not <em>n</em>:</p>
 <p class="math">s² = Σ (x<sub>i</sub> − x̄)² / (n − 1)</p>
-<p>Why? The deviations are measured from <em>x̄</em>, which is fitted to the same data and so sits closer to the data than μ does; dividing by <em>n</em> would underestimate σ² on average by a factor (<em>n</em> − 1)/<em>n</em>. Dividing by <em>n</em> − 1 makes it unbiased. Python's <code>statistics.variance</code> and <code>stdev</code> use <em>n</em> − 1; <code>pvariance</code> and <code>pstdev</code> ("population") use <em>n</em>.</p>
+<p>Why? The deviations are measured from <em>x̄</em>, which is fitted to the same data and so sits closer to the data than μ does. Here is the calculation, for i.i.d. values with mean μ and variance σ². Write each <em>x</em><sub><em>i</em></sub> − μ as (<em>x</em><sub><em>i</em></sub> − <em>x̄</em>) + (<em>x̄</em> − μ), square, and add over <em>i</em>. The cross terms add up to 2(<em>x̄</em> − μ)Σ(<em>x</em><sub><em>i</em></sub> − <em>x̄</em>) = 0, because deviations from the mean sum to 0. So</p>
+<p class="math">Σ (x<sub>i</sub> − x̄)² = Σ (x<sub>i</sub> − μ)² − n(x̄ − μ)²</p>
+<p>Now take expectations. Each E[(<em>x</em><sub><em>i</em></sub> − μ)²] is σ², so the first sum has expectation <em>n</em>σ². And E[(<em>x̄</em> − μ)²] = Var(<em>x̄</em>) = σ²/<em>n</em> (Lesson 5), so the second term has expectation σ². Therefore E[Σ(<em>x</em><sub><em>i</em></sub> − <em>x̄</em>)²] = (<em>n</em> − 1)σ². Dividing by <em>n</em> would give (<em>n</em> − 1)σ²/<em>n</em> on average, too small by the factor (<em>n</em> − 1)/<em>n</em>; dividing by <em>n</em> − 1 gives exactly σ² on average, so <em>s</em>² is unbiased. Python's <code>statistics.variance</code> and <code>stdev</code> use <em>n</em> − 1; <code>pvariance</code> and <code>pstdev</code> ("population") use <em>n</em>.</p>
 
 <h3>Maximum likelihood</h3>
 <p>A general recipe for estimators is <strong>maximum likelihood</strong>: choose the parameter value under which the observed data is most probable. For <em>k</em> heads in <em>n</em> flips of a coin with unknown <em>p</em>, the likelihood is <em>L</em>(<em>p</em>) = <em>p</em><sup><em>k</em></sup>(1 − <em>p</em>)<sup><em>n</em>−<em>k</em></sup>. Maximizing its logarithm, <em>k</em> ln <em>p</em> + (<em>n</em> − <em>k</em>) ln(1 − <em>p</em>), by setting the derivative <em>k</em>/<em>p</em> − (<em>n</em> − <em>k</em>)/(1 − <em>p</em>) to 0 (MATH 130's optimization), gives <em>p̂</em> = <em>k</em>/<em>n</em>: the observed proportion, as you'd expect. For exponential waiting times, the maximum-likelihood rate is 1/<em>x̄</em>. Fitting a machine learning model is usually maximum likelihood (or a close relative) on a large scale, with gradient descent (MATH 131 Lesson 8) doing the maximizing.</p>
@@ -525,7 +550,19 @@ print(round(statistics.mean(averages), 3), round(statistics.stdev(averages), 3))
 <p>A single number hides its uncertainty. A <strong>confidence interval</strong> gives a range. By the CLT, <em>X̄</em> is within 1.96 standard errors of μ with probability about 0.95. Turning that around, the interval</p>
 <p class="math">x̄ ± 1.96 · s/√n</p>
 <p>is an approximate <strong>95% confidence interval</strong> for μ (using <em>s</em> to estimate σ).</p>
-<p><strong>Example.</strong> Ten page loads take 1.2, 0.9, 1.5, 1.1, 1.3, 0.8, 1.6, 1.0, 1.2 and 1.4 seconds. Then <em>x̄</em> = 1.2, <em>s</em> ≈ 0.258, and the standard error is 0.258/√10 ≈ 0.082. The interval is 1.2 ± 0.16, from about 1.04 to 1.36 seconds. (With only 10 values, using <em>s</em> in place of σ adds uncertainty, and the exact method replaces 1.96 with a value from the <em>t</em> distribution, 2.262 for 10 values, giving 1.02 to 1.38. For <em>n</em> above about 30 the difference is small.)</p>
+<p><strong>Example.</strong> Ten page loads take 1.2, 0.9, 1.5, 1.1, 1.3, 0.8, 1.6, 1.0, 1.2 and 1.4 seconds. Then <em>x̄</em> = 1.2, <em>s</em> ≈ 0.258, and the standard error is 0.258/√10 ≈ 0.082. The interval is 1.2 ± 0.16, from about 1.04 to 1.36 seconds. </p>
+<p><strong>Small samples and the <em>t</em> distribution.</strong> With only 10 values, using <em>s</em> in place of σ adds uncertainty: <em>s</em> itself varies from sample to sample, and when it comes out small the interval is too narrow. In 1908 William Gosset, a chemist at the Guinness brewery who published as "Student", worked out the distribution of (<em>x̄</em> − μ)/(<em>s</em>/√<em>n</em>) for normally distributed data. It is called the <strong><em>t</em> distribution</strong> (with <em>n</em> − 1 "degrees of freedom"). It is bell-shaped like the standard normal but has heavier tails, and it gets closer to the normal as <em>n</em> grows. Its derivation is beyond this course, so the values are stated here without proof: the number that replaces 1.96 for a 95% interval is 2.776 for 5 values, 2.262 for 10, 2.045 for 30 and 1.984 for 100. For the page loads, 1.2 ± 2.262 × 0.0816 ≈ 1.2 ± 0.18, from about 1.02 to 1.38 seconds. For <em>n</em> above about 30 the difference from 1.96 is small. You can check 2.262 by simulation: draw many samples of 10 standard normal values (μ = 0), compute the statistic for each, and find the value that 97.5% of them fall below.</p>
+<pre><code>import random, math
+
+random.seed(7)
+ts = []
+for _ in range(100_000):
+    xs = [random.gauss(0, 1) for _ in range(10)]
+    m = sum(xs) / 10
+    s = math.sqrt(sum((x - m) ** 2 for x in xs) / 9)
+    ts.append(m / (s / math.sqrt(10)))   # (x̄ − μ)/(s/√n) with μ = 0
+ts.sort()
+print(round(ts[97_500], 2))   # 2.27: close to 2.262 (other seeds give 2.24 to 2.28)</code></pre>
 <p>For a proportion, the interval is <em>p̂</em> ± 1.96 √(<em>p̂</em>(1 − <em>p̂</em>)/<em>n</em>).</p>
 <div class="callout"><p><strong>What "95% confidence" means.</strong> The <em>procedure</em> produces intervals that contain the true value 95% of the time, over repeated samples. In a simulation of 10,000 samples of 40 normal values, 94.6% of the intervals contained the true mean. It does <em>not</em> mean "there's a 95% probability that μ is in this particular interval": μ is a fixed number, and this interval either contains it or doesn't. (The Bayesian approach of Lesson 1 does produce statements of that kind, by starting from a prior.)</p></div>
 
@@ -545,6 +582,7 @@ print(boots[250], boots[9749])    # 1.05 1.35: the middle 95% of the bootstrap m
         ["Bias", "The difference between an estimator's expected value and the true value."],
         ["Sample variance", "s² = Σ(xᵢ − x̄)²/(n − 1), an unbiased estimate of the variance."],
         ["Maximum likelihood", "Estimating parameters by the values that make the observed data most probable."],
+        ["t distribution", "The distribution of (x̄ − μ)/(s/√n) for normal data; it replaces 1.96 with a larger value for small samples, such as 2.262 for n = 10."],
         ["Confidence interval", "An interval from a procedure that captures the true value a stated fraction of the time, such as 95%."],
         ["Bootstrap", "Estimating uncertainty by recomputing a statistic on many resamples, drawn with replacement from the data."]
       ],
@@ -609,6 +647,7 @@ print(extreme / trials)    # about 0.087</code></pre>
 
 <h3>The z-test for two proportions</h3>
 <p>The CLT gives the same answer without simulation. Under <em>H</em><sub>0</sub>, both groups share the pooled rate <em>p</em> = 225/2000 = 0.1125, and the difference of two proportions has standard error √(<em>p</em>(1 − <em>p</em>)(1/1000 + 1/1000)) ≈ 0.0141. The observed difference is 0.025/0.0141 ≈ 1.77 standard errors, and a standard normal is at least that far from 0 with probability about 0.077. The two methods agree roughly (0.077 versus 0.087); the permutation test makes fewer assumptions.</p>
+<p><strong>Two-sided and one-sided tests.</strong> Both p-values above are <strong>two-sided</strong>: they count results at least as extreme in <em>either</em> direction, B ahead of A by 2.5 points or more, or A ahead of B by as much. That is the right choice when a difference either way would matter, and it is the usual default. A <strong>one-sided</strong> test counts only one direction, which must be chosen before seeing the data (for example, only "B ahead"). When the distribution under <em>H</em><sub>0</sub> is symmetric, as here, the one-sided p-value is half the two-sided one: about 0.038 for the z-test. Picking the direction after seeing which way the data went would halve the p-value for free, which is a form of p-hacking (below). This course uses two-sided tests.</p>
 
 <h3>Two kinds of error, and power</h3>
 <table>
@@ -620,13 +659,15 @@ print(extreme / trials)    # about 0.087</code></pre>
 </table>
 <p>The <strong>power</strong> of a test is the probability of detecting a real effect of a given size. It grows with the sample size. A standard formula says that to detect a change from 10% to 12.5% with α = 0.05 and 80% power needs about</p>
 <p class="math">n ≈ (1.96 + 0.84)² × (0.10 × 0.90 + 0.125 × 0.875) / 0.025² ≈ 2,500 per group</p>
-<p>(1.96 for the significance level, 0.84 for 80% power). The experiment above, with 1,000 per group, was underpowered. Deciding the sample size <em>before</em> running a test is essential.</p>
+<p>(1.96 for the significance level, 0.84 for 80% power). Where does it come from? Let δ = <em>p</em><sub>2</sub> − <em>p</em><sub>1</sub> be the true difference and <em>n</em> the number of visitors per group. The observed difference <em>D</em> of the two proportions has variance <em>p</em><sub>1</sub>(1 − <em>p</em><sub>1</sub>)/<em>n</em> + <em>p</em><sub>2</sub>(1 − <em>p</em><sub>2</sub>)/<em>n</em> (each proportion's variance is <em>p</em>(1 − <em>p</em>)/<em>n</em>, as in Lesson 5's polls, and for independent groups Var(<em>X</em> − <em>Y</em>) = Var(<em>X</em>) + Var(<em>Y</em>), Lesson 4); call its square root SE. The test rejects <em>H</em><sub>0</sub> when <em>D</em> is more than 1.96 SE above 0. (This ignores two small things: the test's SE is the pooled one, slightly different, and it could also reject with <em>D</em> far below 0, which is very unlikely when the true δ is positive.) By the CLT, <em>D</em> is approximately N(δ, SE²), so</p>
+<p class="math">power = P(D &gt; 1.96 SE) = P(Z &gt; 1.96 − δ/SE)</p>
+<p>with <em>Z</em> standard normal. A standard normal is above −0.84 with probability 0.80, because 0.84 is its 80th percentile (<code>NormalDist().inv_cdf(0.8)</code> is 0.8416). So 80% power needs 1.96 − δ/SE = −0.84, that is, δ = (1.96 + 0.84) SE. Squaring both sides and solving for <em>n</em> gives the formula above. The experiment above, with 1,000 per group, was underpowered. Deciding the sample size <em>before</em> running a test is essential.</p>
 
 <h3>How p-values go wrong</h3>
 <p>A p-value is <em>not</em> the probability that the null hypothesis is true, nor the probability that the result is a fluke. It's a statement about the data assuming <em>H</em><sub>0</sub>. In 2016 the American Statistical Association took the unusual step of publishing a statement on p-values, warning against these misreadings and against treating 0.05 as a bright line. Common misuses:</p>
 <ul>
 <li><strong>Multiple comparisons.</strong> Test 20 independent features that have no effect at α = 0.05, and the chance that at least one comes out "significant" is 1 − 0.95<sup>20</sup> ≈ 0.64. Report only that one and you've reported noise. The simplest correction (Bonferroni) uses α/20 = 0.0025 for each test.</li>
-<li><strong>Peeking.</strong> Checking the p-value every day and stopping as soon as it dips below 0.05 greatly inflates the false-positive rate, because a random walk often wanders across the line at some point. Fix the sample size in advance, or use methods designed for sequential testing.</li>
+<li><strong>Peeking.</strong> Checking the p-value every day and stopping as soon as it dips below 0.05 greatly inflates the false-positive rate, because the difference between the groups, recomputed each day, behaves like a <strong>random walk</strong>: a quantity that takes a random step up or down each time new data arrives. Even when there is no effect, such a walk often strays far enough for the p-value to dip below 0.05 at some point, before it wanders back. Fix the sample size in advance, or use methods designed for sequential testing.</li>
 <li><strong>p-hacking.</strong> Trying different subsets, outcome measures or analyses until something is significant.</li>
 <li><strong>Significance isn't importance.</strong> With millions of users, a 0.01% improvement can be highly significant and practically worthless. Report the size of the effect, with a confidence interval (Lesson 6), not just the p-value.</li>
 </ul>
@@ -638,6 +679,7 @@ print(extreme / trials)    # about 0.087</code></pre>
         ["p-value", "The probability, if H₀ were true, of a result at least as extreme as the one observed."],
         ["Permutation test", "Computing a p-value by randomly shuffling group labels and seeing how often the effect is as large as observed."],
         ["Type I and type II error", "Rejecting a true null hypothesis (false positive), or failing to reject a false one (false negative)."],
+        ["Two-sided and one-sided tests", "A two-sided test counts results as extreme as the observed one in either direction; a one-sided test, only in one direction chosen in advance."],
         ["Power", "The probability that a test detects a real effect of a given size."],
         ["Multiple comparisons", "Running many tests, which makes some false positives likely unless the significance level is adjusted."]
       ],
@@ -701,6 +743,7 @@ print(round(correlation(hours, score) ** 2, 3))        # 0.988</code></pre>
 
 <h3>Overfitting</h3>
 <p>More flexible models fit the data better: a polynomial of degree 5 passes exactly through any six points, with <em>R</em>² = 1. But its wiggles fit the noise, not the pattern, and it predicts new data badly. This is <strong>overfitting</strong>, the central danger of all model fitting, including machine learning. The standard defense is to evaluate a model on data it wasn't fitted to: split the data into a <strong>training set</strong> for fitting and a <strong>test set</strong> for measuring prediction error (or rotate the roles among several parts, <strong>cross-validation</strong>). A model that fits training data much better than test data is overfitting. Choose the model that predicts held-out data best.</p>
+<p>To try this yourself you need to fit a polynomial, which the <code>statistics</code> module can't do. NumPy can; MATH 220 Lesson 1 ends with a short introduction to it, including how to install it. <code>np.polyfit(xs, ys, d)</code> returns the coefficients of the least-squares polynomial of degree <em>d</em>: MATH 220 Lesson 6's method, with columns 1, <em>x</em>, <em>x</em>², …, <em>x</em><sup><em>d</em></sup>. They come as an array, highest power first. <code>np.polyval(coef, x)</code> evaluates that polynomial at <em>x</em>. For example, <code>np.polyfit([0, 1, 2], [1, 3, 7], 2)</code> gives <code>[1. 1. 1.]</code> (up to rounding), the parabola <em>x</em>² + <em>x</em> + 1, which passes exactly through the three points.</p>
 <p>Multiple regression extends all of this to several predictors, <em>ŷ</em> = <em>a</em> + <em>b</em><sub>1</sub><em>x</em><sub>1</sub> + <em>b</em><sub>2</sub><em>x</em><sub>2</sub> + …, solved by exactly MATH 220's normal equations with more columns. Logistic regression, which predicts probabilities for yes/no outcomes, is fitted by maximum likelihood (Lesson 6). Both are workhorses of data science and the starting point of machine learning.</p>
 
 <h3>Regression toward the mean</h3>
@@ -732,8 +775,26 @@ print(round(correlation(hours, score) ** 2, 3))        # 0.988</code></pre>
           a: `<p>At <em>x</em> = <em>x̄</em>, <em>ŷ</em> = <em>a</em> + <em>bx̄</em> = (<em>ȳ</em> − <em>bx̄</em>) + <em>bx̄</em> = <em>ȳ</em>.</p>`
         },
         {
-          q: `<p>Generate 20 points with <em>x</em> from 0 to 1 and <em>y</em> = 2<em>x</em> + <code>random.gauss(0, 0.3)</code>. Use 10 for training and 10 for testing. Fit a line (with <code>statistics.linear_regression</code>) and, with NumPy's <code>numpy.polyfit</code>, a degree-8 polynomial to the training points. Compare the mean squared error of each on the test points.</p>`,
-          a: `<p>Typically the polynomial has much smaller training error but much larger test error than the line, sometimes enormously larger near the ends of the interval where it oscillates. The line, which matches how the data was generated, predicts better.</p>`
+          q: `<p>Generate 20 points with <em>x</em> from 0 to 1 and <em>y</em> = 2<em>x</em> + <code>random.gauss(0, 0.3)</code>. Use 10 for training and 10 for testing. Fit a line (with <code>statistics.linear_regression</code>) and, with NumPy's <code>np.polyfit</code> (described in the notes' section on overfitting), a degree-8 polynomial to the training points. Compare the <strong>mean squared error</strong> (the average of the squared residuals) of each on the training points and on the test points.</p>`,
+          hint: `<p>Take <em>x</em> = <em>i</em>/19 for <em>i</em> = 0, …, 19, and use every other point for training: <code>xs[0::2]</code> and <code>xs[1::2]</code>. Write <code>mse(predict, xs, ys)</code> that takes a function <code>predict</code>. For the line, <code>predict</code> is <code>lambda x: fit.intercept + fit.slope * x</code>; for the polynomial, <code>coef = np.polyfit(train_x, train_y, 8)</code> and <code>lambda x: np.polyval(coef, x)</code>.</p>`,
+          a: `<pre><code>import random, statistics
+import numpy as np
+
+random.seed(2)
+xs = [i / 19 for i in range(20)]
+ys = [2 * x + random.gauss(0, 0.3) for x in xs]
+train_x, train_y = xs[0::2], ys[0::2]
+test_x, test_y = xs[1::2], ys[1::2]
+
+def mse(predict, x, y):
+    return sum((predict(a) - b) ** 2 for a, b in zip(x, y)) / len(x)
+
+fit = statistics.linear_regression(train_x, train_y)
+line = lambda x: fit.intercept + fit.slope * x
+coef = np.polyfit(train_x, train_y, 8)
+poly = lambda x: np.polyval(coef, x)
+print(round(mse(line, train_x, train_y), 3), round(mse(line, test_x, test_y), 3))   # 0.074 0.15
+print(round(mse(poly, train_x, train_y), 3), round(mse(poly, test_x, test_y), 3))   # 0.001 0.841</code></pre><p>Typically the polynomial has much smaller training error but much larger test error than the line, sometimes enormously larger near the ends of the interval where it oscillates. The line, which matches how the data was generated, predicts better.</p>`
         },
         {
           q: `<p>A school gives extra tutoring to the 10% of students with the lowest scores on a first test. On the second test, their scores rise by 8 points on average. Does this show tutoring works? What design would?</p>`,
