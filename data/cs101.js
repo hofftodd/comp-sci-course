@@ -123,8 +123,8 @@ Hello, world</code></pre>
 <h3>Your first program</h3>
 <p>A <strong>program</strong> is a file of instructions that Python runs from top to bottom. You will write it in your editor and save it inside your <code>cs101</code> folder. Editors do not save there by default (many choose your Documents or home folder), so do it this way:</p>
 <ol>
-  <li>In the terminal, make the folder once: <code>mkdir cs101</code>.</li>
-  <li><strong>VS Code:</strong> choose <em>File → Open Folder…</em> and pick <code>cs101</code>. Then, in the Explorer panel on the left, hover over the folder's name, click the <em>New File</em> icon, type <code>hello.py</code> and press Enter; the file is created inside <code>cs101</code>. VS Code's built-in terminal (<em>Terminal → New Terminal</em>) also starts in that folder. <strong>Thonny:</strong> type the code, choose <em>File → Save as…</em>, browse to <code>cs101</code>, and name the file <code>hello.py</code>.</li>
+  <li>In the terminal, make the folder once: <code>mkdir cs101</code>. A new terminal window starts in your <strong>home folder</strong> (the folder named after your user account, such as <code>/Users/ada</code> on macOS or <code>C:\\Users\\ada</code> on Windows; type <code>pwd</code> to see it), so this makes <code>cs101</code> inside your home folder. That is where to look for it below.</li>
+  <li><strong>VS Code:</strong> choose <em>File → Open Folder…</em> and pick <code>cs101</code>. Then, in the Explorer panel on the left, hover over the folder's name, click the <em>New File</em> icon, type <code>hello.py</code> and press Enter; the file is created inside <code>cs101</code>. VS Code's built-in terminal (<em>Terminal → New Terminal</em>) also starts in that folder. <strong>Thonny:</strong> type the code, choose <em>File → Save as…</em>, browse to your home folder and open <code>cs101</code> inside it, and name the file <code>hello.py</code>.</li>
   <li>In the terminal, <code>cd</code> into <code>cs101</code> and type <code>ls</code> (<code>dir</code> also works on Windows). You should see <code>hello.py</code> in the list. If it isn't there, the file was saved somewhere else, and <code>python3 hello.py</code> will say <em>No such file or directory</em>.</li>
 </ol>
 <p>Here is the program:</p>
@@ -299,7 +299,7 @@ std::string(3, 'a')  // "aaa"  (no built-in string repeat)</code></pre>
     <tr><td>64</td><td>2<sup>64</sup> = 18,446,744,073,709,551,616</td><td>1.8 × 10<sup>19</sup></td></tr>
   </tbody>
 </table>
-<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 16 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. (Where the 16 comes from: 53 of the 64 bits hold the digits, and 2<sup>53</sup> = 9,007,199,254,740,992 is a 16-digit number. So a float can hold every whole number up to that size exactly: every number with 15 digits, but only some with 16. For instance, <code>float(9007199254740993)</code> comes back as <code>9007199254740992.0</code>. Digits after the point behave the same way: the first 15 significant digits always survive and the 16th usually does. That is what "about 16" means, here and in MATH 130.) That limit is where the surprises below come from.</p>
+<p>If half of the 32-bit patterns are used for negative numbers, the largest positive one is 2<sup>31</sup> − 1 = 2,147,483,647, about 2.1 billion. A fixed number of bits can only count so far. Adding 1 to the largest value <strong>overflows</strong>: like a car's odometer rolling from 999999 to 000000, a one-byte counter at 255 <em>wraps around</em> to 0. Python's own <code>int</code> grows as needed, so you won't see this in Python, but many other languages and machines have fixed-size numbers. A Python <code>float</code> uses 64 bits (called <strong>double precision</strong>), which is enough for about 16 <strong>significant digits</strong>: the digits that carry information, not counting leading zeros. (Where the 16 comes from: 53 of the 64 bits hold the digits, and 2<sup>53</sup> = 9,007,199,254,740,992 is a 16-digit number. So a float can hold every whole number up to that size exactly: every number with 15 digits, but only some with 16. For instance, <code>float(9007199254740993)</code>, which converts that whole number to a float (<code>float(...)</code> turns a value into a float; the next lesson covers such conversions), comes back as <code>9007199254740992.0</code>. Digits after the point behave the same way: the first 15 significant digits always survive and the 16th usually does. That is what "about 16" means, here and in MATH 130.) That limit is where the surprises below come from.</p>
 
 <h3>Floats are approximate</h3>
 <p>Floats are stored in binary, and many decimal fractions, like 0.1, can't be written exactly in binary, just as 1/3 can't be written exactly in decimal. So <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. Three consequences:</p>
@@ -1248,7 +1248,7 @@ apply_twice(triple, 2)   # triple(triple(2)) = 18</code></pre>
     return (lo + hi) / 2
 
 print(bisect(lambda x: x**2 - 2, 0, 2))   # 1.414213562355144, close to √2</code></pre>
-<p>The lambda <code>lambda x: x**2 - 2</code> is the function whose zero we want; writing it inline saves defining a named function just for this call. <code>tol=1e-10</code> is a default argument: the loop stops once the interval is narrower than 10<sup>−10</sup> (<code>1e-10</code> is scientific notation, from <a href="#c-cs101-u1">Lesson 2</a>).</p>
+<p>Why does <code>f(lo) * f(mid) &lt;= 0</code> mean "the sign changes in the left half"? A product of two numbers is negative exactly when one is negative and the other positive (for example −2 × 3 = −6), and it is zero when either one is zero. So the product is zero or less exactly when <code>f(lo)</code> and <code>f(mid)</code> have different signs, or one of them is zero. Then the curve crosses zero (or touches it) somewhere between <code>lo</code> and <code>mid</code>, so we keep that half. If the product is positive, both values have the same sign and the crossing must be in the right half. The lambda <code>lambda x: x**2 - 2</code> is the function whose zero we want; writing it inline saves defining a named function just for this call. <code>tol=1e-10</code> is a default argument: the loop stops once the interval is narrower than 10<sup>−10</sup> (<code>1e-10</code> is scientific notation, from <a href="#c-cs101-u1">Lesson 2</a>).</p>
 
 <h3>Checking functions with assert</h3>
 <p>Because functions take inputs and return outputs, they are easy to check:</p>
@@ -1608,6 +1608,7 @@ max(scores)        # 95, the largest</code></pre>
 <p>Notice the pattern: methods that change a list in place, like <code>append</code> and <code>sort</code>, return <code>None</code>. So <code>xs = xs.sort()</code> is a bug: it sorts the list, then replaces it with <code>None</code>. Use either <code>xs.sort()</code> on its own line, or <code>ys = sorted(xs)</code> to get a new list and keep the original.</p>
 
 <h3>Aliasing: two names, one list</h3>
+<p>First, a word you will meet often from here on. Python calls each value it keeps in memory an <strong>object</strong>: a particular list, string, number, or (later) file or error. A variable name doesn't contain the object; it <em>refers</em> to it, and two names can refer to the same object. Each object has a type, which decides what you can do with it (its methods, such as a list's <code>append</code>). Phrases like "file object" or "<code>Path</code> object" in later lessons just mean "an object of that type".</p>
 <p>Assignment never copies. After <code>b = a</code>, both names refer to the same list, so a change made through one is visible through the other.</p>
 <pre><code>a = [1, 2, 3]
 b = a
@@ -1686,6 +1687,7 @@ low, high = min_max([7, 2, 9])  # low is 2, high is 9</code></pre>
       ["List", "An ordered, mutable sequence: [1, 2, 3]."],
       ["Tuple", "An ordered, immutable sequence: (1, 2)."],
       ["Mutable", "Able to be changed in place after creation."],
+      ["Object", "A value Python keeps in memory, such as a particular list or string. Names refer to objects, and an object's type decides what it can do."],
       ["Aliasing", "Two names referring to the same object."],
       ["Unpacking", "Assigning the parts of a tuple or list to separate names: x, y = point."],
       ["Shallow copy", "A new outer list holding the same inner objects, as made by xs.copy(); a deep copy also copies everything inside."],
@@ -1778,6 +1780,7 @@ seen.add("Ada")        # add one item: {'Ada'}
 seen.add("Ada")        # already there, so no change
 "Ada" in seen          # True</code></pre>
 <p><code>.add(x)</code> puts one item into a set, much as <code>.append(x)</code> does for a list. A common pattern starts with an empty set and adds items as a loop meets them, so that <code>x in seen</code> answers "have I met this before?" quickly.</p>
+<p>Because <code>.add</code> changes a set in place, sets are <em>mutable</em>, and so are dictionaries (assigning <code>d[key] = value</code> changes one). That means neither can be a dictionary key or a member of a set: <code>{{1, 2}: "x"}</code> and <code>{{"a": 1}: "x"}</code> both raise <code>TypeError: unhashable type</code>. Of the built-in collections, only tuples (and strings) are immutable, so they are the ones you can use as keys.</p>
 <p>Comprehensions work with braces too. With one expression they build a set; with <code>key: value</code> they build a dictionary:</p>
 <pre><code>{len(w) for w in ["to", "be", "or"]}      # set:  {2}
 {w: len(w) for w in ["to", "be", "or"]}   # dict: {'to': 2, 'be': 2, 'or': 2}</code></pre>
@@ -1816,7 +1819,7 @@ sorted(pairs, key=lambda p: (-p[1], p[0]))
     terms: [
       ["Dictionary", "A mapping from keys to values: {\"a\": 1}."],
       ["Set", "An unordered collection with no duplicates: {1, 2}."],
-      ["Hashable", "Usable as a dictionary key or set member: the value has a hash that never changes. Immutable built-ins are hashable; lists are not."],
+      ["Hashable", "Usable as a dictionary key or set member: the value has a hash that never changes. Immutable built-ins (numbers, strings, tuples) are hashable; lists, sets and dictionaries are mutable, so they are not."],
       ["Hash", "A whole number computed from a value, used to choose where a dictionary or set stores it."]
     ],
     quiz: [
@@ -1919,7 +1922,7 @@ def is_palindrome(s):
     return s[0] == s[-1] and is_palindrome(s[1:-1])</code></pre>
 <p>These are written for clarity, not speed, and they have two costs worth knowing:</p>
 <ul>
-  <li><strong>Copying.</strong> The slice <code>xs[1:]</code> builds a new list each call, so a list of <em>n</em> items copies (<em>n</em> − 1) + (<em>n</em> − 2) + … + 1 + 0 = <em>n</em>(<em>n</em> − 1)/2 items in total: 404,550 copies for 900 items. You can avoid the copying by passing a position instead of a shorter list: <code>def total_from(xs, i=0)</code> returns 0 when <code>i == len(xs)</code> and otherwise <code>xs[i] + total_from(xs, i + 1)</code>.</li>
+  <li><strong>Copying.</strong> The slice <code>xs[1:]</code> builds a new list each call, so a list of <em>n</em> items copies (<em>n</em> − 1) + (<em>n</em> − 2) + … + 1 + 0 = <em>n</em>(<em>n</em> − 1)/2 items in total: 404,550 copies for 900 items. (Why that formula: write the <em>n</em> numbers from <em>n</em> − 1 down to 0, and under them the same numbers from 0 up to <em>n</em> − 1. Each of the <em>n</em> columns adds to <em>n</em> − 1, so twice the sum is <em>n</em>(<em>n</em> − 1), and the sum is half that. MATH 120 proves this kind of formula properly by induction.) You can avoid the copying by passing a position instead of a shorter list: <code>def total_from(xs, i=0)</code> returns 0 when <code>i == len(xs)</code> and otherwise <code>xs[i] + total_from(xs, i + 1)</code>.</li>
   <li><strong>Depth.</strong> Either way, each item adds one frame to the call stack, so the stack ends up about as deep as the list is long. With Python's limit of about 1,000 frames, <code>total(list(range(900)))</code> works, but <code>total(list(range(2000)))</code> stops with <code>RecursionError</code>. For long lists, use a loop or the built-in <code>sum</code>, which gives 1999000 instantly.</li>
 </ul>
 <p>Recursion shines on <strong>nested</strong> data, where loops become awkward. A list can contain lists, which contain more lists:</p>
@@ -2191,7 +2194,7 @@ else:
       ["Edge case", "An input at the boundary of what a function accepts, where bugs are most likely."],
       ["pytest", "A popular tool that finds and runs test functions and reports failures."],
       ["Traceback", "Python's report of the chain of calls that led to an error. Read it from the bottom up."],
-      ["Exception", "An object signaling an error, which travels up the call stack until caught."],
+      ["Exception", "An object (a value, as defined in the Lists lesson) signaling an error, which travels up the call stack until caught."],
       ["try / except", "Code that runs a block and handles specific exceptions if they occur."],
       ["Breakpoint", "A place where a debugger pauses the program so you can inspect its state."],
       ["Assertion", "A statement that a condition must hold at that point."]
@@ -2289,7 +2292,7 @@ with open("todo.txt", "a", encoding="utf-8") as f:
 <p>Unlike <code>print</code>, <code>write</code> doesn't add a new line, so you add <code>"\\n"</code> yourself. Be careful with <code>"w"</code>: opening an existing file in write mode erases it immediately.</p>
 
 <h3>Where is the file? Paths and the working folder</h3>
-<p>A relative path like <code>"poem.txt"</code> is looked up in the <strong>working directory</strong>: the folder the terminal was in when you started the program, which isn't necessarily the folder the program file is in. Running <code>python3 code/report.py</code> from the folder above <code>code</code> means <code>open("data.csv")</code> looks for <code>data.csv</code> in the folder above. When you see <code>FileNotFoundError</code>, check <code>pwd</code> first.</p>
+<p>A relative path like <code>"poem.txt"</code> is looked up in the <strong>working directory</strong>: the folder the terminal was in when you started the program, which isn't necessarily the folder the program file is in. For example, suppose a folder <code>project</code> contains a folder <code>code</code>, and <code>report.py</code> is inside <code>code</code>. If the terminal is in <code>project</code> and you run <code>python3 code/report.py</code>, then <code>open("data.csv")</code> looks for <code>project/data.csv</code>, the folder you are in, not <code>project/code/data.csv</code> next to the program. When you see <code>FileNotFoundError</code>, check <code>pwd</code> first.</p>
 <p>The <code>pathlib</code> module makes paths easier and works the same on every operating system:</p>
 <pre><code>from pathlib import Path
 here = Path(__file__).parent          # the folder this program file is in

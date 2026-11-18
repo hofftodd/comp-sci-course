@@ -326,10 +326,10 @@ def step(x, y, vx, vy, m, k, dt, g=9.8):
 `,
     terms: [
       ["Net force", "The vector sum of all forces on an object."],
-      ["Newton's second law", "F_net = ma."],
+      ["Newton's second law", "The net force on a body equals its mass times its acceleration: F = ma, where F is the net force."],
       ["Weight", "The gravitational force on an object, W = mg."],
       ["Normal force", "The perpendicular push of a surface on an object resting on it."],
-      ["Friction", "A force parallel to a surface opposing sliding; kinetic friction is μₖN."],
+      ["Friction", "A force parallel to a surface opposing sliding; kinetic friction is μₖ times the normal force."],
       ["Free-body diagram", "A sketch of one object showing every force acting on it."],
       ["Terminal velocity", "The constant speed at which drag balances weight."]
     ],
@@ -418,7 +418,12 @@ print(energy_after(10_000, 0.01, True))    # about 0.5: conserved</code></pre>
   <li><strong>Explicit Euler</strong> uses only the old values, so each step moves the point straight along the tangent to its current circle. A tangent line always lies <em>outside</em> the circle, so every step lands on a slightly bigger circle. You can compute exactly how much: the new <em>x</em>² + <em>v</em>² is (<em>x</em> + <em>v</em>Δ<em>t</em>)² + (<em>v</em> − <em>x</em>Δ<em>t</em>)² = (<em>x</em>² + <em>v</em>²)(1 + Δ<em>t</em>²). The energy is multiplied by 1 + Δ<em>t</em>² at <em>every</em> step, so it grows without limit: after 10,000 steps of 0.01, by (1.0001)<sup>10,000</sup> ≈ 2.72, which is why the code prints about 1.36.</li>
   <li><strong>Semi-implicit Euler</strong> moves the position with the velocity it has just corrected, so its small errors don't all push the same way: in one part of each cycle they push outward, and in another inward, and they cancel over a cycle. You can check that this method keeps a slightly tilted version of the energy, <em>x</em>² + <em>v</em>² − Δ<em>t</em> · <em>xv</em>, <em>exactly</em> constant. Since that differs from the true <em>x</em>² + <em>v</em>² only by the small term Δ<em>t</em> · <em>xv</em>, the true energy can only wobble in a narrow band (here within about 0.5%), never drift away.</li>
 </ul>
-<p>The word <strong>symplectic</strong> names the underlying property: the method preserves <em>areas</em> in the (<em>x</em>, <em>v</em>) plane. Take a small patch of starting states and step them all; with explicit Euler the patch grows by a factor 1 + Δ<em>t</em>² every step, while with semi-implicit Euler its area stays exactly the same. A method that can't grow areas can't spiral outward.</p>
+<p>The word <strong>symplectic</strong> names the underlying property: the method preserves <em>areas</em> in the (<em>x</em>, <em>v</em>) plane. Take a small patch of starting states and step them all; with explicit Euler the patch grows by a factor 1 + Δ<em>t</em>² every step, while with semi-implicit Euler its area stays exactly the same. You can see both with the unit square, corners (0, 0), (1, 0), (0, 1) and (1, 1). Each new <em>x</em> and <em>v</em> is a fixed combination of the old ones, so straight lines stay straight and every small square in a patch changes in the same way as this one.</p>
+<ul>
+  <li><strong>Explicit Euler</strong> sends (<em>x</em>, <em>v</em>) to (<em>x</em> + <em>v</em>Δ<em>t</em>, <em>v</em> − <em>x</em>Δ<em>t</em>). The corner (1, 0) goes to (1, −Δ<em>t</em>) and (0, 1) goes to (Δ<em>t</em>, 1). Each of these two sides has length √(1 + Δ<em>t</em>²), and they are still at right angles (the slopes −Δ<em>t</em> and 1/Δ<em>t</em> multiply to −1). So the square becomes a slightly turned square of side √(1 + Δ<em>t</em>²), with area 1 + Δ<em>t</em>².</li>
+  <li><strong>Semi-implicit Euler</strong> makes two moves in turn. First <em>v</em> changes by −<em>x</em>Δ<em>t</em> while <em>x</em> stays put: each vertical strip of the patch slides up or down as a whole, so no strip changes length and the area stays the same. Then <em>x</em> changes by <em>v</em>Δ<em>t</em> with the new <em>v</em> held fixed: each horizontal strip slides sideways, and again the area stays the same. Explicit Euler can't be split this way, because both of its updates use the old values.</li>
+</ul>
+<p>(Checked with code: stepping the corners of the unit square once with Δ<em>t</em> = 0.01 gives areas 1.0001 and 1.0.) A method that can't grow areas can't spiral outward.</p>
 `,
     terms: [
       ["Work", "W = Fd cos θ, energy transferred by a force acting through a displacement (joules)."],
@@ -561,7 +566,7 @@ ellipse = orbit(0, 1.2)    # an ellipse, farthest from the center on the opposit
       ["Orbital speed", "v = √(GM/r) for a circular orbit."],
       ["Kepler's laws", "Elliptical orbits, equal areas in equal times, and T² ∝ a³."],
       ["Escape velocity", "The speed needed to leave a body's gravity permanently: √2 times circular orbital speed at that distance."],
-      ["Angular momentum", "L = m(x v_y − y v_x) = m r v⊥ about a center; conserved when the force points along the radius."],
+      ["Angular momentum", "L = m r v⊥ about a center, where v⊥ is the part of the velocity perpendicular to the radius; conserved when the force points along the radius."],
       ["Gravitational potential energy", "U = −GMm/r, zero infinitely far away; mgh is its approximation near the surface."]
     ],
     quiz: [
@@ -631,6 +636,8 @@ ellipse = orbit(0, 1.2)    # an ellipse, farthest from the center on the opposit
   <li><strong>Critically damped</strong> (<em>b</em> = 2√(<em>km</em>)): returns to equilibrium as fast as possible without overshooting. Car suspensions and door closers aim close to this.</li>
   <li><strong>Overdamped</strong> (large <em>b</em>): creeps back slowly without oscillating.</li>
 </ul>
+<p><strong>Where the amplitude formula comes from (small <em>b</em>).</strong> Look at the energy <em>E</em> = ½<em>mv</em>² + ½<em>kx</em>². Its rate of change is <em>dE</em>/<em>dt</em> = <em>mvv</em>′ + <em>kxv</em> = <em>v</em>(<em>mx</em>″ + <em>kx</em>), and the equation says <em>mx</em>″ + <em>kx</em> = −<em>bv</em>, so <em>dE</em>/<em>dt</em> = −<em>bv</em>². When <em>b</em> is small, each cycle looks almost like SHM, and in SHM the kinetic energy is on average half of <em>E</em>. (Kinetic energy is ½<em>kA</em>² sin²(ω<em>t</em> + φ) and potential energy is ½<em>kA</em>² cos²(ω<em>t</em> + φ). These are the same curve shifted by a quarter period, so they have the same average.) So on average ½<em>mv</em>² ≈ <em>E</em>/2, which means <em>v</em>² ≈ <em>E</em>/<em>m</em> and <em>dE</em>/<em>dt</em> ≈ −(<em>b</em>/<em>m</em>)<em>E</em>. That is exponential decay (<a href="#c-math131-k6">MATH 131, Lesson 6</a>): <em>E</em> ∝ e<sup>−<em>bt</em>/<em>m</em></sup>. Energy is ½<em>kA</em>², so the amplitude goes as the square root of <em>E</em>, which is e<sup>−<em>bt</em>/(2<em>m</em>)</sup>. (Checked by simulation: with <em>m</em> = 1, <em>k</em> = 16, <em>b</em> = 1 and <em>x</em>(0) = 1, the peaks are 0.4531, 0.2053 and 0.0930, and e<sup>−<em>t</em>/2</sup> at those times gives the same four digits.)</p>
+<p><strong>Where the critical value comes from.</strong> Try <em>x</em> = e<sup><em>rt</em></sup>, a curve that never oscillates. Then <em>x</em>′ = <em>r</em>e<sup><em>rt</em></sup> and <em>x</em>″ = <em>r</em>²e<sup><em>rt</em></sup>, and dividing the equation by e<sup><em>rt</em></sup> leaves <em>mr</em>² + <em>br</em> + <em>k</em> = 0. By the quadratic formula, <em>r</em> = (−<em>b</em> ± √(<em>b</em>² − 4<em>mk</em>))/(2<em>m</em>). When <em>b</em>² &gt; 4<em>mk</em>, there are two real roots, both negative, and the motion is a mix of two decaying curves with no oscillation: overdamped. When <em>b</em>² &lt; 4<em>mk</em>, the square root has no real value, so no such non-oscillating curve exists. The solutions then turn out to oscillate (finding them exactly needs complex numbers, which this course doesn't use): underdamped. The boundary, <em>b</em>² = 4<em>mk</em>, is <em>b</em> = 2√(<em>km</em>). We state without proof that this boundary is the fastest return without overshoot; the simulation below lets you check it. (With <em>m</em> = 1 and <em>k</em> = 16, critical is <em>b</em> = 8. Released from <em>x</em> = 1, <em>b</em> = 7 overshoots to −0.0034, while <em>b</em> = 8 and <em>b</em> = 9 never cross 0.)</p>
 <p>The same equation, with inductance, resistance and capacitance in place of mass, damping and spring constant, describes electrical circuits. In computing, the "spring" animations in phone interfaces, which overshoot slightly and settle, are damped oscillators chosen for how they feel.</p>
 
 <h3>Driven oscillation and resonance</h3>

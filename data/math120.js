@@ -64,6 +64,7 @@ CSA.addUnits("math120", [
     summary: "Propositions and connectives, truth tables, translating English, logical equivalence, and simplifying statements with equivalence laws.",
     notes: `
 <p>Logic is the grammar of mathematics and of programming. Every <code>if</code> statement you write in CS 101 tests a logical condition, every proof in this course is a chain of logical steps, and every processor is built from <em>logic gates</em>: tiny electronic switches that compute "and", "or" and "not" on signals that are either on or off. This lesson covers the simplest logic, about statements that are simply true or false.</p>
+<p class="note">Python in this course: CS 101 runs alongside MATH 120, so a lesson here may show optional Python before CS 101 teaches it. Where it does, a note beginning "Reading the Python" explains that code in plain words.</p>
 
 <h3>Propositions</h3>
 <p>A <strong>proposition</strong> is a statement that is either true or false, though we may not know which.</p>
@@ -203,12 +204,13 @@ CSA.addUnits("math120", [
         if a == statement:                 # knights say true things, knaves false
             print("A knight" if a else "A knave", "B knight" if b else "B knave")
 # prints: A knave B knight</code></pre>
+<p class="note">Reading the Python, if CS 101 hasn't reached it yet: <code>for a in [True, False]:</code> runs the indented lines below it twice, with <code>a</code> first <code>True</code>, then <code>False</code>. A loop inside another runs the inner lines for all four combinations of <code>a</code> and <code>b</code>: the four rows of the truth table. <code>not</code>, <code>and</code>, <code>or</code> are ¬, ∧, ∨; <code>==</code> means "same truth value" (↔); <code>if</code> runs the line under it only when its test is <code>True</code>. <code>"A knight" if a else "A knave"</code> gives <code>"A knight"</code> when <code>a</code> is <code>True</code>, else <code>"A knave"</code>. Text after <code>#</code> is a comment, ignored by Python.</p>
 
 <h3>Logic in code</h3>
 <p>The same laws simplify conditions in programs. These two lines are equivalent by De Morgan's law, and the second is easier to read:</p>
 <pre><code>if not (is_weekend or is_holiday):
 if not is_weekend and not is_holiday:</code></pre>
-<p>A computer can check any equivalence with a few letters by trying every row. With the loops from CS 101:</p>
+<p>A computer can check any equivalence with a few letters by trying every row, using two loops as in the knights-and-knaves code above:</p>
 <pre><code>for p in [True, False]:
     for q in [True, False]:
         left = not (p and q)
@@ -724,7 +726,7 @@ CSA.addUnits("math120", [
       { q: `<p>Use the pigeonhole principle: (a) How many students must be in a class to guarantee two have the same last digit in their student ID? (b) Show that among any five integers, two have a difference divisible by 4.</p>`, a: `<p>(a) 11: there are 10 possible last digits, so 11 students guarantee a repeat (10 could all differ). (b) Every integer has one of four remainders mod 4: 0, 1, 2 or 3. With five integers and four remainders, two share a remainder, and then their difference is divisible by 4.</p>` },
       { q: `<p>For each relation on the set of all people, decide whether it is reflexive, symmetric, antisymmetric and transitive: (a) "has the same birthday as". (b) "is taller than". (c) "is at least as old as".</p>`, a: `<p>(a) Reflexive, symmetric, transitive, not antisymmetric: it's an equivalence relation. (b) Not reflexive, not symmetric, antisymmetric (vacuously: <em>a</em> taller than <em>b</em> and <em>b</em> taller than <em>a</em> never both happen), transitive. (c) Reflexive, not symmetric, not antisymmetric (two different people can be exactly the same age), transitive.</p>` },
       { q: `<p>Prove that congruence mod <em>n</em> is transitive: if <em>a</em> ≡ <em>b</em> and <em>b</em> ≡ <em>c</em> (mod <em>n</em>), then <em>a</em> ≡ <em>c</em> (mod <em>n</em>).</p>`, a: `<p><strong>Proof.</strong> By definition, <em>n</em> | (<em>a</em> − <em>b</em>) and <em>n</em> | (<em>b</em> − <em>c</em>), so <em>a</em> − <em>b</em> = <em>nj</em> and <em>b</em> − <em>c</em> = <em>nk</em> for integers <em>j</em> and <em>k</em>. Adding, <em>a</em> − <em>c</em> = <em>n</em>(<em>j</em> + <em>k</em>), so <em>n</em> | (<em>a</em> − <em>c</em>), that is, <em>a</em> ≡ <em>c</em> (mod <em>n</em>). ∎</p>` },
-      { q: `<p>List the equivalence classes of congruence mod 4 on the integers from 0 to 15. Which class contains 2026? Which contains −1?</p>`, a: `<p>[0] = {0, 4, 8, 12}, [1] = {1, 5, 9, 13}, [2] = {2, 6, 10, 14}, [3] = {3, 7, 11, 15}. 2026 = 4 × 506 + 2, so it's in [2]. −1 = 4 × (−1) + 3, so it's in [3]: indeed −1 − 3 = −4 is divisible by 4.</p>` },
+      { q: `<p>(a) List the equivalence classes of congruence mod 4 on the integers from 0 to 15. (b) Now take congruence mod 4 on <em>all</em> the integers. It has the same four classes, each extended in both directions: for example, the class of 2 is {…, −6, −2, 2, 6, 10, …}. Which of these four classes contains 2026? Which contains −1?</p>`, a: `<p>(a) [0] = {0, 4, 8, 12}, [1] = {1, 5, 9, 13}, [2] = {2, 6, 10, 14}, [3] = {3, 7, 11, 15}. (b) 2026 = 4 × 506 + 2, so it's in [2]. −1 = 4 × (−1) + 3, so it's in [3]: indeed −1 − 3 = −4 is divisible by 4.</p>` },
       { q: `<p>These tasks must be done in an order respecting: <em>shop</em> before <em>cook</em>, <em>cook</em> before <em>eat</em>, <em>set table</em> before <em>eat</em>, <em>eat</em> before <em>wash dishes</em>. Give two different valid orders.</p>`, a: `<p>For example: shop, cook, set table, eat, wash dishes; or set table, shop, cook, eat, wash dishes. Setting the table isn't related to shopping or cooking, so it can go anywhere before eating. That freedom is what makes this a partial order rather than a total one.</p>` }
     ],
     sources: ["mcs", "levin", "bookofproof"]

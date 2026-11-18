@@ -87,3 +87,44 @@ I'm a first-year student. Before this term I had high-school algebra and trigono
 18. CS 101, Loops: "Put imports at the top of the file." WRIT 100, Documentation shows `split_bill` with `import math` inside the function body, under the docstring. I don't know which is right, or when an import inside a function is acceptable.
 
 19. MATH 120 Lesson 1 assumes CS 101 loops and lists ("With the loops from CS 101"). MATH 130 Limits and Continuity and MATH 120 Lesson 2 add explanations for students "if CS 101 hasn't reached" the code. This made me unsure where CS 101 is expected to be when each math lesson happens. Item 8 is the case where that left me unable to read the code.
+
+## Professor's response
+
+Thank you. Every item led to a change. Three items in WRIT 100 (13, 16, 17) were blocking, and all three were real: two exercises assumed material from later courses, and the citation lesson asked for a web-page reference without showing one. Items 8 and 19 are the same problem as in earlier rounds, a MATH lesson using Python before CS 101 teaches it; Lesson 1 of MATH 120 now has its own reading note, and both math courses now say once, at the start, how their Python relates to CS 101. Item 18 was a mistake in the WRIT 100 example, not a rule with exceptions. No item rested on a misreading. Every number and code output I added was checked by running Python 3. No programming problem changed.
+
+### CS 101 Programming I
+
+1. u0, your first program: The step now says that a new terminal window starts in your home folder (the folder named after your user account, such as `/Users/ada` or `C:\Users\ada`; `pwd` shows it), so `mkdir cs101` makes `cs101` there. The Thonny step now says to browse to your home folder and open `cs101` inside it.
+2. u1, floats: The sentence now says what the call does: `float(...)` turns a value into a float, and the next lesson covers such conversions. (`float(9007199254740993)` is `9007199254740992.0`, checked.)
+3. u3, bisection: A new paragraph explains the test. A product is negative exactly when one number is negative and the other positive (−2 × 3 = −6), and zero when either is zero, so `f(lo) * f(mid) <= 0` means the two values differ in sign or one is zero, and the crossing is in the left half. A positive product means the crossing is in the right half.
+4. dicts, Quiz 1: After `.add`, a new paragraph says that sets and dictionaries are mutable (`.add` and `d[key] = value` change them), so neither can be a key or a set member: `{{1, 2}: "x"}` and `{{"a": 1}: "x"}` both raise `TypeError: unhashable type`. The key term "Hashable" now names numbers, strings and tuples as hashable and lists, sets and dictionaries as not. The quiz can now be answered from the lesson.
+5. u4, cost of slicing: The formula now has its reason: write the numbers from n − 1 down to 0 above the same numbers from 0 up to n − 1; each of the n columns adds to n − 1, so twice the sum is n(n − 1). It also says MATH 120 proves such formulas by induction. (For 900 items, 404,550, checked.)
+6. u6, "object": The word is now defined where it first matters, at the start of "Aliasing: two names, one list" in Lesson 8: an object is a value Python keeps in memory, such as a particular list or string; names refer to objects, and an object's type decides what it can do. It says that "file object" and "`Path` object" later just mean an object of that type. "Object" is also a key term in that lesson, and the "Exception" key term points back to it.
+7. files, working directory: The example is now concrete: a folder `project` contains a folder `code`, which holds `report.py`. If the terminal is in `project` and you run `python3 code/report.py`, then `open("data.csv")` looks for `project/data.csv` (the folder you are in), not `project/code/data.csv`.
+
+### MATH 120 Discrete Mathematics I
+
+8. u1, Python in Propositional logic: A note after the knights-and-knaves code now reads it in plain words: what `for a in [True, False]:` does, how a loop inside a loop gives the four rows of the truth table, that `not`, `and`, `or` are ¬, ∧, ∨ and `==` plays the role of ↔, what `if` does, what `"A knight" if a else "A knave"` gives, and that `#` starts a comment. The De Morgan check later in the lesson no longer says "With the loops from CS 101"; it points back to that code. Both programs can now be read in week 1. (The knights program prints `A knave B knight`, checked.)
+9. u5, Practice 6: The problem now has two parts. (a) asks for the classes on 0 to 15. (b) says that on all the integers the same four classes extend in both directions (the class of 2 is {…, −6, −2, 2, 6, 10, …}) and asks which contains 2026 and which contains −1. The answer is [2] (2026 = 4 × 506 + 2) and [3] (−1 = 4 × (−1) + 3).
+
+### MATH 130 Calculus I
+
+10. u2, Practice 4: The leftover phrase is gone. The sentence now reads: "The answer is then within 10⁻¹⁰ of the true root, so it is correct to about 10 decimal places."
+11. chain, derivative function: Both references, in the inverse-function example and in Practice 5, now point to Lesson 5, The derivative, with a link. (`derivative(math.atan, 1)` gives 0.5000000000088267 and the arctan(x²) check gives 0.9999999999676933, matching the text, checked.)
+
+### CS 100 Computing in Society
+
+12. u1, semiconductor: The lesson now defines it where it first appears: a material, usually silicon, that conducts electricity better than an insulator such as glass but worse than a metal such as copper; adding tiny amounts of other elements to small regions controls where current flows, which is how a transistor is made. It is also a key term.
+
+### WRIT 100 Writing for Technical Audiences
+
+13. w4, Practice 1: **Blocking item fixed.** The problem now gives a programmer's definition of a queue (enqueue adds an item at the back, dequeue removes the item at the front, so items leave in the order they arrived) and says you need to know nothing more. The task is to rewrite that definition for a non-programmer, starting with an example. That is the skill the lesson teaches, and it no longer depends on a data structure no course has covered.
+14. w5, Practice 3: Part (b) is now `time.sleep(2)  # wait`, and the prompt says what the call does (pauses the program for 2 seconds) and why it is there (a web service refuses requests that come faster than one every 2 seconds). The task is to write a comment that says that reason.
+15. w6, commit messages: Both tools are now explained in a few words: `git log` (from CS 101) lists past commits with their messages, and `git blame` shows, next to each line of a file, the commit that last changed it.
+16. w7, Practice 3: **Blocking item fixed.** Part (a) now explains what storing passwords as hashes means: the program keeps only the result of a one-way scrambling function, which can't be turned back into the password, and checks a login by scrambling what the user typed and comparing. "Salted" is gone, since the question doesn't need it. I also explained "caching" in part (b) and said in one line what C is in part (c), and set the three parts on separate lines.
+17. w8, Practice 4: **Blocking item fixed.** The lesson now shows a full web-page reference in both styles, using PEP 257 (the docstring guide from Lesson 5), and then spells out the order and punctuation of each: IEEE gives initials, the title in quotation marks, the site, the year, "[Online]. Available:", the URL and the access date; APA gives the surname, the year in parentheses, the title without quotation marks (italic when formatted), the site and the URL, with an access date only for pages designed to change. It also says to leave the site name out when the site is the author's own, which is the case in Practice 4.
+
+### Across courses
+
+18. Imports: CS 101 is right: put imports at the top of the file. The WRIT 100 example now has `import math` above `def split_bill`, as it should have from the start. (`split_bill(50, 3)` is still 1917, checked.)
+19. Where CS 101 is expected to be: Each math course now says once, near the start of its first lesson, that CS 101 runs alongside it, so a lesson may show optional Python before CS 101 teaches it, and that where it does, the lesson explains that code in plain words, usually in a note beginning "Reading the Python". So you should never need CS 101 to be at a particular point to read a math lesson. Lesson 1 of MATH 120, the one place this was missing, now has such a note (item 8).

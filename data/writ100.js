@@ -390,7 +390,7 @@ turning any data into a fixed-size number.</code></pre>
       ],
       practice: [
         {
-          q: `<p><strong>Example first.</strong> Explain what a <em>queue</em> data structure is to someone who has never programmed, starting with a concrete example and ending with a one-sentence definition.</p>`,
+          q: `<p><strong>Example first.</strong> A programmer defines a <em>queue</em> like this: "a collection with two operations: <em>enqueue</em> adds an item at the back, and <em>dequeue</em> removes and returns the item at the front, so items leave in the order they arrived." (You don't need to know any more about queues than this.) Rewrite that explanation for someone who has never programmed, starting with a concrete example and ending with a one-sentence definition in plain words.</p>`,
           a: `<p>"At a coffee shop, people join the line at the back and are served from the front: whoever arrived first is served first. A queue in a program works the same way. The program adds items to the back and takes them from the front, for example print jobs waiting for a printer. A queue is a collection where items are removed in the same order they were added: first in, first out."</p>`
         },
         {
@@ -451,7 +451,9 @@ CSA.addUnits("writ100", [
 
 <h3>Docstrings</h3>
 <p>A <strong>docstring</strong> is documentation attached to a function, class or module. In Python it is a string literal on the first line of the body, and tools such as <code>help()</code> display it. Its reader is someone who wants to <em>call</em> the function without reading its code. Python's style guide for docstrings, PEP 257, asks for a one-line summary written as a command ("Return…", not "Returns…" or "This function returns…"), then, if needed, a blank line and more detail.</p>
-<pre><code>def split_bill(total, people, tip=0.15):
+<pre><code>import math
+
+def split_bill(total, people, tip=0.15):
     """Return each person's share of a bill, including tip, in cents.
 
     total is the bill before tip, in dollars; people is the number of
@@ -459,7 +461,6 @@ CSA.addUnits("writ100", [
     Shares are rounded up to the next cent, so they may add up to
     slightly more than the bill.
     """
-    import math
     return math.ceil(total * (1 + tip) * 100 / people)
 
 print(split_bill(50, 3))   # 1917</code></pre>
@@ -509,8 +510,8 @@ items = sorted(items)   # binary search below requires sorted input</code></pre>
     """</code></pre><p>It starts with a command, states the return values, and lists the exact rules, so a caller doesn't need to read the code. Mentioning that symbols aren't required answers a question users would likely ask.</p>`
         },
         {
-          q: `<p><strong>Comments.</strong> Improve or delete each comment: (a) <code>x = x * 1.08  # multiply x by 1.08</code>; (b) <code>sleep(2)  # wait</code>; (c) <code>if n &lt; 2: return n  # base case</code>.</p>`,
-          a: `<p>(a) Say why: <code># add 8% sales tax</code>, or better, remove the comment and name the constant: <code>SALES_TAX = 0.08</code>, <code>price = price * (1 + SALES_TAX)</code>. (b) Say why: <code># the API allows at most one request every 2 seconds</code>. (c) Fine for a reader learning recursion; in a codebase of experienced readers, delete it.</p>`
+          q: `<p><strong>Comments.</strong> Improve or delete each comment: (a) <code>x = x * 1.08  # multiply x by 1.08</code>; (b) <code>time.sleep(2)  # wait</code>, where <code>time.sleep(2)</code> pauses the program for 2 seconds, here because a web service the program calls refuses requests that come faster than one every 2 seconds; (c) <code>if n &lt; 2: return n  # base case</code>.</p>`,
+          a: `<p>(a) Say why: <code># add 8% sales tax</code>, or better, remove the comment and name the constant: <code>SALES_TAX = 0.08</code>, <code>price = price * (1 + SALES_TAX)</code>. (b) Say why the program pauses, which the code can't show: <code># the service allows at most one request every 2 seconds</code>. (c) Fine for a reader learning recursion; in a codebase of experienced readers, delete it.</p>`
         },
         {
           q: `<p><strong>README test.</strong> Write the "Installing" and "Using" sections of a README for a Python script <code>grades.py</code> that reads <code>scores.csv</code> and prints each student's average. Assume your reader knows how to open a terminal but nothing else.</p>`,
@@ -532,7 +533,7 @@ items = sorted(items)   # binary search below requires sorted input</code></pre>
 <p>Most writing in a software team is short: a commit message, a bug report, a comment on a teammate's code, a question in a chat channel. Each is read by someone busy, often months later, who needs to act on it. Each has a well-understood shape.</p>
 
 <h3>Commit messages</h3>
-<p>A <strong>commit message</strong> describes one change to a codebase. Its readers are teammates reviewing the change today and, much more often, someone in the future asking "why was this line changed?" with a tool like <code>git log</code> or <code>git blame</code>. The code shows <em>what</em> changed; the message should say <em>why</em>.</p>
+<p>A <strong>commit message</strong> describes one change to a codebase. Its readers are teammates reviewing the change today and, much more often, someone in the future asking "why was this line changed?" with a tool like <code>git log</code> (from CS 101, which lists past commits with their messages) or <code>git blame</code> (which shows, next to each line of a file, the commit that last changed it). The code shows <em>what</em> changed; the message should say <em>why</em>.</p>
 <p>The conventions most teams follow (summarized well by Chris Beams in 2014):</p>
 <ul>
 <li>A <strong>subject line</strong> of about 50 characters or fewer, capitalized, with no period at the end.</li>
@@ -682,7 +683,7 @@ all of them; three tries keeps the worst case under 10 seconds.</code></pre>
           a: `<p>For example: <em>Setup effort</em>: email low (a mail service), push high (building an app for two phone systems). <em>Reach</em>: email all students, push only those who install the app. <em>Noticed quickly</em>: email often not, push usually. Decision: "Use email for version 1, because every student has it and it needs no app; revisit push notifications if students report missing reminders." A strong answer chooses dimensions that matter to this decision.</p>`
         },
         {
-          q: `<p><strong>Trade-offs.</strong> State what each choice gives up: (a) storing passwords only as salted hashes; (b) caching search results for 10 minutes; (c) writing the program in Python rather than C.</p>`,
+          q: `<p><strong>Trade-offs.</strong> State what each choice gives up (and what it gains):</p><p>(a) Storing passwords only as <em>hashes</em>. The program runs each password through a one-way scrambling function and keeps only the scrambled result, which can't be turned back into the password. To check a login, it scrambles what the user typed the same way and compares the two results.</p><p>(b) Caching search results for 10 minutes: keeping a copy of each search's results and reusing that copy, instead of searching again, when the same search comes in within 10 minutes.</p><p>(c) Writing the program in Python rather than C, a language whose programs run faster but where the programmer must manage the computer's memory by hand.</p>`,
           a: `<p>(a) Gains: a stolen database doesn't reveal passwords. Gives up: you can never show a user their password, only reset it, and checking a login costs extra computation. (b) Gains: speed and lower load. Gives up: results can be up to 10 minutes out of date. (c) Gains: faster development, fewer memory bugs. Gives up: running speed and fine control over memory.</p>`
         },
         {
@@ -736,7 +737,14 @@ all of them; three tries keeps the worst case under 10 seconds.</code></pre>
 <p><strong>APA</strong> (common in psychology and the social sciences, and in human-computer interaction) puts the author and year in the text: "(Gopen &amp; Swan, 1990)". The reference list is alphabetical:</p>
 <pre data-label="APA"><code>Gopen, G. D., &amp; Swan, J. A. (1990). The science of scientific writing.
     American Scientist, 78(6), 550-558.</code></pre>
-<p>Which style you use matters less than using one consistently and completely. Your instructor or publisher will say which. For web pages, include the author or organization, title, site, date, URL and the date you accessed it, since pages change. Reference managers such as Zotero (free) store sources and format citations for you.</p>
+<p>Which style you use matters less than using one consistently and completely. Your instructor or publisher will say which. For a web page, give the author (or the organization, if no person is named), the page's title, the site's name, the year it was published, and its URL. Here is PEP 257, the Python docstring guide from <a href="#c-writ100-w5">Lesson 5</a>, written by David Goodger and Guido van Rossum and published on the Python Software Foundation's site in 2001:</p>
+<pre data-label="IEEE"><code>[2] D. Goodger and G. van Rossum, "PEP 257 – Docstring conventions," Python
+    Software Foundation, 2001. [Online]. Available: https://peps.python.org/pep-0257/
+    (accessed Sep. 15, 2026).</code></pre>
+<pre data-label="APA"><code>Goodger, D., &amp; van Rossum, G. (2001). PEP 257 – Docstring conventions.
+    Python Software Foundation. https://peps.python.org/pep-0257/</code></pre>
+<p>The order and punctuation follow the journal examples: IEEE puts initials first and the title in quotation marks, then the site, the year, the words "[Online]. Available:" and the URL, and ends with the date you accessed the page, since pages change. APA puts the surname first and the year in parentheses, then the title without quotation marks (in italics, in a formatted document), then the site and the URL; it adds an access date only for pages that are designed to change, such as a live dashboard. When the site is simply the author's own website, leave the site name out in both styles.</p>
+<p>Reference managers such as Zotero (free) store sources and format citations for you.</p>
 
 <h3>Plagiarism, code and AI tools</h3>
 <p><strong>Plagiarism</strong> is presenting someone else's words, ideas, code or images as your own. It includes copying without quotation marks, paraphrasing without citation, and reusing your own earlier work without saying so. It is serious in a university and in a career, and it's easy to avoid: when in doubt, cite.</p>

@@ -89,7 +89,7 @@ CSA.addCourse({
 <p class="note"><strong>Why it matters:</strong> vacuum tubes made computers fast, and stored programs made them flexible. Tubes were also hot and power-hungry and burned out often, which set up the next era.</p>
 
 <h3>4. Chips: shrinking the switch (1947 to the 1990s)</h3>
-<p>A computer is built from switches, and the history of hardware is the history of shrinking them: gears, then relays, vacuum tubes, transistors. The <strong>transistor</strong>, invented at Bell Labs in December 1947 by John Bardeen, Walter Brattain and William Shockley, did a tube's job with no warm-up time, little power and a far longer life. In 1958–59 <strong>Jack Kilby</strong> at Texas Instruments and <strong>Robert Noyce</strong> at Fairchild Semiconductor independently created the <strong>integrated circuit</strong>: many transistors made together on one piece of semiconductor, instead of being wired together by hand.</p>
+<p>A computer is built from switches, and the history of hardware is the history of shrinking them: gears, then relays, vacuum tubes, transistors. The <strong>transistor</strong>, invented at Bell Labs in December 1947 by John Bardeen, Walter Brattain and William Shockley, did a tube's job with no warm-up time, little power and a far longer life. In 1958–59 <strong>Jack Kilby</strong> at Texas Instruments and <strong>Robert Noyce</strong> at Fairchild Semiconductor independently created the <strong>integrated circuit</strong>: many transistors made together on one piece of semiconductor, instead of being wired together by hand. (A <strong>semiconductor</strong> is a material, usually silicon, that conducts electricity better than an insulator such as glass but worse than a metal such as copper. Adding tiny amounts of other elements to small regions of it lets engineers control where current can flow, which is how a transistor is made.)</p>
 <p>In 1965 Gordon Moore predicted that the number of transistors on a chip would keep doubling at a steady pace. In 1975 he put the pace at about every two years, and "<strong>Moore's law</strong>" held for decades. The <strong>Intel 4004</strong> (1971), the first commercial microprocessor, had about 2,300 transistors. Today's chips have tens of billions, and the largest have more than a hundred billion.</p>
 <p>Cheaper chips changed who used computers:</p>
 <ul>
@@ -128,6 +128,7 @@ CSA.addCourse({
       terms: [
         ["Stored-program computer", "A computer that keeps its instructions in the same memory as its data."],
         ["Universal Turing machine", "A theoretical machine that can simulate any other Turing machine, given its description."],
+        ["Semiconductor", "A material, usually silicon, that conducts electricity between an insulator and a metal; transistors are made from it."],
         ["Integrated circuit", "Many transistors and their connections made together on a single chip of semiconductor."],
         ["Moore's law", "The observation that transistor counts per chip doubled about every two years."],
         ["Packet switching", "Sending data in small, separately routed pieces, as ARPANET and the internet do."],
