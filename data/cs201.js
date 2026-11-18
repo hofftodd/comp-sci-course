@@ -1113,12 +1113,12 @@ print(uf.find("A") == uf.find("C"), uf.find("E") == uf.find("A"))   # True False
 
 <h3>Tries</h3>
 <p>A <strong>trie</strong> (from "retrieval", usually pronounced "try") stores a set of strings as a tree of characters. Each edge is labeled with a character; each node represents the prefix spelled by the path from the root; and a node is marked if that prefix is itself a stored word.</p>
-<figure class="fig"><svg viewBox="0 0 460 200" role="img" aria-label="A trie storing car, cat and do: from the root, c leads to a, which branches to r and t; d leads to o. Marked nodes end words.">
+<figure class="fig"><svg viewBox="0 0 460 230" role="img" aria-label="A trie storing car, cat and do: from the root, c leads to a, which branches to r and t; d leads to o. Marked nodes end words.">
 <g class="ln"><line x1="230" y1="30" x2="150" y2="80"/><line x1="230" y1="30" x2="330" y2="80"/><line x1="150" y1="80" x2="150" y2="130"/><line x1="150" y1="130" x2="100" y2="180"/><line x1="150" y1="130" x2="200" y2="180"/><line x1="330" y1="80" x2="330" y2="130"/></g>
-<g class="box"><circle cx="230" cy="30" r="13"/><circle cx="150" cy="80" r="13"/><circle cx="330" cy="80" r="13"/><circle cx="150" cy="130" r="13"/></g>
+<g class="box"><circle cx="230" cy="30" r="13"/><circle cx="150" cy="80" r="13"/><circle cx="330" cy="80" r="13"/><circle cx="150" cy="130" r="13"/><circle cx="100" cy="180" r="13"/><circle cx="200" cy="180" r="13"/><circle cx="330" cy="130" r="13"/></g>
 <g class="hl"><circle cx="100" cy="180" r="13"/><circle cx="200" cy="180" r="13"/><circle cx="330" cy="130" r="13"/></g>
 <g class="text"><text x="180" y="52" text-anchor="middle">c</text><text x="290" y="52" text-anchor="middle">d</text><text x="140" y="110" text-anchor="middle">a</text><text x="320" y="110" text-anchor="middle">o</text><text x="115" y="160" text-anchor="middle">r</text><text x="185" y="160" text-anchor="middle">t</text>
-<text x="100" y="184" text-anchor="middle" class="code">car</text><text x="200" y="184" text-anchor="middle" class="code">cat</text><text x="330" y="134" text-anchor="middle" class="code">do</text></g>
+<text x="100" y="216" text-anchor="middle" class="code">"car"</text><text x="200" y="216" text-anchor="middle" class="code">"cat"</text><text x="330" y="166" text-anchor="middle" class="code">"do"</text></g>
 </svg><figcaption>A trie holding "car", "cat" and "do". Words sharing a prefix share a path; highlighted nodes end a word.</figcaption></figure>
 <pre><code>class Trie:
     def __init__(self):
