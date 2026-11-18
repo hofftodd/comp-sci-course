@@ -88,7 +88,7 @@ hex         D    6    3    F      written 0xD63F</code></pre>
 
 int main(void) {
     int8_t a = 127;                  /* an 8-bit signed integer */
-    a = a + 1;                       /* converted back to 8 bits */
+    a = a + 1;                       /* 128 as an int, stored back in 8 bits */
     printf("%d\\n", a);              /* -128 */
     unsigned int u = 0;
     u = u - 1;
@@ -97,6 +97,7 @@ int main(void) {
     return 0;
 }</code></pre>
 <p>The last line shows a classic trap. The <code>u</code> at the end of <code>0u</code> makes the constant <em>unsigned</em>: <code>0u</code> is the number 0 with type <code>unsigned int</code>, while plain <code>0</code> is a signed <code>int</code>. When C compares a signed and an unsigned integer, it converts the signed one to unsigned, so −1 becomes 4,294,967,295 and "−1 &lt; 0" is false. In C, overflow of <em>unsigned</em> arithmetic is defined to wrap around; overflow of <em>signed</em> arithmetic is undefined behavior (CS 101's sidebar on integers), which compilers may assume never happens.</p>
+<p>So why is the first example, which seems to overflow a signed number, safe to show? Because no signed arithmetic overflows in it. C never does arithmetic on types narrower than <code>int</code>: in <code>a + 1</code>, the 8-bit <code>a</code> is first converted to an <code>int</code> (this is called <em>integer promotion</em>), and the sum is the <code>int</code> 128, which fits easily. The overflow happens only when <code>a = …</code> stores 128 back into an <code>int8_t</code>, which can't hold it. That is a <em>conversion</em>, not arithmetic, and the C standard makes its result <em>implementation-defined</em>: each compiler must pick a result and document it. GCC, Clang and other common compilers keep the low 8 bits, which gives −128. Arithmetic that overflows in the <code>int</code> type itself, such as adding 1 to an <code>int</code> holding 2,147,483,647, is different: that is undefined behavior, and no result is promised.</p>
 <p>Overflow causes real failures. In 1996 the first Ariane 5 rocket self-destructed 37 seconds after launch when a 64-bit floating-point value was converted to a 16-bit signed integer that couldn't hold it (CS 101's optional ethics lesson tells the story). In 2014, the YouTube view counter for the music video "Gangnam Style" approached 2<sup>31</sup> − 1 = 2,147,483,647, the limit of a signed 32-bit integer; YouTube switched to 64-bit counters. And many systems count time as signed 32-bit seconds since 1 January 1970, which overflows at 03:14:07 UTC on 19 January 2038, the "Year 2038 problem".</p>
 
 <h3>Simulating fixed width in Python</h3>
@@ -125,7 +126,7 @@ print(wrap(2**31, 32))       # -2147483648</code></pre>
 <tr><td><code>a &gt;&gt; k</code></td><td>shift right by k (divide by 2<sup>k</sup>, rounding down)</td><td><code>00001100 &gt;&gt; 2 = 00000011</code></td></tr>
 </tbody>
 </table>
-<p>A <strong>mask</strong> picks out bits. To test bit <em>i</em>: <code>(x &gt;&gt; i) &amp; 1</code>. To set it: <code>x | (1 &lt;&lt; i)</code>. To clear it: <code>x &amp; ~(1 &lt;&lt; i)</code>. To flip it: <code>x ^ (1 &lt;&lt; i)</code>. Unix file permissions are a well-known example: <code>chmod 754</code> sets three 3-bit groups (read = 4, write = 2, execute = 1) for the owner, group and everyone else.</p>
+<p>A <strong>mask</strong> picks out bits. To test bit <em>i</em>: <code>(x &gt;&gt; i) &amp; 1</code>. To set it: <code>x | (1 &lt;&lt; i)</code>. To clear it: <code>x &amp; ~(1 &lt;&lt; i)</code>. To flip it: <code>x ^ (1 &lt;&lt; i)</code>. Unix file permissions are a well-known example: <code>chmod 754</code> sets three 3-bit groups (read = 4, write = 2, execute = 1) for the owner, group and everyone else. The number 754 is written in <strong>octal</strong> (base 8), not decimal: each octal digit, 0 to 7, is exactly three bits, so the digits are read one at a time. 7 = <code>111</code> gives the owner read, write and execute; 5 = <code>101</code> gives the group read and execute; 4 = <code>100</code> gives everyone else read only. (As a single number, octal 754 is 7 × 64 + 5 × 8 + 4 = 492 in decimal.)</p>
 <p>Two details differ between languages. Right-shifting a negative number in Python (and on nearly all C compilers) is an <strong>arithmetic shift</strong> that copies the sign bit in from the left, so <code>-8 &gt;&gt; 1</code> is −4; an unsigned right shift in C is a <strong>logical shift</strong> that brings in zeros. And because Python integers have no fixed width, <code>~x</code> is −<em>x</em> − 1: the infinite two's complement pattern with every bit flipped. Mask with <code>&amp; 0xFF</code> (or the right width) to see the bits you mean.</p>
 <p>Some useful tricks follow from the arithmetic. <code>x &amp; (x - 1)</code> clears the lowest 1 bit (subtracting 1 turns the lowest 1 into 0 and the 0s below it into 1s). So a positive <em>x</em> is a power of two exactly when <code>x &amp; (x - 1) == 0</code>, and repeating the trick until <em>x</em> is 0 counts the 1 bits.</p>
 
@@ -214,7 +215,7 @@ print(float32_bits(0.1))     # 3dcccccd</code></pre>
 <h3>Special values</h3>
 <p>The smallest and largest exponent fields are reserved:</p>
 <ul>
-<li><strong>Exponent all zeros: zero and subnormal numbers.</strong> With fraction 0, the value is ±0 (yes, there are two zeros; they compare equal). With a nonzero fraction, the number is <em>subnormal</em>: 0.<em>f</em> × 2<sup>−126</sup> in single precision, with no hidden 1. Subnormals fill the gap between 0 and the smallest normal number, so that <em>x</em> − <em>y</em> is zero only when <em>x</em> = <em>y</em>. A result too small even for a subnormal (below about 1.4 × 10<sup>−45</sup> in single precision, or 4.9 × 10<sup>−324</sup> in double) rounds to 0. This loss of tiny results, first to subnormals with fewer digits and then to 0, is called <strong>underflow</strong>. In Python, <code>1e-200 * 1e-200</code> is <code>0.0</code>. Multiplying many small numbers, such as hundreds of probabilities, underflows in the same way, which is why such programs add logarithms instead of multiplying.</li>
+<li><strong>Exponent all zeros: zero and subnormal numbers.</strong> With fraction 0, the value is ±0 (yes, there are two zeros; they compare equal). With a nonzero fraction, the number is <em>subnormal</em>: 0.<em>f</em> × 2<sup>−126</sup> in single precision, with no hidden 1. The bias rule would suggest 2<sup>0 − 127</sup> = 2<sup>−127</sup>, but the standard deliberately uses −126, the same exponent as the smallest normal numbers (exponent field 1, values 1.<em>f</em> × 2<sup>−126</sup>). That way the largest subnormal, 0.111…1 × 2<sup>−126</sup>, sits just one step below the smallest normal number, 1.000…0 × 2<sup>−126</sup>, and the numbers stay evenly spaced across the boundary. With 2<sup>−127</sup>, the subnormals would stop at 2<sup>−127</sup>, leaving a gap up to 2<sup>−126</sup>. (Double precision likewise uses 2<sup>−1022</sup>.) Subnormals fill the gap between 0 and the smallest normal number, so that <em>x</em> − <em>y</em> is zero only when <em>x</em> = <em>y</em>. A result too small even for a subnormal (below about 1.4 × 10<sup>−45</sup> in single precision, or 4.9 × 10<sup>−324</sup> in double) rounds to 0. This loss of tiny results, first to subnormals with fewer digits and then to 0, is called <strong>underflow</strong>. In Python, <code>1e-200 * 1e-200</code> is <code>0.0</code>. Multiplying many small numbers, such as hundreds of probabilities, underflows in the same way, which is why such programs add logarithms instead of multiplying.</li>
 <li><strong>Exponent all ones: infinity and NaN.</strong> With fraction 0, the value is ±∞, produced by overflow (<code>1e308 * 10</code> in Python is <code>inf</code>) and in C by dividing a nonzero number by zero. With a nonzero fraction, it is <strong>NaN</strong> ("not a number"), the result of meaningless operations like ∞ − ∞ or 0/0 in C. NaN is not equal to anything, including itself: <code>x != x</code> is the classic test for NaN.</li>
 </ul>
 <pre><code>inf = float("inf")
@@ -317,6 +318,7 @@ int main(void) {
 <li>The <code>for</code> loop has three parts: start (<code>int i = 1</code>), condition (<code>i &lt;= 3</code>), and step (<code>i++</code>, which adds 1).</li>
 <li><code>printf</code> prints using a format string: <code>%d</code> for an <code>int</code>, <code>%f</code> for a <code>double</code>, <code>%s</code> for a string, <code>%c</code> for a character. Unlike Python's <code>print</code>, it adds no newline unless you write <code>\\n</code>. A number between <code>%</code> and <code>f</code> sets the decimal places: <code>printf("%.1f", 2.0 / 3)</code> prints <code>0.7</code>, and <code>%.2f</code> would print <code>0.67</code>, rounding the last digit. (Plain <code>%f</code> prints six decimal places: <code>0.666667</code>.) Other types have their own codes: <code>%u</code> for an <code>unsigned int</code>, <code>%ld</code> for a <code>long</code>, and <code>%zu</code> for a <code>size_t</code> (below).</li>
 <li>Execution starts at <code>main</code>. Its return value goes to the operating system: 0 means success.</li>
+<li><code>void</code> means "nothing". Inside the parentheses, <code>int main(void)</code> says that <code>main</code> takes no parameters. As a return type, as in <code>void swap(int *a, int *b)</code> in Lesson 4, it says the function returns no value, like a Python function with no <code>return</code>; such a function ends with a bare <code>return;</code> or by reaching its closing brace.</li>
 </ul>
 
 <h3>Compiling</h3>
@@ -380,7 +382,8 @@ int main(void) {
 
 <h3>Strings</h3>
 <p>C has no string type. A string is an array of <code>char</code> ending in a <strong>null terminator</strong>, the byte 0, written <code>'\\0'</code>. "Grace" needs 6 bytes: five letters and the terminator. Functions like <code>printf("%s")</code> and <code>strlen</code> walk through memory until they find the 0 byte, so <code>strlen</code> costs Θ(<em>n</em>), not Θ(1). If the terminator is missing, they keep reading past the end of the array.</p>
-<p>Copying a string into an array that's too small is the most famous C bug. The old function <code>strcpy(dest, src)</code> copies until it reaches <code>src</code>'s terminator, however small <code>dest</code> is. Safer code checks sizes, for example with <code>snprintf(dest, sizeof dest, "%s", src)</code>, which never writes more than the size it's given.</p>
+<p>Copying a string into an array that's too small is the most famous C bug. The old function <code>strcpy(dest, src)</code> copies until it reaches <code>src</code>'s terminator, however small <code>dest</code> is. Safer code checks sizes, for example with <code>snprintf(dest, sizeof dest, "%s", src)</code>, which never writes more than the size it's given. (<code>sizeof dest</code> is the same as <code>sizeof(dest)</code>: when <code>sizeof</code> is applied to a variable, the parentheses may be left out. They are required around a type name, as in <code>sizeof(int)</code>. Here <code>dest</code> must be an array declared in the same function, so that its size is known. An array parameter, like <code>xs</code> in <code>sum</code> above, is only an address, and <code>sizeof</code> would give the size of the address.)</p>
+<p>The terminator also needs room when you initialize an array. <code>char name[6] = "Grace"</code> fits all 6 bytes, and <code>char name[] = "Grace"</code> lets the compiler count them. A string one character longer than the array, as in <code>char word[5] = "hello"</code>, is a special case: C allows it and silently leaves out the terminator, so <code>word</code> holds five letters and no 0 byte. GCC 13 compiles it without even a warning under <code>-Wall -Wextra</code>. Printing it with <code>%s</code> then reads past the end of the array. (A string with more letters than the array has bytes, such as <code>char w[4] = "hello"</code>, breaks a rule of the language, and GCC warns that the initializer is too long.)</p>
 
 <h3>No exceptions</h3>
 <p>C has no exceptions. Functions signal errors through their return value: <code>-1</code>, <code>NULL</code> (Lesson 4), or a special code, often with details in a global variable called <code>errno</code>. Every call that can fail must be checked by the caller. Forgetting to check is a common source of bugs, and part of why newer systems languages such as Rust and Go make errors harder to ignore.</p>
@@ -662,7 +665,7 @@ done:   halt</code></pre>
 <p>A simulator for this machine is a short Python program: find the labels, then fetch, decode and execute in a loop, exactly the cycle above. Writing it is this lesson's first programming problem, <em>Simulating the teaching machine</em>. Simulators like this are how processor designers test a new ISA before any hardware exists.</p>
 
 <h3>Why read assembly?</h3>
-<p>You will rarely write assembly. But reading it lets you see what the compiler really did: whether a loop was vectorized, why a "harmless" change slowed a program down, what a crash in a library without source code was doing. Security work depends on it: malware analysis and finding vulnerabilities start from machine code. The online tool Compiler Explorer (godbolt.org) shows the assembly for C, C++, Rust and many other languages side by side with the source, and is a good place to experiment.</p>
+<p>You will rarely write assembly. But reading it lets you see what the compiler really did: whether a loop was <em>vectorized</em> (rewritten to use instructions that each work on several numbers at once, for example adding four pairs of <code>int</code>s in one step), why a "harmless" change slowed a program down, what a crash in a library without source code was doing. Security work depends on it: malware analysis and finding vulnerabilities start from machine code. The online tool Compiler Explorer (godbolt.org) shows the assembly for C, C++, Rust and many other languages side by side with the source, and is a good place to experiment.</p>
 `,
       terms: [
         ["Instruction set architecture", "The menu of machine instructions a processor family understands, such as x86-64 or ARM."],
@@ -875,19 +878,39 @@ done:   halt</code></pre><p>Compare GCC's <code>max2</code>, which uses a "condi
 <h3>Loop order matters</h3>
 <p>The example in this section uses three pieces of C not yet shown. <code>#define N 4096</code> gives the constant 4096 a name: before compiling, every <code>N</code> in the file is replaced by 4096 (Lesson 8 shows the stage that does this). <code>int grid[N][N]</code> is a <strong>two-dimensional array</strong>, N rows of N <code>int</code>s, stored as one block, and <code>grid[r][c]</code> is the item in row <em>r</em> and column <em>c</em>. Because <code>grid</code> is declared outside any function, it is a global variable: it lives in the fixed region for globals (Lesson 4) instead of on the stack, which at 8 MB (Lesson 6) is far too small for 64 MB. The word <code>static</code> in front of it keeps the name private to this file, so other files linked with it (Lesson 8) can't see it.</p>
 <p>C stores a two-dimensional array <strong>row by row</strong> ("row-major" order): <code>grid[r][c]</code> and <code>grid[r][c + 1]</code> are neighbors in memory, while <code>grid[r + 1][c]</code> is a whole row away. Summing the same array in two orders:</p>
-<pre data-label="C"><code>#define N 4096
+<pre data-label="C"><code>#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+
+#define N 4096
 static int grid[N][N];              /* 4096 x 4096 ints = 64 MB */
 
-/* (the program first fills grid, so the memory is really in use) */
-for (int r = 0; r &lt; N; r++)         /* row by row: neighbors in memory */
-    for (int c = 0; c &lt; N; c++)
-        total += grid[r][c];
+int main(void) {
+    for (int r = 0; r &lt; N; r++)     /* fill grid, so the memory is really in use */
+        for (int c = 0; c &lt; N; c++)
+            grid[r][c] = r + c;
 
-for (int c = 0; c &lt; N; c++)         /* column by column: 16 KB jumps */
-    for (int r = 0; r &lt; N; r++)
-        total += grid[r][c];</code></pre>
-<pre data-label="Output"><code>rows 0.015 s, columns 0.154 s</code></pre>
-<p>Both loops add the same 16 million numbers; the column-by-column loop was about 10 times slower on the test machine. The row loop uses all 16 <code>int</code>s of each cache line it fetches. The column loop jumps 16 KB at each step, uses one <code>int</code> per line, and by the time it comes back for the line's next <code>int</code>, the line has long been evicted.</p>
+    long total = 0;
+    clock_t start = clock();
+    for (int r = 0; r &lt; N; r++)     /* row by row: neighbors in memory */
+        for (int c = 0; c &lt; N; c++)
+            total += grid[r][c];
+    double rows = (double)(clock() - start) / CLOCKS_PER_SEC;
+
+    start = clock();
+    for (int c = 0; c &lt; N; c++)     /* column by column: 16 KB jumps */
+        for (int r = 0; r &lt; N; r++)
+            total += grid[r][c];
+    double cols = (double)(clock() - start) / CLOCKS_PER_SEC;
+
+    printf("total %ld\\n", total);
+    printf("rows %.3f s, columns %.3f s\\n", rows, cols);
+    return 0;
+}</code></pre>
+<pre data-label="Output"><code>total 137405399040
+rows 0.013 s, columns 0.152 s</code></pre>
+<p>To time part of a program, <code>clock()</code> from <code>&lt;time.h&gt;</code> returns the processor time the program has used so far, as a <code>clock_t</code> count of ticks. As with Python's <code>time.perf_counter()</code> (CS 102 Lesson 5), one reading means nothing, but the difference between two readings is the time in between, and dividing by the constant <code>CLOCKS_PER_SEC</code> turns ticks into seconds. The <code>(double)</code> in front converts the tick count to a <code>double</code> first, so the division isn't integer division. To time a whole program instead, put the shell command <code>time</code> in front of it: <code>time ./grid</code> runs the program and then prints how long it took (<code>real</code> is the time on a wall clock).</p>
+<p>The fill loop matters because of how the operating system hands out memory. A global array starts as all zeros, and until the program writes to it, the operating system doesn't give it real memory of its own: every page of it is mapped to one shared page of zeros (Operating Systems explains this). Summing an unwritten array would keep reading that same small page, which stays in the cache, and both orders would look fast. Writing every element first makes the 64 MB really exist in memory. The program prints <code>total</code> so that the compiler can't decide the sums are unused and delete the loops.</p>
+<p>Compile it with <code>gcc -Wall -O1 -o grid grid.c</code> and run <code>./grid</code>. Both loops add the same 16 million numbers; the column-by-column loop was about 10 times slower on the test machine. The row loop uses all 16 <code>int</code>s of each cache line it fetches. The column loop jumps 16 KB at each step, uses one <code>int</code> per line, and by the time it comes back for the line's next <code>int</code>, the line has long been evicted.</p>
 <p>The lesson generalizes. In matrix multiplication, reordering the three nested loops so the innermost loop walks along rows can make it several times faster with identical arithmetic. Libraries go further, splitting matrices into small blocks that fit in the cache ("blocking" or "tiling"). This is also why Python lists of lists are slow for numerical work: each row is a separate object, and each number is itself a separate object reached by a pointer, scattered through memory. NumPy arrays store numbers contiguously, like C arrays.</p>
 `,
       terms: [
@@ -917,8 +940,9 @@ for (int c = 0; c &lt; N; c++)         /* column by column: 16 KB jumps */
           a: `<p>32,768 / 64 = 512 lines; 512 / 8 = 64 sets; log₂ 64 = 6 index bits (with 6 offset bits, the tag is the rest of the address).</p>`
         },
         {
-          q: `<p>Compile the row-versus-column program (filling the array first) with <code>gcc -O1</code> on your own computer and time it. Then change <code>N</code> to 256. What happens to the ratio, and why?</p>`,
-          a: `<p>At N = 4096 the column order is typically 5–15 times slower. At N = 256 the array is 256 KB, small enough to fit in the L2 cache, so after the first pass most accesses hit in some cache whichever order is used, and the two times become close. Locality matters most when the data is larger than the cache.</p>`
+          q: `<p>Save the row-versus-column program from the notes as <code>grid.c</code>, compile it with <code>gcc -Wall -O1 -o grid grid.c</code> on your own computer and run it. Then change <code>N</code> to 256. What happens to the ratio, and why?</p>`,
+          hint: `<p>At N = 256 each sum takes well under a millisecond, too short for <code>clock()</code> to measure, so the program may print 0.000 for both. Put each pair of summing loops inside <code>for (int rep = 0; rep &lt; 256; rep++)</code> so each order sums the array 256 times.</p>`,
+          a: `<p>At N = 4096 the column order is typically 5–15 times slower (about 10 on the test machine). At N = 256 the array is 256 KB, small enough to fit in the L2 cache, so after the first pass the column order's misses in L1 are served by L2, a few nanoseconds away, instead of by main memory. With each loop repeated 256 times, the test machine took 0.005 s by rows and 0.016 s by columns: the ratio fell from about 10 to about 3. Locality matters most when the data is larger than the cache.</p>`
         },
         {
           q: `<p>For the matrix product C = AB of n × n arrays in C, the obvious loop order is <code>i, j, k</code> with <code>C[i][j] += A[i][k] * B[k][j]</code>. Which array is accessed with poor locality in the innermost loop? Suggest a reordering that fixes it.</p>`,
@@ -955,7 +979,30 @@ for (int c = 0; c &lt; N; c++)         /* column by column: 16 KB jumps */
 <li><strong>undefined reference to 'foo'</strong>: something uses <code>foo</code> but no file or library defines it (you forgot a file, a library, or misspelled a name).</li>
 <li><strong>multiple definition of 'foo'</strong>: two files define the same global name.</li>
 </ul>
-<p>A <strong>header file</strong> (<code>util.h</code>) contains only declarations, such as <code>int square(int x);</code>, so that every file using <code>square</code> knows its type; exactly one <code>.c</code> file contains the definition.</p>
+<p>A <strong>header file</strong> (<code>util.h</code>) contains only declarations, such as <code>int square(int x);</code>, so that every file using <code>square</code> knows its type; exactly one <code>.c</code> file contains the definition. Your own header is included with quotation marks instead of angle brackets:</p>
+<pre data-label="C"><code>/* util.h */
+int square(int x);
+
+/* util.c */
+#include "util.h"
+
+int square(int x) {
+    return x * x;
+}
+
+/* prog.c */
+#include &lt;stdio.h&gt;
+#include "util.h"
+
+int main(void) {
+    printf("%d\\n", square(7));      /* 49 */
+    return 0;
+}</code></pre>
+<pre data-label="Shell"><code>gcc -Wall -c prog.c          # makes prog.o
+gcc -Wall -c util.c          # makes util.o
+gcc prog.o util.o -o prog    # links them
+./prog</code></pre>
+<p><code>#include "util.h"</code> looks first in the folder of the file being compiled, then in the system's folders. <code>#include &lt;util.h&gt;</code> looks only in the system's folders, where the standard headers such as <code>stdio.h</code> live, so it fails with <code>fatal error: util.h: No such file or directory</code>. <code>util.c</code> includes its own header too, so the compiler checks that the declaration matches the definition.</p>
 
 <h3>Libraries</h3>
 <p>A <strong>library</strong> is a bundle of object files. A <em>static</em> library (<code>libm.a</code>) is copied into the executable at link time. A <em>shared</em> (dynamic) library (<code>libc.so</code> on Linux, <code>.dylib</code> on macOS, <code>.dll</code> on Windows) is linked when the program starts, and one copy in memory is shared by every program using it. A security fix to a shared library helps every program at once; the cost is that a program can break if the library it finds at run time differs from the one it was built with. <code>ldd prog</code> lists the shared libraries a Linux program needs.</p>
@@ -995,7 +1042,7 @@ parent: child 4218 exited with 0</code></pre>
 <p>This is exactly what a shell does for every command you type: fork, exec the command in the child, wait. The <code>fflush</code> line is a lesson in itself: <code>printf</code> collects output in a buffer in the process's memory, and <code>exec</code> replaces that memory, so anything not yet written out would be lost.</p>
 
 <h3>System calls</h3>
-<p>A process can't touch hardware or other processes directly. To read a file, print, allocate more memory, or create a process, it asks the operating system's <strong>kernel</strong> through a <strong>system call</strong>: a special instruction that switches the processor into a privileged mode and runs kernel code on the process's behalf. <code>fork</code>, <code>execve</code>, <code>read</code>, <code>write</code> and <code>open</code> are system calls; library functions like <code>printf</code> and <code>malloc</code> are ordinary code that makes system calls when it needs to.</p>
+<p>A process can't touch hardware or other processes directly. To read a file, print, allocate more memory, or create a process, it asks the operating system's <strong>kernel</strong> through a <strong>system call</strong>: a special instruction that switches the processor into a privileged mode and runs kernel code on the process's behalf. <code>fork</code>, <code>execve</code>, <code>read</code>, <code>write</code> and <code>open</code> are system calls; library functions like <code>printf</code> and <code>malloc</code> are ordinary code that makes system calls when it needs to. "Exec" is the name of a whole family. Only <code>execve(path, argv, envp)</code> is a system call: it takes the program's full path, an array of argument strings and an array of environment settings. The others, such as the <code>execlp</code> used above, are functions in the C library that do the convenient parts in ordinary code, such as collecting the arguments from a list or searching the command folders, and then call <code>execve</code>.</p>
 <p>Open files are identified by small integers called <strong>file descriptors</strong>. Every process starts with three: 0 is standard input, 1 standard output, 2 standard error. When a shell runs <code>sort &lt; in.txt &gt; out.txt</code>, it opens the files in the child before exec, arranging for descriptor 0 to be <code>in.txt</code> and 1 to be <code>out.txt</code>; <code>sort</code> just reads 0 and writes 1, never knowing. A pipe (<code>ls | sort</code>, from CS 101's sidebar on Unix) connects one process's descriptor 1 to another's descriptor 0.</p>
 <pre data-label="C"><code>#include &lt;unistd.h&gt;
 

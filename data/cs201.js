@@ -414,7 +414,7 @@ print(m.get("bee"), m._size)   # 3 3</code></pre>
 
 <h3>Open addressing</h3>
 <p>In <strong>open addressing</strong>, every key lives directly in the slot array; there are no chains. On a collision, the table <em>probes</em> other slots in a fixed order until it finds a free one. The simplest order is <strong>linear probing</strong>: try slot <em>h</em>, then <em>h</em> + 1, <em>h</em> + 2, … (wrapping around at the end). A lookup follows the same sequence until it finds the key or an empty slot.</p>
-<p>Linear probing is fast in practice because the probes touch neighboring memory, which modern computers read quickly (CS 210 Lesson 7 explains why). Its weakness is <strong>clustering</strong>: occupied slots form runs, and any key that hashes into a run must walk to its end, making the run longer still. Open addressing also needs α &lt; 1 (the table can't hold more keys than slots), and gets slow as α approaches 1: under a uniform-hashing idealization, an unsuccessful search takes about 1/(1 − α) probes, which is 2 probes at α = 0.5 and 10 at α = 0.9. So open-addressing tables resize at a load factor well below 1.</p>
+<p>Linear probing is fast in practice because the probes touch neighboring memory, which modern computers read quickly (CS 210 Lesson 7 explains why). Its weakness is <strong>clustering</strong>: occupied slots form runs, and any key that hashes into a run must walk to its end, making the run longer still. Open addressing also needs α &lt; 1 (the table can't hold more keys than slots), and gets slow as α approaches 1. To see how slow, use an idealization stronger than simple uniform hashing, which said only where a key's <em>first</em> slot lands. <em>Uniform hashing</em> pretends that each key's whole probe sequence is a random order of all the slots. Then each probe of an unsuccessful search finds an occupied slot with probability about α and an empty one (which ends the search) with probability about 1 − α, independently of the earlier probes. The number of probes is then a geometric random variable with success probability 1 − α, whose mean is 1/(1 − α) (MATH 121 Lesson 7). That is 2 probes at α = 0.5 and 10 at α = 0.9. (Linear probing does worse than this idealization, because of clustering.) So open-addressing tables resize at a load factor well below 1.</p>
 <p>Deleting is subtle. If we simply empty a slot, a later lookup that probes through it will stop early and miss keys stored beyond it. The usual fix is to leave a <strong>tombstone</strong>, a marker meaning "deleted, keep probing", which inserts may reuse.</p>
 <p>CPython's <code>dict</code> uses open addressing with a probing sequence that mixes in more of the hash's bits than linear probing does, and resizes when it is two-thirds full. Since Python 3.6 it also stores entries in a separate compact array in insertion order, which is why dicts remember insertion order (CS 101's sidebar).</p>
 
@@ -495,8 +495,9 @@ print(m.get("bee"), m._size)   # 3 3</code></pre>
 <li>search, insert and delete;</li>
 <li>the minimum and maximum key;</li>
 <li>the <strong>successor</strong> of a key (the next larger one) and its predecessor;</li>
-<li>counting or listing the keys in a range [<em>a</em>, <em>b</em>] (listing costs an extra Θ(<em>k</em>) for <em>k</em> results).</li>
+<li>finding where a range [<em>a</em>, <em>b</em>] of keys starts and ends.</li>
 </ul>
+<p>Listing the <em>k</em> keys in a range then costs O(log <em>n</em> + <em>k</em>): two root-to-leaf paths to find the ends, plus the keys themselves. Counting them the same way, by visiting each one, also costs O(log <em>n</em> + <em>k</em>), and that is what this lesson's practice and programming problem do. Counting in O(log <em>n</em>) alone needs a <strong>size-augmented</strong> tree: each node also stores the number of nodes in its subtree, updated on every insertion, deletion and rotation (still O(log <em>n</em>) each). Then, walking down toward <em>a</em>, every time the path goes left at a node with key ≥ <em>a</em>, that node and its whole right subtree are ≥ <em>a</em>, and their count is read off in one step. That gives the number of keys ≥ <em>a</em>; do the same for keys &gt; <em>b</em> and subtract.</p>
 <p>An in-order traversal lists all keys in sorted order in Θ(<em>n</em>). A hash table can do none of these efficiently.</p>
 
 <h3>Rotations</h3>
@@ -640,7 +641,7 @@ print(xs)                           # [10, 20, 25, 30, 40]</code></pre>
         return count_in_range(node.right, lo, hi)
     if node.key &gt; hi:
         return count_in_range(node.left, lo, hi)
-    return 1 + count_in_range(node.left, lo, hi) + count_in_range(node.right, lo, hi)</code></pre><p>It visits the nodes in range, plus at most two root-to-leaf paths along the boundaries: O(log <em>n</em> + <em>m</em>). (Storing each subtree's size in its node allows counting in O(log <em>n</em>) without visiting the <em>m</em> nodes.)</p>`
+    return 1 + count_in_range(node.left, lo, hi) + count_in_range(node.right, lo, hi)</code></pre><p>It visits the nodes in range, plus at most two root-to-leaf paths along the boundaries: O(log <em>n</em> + <em>m</em>). (A size-augmented tree, described in the notes, counts in O(log <em>n</em>) without visiting the <em>m</em> nodes.)</p>`
         },
         {
           q: `<p>Show that a rotation preserves the BST property by listing the in-order traversal of both trees in the figure. Then explain why <code>rotate_right</code> must update <em>y</em>'s height before <em>x</em>'s.</p>`,
@@ -834,7 +835,7 @@ def merge_sorted(lists):
     return a
 
 print(insertion_sort([5, 2, 4, 6, 1, 3]))   # [1, 2, 3, 4, 5, 6]</code></pre>
-<p>Its worst case (reverse order) is Θ(<em>n</em>²). But its cost is really Θ(<em>n</em> + <em>I</em>), where <em>I</em> is the number of <strong>inversions</strong>: pairs that are out of order. On a nearly sorted list it is close to linear, and on tiny lists its simplicity beats every clever algorithm. That's why real libraries switch to insertion sort for small pieces.</p>
+<p>Its worst case (reverse order) is Θ(<em>n</em>²). But its cost is really Θ(<em>n</em> + <em>I</em>), where <em>I</em> is the number of <strong>inversions</strong>: pairs of positions <em>i</em> &lt; <em>j</em> whose items are out of order, <em>a</em>[<em>i</em>] &gt; <em>a</em>[<em>j</em>]. Here is why. Each shift moves a larger item one place right, past <code>x</code>, so it swaps two neighbors that were out of order. Swapping two neighbors changes the relative order of that one pair and of no other pair, so each shift removes exactly one inversion. The list ends sorted, with no inversions, so insertion sort makes exactly <em>I</em> shifts in total, plus Θ(<em>n</em>) work for the outer loop. On a nearly sorted list it is close to linear, and on tiny lists its simplicity beats every clever algorithm. That's why real libraries switch to insertion sort for small pieces.</p>
 
 <h3>Quicksort</h3>
 <p>Quicksort, invented by Tony Hoare around 1960, is merge sort's opposite. Merge sort splits trivially and does its work combining; quicksort does its work splitting and combines trivially. To sort a list: pick an item, the <strong>pivot</strong>; <strong>partition</strong> the list into items less than the pivot, then the pivot, then items greater than or equal to it; sort the two parts recursively. No merging is needed: everything in the left part already belongs before everything in the right.</p>
@@ -904,11 +905,34 @@ print(by_grade)   # [('Al', 'A'), ('Di', 'A'), ('Bo', 'B'), ('Cy', 'B')]</code><
     return out
 
 print(counting_sort([3, 1, 4, 1, 5, 2, 0], 6))   # [0, 1, 1, 2, 3, 4, 5]</code></pre>
-<p>(This version sorts bare numbers. A stable version, which can sort records by a numeric key, turns the counts into starting positions and places each record in turn.)</p>
+<p>This version sorts bare numbers. To sort <em>records</em> by a number computed from each one (its <em>key</em>), and keep records with equal keys in their original order, turn the counts into starting positions. If 2 records have key 0 and 3 have key 1, the key-0 records go in positions 0 and 1 and the key-1 records start at position 2. Then go through the records in their original order and put each one at the next free position for its key:</p>
+<pre><code>def counting_sort_by(records, key, k):    # key(r) is a whole number from 0 to k - 1
+    counts = [0] * k
+    for r in records:
+        counts[key(r)] += 1
+    starts = [0] * k             # starts[v]: where the next record with key v goes
+    total = 0
+    for v in range(k):
+        starts[v] = total
+        total += counts[v]
+    out = [None] * len(records)
+    for r in records:            # in the original order: this makes it stable
+        v = key(r)
+        out[starts[v]] = r
+        starts[v] += 1
+    return out
+
+def code_number(code):           # "AA" -&gt; 0, "AB" -&gt; 1, ..., "ZZ" -&gt; 675
+    return (ord(code[0]) - ord("A")) * 26 + (ord(code[1]) - ord("A"))
+
+people = [("Ann", "FR"), ("Bo", "DE"), ("Cy", "FR"), ("Di", "AT"), ("Ed", "DE")]
+print(counting_sort_by(people, lambda p: code_number(p[1]), 676))
+# [('Di', 'AT'), ('Bo', 'DE'), ('Ed', 'DE'), ('Ann', 'FR'), ('Cy', 'FR')]</code></pre>
+<p>Two records with the same key are placed in the order the last loop meets them, which is their original order, so the sort is stable. Each loop is Θ(<em>n</em>) or Θ(<em>k</em>), so the total is Θ(<em>n</em> + <em>k</em>). The function <code>code_number</code> turns a two-letter code into a key: <code>ord</code> (CS 101) gives a letter's character number, so <code>ord(c) - ord("A")</code> is the letter's place in the alphabet, 0 to 25. A two-letter code is then a two-digit number in base 26: the first letter times 26 plus the second, from 0 for "AA" to 25 × 26 + 25 = 675 for "ZZ". "FR" is 5 × 26 + 17 = 147.</p>
 <p><strong>Radix sort</strong> extends this to larger keys by sorting digit by digit, starting from the <em>least</em> significant digit, using a stable counting sort for each digit. Stability is what makes it work: after sorting by the tens digit, numbers with the same tens digit stay in the order the ones-digit pass left them. With <em>d</em> digits in base <em>b</em>, it costs Θ(<em>d</em>(<em>n</em> + <em>b</em>)). Sorting a million 32-bit integers takes 4 passes in base 256. Radix sort was used on punched-card sorting machines in the early 1900s, decades before electronic computers.</p>
 
 <h3>What libraries actually use</h3>
-<p>Production sorts are hybrids. <strong>Timsort</strong>, written by Tim Peters for Python in 2002, is a stable merge sort that first finds runs that are already in order in the data and uses insertion sort to make short runs longer, then merges the runs cleverly. On random data it is a good O(<em>n</em> log <em>n</em>) sort; on the partly sorted data common in real programs it can approach Θ(<em>n</em>). Java adopted Timsort for sorting objects in Java 7, and uses a dual-pivot quicksort for arrays of primitive numbers, where stability can't be observed. C++'s <code>std::sort</code> is typically <em>introsort</em>: quicksort that switches to heapsort if the recursion gets too deep (guaranteeing O(<em>n</em> log <em>n</em>)), and to insertion sort for small pieces.</p>
+<p>Production sorts are hybrids. <strong>Timsort</strong>, written by Tim Peters for Python in 2002, is a stable merge sort that first finds runs that are already in order in the data and uses insertion sort to make short runs longer, then merges the runs cleverly. On random data it is a good O(<em>n</em> log <em>n</em>) sort; on the partly sorted data common in real programs it can approach Θ(<em>n</em>). Java adopted Timsort for sorting objects in Java 7, and uses a dual-pivot quicksort for arrays of <em>primitive</em> numbers. Java's primitive types, such as <code>int</code> and <code>double</code>, are bare values rather than objects with other fields. Two equal <code>int</code>s are identical in every way, so no program can tell whether a sort kept them in their original order: stability can't be observed, and the faster unstable sort is safe. C++'s <code>std::sort</code> is typically <em>introsort</em>: quicksort that switches to heapsort if the recursion gets too deep (guaranteeing O(<em>n</em> log <em>n</em>)), and to insertion sort for small pieces.</p>
 <table>
 <thead><tr><th>Algorithm</th><th>Worst case</th><th>Average</th><th>Extra memory</th><th>Stable</th></tr></thead>
 <tbody>
@@ -1144,7 +1168,7 @@ print(topological_order(prereqs))
 uf = UnionFind("ABCDEF")
 uf.union("A", "B"); uf.union("C", "D"); uf.union("B", "D")
 print(uf.find("A") == uf.find("C"), uf.find("E") == uf.find("A"))   # True False</code></pre>
-<p>With both improvements, a sequence of <em>m</em> operations on <em>n</em> items takes O(<em>m</em> α(<em>n</em>)) time, where α is the <strong>inverse Ackermann function</strong>. The Ackermann function, defined by Wilhelm Ackermann in 1928, grows faster than any tower of powers. In the version used for this bound, its values at <em>k</em> = 0, 1, 2, 3 are 2, 3, 7 and 2047, and its value at <em>k</em> = 4 is larger than 2<sup>2048</sup>, a number with more than 600 digits. Its inverse, α(<em>n</em>), is the smallest <em>k</em> whose value is at least <em>n</em>. So α grows so slowly that α(<em>n</em>) ≤ 4 for any <em>n</em> that could ever be stored in a computer. You don't need the definition itself: only the fact that α(<em>n</em>) is a very slowly growing function, at most 4 in practice. Robert Tarjan proved this bound in 1975, and later work showed it can't be improved. In practice, each operation is constant time. Union-find is the heart of Kruskal's minimum-spanning-tree algorithm, which you'll meet in Algorithms I.</p>
+<p>With both improvements, a sequence of <em>m</em> operations on <em>n</em> items takes O(<em>m</em> α(<em>n</em>)) time, where α is the <strong>inverse Ackermann function</strong>. (This α is a function of <em>n</em>, written α(<em>n</em>), and has nothing to do with Lesson 3's load factor α; the Greek alphabet is short, and both uses are standard.) The Ackermann function, defined by Wilhelm Ackermann in 1928, grows faster than any tower of powers. In the version used for this bound, its values at <em>k</em> = 0, 1, 2, 3 are 2, 3, 7 and 2047, and its value at <em>k</em> = 4 is larger than 2<sup>2048</sup>, a number with more than 600 digits. Its inverse, α(<em>n</em>), is the smallest <em>k</em> whose value is at least <em>n</em>. So α grows so slowly that α(<em>n</em>) ≤ 4 for any <em>n</em> that could ever be stored in a computer. You don't need the definition itself: only the fact that α(<em>n</em>) is a very slowly growing function, at most 4 in practice. Robert Tarjan proved this bound in 1975, and later work showed it can't be improved. In practice, each operation is constant time. Union-find is the heart of Kruskal's minimum-spanning-tree algorithm, which you'll meet in Algorithms I.</p>
 
 <h3>Tries</h3>
 <p>A <strong>trie</strong> (from "retrieval", usually pronounced "try") stores a set of strings as a tree of characters. Each edge is labeled with a character; each node represents the prefix spelled by the path from the root; and a node is marked if that prefix is itself a stored word.</p>
