@@ -233,7 +233,7 @@ G, P = block_gp(to_bits(11, 4), to_bits(6, 4))
 print(G, P)   # 1 0: the 4-bit block generates a carry out, so 11 + 6 carries
 G, P = block_gp(to_bits(9, 4), to_bits(6, 4))
 print(G, P)   # 0 1: 9 + 6 = 15 = 1111, so a carry in would pass straight through</code></pre>
-<p>(The function needs a power-of-two width.) The carries into the middle columns come from the same tree: the carry into a block is <em>G</em> + <em>Pc</em> of the blocks below it, and a second pass back down the tree delivers it to every column, also in Θ(log <em>n</em>) levels. So all carries take Θ(log <em>n</em>) gate levels: 6 levels of combining for 64 bits instead of 64 ripple stages. This is the divide-and-conquer idea from CS 220 Lesson 1, in hardware.</p>
+<p>(The function needs a power-of-two width.) The carries into the middle columns come from the same tree, in a second pass that runs from the root back down. Each node is told the carry <em>c</em> into its block (the root gets <em>c</em><sub>0</sub>). It passes <em>c</em> unchanged to its low half, and passes <em>G</em><sub>l</sub> + <em>P</em><sub>l</sub><em>c</em> to its high half, using the low half's pair saved from the first pass. Each node does one such step, the tree has log₂ <em>n</em> levels, and at the bottom every column has its carry in. So all carries take Θ(log <em>n</em>) gate levels: 6 levels of combining for 64 bits instead of 64 ripple stages. This is the divide-and-conquer idea from CS 220 Lesson 1, in hardware.</p>
 
 <h3>Subtraction</h3>
 <p>Two's complement (CS 210 Lesson 1) makes subtraction free: <em>a</em> − <em>b</em> = <em>a</em> + (−<em>b</em>) = <em>a</em> + <em>b</em>′ + 1. Invert every bit of <em>b</em> (an XOR with 1 on each bit does it) and set the adder's carry-in to 1. One adder, plus a row of XOR gates controlled by a "subtract" signal, does both operations. Overflow is detected the way CS 210 described: when the carry into the top column differs from the carry out of it.</p>
@@ -437,7 +437,7 @@ jal  ra, func        # jump to func, saving the return address in ra</code></pre
 </tbody>
 </table>
 <p>(rd is the destination register, rs1 and rs2 the source registers, and imm[11:0] means bits 11 to 0 of the immediate. imm[12, 10:5] means immediate bit 12 followed by bits 10 to 5, from the instruction's bit 31 down.) The registers always sit in the same bit positions in every format, so the processor can start reading registers before it has even finished decoding the instruction. That's why S-format splits its immediate into two pieces: to keep rs2 where R-format has it.</p>
-<p>The other three formats follow the same rule. <strong>B</strong> (branches) is S with its immediate bits shuffled. The immediate is the distance in bytes from the branch to its target; instructions sit at even addresses, so that distance is always even, its bit 0 is always 0 and isn't stored, and the 12 stored bits are bits 12 to 1 (targets up to 4,096 bytes away in either direction). <code>beq x5, x6, label</code> branches when x5 = x6. <strong>U</strong> holds a 20-bit constant for the upper bits of a register: <code>lui x5, 0x12345</code> ("load upper immediate") sets x5 = 0x12345000, and an <code>addi</code> can then fill in the low 12 bits. <strong>J</strong> is U with its bits shuffled, holding <code>jal</code>'s jump distance (again even: 20 stored bits, bits 20 to 1, so up to about a million bytes away). The shuffles look odd, but they keep each immediate bit in the same instruction bit across formats as often as possible, which saves wiring in the decoder.</p>
+<p>The other three formats follow the same rule. <strong>B</strong> (branches) is S with its immediate bits shuffled. The immediate is the distance in bytes from the branch to its target; instructions sit at even addresses, so that distance is always even, its bit 0 is always 0 and isn't stored, and the 12 stored bits are bits 12 to 1 (targets up to 4,096 bytes away in either direction). <code>beq x5, x6, label</code> branches when x5 = x6. <strong>U</strong> holds a 20-bit constant for the upper bits of a register: <code>lui x5, 0x12345</code> ("load upper immediate") sets x5 = 0x12345000, and an <code>addi</code> can then add in the low 12 bits. Like every RISC-V immediate, addi's 12-bit immediate is <strong>sign-extended</strong> first: its top bit (bit 11) is copied into all the higher bits, so it is read as a two's-complement number from −2048 to 2047. <strong>J</strong> is U with its bits shuffled, holding <code>jal</code>'s jump distance (again even: 20 stored bits, bits 20 to 1, so up to about a million bytes away). The shuffles look odd, but they keep each immediate bit in the same instruction bit across formats as often as possible, which saves wiring in the decoder.</p>
 <p>Two jumps matter for function calls. <code>jal rd, label</code> jumps to the label and saves the address of the next instruction (the return address) in rd. <code>jalr rd, imm(rs1)</code>, in I format, jumps to the address rs1 + imm, again saving the return address in rd. A call is <code>jal ra, func</code>; a return is <code>jalr x0, 0(ra)</code>, which jumps back to the saved address and throws away its own return address by writing it to x0.</p>
 <p><strong>Encoding <code>add x5, x6, x7</code>.</strong> R-format, opcode 0110011 (0x33), funct3 000, funct7 0000000 (sub differs only in funct7 = 0100000). rd = 5, rs1 = 6, rs2 = 7:</p>
 <pre data-label="Bits"><code>funct7   rs2   rs1   funct3 rd    opcode
@@ -630,8 +630,8 @@ print(x[10])   # 20</code></pre>
 print(run(prog)[0][10])   # 20</code></pre>`
         },
         {
-          q: `<p>Suppose a load takes 800 ps (200 fetch, 100 register read, 200 ALU, 200 memory, 100 write back), and adds don't use memory, so they need only 600 ps. In a program that is 25% loads, what fraction of the single-cycle processor's time is wasted?</p>`,
-          a: `<p>Every instruction gets 800 ps. Loads use all of it; the other 75% use only 600 ps (assuming they're like adds), wasting 200 ps each. Average waste 0.75 × 200 = 150 ps per instruction: 150/800 ≈ 19% of the time.</p>`
+          q: `<p>Suppose a load takes 800 ps (200 fetch, 100 register read, 200 ALU, 200 memory, 100 write back), and adds don't use memory, so they need only 600 ps. In a program that is 25% loads and 75% instructions that, like adds, need 600 ps, what fraction of the single-cycle processor's time is wasted?</p>`,
+          a: `<p>Every instruction gets 800 ps. Loads use all of it; the other 75% use only 600 ps, wasting 200 ps each. Average waste 0.75 × 200 = 150 ps per instruction: 150/800 ≈ 19% of the time.</p>`
         }
       ],
       sources: ["patthen", "hh", "riscvspec"]
@@ -676,7 +676,7 @@ add x7, x5, x8       # needs x5 at the start of its EX (cycle 4): one cycle shor
 <p>Structural hazards (two instructions needing the same hardware in the same cycle) are avoided by design: separate instruction and data memories (in practice, separate caches), and a register file written in the first half of a cycle and read in the second.</p>
 
 <h3>Beyond the basic pipeline</h3>
-<p>Modern processors go further: <strong>superscalar</strong> designs fetch and execute several instructions per cycle (CPI below 1), and <strong>out-of-order</strong> execution lets later independent instructions run while an earlier one waits for memory, then retires results in program order so the program can't tell. These techniques are why a modern core executes several instructions per cycle at billions of cycles per second.</p>
+<p>Modern processors go further: <strong>superscalar</strong> designs fetch and execute several instructions per cycle (CPI below 1), and <strong>out-of-order</strong> execution lets later independent instructions run while an earlier one waits for memory, then <strong>retires</strong> results in program order (makes each one final, writing it to the registers or memory the program sees, only after every earlier instruction has) so the program can't tell. These techniques are why a modern core executes several instructions per cycle at billions of cycles per second.</p>
 `,
       terms: [
         ["Pipelining", "Overlapping the execution of instructions by splitting it into stages, like an assembly line."],
@@ -836,7 +836,7 @@ for p in (0.5, 0.9, 0.99):
         ["Moore's law", "The observation that the number of transistors on a chip doubles about every two years."],
         ["Dennard scaling", "The historical trend that smaller transistors used proportionally less power, keeping power density constant; it ended around 2005."],
         ["Power wall", "The limit on clock speed set by the power and heat a chip can dissipate."],
-        ["Core", "A complete processor; multicore chips contain several on one die."],
+        ["Core", "A complete processor; multicore chips contain several on one die (the single piece of silicon a chip is built on)."],
         ["Amdahl's law", "Speedup = 1/((1 − p) + p/s) when a fraction p of the work is sped up by a factor s."],
         ["SIMD", "Single instruction, multiple data: one instruction operating on several values at once."],
         ["GPU", "A graphics processing unit: thousands of simple cores for massively data-parallel work."]

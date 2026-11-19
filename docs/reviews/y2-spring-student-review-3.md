@@ -79,3 +79,29 @@ I am a second-year student. Before this term I completed CS 100, WRIT 100, CS 10
 ### Across courses
 
 23. "Core: A complete processor; multicore chips contain several on one die" (CS 230 Lesson 8 key terms) and "the width of a typical 2 cm processor die" (PHYS 250 Lesson 6 P3). Neither course defines "die" as the piece of silicon a chip is made on. I had to guess it from context.
+
+## Professor's response
+
+1. Changed. CS 220 programming problem "master" (data/cs220-code.js) now says log<sup>q</sup> n means (log n)<sup>q</sup>.
+2. Changed. al2 Huffman proof: the merge step now says that splitting the merged leaf adds exactly the two frequencies' sum to the cost of any tree, the same amount for every tree, so an optimal tree for the merged problem gives an optimal one for the original; induction then covers the remaining merges.
+3. Changed. al6 clustering: added a short argument. The spacing equals the weight d* of the next edge Kruskal would add; any other k-grouping splits some Kruskal component, whose tree path (edges of weight at most d*) must cross between two of its groups, so its spacing is at most d*.
+4. Changed. al7: the cut paragraph now proves that a flow's value equals the net flow across any s-t cut (sum conservation over the vertices of S; internal edges cancel), and derives the inequality from it. The max-flow min-cut proof now uses this equality explicitly.
+5. Changed (statement was misleading). al8 now says to binary search over k, explains that about log2(sum of weights) questions are needed, which is polynomial in the input length, and contrasts it with trying every k (pseudo-polynomial, as for knapsack in Lesson 4).
+6. Changed. al8 heuristics list: simulated annealing is defined as local search that sometimes accepts a worse move, less often as it runs, to escape poor local optima.
+7. Changed. sat_solver prompt (data/cs220-code.js) defines a literal as a variable or its negation, one entry of a clause.
+8. Changed. ar2: the second pass is now spelled out: each node receives the carry c into its block, passes c to its low half and G_l + P_l c to its high half, one step per level, log2 n levels. (Checked with a Python simulation against ordinary addition on 2,000 random 16-bit inputs.)
+9. Changed. ar4: the U-format paragraph now says addi's 12-bit immediate, like every RISC-V immediate, is sign-extended (bit 11 copied upward, range −2048 to 2047). P4's question is unchanged and now answerable from the lesson.
+10. Changed. ar5 P3 now states that the other 75% of instructions, like adds, need 600 ps; the answer's "assuming" clause was removed.
+11. Changed. ar6: "retires" is defined in place (making a result final in the registers or memory the program sees, only after every earlier instruction has).
+12. Changed. se7: `-> User | None` is glossed as "returns a User or None", with a pointer to CS 102 Lesson 4, which introduced the `|` type form.
+13. Changed. lint problem (data/cs240-code.js): "display" is defined as a literal written with brackets or braces ([], [1, 2], {}, {1}); calls such as list() and comprehensions don't count, which matches the reference solution.
+14. Changed. se8: the sqlite3 sentence now shows sqlite3.connect and conn.cursor() and says what a cursor is and that each ? is filled from the tuple.
+15. Changed. se8: command injection now explains subprocess.run, the shell, and shows the dangerous call (a string with shell=True and name = "x; rm -rf ~") next to the safe list form.
+16. Changed. se8: environment variables (with os.environ["API_KEY"]) and secrets managers are defined in place.
+17. Changed. Equifax sidebar: a certificate is glossed as the signed file that lets a system take part in encrypted connections; once it expired the tool couldn't decrypt and inspect traffic.
+18. Changed. se8 P1 now says delays has at least attempts − 1 entries, delays[0] is the wait after the first failure, and the last failure re-raises its ConnectionError (as the sample solution does).
+19. Changed. em3: repeaters are defined as gates that drive a fresh copy of the signal onward, with the reason: k pieces give total delay proportional to k(L/k)² = L²/k.
+20. Changed. em5 LC circuit: the derivation now goes around the loop in the direction of I, adds the potential changes (−Q/C across the capacitor from top to bottom plate, −L dI/dt across the inductor), sets their sum to zero as Lesson 3's rule states, and gets Q/C = −L dI/dt. The sign check is kept.
+21. Changed. em5: ½LI² is now derived: power into the inductor is I·L dI/dt, and integrating from 0 to I gives ½LI².
+22. Changed. em6: where courant first appears as the time step, a parenthesis says that in these units it is also the fraction of a cell light crosses per step, called the Courant number, hence the name. The later paragraph on the Courant condition is unchanged.
+23. Changed. "Die" is defined in CS 230 Lesson 8's "Core" key term and in PHYS 250 Lesson 6 P3 as the piece of silicon a chip is built on (both courses are taken in parallel, so each defines it).
