@@ -55,3 +55,19 @@ I'm a second-year student. Before this term I took CS 100, WRIT 100, CS 101 and 
 ### Across courses
 
 11. The cross-references in CS 210 (items 5 to 7) name programming problems by titles that don't appear anywhere in my text. I only see ids such as "CODE c_division". Every time a lesson pointed to "the X problem", I had to search for a matching id. I found no other problems that span courses. Where a symbol is reused (α as the load factor in CS 201 Lesson 3, the inverse Ackermann function in CS 201 Lesson 8 and the significance level in MATH 230 Lesson 7), each use explains itself. The underflow limits in CS 210 Lesson 2 and MATH 230 Lesson 1 also agree.
+
+## Professor's response
+
+1. CS 201 ds1: before the best-case/worst-case example, added a two-sentence description of insertion sort (slide each item left past larger items) with a pointer to Lesson 6, and why a sorted list makes it Θ(n) and a reversed one Θ(n²).
+2. CS 201 ds3: the PYTHONHASHSEED note now defines an environment variable (a named text setting the shell passes to each program it starts), explains that `NAME=value command` sets it for that one command, and says that `python3 -c "..."` runs the quoted code instead of a file.
+3. CS 201 ds4: the +2 had no reason, so I removed it. The `avl_tree` tests now check h ≤ 1.44 log₂(n + 1) (2001 and 3001 in place of 2002 and 3002), and the lesson says the problem checks "the same bound rounded". The problem's heights count nodes, as the lesson's N(1) = 1 does. All tests still pass.
+4. CS 201 `running_median` hint: the second sentence now states the same rule as the first and the solution: "if that rule is broken (the lower half has two more items, or the upper half has more), move the top item of the bigger half across." Tests pass.
+5. Dump fix: `scripts/dump_course.js` now prints `CODE id "title": prompt`, so the student will see "C's integer division" as the title of `c_division`. Title check: the reference in sy3 P2 matches the title exactly. No change.
+6. Same dump fix. The `byte_memory` prompt's "C strings in a byte buffer" matches the title of `c_strings` exactly. No change.
+7. Same dump fix. sy5's "Simulating the teaching machine" matches the title of `teaching_machine` exactly. No change.
+8. MATH 220 la6: added a short proof. If AᵀA**x** = **0**, then multiplying by **x**ᵀ gives ‖A**x**‖² = 0, so A**x** = **0**, and independent columns force **x** = **0**. By Lesson 4's list of equivalent conditions, the square matrix AᵀA is therefore invertible.
+9. MATH 230 ps1 Q2 (blocking): replaced the choice "8 : 4" with "8 : 1", which comes from forgetting the prior. Only 2 : 1 is now correct.
+10. MATH 230 ps2: "Poisson process" is now in bold and defined where it first appears. It is a stream of events that arrive one at a time, independently, at a steady rate λ. It adds nothing to the Poisson distribution's assumptions: it applies them to every stretch of time, so the count in any interval of length t is Poisson(λt), and counts in non-overlapping intervals are independent. Lesson 3's back-reference is now correct.
+11. Fixed by the dump change described in item 5. I checked every place in the four Fall courses, both lesson files and code files, where a programming problem is named. There are three: `c_division`, `c_strings` and `teaching_machine`. All three match the titles exactly. Every other reference says "this lesson's programming problem" without a name.
+
+Checks: `node --check` passes on every edited file. `validate_content.js` reports "all good". `check_problems.py` finds 0 problems in 166. `check_lesson_code.py` reports no mismatches in cs201, cs210, math220 or math230. `test_dump_course.js` passes. No lesson's slow estimate is over 100 minutes; the highest among the edited ones is ds1 at 74.

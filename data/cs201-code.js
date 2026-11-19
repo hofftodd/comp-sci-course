@@ -281,13 +281,13 @@ CSA.addCode("cs201", {
      "label": "2,000 sorted keys stay balanced",
      "type": "assert",
      "limit": 8,
-     "code": "import math\nt = AVLTree()\nfor k in range(2000):\n    t.insert(k)\nassert t.inorder() == list(range(2000)), \"inorder() should list the keys in sorted order\"\nassert t.height() <= 1.44 * math.log2(2002), f\"height {t.height()} is too tall for 2,000 keys\"\n"
+     "code": "import math\nt = AVLTree()\nfor k in range(2000):\n    t.insert(k)\nassert t.inorder() == list(range(2000)), \"inorder() should list the keys in sorted order\"\nassert t.height() <= 1.44 * math.log2(2001), f\"height {t.height()} is too tall for 2,000 keys\"\n"
     },
     {
      "label": "Random keys",
      "type": "assert",
      "hidden": true,
-     "code": "import random, math\nrandom.seed(7)\nkeys = random.sample(range(100000), 3000)\nt = AVLTree()\nfor k in keys:\n    t.insert(k)\nassert t.inorder() == sorted(keys)\nassert t.height() <= 1.44 * math.log2(3002)\n"
+     "code": "import random, math\nrandom.seed(7)\nkeys = random.sample(range(100000), 3000)\nt = AVLTree()\nfor k in keys:\n    t.insert(k)\nassert t.inorder() == sorted(keys)\nassert t.height() <= 1.44 * math.log2(3001)\n"
     }
    ]
   },
@@ -365,7 +365,7 @@ CSA.addCode("cs201", {
    "title": "Running median",
    "prompt": "<p>Write <code>running_median(xs)</code> that returns a list whose <em>i</em>th item is the median of <code>xs[0]</code> to <code>xs[i]</code>. For an odd count the median is the middle value; for an even count it is the average of the two middle values (a float). For <code>[5, 2, 8, 1]</code> the result is <code>[5, 3.5, 5, 3.5]</code>.</p>\n<p>One test has 50,000 items, so sorting the prefix each time is too slow. Use two heaps (you may use <code>heapq</code>): a max-heap of the smaller half and a min-heap of the larger half.</p>",
    "starter": "def running_median(xs):\n    pass\n",
-   "hint": "<p>Keep the lower half in a max-heap (store negated values in a <code>heapq</code> list) and the upper half in a min-heap, with the lower half holding the same number of items or one more. Push each new value onto the correct side, then move one item across if the sizes are off by more than one. The median is the top of the lower half, or the average of both tops.</p>",
+   "hint": "<p>Keep the lower half in a max-heap (store negated values in a <code>heapq</code> list) and the upper half in a min-heap, with the lower half holding the same number of items or one more. Push each new value onto the correct side, then, if that rule is broken (the lower half has two more items, or the upper half has more), move the top item of the bigger half across. The median is the top of the lower half, or the average of both tops.</p>",
    "solution": "import heapq\n\ndef running_median(xs):\n    low, high, out = [], [], []           # low: max-heap via negation; high: min-heap\n    for x in xs:\n        if not low or x <= -low[0]:\n            heapq.heappush(low, -x)\n        else:\n            heapq.heappush(high, x)\n        if len(low) > len(high) + 1:\n            heapq.heappush(high, -heapq.heappop(low))\n        elif len(high) > len(low):\n            heapq.heappush(low, -heapq.heappop(high))\n        if len(low) > len(high):\n            out.append(-low[0])\n        else:\n            out.append((-low[0] + high[0]) / 2)\n    return out\n",
    "tests": [
     {

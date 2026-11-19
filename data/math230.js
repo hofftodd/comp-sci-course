@@ -124,7 +124,7 @@ print(round(spam_probability(["winner", "free"], 0.4, p_spam, p_ham), 3))   # 0.
       ],
       quiz: [
         { q: "A condition affects 1 in 1,000 people. A test catches every case and has a 1% false-positive rate. About what fraction of positive results are true?", choices: ["99%", "50%", "About 9%", "0.1%"], answer: 2, why: "Per 100,000 people: 100 true positives and about 999 false ones, so 100/1099 ≈ 9%." },
-        { q: "Prior odds are 1 : 4 and the evidence has likelihood ratio 8. What are the posterior odds?", choices: ["1 : 32", "2 : 1", "8 : 4", "1 : 2"], answer: 1, why: "1/4 × 8 = 2, that is 2 : 1." },
+        { q: "Prior odds are 1 : 4 and the evidence has likelihood ratio 8. What are the posterior odds?", choices: ["1 : 32", "2 : 1", "8 : 1", "1 : 2"], answer: 1, why: "1/4 × 8 = 2, that is 2 : 1." },
         { q: "What does a likelihood ratio of 0.5 mean?", choices: ["The hypothesis is 50% likely", "The evidence is twice as likely if the hypothesis is false: it's evidence against", "The evidence is irrelevant", "The prior halves"], answer: 1, why: "It multiplies the odds by 0.5." },
         { q: "What is \"naive\" about naive Bayes?", choices: ["It ignores the prior", "It assumes the features are independent given the class", "It uses only one word", "It never smooths counts"], answer: 1, why: "That assumption lets the likelihood ratios simply multiply." },
         { q: "Why do spam filters add log-likelihoods rather than multiply probabilities?", choices: ["Logarithms are more accurate mathematically", "Multiplying many small numbers underflows floating point", "Addition is required by Bayes' rule", "To make the result negative"], answer: 1, why: "A product of hundreds of probabilities can round to 0." }
@@ -211,7 +211,7 @@ def poisson_sample(lam):
 samples = [poisson_sample(3) for _ in range(100_000)]
 print(sum(s &gt;= 6 for s in samples) / len(samples))     # close to 0.084
 print(1 - sum(exp(-3) * 3**k / factorial(k) for k in range(6)))   # 0.0839...</code></pre>
-<p>(<code>random.expovariate(λ)</code> draws the waiting time until the next event of a Poisson process, an <em>exponential</em> random variable; Lesson 3 explains why adding up such waits and counting how many fit in one time unit gives a Poisson count.) A simulation of 100,000 trials typically agrees with the formula to two or three decimal places; Lesson 5 explains exactly how close to expect.</p>
+<p>(<code>random.expovariate(λ)</code> draws the waiting time until the next event of a <strong>Poisson process</strong>, an <em>exponential</em> random variable. A Poisson process is a stream of events in time that arrive one at a time, independently, at a steady average rate λ per unit time. It adds nothing to the Poisson distribution's assumptions; it applies them to every stretch of time at once, so the count in any interval of length <em>t</em> is Poisson(λ<em>t</em>), and counts in intervals that don't overlap are independent. Lesson 3 explains why adding up such waits and counting how many fit in one time unit gives a Poisson count.) A simulation of 100,000 trials typically agrees with the formula to two or three decimal places; Lesson 5 explains exactly how close to expect.</p>
 `,
       terms: [
         ["Probability mass function", "p(k) = P(X = k) for a discrete random variable; non-negative and summing to 1."],
