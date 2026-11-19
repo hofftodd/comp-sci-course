@@ -56,6 +56,6 @@ for (const u of [...c.units, ...c.optional]) {
   for (const a of u.asides || []) out += `\n[SIDEBAR ${a.kind}: ${a.title}] ` + txt(a.html);
   (u.quiz || []).forEach((q, i) => out += `\nQ${i + 1}. ${txt(q.q)} | ${q.choices.map(txt).join(" / ")} | ans: ${txt(q.choices[q.answer])}`);
   (u.practice || []).forEach((p, i) => out += `\nP${i + 1}. ${txt(p.q)}` + (p.hint ? `\n   Hint: ${txt(p.hint)}` : ""));
-  (u.code || []).forEach(p => out += `\nCODE ${p.id}: ${txt(p.prompt)}` + (p.hint ? `\n   Hint: ${txt(p.hint)}` : ""));
+  (u.code || []).forEach(p => out += `\nCODE ${p.id} "${p.title}": ${txt(p.prompt)}` + (p.hint ? `\n   Hint: ${txt(p.hint)}` : ""));
 }
 process.stdout.write(out + "\n");
