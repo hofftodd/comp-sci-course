@@ -59,3 +59,18 @@ I'm a second-year CS student. Before this term I took CS 100, WRIT 100, CS 101 a
 ### Across courses
 
 No problems spanning courses beyond those listed above. Each time a symbol is reused (α as load factor, inverse Ackermann function and significance level) or a convention changes (tree heights counted in nodes, union-find depth in edges), the lesson says so where it happens.
+
+## Professor's response
+
+1. **ds4, exact AVL bound.** Added a short derivation after the constant-c argument (data/cs201.js): adding 1 to the recurrence shows N(h) + 1 = F(h+2); induction with φ² = φ + 1 gives F(k) ≥ φ^(k−2); so n + 1 ≥ φ^h and h ≤ log₂(n + 1)/log₂ φ ≈ 1.4404 log₂(n + 1), with no constant. The notes now say the programming problem checks the rounder h ≤ 1.44 log₂(n + 2), and that rounding 1.4404 down to 1.44 matters only above height about 1,100 (more than 2^700 nodes). Checked numerically: minimal AVL trees first violate 1.44 log₂(n + 2) at height 1124.
+2. **ds6, insertion sort average case.** Added the argument: a reversed list has all n(n − 1)/2 pairs inverted; in a random order each pair is inverted in exactly half the orders (swapping the two items pairs them up), so the average is n(n − 1)/4 inversions and the average case is Θ(n²).
+3. **ds8, trie delete.** Added a paragraph after the Trie code: clear is_word at the word's last node (enough for correctness), and optionally walk back up removing nodes with no children that don't end another word, stopping at the first node still needed. Worked example with "cart" and "car" from the lesson's trie; cost Θ(L).
+4. **ds8, profiler.** Defined profiler where it appears and gave the command `python3 -m cProfile -s cumulative myprog.py`.
+5. **sy1, x & -x.** The bit_tricks hint (data/cs210-code.js) now explains it from the lesson's "invert and add 1": the carry runs through the low zeros and stops at the lowest set bit, so x and −x agree there and differ everywhere above. Example 12 & −12 = 4 (checked), and a note that Python's integers act as two's complement with the sign bit repeated forever to the left.
+6. **sy7, page.** Defined page where it first appears: a fixed-size block of memory, usually 4 KB (64 cache lines), that the operating system hands out.
+7. **sy7, doubled total.** The notes now say both loops add into the same total, so it is twice the grid's sum: 4096² × 4095 = 68,702,699,520, doubled to the printed 137,405,399,040. Compiled and ran the program with gcc -O1 to confirm the output.
+8. **sy8, linker and printf.** The prompt now states that libraries get no special treatment: a library is passed in the list as an ordinary object (example given with libc.so defining printf and malloc, as in the first test), and if no object defines printf it is an undefined reference. The tests are unchanged.
+9. **la1, Cauchy–Schwarz.** Replaced the parenthetical with the direct proof: expand 0 ≤ ‖u − tv‖², choose t = (u·v)/‖v‖², and conclude (u·v)² ≤ ‖u‖²‖v‖². The notes now say the |cos θ| argument is valid only in two dimensions and that the algebraic proof is what makes the n-dimensional angle well defined.
+10. **la4, "three times".** Added the count in the callout: Gauss–Jordan on [A | I] clears each pivot column in all n − 1 other rows, and about n entries change in each row (n − k uncleared on the left, about k filled on the right), so n × n × n × 2 ≈ 2n³, three times elimination's (2/3)n³.
+11. **la8, u_i as eigenvectors of AA^T.** Added the one-line derivation AA^T u_i = A(A^T A v_i)/σ_i = λ_i u_i, which gives the eigenvalues λ_i = σ_i².
+12. **ps7, "below".** Changed "The z-test below" to "The two-proportion z-test above", since its section comes earlier.
