@@ -335,7 +335,7 @@ print(min_coins([1, 5, 10, 25], 63))   # [1, 1, 1, 10, 25, 25]</code></pre>
 <p>A <strong>subsequence</strong> of a string keeps some of its characters in order, not necessarily adjacent: "ACE" is a subsequence of "ABCDE". The <strong>longest common subsequence</strong> (LCS) of two strings measures how similar they are. It's the core of the <code>diff</code> tool and of version control (which lines were kept between two versions of a file?), and of comparing DNA sequences.</p>
 <ol>
 <li>Subproblems: <em>L</em>[<em>i</em>][<em>j</em>] = the length of the LCS of the first <em>i</em> characters of <em>x</em> and the first <em>j</em> characters of <em>y</em>.</li>
-<li>Recurrence: look at the last characters. If <em>x</em>[<em>i</em>] = <em>y</em>[<em>j</em>], an LCS can use that shared character: <em>L</em>[<em>i</em>][<em>j</em>] = <em>L</em>[<em>i</em> − 1][<em>j</em> − 1] + 1. Otherwise at least one of them is not in the LCS: <em>L</em>[<em>i</em>][<em>j</em>] = max(<em>L</em>[<em>i</em> − 1][<em>j</em>], <em>L</em>[<em>i</em>][<em>j</em> − 1]).</li>
+<li>Recurrence: look at the last characters. Here <em>x</em>[<em>i</em>] means the <em>i</em>-th character of <em>x</em>, counting from 1, so in Python it is <code>x[i - 1]</code>; the code below makes that shift. If <em>x</em>[<em>i</em>] = <em>y</em>[<em>j</em>], an LCS can use that shared character: <em>L</em>[<em>i</em>][<em>j</em>] = <em>L</em>[<em>i</em> − 1][<em>j</em> − 1] + 1. Otherwise at least one of them is not in the LCS: <em>L</em>[<em>i</em>][<em>j</em>] = max(<em>L</em>[<em>i</em> − 1][<em>j</em>], <em>L</em>[<em>i</em>][<em>j</em> − 1]).</li>
 <li>Base cases: <em>L</em>[<em>i</em>][0] = <em>L</em>[0][<em>j</em>] = 0 (a string with an empty one).</li>
 <li>Order: row by row.</li>
 <li>Answer <em>L</em>[<em>m</em>][<em>n</em>]; cost Θ(<em>mn</em>).</li>
@@ -549,7 +549,10 @@ print(dist)   # {'A': 0, 'B': 4, 'C': 2, 'E': 5, 'D': 9, 'F': 20}</code></pre>
 
 <h3>Why Dijkstra is correct</h3>
 <p>Claim: when a vertex <em>u</em> is finished, <em>d</em>[<em>u</em>] = dist(<em>u</em>). Suppose not, and let <em>u</em> be the first vertex finished with a wrong estimate. Take a true shortest path from <em>s</em> to <em>u</em>. It starts among finished vertices and ends outside them, so it has a first edge (<em>x</em>, <em>y</em>) leaving the finished set. Since <em>x</em> was finished correctly and its edges were relaxed, <em>d</em>[<em>y</em>] ≤ dist(<em>x</em>) + <em>w</em>(<em>x</em>, <em>y</em>) = dist(<em>y</em>). Because weights are non-negative, the rest of the path from <em>y</em> to <em>u</em> can't be negative, so dist(<em>y</em>) ≤ dist(<em>u</em>) &lt; <em>d</em>[<em>u</em>]. So <em>d</em>[<em>y</em>] &lt; <em>d</em>[<em>u</em>], and the algorithm would have chosen <em>y</em> before <em>u</em>. Contradiction.</p>
-<p>The proof used non-negative weights at exactly one step. Without it, the algorithm can be wrong: with edges <em>s</em> → <em>a</em> (1), <em>s</em> → <em>b</em> (2) and <em>b</em> → <em>a</em> (−2), Dijkstra finishes <em>a</em> at distance 1, but the path through <em>b</em> has length 0.</p>
+<p>The proof used non-negative weights at exactly one step. Without it, the algorithm can be wrong. Take edges <em>s</em> → <em>a</em> (1), <em>s</em> → <em>b</em> (2), <em>b</em> → <em>a</em> (−2) and <em>a</em> → <em>c</em> (1). Dijkstra finishes <em>a</em> at estimate 1 and relaxes <em>a</em> → <em>c</em>, giving <em>c</em> the estimate 2. Then it finishes <em>b</em> and relaxes <em>b</em> → <em>a</em>: the code above does lower <em>a</em>'s estimate to 0, but <em>a</em> is already finished, so its edges are never relaxed again and <em>c</em> keeps 2, although the path <em>s</em> → <em>b</em> → <em>a</em> → <em>c</em> has length 1.</p>
+<pre><code>H = {"s": [("a", 1), ("b", 2)], "a": [("c", 1)], "b": [("a", -2)], "c": []}
+print(dijkstra(H, "s")[0])   # {'s': 0, 'a': 0, 'b': 2, 'c': 2}</code></pre>
+<p>The distance to <em>c</em> is wrong: it should be 1.</p>
 
 <h3>Bellman–Ford</h3>
 <p>The <strong>Bellman–Ford</strong> algorithm (Richard Bellman and Lester Ford, 1950s) handles negative weights. It's simple: relax <em>every</em> edge, and repeat <em>V</em> − 1 times.</p>
@@ -763,7 +766,7 @@ def max_flow(capacity, s, t):
     residual = dict(capacity)
     nbrs = {}
     for u, v in capacity:
-        residual.setdefault((v, u), 0)              # backward edges start empty
+        residual.setdefault((v, u), 0)              # a backward edge starts at 0, unless (v, u) is itself an edge
         nbrs.setdefault(u, set()).add(v)
         nbrs.setdefault(v, set()).add(u)
     flow = 0

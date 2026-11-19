@@ -65,7 +65,7 @@ CSA.addCourse({
 <p>CS 210 showed how a program becomes machine code. This course goes one level further down: how a processor that runs machine code is built. The answer starts with a single idea. Everything a computer does is built from <strong>switches</strong> that are on or off, and switches can compute logic.</p>
 
 <h3>Transistors are switches</h3>
-<p>A modern chip contains billions of <strong>transistors</strong>. For our purposes, a transistor is a switch controlled by a voltage: one voltage on its control input lets current flow, the other blocks it. We call the two voltages 1 (high) and 0 (low). In <strong>CMOS</strong> technology, used in nearly every chip, transistors come in two complementary kinds, one that conducts when its input is 1 and one that conducts when it is 0. Pairing them builds circuits whose outputs are always firmly connected to either the high or the low voltage. We'll work one level up, with <strong>logic gates</strong>, and treat each gate as a small fixed circuit of transistors.</p>
+<p>A modern chip contains billions of <strong>transistors</strong>. For our purposes, a transistor is a switch controlled by a voltage: one voltage on its control input lets current flow, the other blocks it. (A real switched-on transistor still has some resistance, which is one reason gates take time to switch; PHYS 250 Lesson 3 looks at this.) We call the two voltages 1 (high) and 0 (low). In <strong>CMOS</strong> technology, used in nearly every chip, transistors come in two complementary kinds, one that conducts when its input is 1 and one that conducts when it is 0. Pairing them builds circuits whose outputs are always firmly connected to either the high or the low voltage. We'll work one level up, with <strong>logic gates</strong>, and treat each gate as a small fixed circuit of transistors.</p>
 
 <h3>Gates and truth tables</h3>
 <p>A gate computes a fixed function of its 0/1 inputs. A <strong>truth table</strong> lists the output for every combination of inputs: 2<sup><em>n</em></sup> rows for <em>n</em> inputs.</p>
@@ -103,7 +103,9 @@ print(equivalent(lambda a, b, c: a | (b &amp; c), lambda a, b, c: (a | b) &amp; 
 <h3>Any function as a sum of products</h3>
 <p>Given any truth table, there's a mechanical way to build a circuit for it. For each row where the output is 1, write a product (AND) of all the inputs, each negated if it's 0 in that row; this product is 1 for that row only. Then OR the products together. The result is the <strong>sum-of-products</strong> form. Example: the <strong>majority</strong> function of three inputs, 1 when at least two inputs are 1. Its 1-rows are 011, 101, 110 and 111, giving</p>
 <p class="math">maj = a′bc + ab′c + abc′ + abc</p>
-<p>Boolean algebra simplifies it: adding a copy of <em>abc</em> for each of the first three terms (allowed, since <em>abc</em> + <em>abc</em> = <em>abc</em>) and factoring gives maj = <em>bc</em> + <em>ac</em> + <em>ab</em>: three 2-input ANDs and a 3-input OR. Simplification matters because every gate costs area, power and time. Designers use maps of the truth table (Karnaugh maps) by hand for small functions, and software for large ones.</p>
+<p>Boolean algebra simplifies it. Since <em>abc</em> + <em>abc</em> = <em>abc</em> (the law <em>a</em> + <em>a</em> = <em>a</em>), we may add two more copies of <em>abc</em> and pair one with each of the first three terms. Then factor each pair (AND distributes over OR, as in ordinary algebra) and use <em>a</em> + <em>a</em>′ = 1 and <em>x</em> · 1 = <em>x</em>:</p>
+<p class="math"><em>a</em>′<em>bc</em> + <em>abc</em> = <em>bc</em>(<em>a</em>′ + <em>a</em>) = <em>bc</em> · 1 = <em>bc</em>, and likewise <em>ab</em>′<em>c</em> + <em>abc</em> = <em>ac</em> and <em>abc</em>′ + <em>abc</em> = <em>ab</em>.</p>
+<p>So maj = <em>bc</em> + <em>ac</em> + <em>ab</em>: three 2-input ANDs and a 3-input OR. Simplification matters because every gate costs area, power and time. Designers use maps of the truth table (Karnaugh maps) by hand for small functions, and software for large ones.</p>
 <p>The sum-of-products construction proves something important: <strong>AND, OR and NOT can build any Boolean function</strong>. A set of gates with this property is called <strong>functionally complete</strong>.</p>
 
 <h3>NAND is enough</h3>
@@ -382,7 +384,7 @@ print(detect_101([1, 0, 1, 0, 1, 1, 0, 1]))   # [0, 0, 1, 0, 1, 0, 0, 1]</code><
           a: `<p>States A, B, B, C, B, C, B, then C after the last 0. Outputs: 0, 0, 0, 1, 0, 1, 0. Matches end at positions 4 and 6 (counting from 1); they overlap in the shared middle 1.</p>`
         },
         {
-          q: `<p>Design an FSM for a vending machine that accepts 5¢ and 10¢ coins and dispenses an item (output 1) once 15¢ or more has been inserted, then resets (no change given). Give the states and transitions.</p>`,
+          q: `<p>Design an FSM for a vending machine that accepts 5¢ and 10¢ coins and dispenses an item (output 1) once 15¢ or more has been inserted, then resets. In this version the machine keeps any excess (inserting 10¢ + 10¢ buys one item and gives no change); the programming problem "A vending machine" adds an output that returns the excess as change. Give the states and transitions.</p>`,
           a: `<p>States by amount inserted: 0, 5, 10. From 0: 5¢ → 5, 10¢ → 10. From 5: 5¢ → 10, 10¢ → dispense, back to 0. From 10: 5¢ or 10¢ → dispense, back to 0. Three states need two flip-flops.</p>`
         },
         {
@@ -563,7 +565,7 @@ CSA.addUnits("cs230", [
 <p>("–" means "doesn't matter", because nothing is written.) The table is a truth table, so the control unit is exactly the kind of circuit Lesson 1 built.</p>
 
 <h3>A simulator</h3>
-<p>A processor simulator is the datapath in software: a loop that fetches, decodes, executes and writes back. Here, instructions are given already decoded as tuples to keep the code short; decoding real 32-bit words means undoing Lesson 4's encoding, which the processor lab (described in the course rubric at the top of the course page) asks you to do.</p>
+<p>A processor simulator is the datapath in software: a loop that fetches, decodes, executes and writes back. Here, instructions are given already decoded as tuples to keep the code short; decoding real 32-bit words means undoing Lesson 4's encoding, which the processor lab asks you to do. (That lab, one of the course's four, has you build a single-cycle RISC-V processor that decodes real 32-bit instruction words and runs real programs.)</p>
 <pre><code>def run(program, regs=None, mem=None, max_steps=10_000):
     x = [0] * 32 if regs is None else regs
     mem = {} if mem is None else mem

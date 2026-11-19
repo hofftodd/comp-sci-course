@@ -782,6 +782,21 @@ def square(x):
 
 print(square(3), square(4), square.calls, square.__name__)   # 9 16 2 square</code></pre>
 <p>Writing <code>@count_calls</code> above <code>def square</code> means <code>square = count_calls(square)</code>. The <code>*args, **kwargs</code> parameters accept any positional and keyword arguments and pass them on, so the wrapper works for any function.</p>
+<p>A decorator can also take an argument, such as how many times to repeat a call. That needs one more level of nesting: the outer function takes the argument and <em>returns a decorator</em>, which then takes the function and returns the wrapper.</p>
+<pre><code>def repeat(k):                    # called once, with the argument
+    def decorate(fn):             # called once, with the function
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):     # called on every call of the decorated function
+            return [fn(*args, **kwargs) for _ in range(k)]
+        return wrapper
+    return decorate
+
+@repeat(3)
+def hello(name):
+    return "hi " + name
+
+print(hello("Ada"))   # ['hi Ada', 'hi Ada', 'hi Ada']</code></pre>
+<p>Python evaluates the expression after <code>@</code> first, so <code>@repeat(3)</code> above <code>def hello</code> means <code>hello = repeat(3)(hello)</code>: <code>repeat(3)</code> runs when the function is defined and returns <code>decorate</code>, with <code>k</code> = 3 remembered; <code>decorate(hello)</code> returns <code>wrapper</code>; and each later call <code>hello("Ada")</code> runs <code>wrapper("Ada")</code>, which calls the original function three times.</p>
 
 <h3>Command: actions as objects, and undo</h3>
 <p><strong>Problem:</strong> you need to queue, log or undo actions. <strong>Solution:</strong> represent each action as an object with a method to do it and, for undo, a method to reverse it. An editor keeps a stack (CS 102 Lesson 7) of executed commands; undo pops the last one and reverses it.</p>
@@ -839,7 +854,7 @@ print(ed.doc)   # world</code></pre>
           a: `<p>Keep a second list, <code>self.redone = []</code>. <code>undo</code> pops a command from history, reverses it, and pushes it onto <code>redone</code>. <code>redo</code> pops from <code>redone</code>, runs <code>do</code> again, and pushes it back onto history. Running a new command must clear <code>redone</code>, because the undone commands were defined relative to a document that no longer exists; that's what every editor does.</p>`
         },
         {
-          q: `<p>Write a decorator <code>retry(n)</code> that calls the wrapped function up to <em>n</em> times while it raises an exception, re-raising the last exception if every attempt fails. (A decorator that takes an argument is a function that returns a decorator.)</p>`,
+          q: `<p>Write a decorator <code>retry(n)</code> that calls the wrapped function up to <em>n</em> times while it raises an exception, re-raising the last exception if every attempt fails. Use the three levels of nesting shown for <code>repeat(k)</code>.</p>`,
           a: `<pre><code>import functools
 
 def retry(n):
@@ -1232,7 +1247,7 @@ print(find_user_query("x' OR '1'='1"))
 # SELECT * FROM users WHERE name = 'x' OR '1'='1'</code></pre>
 <p>The second "name" closes the quote and adds a condition that is always true, so the query returns every user. Worse inputs can delete tables. The fix is never to build commands from strings: use <strong>parameterized queries</strong>, where the query and the data are sent separately and the data can never be read as code. With Python's built-in <code>sqlite3</code> module:</p>
 <pre data-label="app.py"><code>cursor.execute("SELECT * FROM users WHERE name = ?", (name,))</code></pre>
-<p>The same principle, keeping code and data apart, prevents <em>cross-site scripting</em> (escape user text before putting it into HTML, as this course's own notes escape <code>&lt;</code>) and <em>command injection</em> (pass a list of arguments to <code>subprocess.run</code>, never a shell string).</p>
+<p>The same principle, keeping code and data apart, prevents <em>cross-site scripting</em>, where an attacker's text such as a comment containing <code>&lt;script&gt;</code> is put into a web page and the browser runs it as code. The defense is to escape user text before putting it into HTML: replace <code>&lt;</code> with <code>&amp;lt;</code>, <code>&gt;</code> with <code>&amp;gt;</code>, <code>&amp;</code> with <code>&amp;amp;</code> and quotes likewise, so the browser shows the characters instead of reading them as tags (Python's <code>html.escape</code> does this). It also prevents <em>command injection</em> (pass a list of arguments to <code>subprocess.run</code>, never a shell string).</p>
 <p><strong>Broken access control</strong>, number one on the 2021 list: the server checks that you're logged in but not that you may see <em>this</em> record, so changing <code>/grades/1041</code> to <code>/grades/1042</code> shows someone else's grades. Every request must check authorization on the server; hiding a button in the interface protects nothing. Lesson 1's third acceptance criterion was this requirement.</p>
 <p><strong>Secrets in code.</strong> API keys and passwords committed to a repository are found by automated scanners within minutes of being pushed to a public one. Keep secrets in environment variables or a secrets manager, out of Git (Lesson 2), and rotate any secret that leaks.</p>
 <p><strong>Storing passwords.</strong> Never store passwords, even encrypted. Store a <em>salted, slow hash</em>: add a random value (the salt) to each password, then apply a hash function designed to be expensive, so that a stolen database can't be cracked quickly or with precomputed tables. Python's <code>hashlib.scrypt</code> and <code>hashlib.pbkdf2_hmac</code> do this. To check a login, hash the attempt with the same salt and compare.</p>
@@ -1282,8 +1297,8 @@ print(check_password("correct horse battery staple", salt, digest), check_passwo
       ],
       practice: [
         {
-          q: `<p>Write <code>call_with_retries(fn, attempts, sleep, delays)</code> that calls <code>fn()</code>, and if it raises <code>ConnectionError</code>, waits <code>delays[i]</code> by calling <code>sleep(delays[i])</code> and tries again, up to <code>attempts</code> calls in total. Any other exception should propagate at once. Why pass <code>sleep</code> as a parameter?</p>`,
-          a: `<pre><code>def call_with_retries(fn, attempts, sleep, delays):
+          q: `<p>Write <code>retry_with_delays(fn, attempts, sleep, delays)</code>, a first version of the retry loop with the delays given as a list, that calls <code>fn()</code>, and if it raises <code>ConnectionError</code>, waits <code>delays[i]</code> by calling <code>sleep(delays[i])</code> and tries again, up to <code>attempts</code> calls in total. Any other exception should propagate at once. Why pass <code>sleep</code> as a parameter? (The programming problem "Retrying with backoff" then asks for a fuller version, <code>call_with_retries</code>, which computes the delays itself with backoff and jitter.)</p>`,
+          a: `<pre><code>def retry_with_delays(fn, attempts, sleep, delays):
     for i in range(attempts):
         try:
             return fn()
@@ -1299,7 +1314,7 @@ def flaky():
         raise ConnectionError("down")
     return "ok"
 
-print(call_with_retries(flaky, 5, slept.append, [1, 2, 4, 8]), slept)   # ok [1, 2]</code></pre><p>Passing <code>sleep</code> in lets the test record the delays instead of waiting for them (Lesson 3's injected clock).</p>`
+print(retry_with_delays(flaky, 5, slept.append, [1, 2, 4, 8]), slept)   # ok [1, 2]</code></pre><p>Passing <code>sleep</code> in lets the test record the delays instead of waiting for them (Lesson 3's injected clock).</p>`
         },
         {
           q: `<p>A service has a 99.9% monthly SLO. On day 10 of the month, an outage lasts 35 minutes. What fraction of the error budget remains, and what should the team do for the rest of the month?</p>`,

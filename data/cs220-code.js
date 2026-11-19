@@ -417,7 +417,7 @@ CSA.addCode("cs220", {
   {
    "id": "max_flow_problem",
    "title": "Maximum flow",
-   "prompt": "<p>Write <code>max_flow(capacity, s, t)</code>. <code>capacity</code> is a dict mapping directed edges <code>(u, v)</code> to non-negative integer capacities. Return the value of a maximum flow from <code>s</code> to <code>t</code>, using Edmonds–Karp (BFS for shortest augmenting paths in the residual graph). If both <code>(u, v)</code> and <code>(v, u)</code> are edges, treat them as separate edges whose residual capacities add.</p>",
+   "prompt": "<p>Write <code>max_flow(capacity, s, t)</code>. <code>capacity</code> is a dict mapping directed edges <code>(u, v)</code> to non-negative integer capacities. Return the value of a maximum flow from <code>s</code> to <code>t</code>, using Edmonds–Karp (BFS for shortest augmenting paths in the residual graph). Edges may go both ways: if both <code>(u, v)</code> and <code>(v, u)</code> are edges, the residual capacity of <code>(u, v)</code> starts at the capacity of <code>(u, v)</code> (not 0), and likewise for <code>(v, u)</code>. Sending flow along one of them adds the same amount to the residual capacity of the other, as in the notes, whose <code>setdefault</code> leaves an existing entry alone.</p>",
    "starter": "from collections import deque\n\ndef max_flow(capacity, s, t):\n    pass\n",
    "hint": "<p>Start the residual dict as a copy of <code>capacity</code> and use <code>residual.get((v, u), 0)</code> for backward edges; keep a neighbor set for each vertex in both directions. Each round, BFS from <code>s</code>; if <code>t</code> isn't reached, return the flow.</p>",
    "solution": "from collections import deque\n\ndef max_flow(capacity, s, t):\n    residual = {}\n    nbrs = {}\n    for (u, v), c in capacity.items():\n        residual[(u, v)] = residual.get((u, v), 0) + c\n        residual.setdefault((v, u), 0)\n        nbrs.setdefault(u, set()).add(v)\n        nbrs.setdefault(v, set()).add(u)\n    flow = 0\n    while True:\n        parent = {s: None}\n        q = deque([s])\n        while q and t not in parent:\n            u = q.popleft()\n            for v in nbrs.get(u, ()):\n                if v not in parent and residual[(u, v)] > 0:\n                    parent[v] = u\n                    q.append(v)\n        if t not in parent:\n            return flow\n        path, v = [], t\n        while parent[v] is not None:\n            path.append((parent[v], v))\n            v = parent[v]\n        b = min(residual[e] for e in path)\n        for u, v in path:\n            residual[(u, v)] -= b\n            residual[(v, u)] += b\n        flow += b\n",
@@ -431,6 +431,11 @@ CSA.addCode("cs220", {
      "label": "Needs a backward edge",
      "call": "max_flow({(\"s\", \"a\"): 1, (\"s\", \"b\"): 1, (\"a\", \"b\"): 1, (\"a\", \"t\"): 1, (\"b\", \"t\"): 1}, \"s\", \"t\")",
      "expect": "2"
+    },
+    {
+     "label": "Edges in both directions between a and b",
+     "call": "max_flow({(\"s\", \"b\"): 3, (\"b\", \"a\"): 3, (\"a\", \"t\"): 3, (\"s\", \"a\"): 1, (\"a\", \"b\"): 1, (\"b\", \"t\"): 1}, \"s\", \"t\")",
+     "expect": "4"
     },
     {
      "label": "No path",
