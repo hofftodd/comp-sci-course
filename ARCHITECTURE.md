@@ -85,7 +85,7 @@ student sees that it failed but not the details) and `limit` (seconds, default 5
 
 **How a check runs.** `code.js` starts `app/pyworker.js` on the first Check or Run. The worker loads
 Pyodide from `vendor/pyodide/` (or, if that's missing, from the jsDelivr CDN), writes `harness.py`
-into Python's virtual file system and imports it. Each test is sent separately with a timer; if a
+into Python's virtual file system and imports it. Standard-library modules that Pyodide ships as separate packages (only `sqlite3`, used by CS 340) are loaded the first time a program or test imports one: the worker fetches the archive from `vendor/pyodide/sqlite3-1.0.0.zip.wasm` (a `.wasm` name because some hosts won't serve `.zip`), or from the CDN, and unpacks it into site-packages. Each test is sent separately with a timer; if a
 test exceeds its limit, the worker is terminated, the test is reported as too slow or an infinite
 loop, and a fresh worker starts for the next test. Tests are visible in the page source, so this
 is for practice, not for graded exams.
