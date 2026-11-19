@@ -137,6 +137,7 @@ int main(void) {
 }</code></pre>
 <pre data-label="Output"><code>child:  x = 101
 parent: x = 100, child's exit code 7</code></pre>
+<p><code>waitpid</code> stores an <code>int</code> in <code>status</code> that packs several facts together: whether the child exited normally or was killed by a signal, and, if it exited, its exit code in bits 8 to 15. <code>WEXITSTATUS(status)</code> is a macro from <code>&lt;sys/wait.h&gt;</code> that extracts the exit code; on Linux it computes <code>(status &amp; 0xff00) &gt;&gt; 8</code>, so here <code>status</code> is 1792 = 7 × 256 and the macro gives 7. (Its partner <code>WIFEXITED(status)</code> is true if the child exited normally.)</p>
 <p>Between the child's exit and the parent's <code>waitpid</code>, the child is a zombie: its memory is gone but its PCB remains, holding the exit code 7. If a parent exits without waiting, its children become <em>orphans</em> and are adopted by process 1 (<code>init</code>, or <code>systemd</code> on most Linux systems), which waits for them so that zombies don't pile up.</p>
 <p>Why split creation into <code>fork</code> and <code>exec</code>? Because the code between them, running in the child, can set up the new program's environment with ordinary system calls before the program starts. Here is a complete, if tiny, shell that runs commands and supports output redirection with <code>&gt;</code>:</p>
 <pre data-label="C"><code>#include &lt;stdio.h&gt;
@@ -305,6 +306,7 @@ print(metrics([("A", 0, 10), ("B", 10, 20), ("C", 20, 30), ("A", 30, 120)], arri
 <li>Once a job has used up its <em>allotment</em> of CPU time at a level (here, one time slice), whether in one go or spread over several bursts, it moves down one level.</li>
 <li>Every <em>S</em> time units, a <strong>priority boost</strong> moves every job back to the top level.</li>
 </ol>
+<p>Two details follow from these rules. Rule 1 holds at every moment, not only when a slice ends: a job that arrives at (or is woken into) a higher level preempts the running job at once. The preempted job stays at the front of its own level and keeps the time it has already used there, so when it runs again it gets only the rest of its slice, and once its allotment is used up it moves down (rule 4).</p>
 <p>A short or interactive job finishes, or blocks for I/O, before using its allotment, so it stays near the top and gets the processor quickly: like SJF, without knowing lengths in advance. A long computation sinks to the bottom, where it shares the processor with other long jobs. Lower levels usually get longer slices (fewer switches for jobs that just compute).</p>
 <p>Rule 5 fixes two problems. Without it, a steady stream of short jobs could keep the top levels busy forever, so that a long job at the bottom <strong>starves</strong>: it never runs. And a job whose behaviour changes, say a program that computes for a minute and then becomes interactive, would be stuck at the bottom. Rule 4 counts time across bursts to stop gaming: under a naive rule that a job keeps its priority whenever it gives up the processor before its slice ends, a program could issue a pointless I/O just before each slice ended and stay at the top forever.</p>
 <p>Real schedulers are MLFQ's descendants or rivals. Windows and macOS use priority levels with feedback. Linux's long-time scheduler, CFS (2007–2023), instead gave each process a share of the processor in proportion to its weight, always running the process that had received the least weighted CPU time so far, kept in a red-black tree (a balanced search tree like CS 201's AVL trees); since version 6.6 it uses a related algorithm, EEVDF. Multicore machines add another question, which core: moving a process to another core loses its cached data, so schedulers prefer to keep a process where it ran (<em>cache affinity</em>), and each core usually keeps its own queue.</p>
@@ -1059,13 +1061,14 @@ print(va &gt;&gt; 22, (va &gt;&gt; 12) &amp; 0x3FF, hex(va &amp; 0xFFF))   # 1 2
 <ol>
 <li>looks up the address in the region list. If it isn't in any region, or the access breaks the region's permissions, it sends the process a signal that kills it: a segmentation fault.</li>
 <li>finds a free physical frame, evicting a page if none is free (below);</li>
-<li>fills the frame: reads the page from the program file or from swap space on disk, or fills it with zeros for new anonymous memory;</li>
+<li>fills the frame: reads the page from the program file or from <strong>swap space</strong> on disk, or fills it with zeros for new anonymous memory;</li>
 <li>updates the page-table entry to present, and returns, so that the faulting instruction runs again and now succeeds.</li>
 </ol>
+<p>Swap space is an area of disk set aside for evicted pages: a separate partition or an ordinary file. A page of program code can simply be dropped when evicted and read back from the program file later, but a modified page of heap or stack (<em>anonymous</em> memory, belonging to no file) has nowhere else to live, so the kernel writes it to swap space when it evicts it and reads it back from there on the next fault.</p>
 <p>This is <strong>demand paging</strong>: pages are loaded only when used. A page fault that needs a disk read is a <em>major</em> fault, costing milliseconds on a hard disk or about 100 µs on an SSD; one that only needs a zeroed frame or a page already in memory is a <em>minor</em> fault, costing around a microsecond. Faults must be rare. If memory takes 100 ns and a major fault 8 ms, the effective access time with fault rate <em>p</em> is (1 − <em>p</em>) × 100 ns + <em>p</em> × 8,000,000 ns. For that to stay within 10% of 100 ns, <em>p</em> must be below 10/7,999,900 ≈ 1.25 × 10<sup>−6</sup>: about one fault in 800,000 accesses.</p>
 
 <h3>Page replacement</h3>
-<p>When memory is full, the kernel must choose a <em>victim</em> page to evict; if the page was modified (its <em>dirty</em> bit is set), it must be written to disk first. The policy aims to evict the page that won't be needed for the longest time. Compare policies on the reference string 7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2 (page numbers in the order a program touches them) with 3 frames:</p>
+<p>When memory is full, the kernel must choose a <em>victim</em> page to evict; if the page was modified (its <em>dirty</em> bit is set), it must be written to disk first: to its file, or to swap space if it is anonymous. The policy aims to evict the page that won't be needed for the longest time. Compare policies on the reference string 7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2 (page numbers in the order a program touches them) with 3 frames:</p>
 <ul>
 <li><strong>FIFO</strong> evicts the page loaded earliest. Simple, but it evicts heavily used pages just because they're old.</li>
 <li><strong>OPT</strong> (Belady's optimal algorithm, 1966) evicts the page whose next use is farthest in the future. It needs to know the future, so it can't be implemented, but it gives the minimum number of faults to compare others against.</li>
@@ -1326,7 +1329,7 @@ while status == BUSY: wait       # 4. wait until it is done</code></pre>
 <tr><td>Network round trip within a data centre</td><td>about 500 µs</td></tr>
 <tr><td>Random read from a hard disk</td><td>5–10 ms</td></tr>
 </table>
-<p>The gap from memory to a hard disk is a factor of about 100,000. Scaled so that a memory access takes one second, a random disk read would take more than a day.</p>
+<p>The gap from memory to a hard disk is a factor of 50,000 to 100,000 (5 ms / 100 ns = 50,000; 10 ms / 100 ns = 100,000). Scaled so that a memory access takes one second, a random disk read would take 50,000 to 100,000 seconds, about 14 to 28 hours; the 8.19 ms read worked out above would take 81,900 seconds, nearly a day (22.75 hours).</p>
 
 <h3>RAID</h3>
 <p>One disk is too small, too slow and too likely to fail. A <strong>RAID</strong> (redundant array of inexpensive disks; Patterson, Gibson and Katz, 1988) combines <em>N</em> disks into one larger, faster or more reliable virtual disk:</p>
