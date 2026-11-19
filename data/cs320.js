@@ -649,21 +649,17 @@ print(same_up_to_renaming(A, 0, {1}, B, "x", {"y"}, "ab"))   # False</code></pre
 
 <h3>The pumping lemma</h3>
 <p><strong>Pumping lemma for regular languages.</strong> If <em>L</em> is regular, there is a number <em>p</em> ≥ 1 (the <strong>pumping length</strong>) such that every string <em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em> can be split as <em>s</em> = <em>xyz</em> where</p>
-<ol>
-<li>|<em>xy</em>| ≤ <em>p</em>,</li>
-<li>|<em>y</em>| ≥ 1, and</li>
-<li><em>xy</em><sup><em>i</em></sup><em>z</em> ∈ <em>L</em> for every <em>i</em> ≥ 0.</li>
-</ol>
+<p>Condition 1: |<em>xy</em>| ≤ <em>p</em>,</p>
+<p>Condition 2: |<em>y</em>| ≥ 1, and</p>
+<p>Condition 3: <em>xy</em><sup><em>i</em></sup><em>z</em> ∈ <em>L</em> for every <em>i</em> ≥ 0.</p>
 <p><em>Proof.</em> Let <em>p</em> be the number of states of a DFA for <em>L</em>, and let <em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em>. Let <em>r</em><sub>0</sub>, <em>r</em><sub>1</sub>, …, <em>r</em><sub><em>p</em></sub> be the states after reading 0, 1, …, <em>p</em> symbols of <em>s</em>. That is <em>p</em> + 1 states from a set of <em>p</em>, so <em>r</em><sub><em>i</em></sub> = <em>r</em><sub><em>j</em></sub> for some <em>i</em> &lt; <em>j</em> ≤ <em>p</em>. Let <em>x</em> be the first <em>i</em> symbols, <em>y</em> the next <em>j</em> − <em>i</em>, and <em>z</em> the rest. Then |<em>xy</em>| = <em>j</em> ≤ <em>p</em> and |<em>y</em>| = <em>j</em> − <em>i</em> ≥ 1. Reading <em>y</em> from <em>r</em><sub><em>i</em></sub> returns to <em>r</em><sub><em>i</em></sub>, so reading <em>y</em><sup><em>k</em></sup> does too, for any <em>k</em>; and <em>z</em> leads from <em>r</em><sub><em>i</em></sub> to the same accepting state as before. So every <em>xy</em><sup><em>k</em></sup><em>z</em> is accepted. ∎</p>
 
 <h3>Using it: a game against an adversary</h3>
-<p>The lemma says: <em>if</em> regular, <em>then</em> pumpable. We use the contrapositive (MATH 120 Lesson 1): if some long string can't be pumped, the language isn't regular. Write out the quantifiers carefully, because getting their order wrong is the usual mistake. <em>L</em> is regular ⇒ ∃<em>p</em> ∀<em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em> ∃ a split <em>xyz</em> satisfying 1 and 2 ∀<em>i</em>: <em>xy</em><sup><em>i</em></sup><em>z</em> ∈ <em>L</em>. Negating flips each quantifier (MATH 120 Lesson 2), so to prove <em>L</em> is not regular you play a game:</p>
-<ol>
-<li>The adversary picks <em>p</em>. You don't know its value; your argument must work for every <em>p</em>.</li>
-<li><em>You</em> pick a string <em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em>, usually written in terms of <em>p</em>.</li>
-<li>The adversary picks any split <em>s</em> = <em>xyz</em> with |<em>xy</em>| ≤ <em>p</em> and |<em>y</em>| ≥ 1. You must handle <em>every</em> such split.</li>
-<li><em>You</em> pick an <em>i</em> such that <em>xy</em><sup><em>i</em></sup><em>z</em> ∉ <em>L</em>.</li>
-</ol>
+<p>The lemma says: <em>if</em> regular, <em>then</em> pumpable. We use the contrapositive (MATH 120 Lesson 1): if some long string can't be pumped, the language isn't regular. Write out the quantifiers carefully, because getting their order wrong is the usual mistake. <em>L</em> is regular ⇒ ∃<em>p</em> ∀<em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em> ∃ a split <em>xyz</em> satisfying conditions 1 and 2 such that ∀<em>i</em>: <em>xy</em><sup><em>i</em></sup><em>z</em> ∈ <em>L</em>. Negating flips each quantifier (MATH 120 Lesson 2), so to prove <em>L</em> is not regular you play a game in four steps:</p>
+<p>Step 1: the adversary picks <em>p</em>. You don't know its value; your argument must work for every <em>p</em>.</p>
+<p>Step 2: <em>you</em> pick a string <em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em>, usually written in terms of <em>p</em>.</p>
+<p>Step 3: the adversary picks any split <em>s</em> = <em>xyz</em> with |<em>xy</em>| ≤ <em>p</em> and |<em>y</em>| ≥ 1 (conditions 1 and 2). You must handle <em>every</em> such split.</p>
+<p>Step 4: <em>you</em> pick an <em>i</em> such that <em>xy</em><sup><em>i</em></sup><em>z</em> ∉ <em>L</em>.</p>
 <p>If you can always win, <em>L</em> is not regular. The skill is in step 2: choose <em>s</em> so that condition 1 forces <em>y</em> into a part of the string where pumping breaks something.</p>
 
 <h4>Example 1: {0<sup><em>n</em></sup>1<sup><em>n</em></sup> : <em>n</em> ≥ 0} is not regular</h4>
@@ -696,7 +692,7 @@ print(pumping_split(lambda w: w.count("0") % 2 == 0, "0101", 3))   # ('0', '1', 
 <p>For the regular language "even number of 0s", the split <em>y</em> = 1 pumps, as the lemma promises.</p>
 
 <h4>A warning</h4>
-<p>The pumping lemma is a necessary condition for regularity, not a sufficient one: some non-regular languages can be pumped. For example, <em>L</em> = {a<sup><em>i</em></sup>b<sup><em>j</em></sup>c<sup><em>k</em></sup> : if <em>i</em> = 1 then <em>j</em> = <em>k</em>} satisfies the lemma's conclusion with <em>p</em> = 2 (pump the first symbol; if <em>i</em> = 2, pump both a's together so the count never becomes 1), yet it is not regular. To show that, we need a stronger tool.</p>
+<p>The pumping lemma is a necessary condition for regularity, not a sufficient one: some non-regular languages can be pumped. For example, <em>L</em> = {a<sup><em>m</em></sup>b<sup><em>j</em></sup>c<sup><em>k</em></sup> : if <em>m</em> = 1 then <em>j</em> = <em>k</em>} satisfies the lemma's conclusion with <em>p</em> = 2 (take <em>y</em> to be the first symbol; but if the string starts with exactly two a's, <em>m</em> = 2, take <em>y</em> = aa, so that pumping never makes the number of a's equal to 1), yet it is not regular. To show that, we need a stronger tool.</p>
 
 <h3>The Myhill–Nerode theorem</h3>
 <p>Lesson 2 proved a DFA lower bound by showing that certain strings must lead to different states. Make that idea exact. For a language <em>L</em>, two strings <em>x</em> and <em>y</em> are <strong>distinguishable</strong> by <em>L</em> if some string <em>z</em> has <em>xz</em> ∈ <em>L</em> and <em>yz</em> ∉ <em>L</em>, or the other way round. Otherwise write <em>x</em> ≡<sub><em>L</em></sub> <em>y</em>: no continuation can tell them apart.</p>
@@ -1083,7 +1079,7 @@ print([w for w in strings("01", 6) if run_pda(P01, "q0", {"q0", "q3"}, w)])   # 
 D = cfg_to_pda({"S": ["0S1", ""]}, "S", "01")
 print([w for w in strings("01", 6) if run_pda(D, "start", {"accept"}, w)])   # ['', '01', '0011', '000111']</code></pre>
 <p>On 0011 the stack (top first) goes <em>S</em>$ → 0<em>S</em>1$ → (match 0) <em>S</em>1$ → 0<em>S</em>11$ → (match 0) <em>S</em>11$ → (<em>S</em> → ε) 11$ → (match 1, 1) $ → accept. At each moment, the input read so far followed by the stack (without $) is a step of the leftmost derivation <em>S</em> ⇒ 0<em>S</em>1 ⇒ 00<em>S</em>11 ⇒ 0011.</p>
-<p><em>PDA to grammar (sketch).</em> First modify the PDA so that it has one accepting state, empties its stack before accepting, and makes every move either a push or a pop. Then make a variable <em>A<sub>pq</sub></em> for each pair of states, meant to generate exactly the inputs that take the PDA from <em>p</em> with some stack to <em>q</em> with the same stack, never going below it. Such a computation either returns to its starting stack height somewhere in the middle, at a state <em>r</em>, giving the rule <em>A<sub>pq</sub></em> → <em>A<sub>pr</sub>A<sub>rq</sub></em>; or its first push is popped only by its last move, giving <em>A<sub>pq</sub></em> → <em>a</em><em>A<sub>rs</sub></em><em>b</em>, where <em>a</em> and <em>b</em> are the symbols read by that push and that pop. The start variable is <em>A</em> for (start state, accepting state).</p>
+<p><em>PDA to grammar (sketch).</em> First modify the PDA so that it has one accepting state, empties its stack before accepting, and makes every move either a push or a pop, not both and not neither. A move that pops <em>X</em> and pushes <em>Y</em> becomes two moves through a new state: the first reads the input symbol and pops <em>X</em>, the second reads ε and pushes <em>Y</em>. A move that does neither becomes a push of a new stack symbol into a new state, then an ε-move that pops it. Then make a variable <em>A<sub>pq</sub></em> for each pair of states, meant to generate exactly the inputs that take the PDA from <em>p</em> with some stack to <em>q</em> with the same stack, never going below it. Such a computation either returns to its starting stack height somewhere in the middle, at a state <em>r</em>, giving the rule <em>A<sub>pq</sub></em> → <em>A<sub>pr</sub>A<sub>rq</sub></em>; or it doesn't, so its first move (a push, of some <em>X</em>) is popped only by its last move. Call <em>r</em> the state the first move goes to and <em>s</em> the state the last move starts from. Between them the stack never goes below the pushed <em>X</em>, which gives <em>A<sub>pq</sub></em> → <em>a</em><em>A<sub>rs</sub></em><em>b</em>, where <em>a</em> and <em>b</em> are the symbols (or ε) read by that push and that pop. Add <em>A<sub>pp</sub></em> → ε for every state <em>p</em>, for the computation of no moves. The start variable is <em>A</em> for (start state, accepting state).</p>
 
 <h3>The pumping lemma for context-free languages</h3>
 <p><strong>Pumping lemma (context-free).</strong> If <em>L</em> is context-free, there is a number <em>p</em> such that every <em>s</em> ∈ <em>L</em> with |<em>s</em>| ≥ <em>p</em> can be split as <em>s</em> = <em>uvxyz</em> where</p>
