@@ -297,7 +297,7 @@ print(metrics([("A", 0, 10), ("B", 10, 20), ("C", 20, 30), ("A", 30, 120)], arri
 <p>Real processes alternate between computing (a <em>CPU burst</em>) and waiting for I/O. When a process starts a disk read, it blocks, and the scheduler should run something else; when the read finishes, the interrupt makes it ready again. A job that does 10 ms of work between 10 ms disk reads, treated as a series of 10 ms jobs, lets the scheduler overlap one job's computing with another's I/O. Interactive programs have short bursts and long waits for the user, which is why they should get the processor quickly when they wake.</p>
 
 <h3>The multi-level feedback queue</h3>
-<p>We want SJF's good turnaround and RR's good response, without knowing job lengths. The <strong>multi-level feedback queue</strong> (MLFQ), first used in the CTSS system at MIT in 1962 by Fernando Corbató's group, learns from each job's behaviour. It keeps several queues, each a priority level, and follows these rules (in OSTEP's formulation):</p>
+<p>We want SJF's good turnaround and RR's good response, without knowing job lengths. The <strong>multi-level feedback queue</strong> (MLFQ), first used in the CTSS system at MIT in 1962 by Fernando Corbató's group, learns from each job's behaviour. It keeps several queues, each a priority level, and follows these rules (as stated in OSTEP, <em>Operating Systems: Three Easy Pieces</em> by Remzi and Andrea Arpaci-Dusseau, this course's main textbook, free online):</p>
 <ol>
 <li>If A's priority is higher than B's, A runs.</li>
 <li>Jobs of equal priority take turns, round robin, using that level's time slice.</li>
@@ -449,7 +449,7 @@ for t in threads:
     t.join()
 print(count)   # 200000</code></pre>
 <p>In C, the same fix wraps the line in <code>pthread_mutex_lock(&amp;m)</code> and <code>pthread_mutex_unlock(&amp;m)</code>, with <code>pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;</code> declared globally; the program then prints 2000000 every time. The lock makes the three instructions atomic with respect to every other thread that uses the same lock. That condition matters: a lock protects data only if <em>every</em> access to the data takes it. How a lock can be built, when the hardware only offers loads and stores, is Lesson 4.</p>
-<p>Critical sections should be short. While one thread holds the lock, others that want it wait, so code inside a lock runs one thread at a time: by Amdahl's law (CS 230 Lesson 8), it is the serial part that limits speedup.</p>
+<p>Critical sections should be short. While one thread holds the lock, others that want it wait, so code inside a lock runs one thread at a time: it is a serial part, and as in Amdahl's law (CS 230 Lesson 8), the serial part limits speedup. If a fraction <em>s</em> of all the work is done holding one lock, that work takes at least <em>s</em> of the one-thread running time however many cores there are, so the program can never be more than 1/<em>s</em> times faster.</p>
 
 <h3>Exploring interleavings deterministically</h3>
 <p>Real races depend on timing, which makes them hard to study. This course uses a small simulator instead, which also runs in the browser, whose Python can't start real threads. A simulated thread is a Python <strong>generator</strong> (CS 102): a function containing <code>yield</code>, which runs until its next <code>yield</code> each time <code>next</code> is called on it. We put a <code>yield</code> wherever a real thread could be interrupted, so each step between yields is atomic, and the scheduler <code>run</code> decides which thread takes the next step.</p>
@@ -498,6 +498,37 @@ for seed in range(1000):
     lost += shared["count"] != 10
 print(lost)   # 975</code></pre>
 <p>How many interleavings are there? If two threads take <em>m</em> and <em>n</em> atomic steps, an interleaving is a choice of which <em>m</em> of the <em>m</em> + <em>n</em> positions belong to the first thread: C(<em>m</em> + <em>n</em>, <em>m</em>) of them (MATH 120's binomial coefficient). Two threads of 3 steps have C(6, 3) = 20; two of 10 steps have C(20, 10) = 184,756. Testing them all is possible only for tiny programs; that is why concurrent code must be correct by design, with every shared access protected, rather than "tested until it seems to work".</p>
+
+<h3>A lock for simulated threads</h3>
+<p>The programming problems use this lock with the simulator:</p>
+<pre><code>class Lock:
+    """A lock for simulated threads. acquire() is a generator: use  yield from lock.acquire()."""
+    def __init__(self):
+        self.held = False
+    def acquire(self):
+        while self.held:          # someone else holds it: let other threads run
+            yield
+        self.held = True          # test and set in one step, so it is atomic
+    def release(self):
+        self.held = False
+
+lock = Lock()
+
+def safe_increment(times):
+    for _ in range(times):
+        yield from lock.acquire()
+        tmp = shared["count"]
+        yield
+        shared["count"] = tmp + 1
+        lock.release()
+
+lost = 0
+for seed in range(1000):
+    shared["count"] = 0
+    run([safe_increment(5), safe_increment(5)], seed=seed)
+    lost += shared["count"] != 10
+print(lost)   # 0</code></pre>
+<p><code>acquire</code> is a generator because waiting must give other threads a turn: a plain loop <code>while self.held: pass</code> would never end, since the thread holding the lock runs only when the waiter yields. But calling a generator function only creates a generator; nothing runs. <code>yield from g</code> runs the generator <code>g</code> as part of the current one: each time <code>g</code> yields, the current thread yields too (so the scheduler may switch), and when <code>g</code> finishes, the thread carries on after the <code>yield from</code> line. If the lock is free, <code>acquire</code> finishes without yielding at all. <code>release</code> never waits, so it is an ordinary method, called without <code>yield from</code>. Nothing yields between the test of <code>self.held</code> and setting it, so no other thread can slip in between: the check and the set are one atomic step. Lesson 4 shows how real hardware provides such a step.</p>
 `,
       terms: [
         ["Thread", "A flow of control within a process, with its own registers and stack, sharing the process's memory with its other threads."],
@@ -530,7 +561,7 @@ print(lost)   # 975</code></pre>
           a: `<p>Serially: A then B gives (5 + 1) × 2 = 12; B then A gives 5 × 2 + 1 = 11. If both load 5 before either stores, the last store wins: A's 6 or B's 10. So {6, 10, 11, 12}. The programming problem <code>interleavings</code> checks this by trying all C(6, 3) = 20 interleavings.</p>`
         },
         {
-          q: `<p>Using the notes' <code>run</code>, write a simulated thread <code>append_twice(lst, a, b)</code> that appends two items to a list as one action, and a schedule that shows another thread's items landing between them. Then explain what a lock would change.</p>`,
+          q: `<p>Using the notes' <code>run</code>, write a simulated thread <code>append_twice(lst, a, b)</code> that is meant to append two items to a list as one action, but has a switch point (a <code>yield</code>) between the two appends, and a schedule that shows another thread's items landing between them. Then explain what a lock would change.</p>`,
           a: `<pre><code>def append_twice(lst, a, b):
     lst.append(a)
     yield
@@ -538,11 +569,11 @@ print(lost)   # 975</code></pre>
 
 out = []
 run([append_twice(out, "a1", "a2"), append_twice(out, "b1", "b2")], schedule=[0, 1, 0, 1])
-print(out)   # ['a1', 'b1', 'a2', 'b2']</code></pre><p>Each <code>append</code> is atomic, but the pair isn't. With a lock held around both appends, the other thread would wait at its acquire until the first released, so the output would be a1 a2 b1 b2 or b1 b2 a1 a2: the pairs stay together.</p>`
+print(out)   # ['a1', 'b1', 'a2', 'b2']</code></pre><p>Each <code>append</code> is atomic, but the pair isn't. With a lock held around both appends (<code>yield from lock.acquire()</code> before the first, <code>lock.release()</code> after the second), the other thread would wait in its acquire until the first released, so the output would be a1 a2 b1 b2 or b1 b2 a1 a2: the pairs stay together.</p>`
         },
         {
-          q: `<p>A program has 8 threads, and each spends 20% of its time inside a critical section protected by one shared lock. Roughly how much faster than one thread can it possibly be on 8 cores? What could you change?</p>`,
-          a: `<p>Only one thread can be in the critical section at a time, so that 20% of all the work is serial. Amdahl's law gives at most 1/(0.2 + 0.8/8) = 1/0.3 ≈ 3.3 times faster, and waiting for the lock costs more on top. Shrink the critical section (do work that doesn't touch shared data outside it), or split the data so that different threads use different locks (for example, one lock per hash-table bucket).</p>`
+          q: `<p>A program's work is split evenly over 8 threads, and each spends 20% of its time inside a critical section protected by one shared lock. At most how much faster than one thread can it be on 8 cores, if the other threads can keep doing their own work while one holds the lock? What could you change?</p>`,
+          a: `<p>Only one thread can be in the critical section at a time, so the 20% of all the work done holding the lock happens one piece after another: it takes at least 0.2 of the one-thread time, however many cores there are. So the program is at most 1/0.2 = 5 times faster, less than the 8 that 8 cores alone would allow. (Reaching 5 needs the lock to be busy all the time, with the other threads doing their 80% meanwhile; time spent waiting for the lock costs more. If instead the other threads had nothing to do while the lock was held, the locked work would be a serial part in Amdahl's sense and the limit would be 1/(0.2 + 0.8/8) ≈ 3.3.) Shrink the critical section (do work that doesn't touch shared data outside it), or split the data so that different threads use different locks (for example, one lock per hash-table bucket).</p>`
         }
       ],
       sources: ["ostep", "pythreading", "csapp"]
@@ -566,7 +597,7 @@ print(out)   # ['a1', 'b1', 'a2', 'b2']</code></pre><p>Each <code>append</code> 
 <p>On a single core, one idea is to disable interrupts during the critical section: with no timer interrupt, there's no switch. But disabling interrupts is privileged (a user program that could do it could keep the processor forever), and it doesn't stop a thread on another core. Kernels do use it, briefly, for their own short critical sections on one core.</p>
 
 <h3>Locks from loads and stores</h3>
-<p>Can a lock be built from ordinary loads and stores? Let's try in the simulator from Lesson 3, repeated here so this lesson's code runs on its own:</p>
+<p>Can a lock be built from ordinary loads and stores? Let's try in the simulator from Lesson 3, repeated here with its <code>Lock</code> so this lesson's code runs on its own:</p>
 <pre><code>import random
 
 def run(threads, schedule=(), seed=0, max_steps=100000):
@@ -583,6 +614,16 @@ def run(threads, schedule=(), seed=0, max_steps=100000):
         except StopIteration:
             live.remove(i)
     return steps
+
+class Lock:
+    def __init__(self):
+        self.held = False
+    def acquire(self):            # a generator: yield from lock.acquire()
+        while self.held:
+            yield
+        self.held = True
+    def release(self):            # a plain call: lock.release()
+        self.held = False
 
 def check(algorithm, seeds=1000):
     """Run two threads through the algorithm's critical section 3 times each, for many schedules.
@@ -601,7 +642,7 @@ def check(algorithm, seeds=1000):
         run([thread(0), thread(1)], seed=seed)
         bad += s["overlap"]
     return bad</code></pre>
-<p>(<code>yield from g</code> runs the generator <code>g</code> inside the current one, passing on its yields, so an <code>enter</code> that waits makes the whole thread wait.) Each algorithm below is a class that only groups two generator functions, <code>enter</code> and <code>leave</code>, which <code>check</code> calls on the class itself (so they take no <code>self</code>). A first attempt: each thread has a flag saying "I want in"; wait while the other's flag is up, then raise your own.</p>
+<p>(As in Lesson 3, <code>yield from g</code> runs the generator <code>g</code> as part of the current thread, so an <code>enter</code> that waits makes the whole thread wait.) Each algorithm below is a class that only groups two generator functions, <code>enter</code> and <code>leave</code>, which <code>check</code> calls on the class itself (so they take no <code>self</code>). A first attempt: each thread has a flag saying "I want in"; wait while the other's flag is up, then raise your own.</p>
 <pre><code>class FlagsOnly:
     def enter(s, i):
         while s["flag"][1 - i]:      # wait while the other wants in
@@ -630,10 +671,10 @@ print(check(FlagsOnly))   # 542</code></pre>
 
 print(check(Peterson))   # 0</code></pre>
 <p>Why it works: suppose both threads are inside. Each wrote <code>turn</code> before its final check, and <code>turn</code> holds whichever value was written last; say thread 0 wrote last, so <code>turn</code> = 1. Thread 0 can only have passed its loop by seeing <code>flag[1]</code> false or <code>turn</code> ≠ 1. <code>turn</code> stayed 1, and <code>flag[1]</code> was already true (thread 1 raised it before writing <code>turn</code>, which was before thread 0's write). So thread 0 couldn't have entered: a contradiction. If only one thread wants in, the other's flag is down and it enters at once (progress), and a waiting thread gets in after the other's next turn, because the other sets <code>turn</code> in its favour (bounded waiting). (The loop's condition reads two variables in one step; putting a <code>yield</code> between the reads changes nothing.)</p>
-<p>Peterson's algorithm is beautiful and not used in practice. It handles only two threads, and on modern processors it fails: cores keep recent stores in a <em>store buffer</em> before they reach memory, and may let a later load go first, so a thread can read the other's old flag after "setting" its own. Making it work needs special <strong>memory fence</strong> instructions that force earlier stores to complete. Real locks instead use instructions designed for the job.</p>
+<p>The proof assumes <strong>sequential consistency</strong>: memory behaves as if the threads' loads and stores happened one at a time in a single order, with each thread's own operations in program order, as in the simulator. Peterson's algorithm is beautiful and not used in practice. It handles only two threads, and on modern processors, which aren't sequentially consistent, it fails: cores keep recent stores in a <em>store buffer</em> before they reach memory, and may let a later load go first, so a thread can read the other's old flag after "setting" its own. Making it work needs special <strong>memory fence</strong> instructions that force earlier stores to complete. Real locks instead use instructions designed for the job.</p>
 
 <h3>Atomic instructions</h3>
-<p>Processors provide instructions that read and write a memory location as one indivisible step, even with other cores trying at the same moment (the cache hardware holds the cache line exclusively for the duration). The basic one is <strong>test-and-set</strong>, or atomic exchange: store a new value and return the old one. x86-64 has <code>xchg</code>; RISC-V's "A" extension has <code>amoswap.w</code> ("atomic memory operation: swap word") and the pair <code>lr.w</code>/<code>sc.w</code> (load-reserved, store-conditional), from which the others can be built. Two more appear everywhere:</p>
+<p>Processors provide instructions that read and write a memory location as one indivisible step, even with other cores trying at the same moment (the cache hardware holds the cache line exclusively for the duration). The basic one is <strong>test-and-set</strong>, or atomic exchange: store a new value and return the old one. x86-64 has <code>xchg</code>; RISC-V's "A" extension has <code>amoswap.w</code> ("atomic memory operation: swap word") and the pair <code>lr.w</code>/<code>sc.w</code> (load-reserved, store-conditional). <code>lr.w</code> loads a word and reserves its address; <code>sc.w</code> stores to that address only if no other core has written it since the <code>lr.w</code>, and puts 0 in its destination register if the store happened, nonzero if it failed. A loop of load-reserved, compute, store-conditional, retrying on failure, performs any read-modify-write atomically, so the other instructions can be built from the pair. Two more appear everywhere:</p>
 <ul>
 <li><strong>Compare-and-swap</strong> (CAS): if the location holds an expected value, replace it with a new one; return whether it did (x86 <code>cmpxchg</code>).</li>
 <li><strong>Fetch-and-add</strong>: add to the location and return the old value (x86 <code>lock xadd</code>, RISC-V <code>amoadd.w</code>).</li>
@@ -645,7 +686,7 @@ atomic_flag busy = ATOMIC_FLAG_INIT;   /* the lock: clear means free */
 
 void lock(void)   { while (atomic_flag_test_and_set(&amp;busy)) { /* spin */ } }
 void unlock(void) { atomic_flag_clear(&amp;busy); }</code></pre>
-<p>Compiled with <code>gcc -O2</code> on x86-64, the loop in <code>lock</code> is an <code>xchgb</code> instruction followed by a test and a branch back. Used around the counter of Lesson 3 in two threads, it gives 2000000 every time. Because the check and the set are one instruction, the flaw of <code>FlagsOnly</code> (both threads checking before either sets) can't happen. (The simulator's <code>Lock</code> in the programming problems imitates this: its check and set happen in one step, with no <code>yield</code> between them.)</p>
+<p>Compiled with <code>gcc -O2</code> on x86-64, the loop in <code>lock</code> is an <code>xchgb</code> instruction followed by a test and a branch back. Used around the counter of Lesson 3 in two threads, it gives 2000000 every time. Because the check and the set are one instruction, the flaw of <code>FlagsOnly</code> (both threads checking before either sets) can't happen. (The simulator's <code>Lock</code> from Lesson 3 imitates this: its check and set happen in one step, with no <code>yield</code> between them.)</p>
 
 <h3>Spinning or blocking</h3>
 <p>A lock whose waiters loop is a <strong>spin lock</strong>. It is the right choice when critical sections are very short and each thread has its own core: the wait is shorter than a context switch would be. But on one core, a spinning thread burns its whole time slice waiting for a thread that can't run until it stops; and test-and-set locks aren't fair, since whichever waiter happens to swap first wins. A <strong>ticket lock</strong>, built from fetch-and-add, fixes fairness (a programming problem builds one).</p>
@@ -704,6 +745,45 @@ for t in threads:
     t.join()
 print(len(got), sorted(got) == list(range(1000)))   # 1000 True</code></pre>
 <p>(<code>threading.Condition(lock)</code> makes a condition variable that uses an existing lock, and <code>with self.lock</code> holds it for the whole method; <code>deque</code>'s <code>popleft</code> removes from the front in constant time.) Two details matter. With <code>if</code> instead of <code>while</code>, two consumers can both be woken for one item: the first takes it, and the second pops from an empty buffer. And with a single condition variable for both sides and <code>notify</code>, a consumer can wake another consumer instead of a producer, and every thread can end up asleep. Two condition variables, or <code>notify_all</code>, avoid that.</p>
+<p>The programming problems use a condition variable for the simulator, built on its <code>Lock</code>. <code>wait</code> may have to wait, so it is a generator, used as <code>yield from cond.wait()</code> while holding the lock; <code>notify</code> and <code>notify_all</code> never wait, so they are plain calls, like <code>release</code>:</p>
+<pre><code>class Condition:
+    """A condition variable for simulated threads, used like threading.Condition."""
+    def __init__(self, lock):
+        self.lock = lock
+        self.waiting = []
+    def wait(self):               # use:  yield from cond.wait()   (while holding the lock)
+        me = [False]
+        self.waiting.append(me)
+        self.lock.release()
+        while not me[0]:
+            yield
+        yield from self.lock.acquire()
+    def notify(self):
+        if self.waiting:
+            self.waiting.pop(0)[0] = True
+    def notify_all(self):
+        for w in self.waiting:
+            w[0] = True
+        self.waiting.clear()
+
+lock = Lock()
+ready = Condition(lock)
+box, got = [], []
+def waiter():
+    yield from lock.acquire()
+    while not box:
+        yield from ready.wait()
+    got.append(box.pop())
+    lock.release()
+def setter():
+    yield from lock.acquire()
+    box.append("item")
+    ready.notify()
+    lock.release()
+    yield
+run([waiter(), setter()], schedule=[0, 1])
+print(got)   # ['item']</code></pre>
+<p>Each waiter puts a one-item list <code>me</code> on the queue, and <code>notify</code> sets the first one to <code>True</code>. Joining the queue and releasing the lock happen with no <code>yield</code> between them, so they are one atomic step, as the rule above requires. Here the waiter runs first, finds <code>box</code> empty and waits; the setter can then take the lock, fill the box and notify; the waiter wakes, reacquires the lock and rechecks.</p>
 
 <h3>Monitors</h3>
 <p>The pattern of this class, data plus one lock held by every method plus condition variables, is a <strong>monitor</strong>, proposed by Per Brinch Hansen and C. A. R. Hoare in the early 1970s. Some languages build it in: in Java, every object has a lock and one condition variable, a method marked <code>synchronized</code> holds the object's lock, and <code>wait()</code>, <code>notify()</code> and <code>notifyAll()</code> are methods of every object. Organizing concurrent code as monitors keeps each piece of shared data next to the lock that protects it.</p>
@@ -711,6 +791,7 @@ print(len(got), sorted(got) == list(range(1000)))   # 1000 True</code></pre>
       terms: [
         ["Progress", "If the lock is free and threads want it, one of them gets it."],
         ["Bounded waiting", "A waiting thread gets the lock after a bounded number of others, so none starves."],
+        ["Sequential consistency", "Memory that behaves as if all loads and stores happened one at a time in a single order, each thread's in program order."],
         ["Peterson's algorithm", "A two-thread lock using only loads and stores, correct on sequentially consistent memory."],
         ["Memory fence", "An instruction that forces earlier memory operations to complete before later ones."],
         ["Test-and-set (atomic exchange)", "An atomic instruction that stores a new value and returns the old one."],
@@ -996,7 +1077,7 @@ print(va &gt;&gt; 22, (va &gt;&gt; 12) &amp; 0x3FF, hex(va &amp; 0xFFF))   # 1 2
 <tr><td>LRU: evicts</td><td>F</td><td>F</td><td>F</td><td>F: 7</td><td>hit</td><td>F: 1</td><td>hit</td><td>F: 2</td><td>F: 3</td><td>F: 0</td><td>F: 4</td><td>hit</td><td>hit</td></tr>
 <tr><td>OPT: evicts</td><td>F</td><td>F</td><td>F</td><td>F: 7</td><td>hit</td><td>F: 1</td><td>hit</td><td>F: 0</td><td>hit</td><td>hit</td><td>F: 4</td><td>hit</td><td>hit</td></tr>
 </table>
-<p>FIFO has 10 faults, LRU 9 and OPT 7. At the reference to 4, OPT holds 2, 0 and 3, whose next uses are at positions 9, 11 and 10 (counting from 1), so it evicts 0; LRU evicts 2, used least recently, and is immediately punished.</p>
+<p>FIFO has 10 faults, LRU 9 and OPT 7. At the reference to 2, OPT holds 7, 0 and 1, and neither 7 nor 1 is ever used again: both are equally far in the future. Which one goes can't change the number of faults, since neither would ever be hit; the table breaks the tie by evicting the page loaded earliest, 7. At the reference to 4, OPT holds 2, 0 and 3, whose next uses are at positions 9, 11 and 10 (counting from 1), so it evicts 0; LRU evicts 2, used least recently, and is immediately punished.</p>
 <p>Exact LRU would need to update a timestamp or list on every memory access, far too costly. Hardware instead sets a <strong>use bit</strong> (or <em>accessed</em> bit) in the page-table entry whenever a page is touched, and the <strong>clock algorithm</strong> approximates LRU with it. Arrange the frames in a circle with a hand pointing at one. To find a victim, look at the frame under the hand: if its use bit is 1, clear it (a "second chance") and move on; if it is 0, the page hasn't been used since the hand last passed, so evict it. Pages in active use keep getting their bits set again and survive. On the string above, clock has 9 faults, the same as LRU. Real kernels use refinements: Linux keeps "active" and "inactive" lists, and prefers clean pages, which can be dropped without a write.</p>
 
 <h3>Belady's anomaly</h3>
@@ -1220,7 +1301,7 @@ echo two &gt; a</code></pre>`,
 write the data to the data register      # 2. hand over the data
 write the command to the command register   # 3. start it
 while status == BUSY: wait       # 4. wait until it is done</code></pre>
-<p>Steps 1 and 4 are <strong>polling</strong>: repeatedly reading the status. That wastes the processor if the device is slow. With <strong>interrupts</strong>, the kernel starts the operation, blocks the waiting process and runs another; the device raises an interrupt when it finishes, and the handler wakes the process (Lesson 1's blocked → ready). Interrupts aren't always better. For a very fast device, the interrupt's overhead (saving state, a context switch) can exceed the wait, so polling wins. And a network card receiving a flood of packets can interrupt so often that the machine does nothing else, <em>livelock</em>; Linux's network stack switches to polling under heavy load, and devices <em>coalesce</em> interrupts, raising one for a batch of completions.</p>
+<p>Steps 1 and 4 are <strong>polling</strong>: repeatedly reading the status. That wastes the processor if the device is slow. With <strong>interrupts</strong>, the kernel starts the operation, blocks the waiting process and runs another; the device raises an interrupt when it finishes, and the handler wakes the process (Lesson 1's blocked → ready). Interrupts aren't always better. For a very fast device, the interrupt's overhead (saving state, a context switch) can exceed the wait, so polling wins. And a network card receiving a flood of packets can interrupt so often that the machine spends all its time in interrupt handlers and no packet ever reaches a program: <em>receive livelock</em>, livelock in Lesson 5's sense (busy, changing state, but making no progress), caused here by a device rather than by threads; Linux's network stack switches to polling under heavy load, and devices <em>coalesce</em> interrupts, raising one for a batch of completions.</p>
 <p>In step 2, copying a large buffer into a data register a word at a time keeps the processor busy for nothing. With <strong>direct memory access</strong> (DMA), the kernel tells a DMA engine where the buffer is in memory, how long it is and where to send it; the engine copies the data itself and interrupts when it's done, while the processor runs other code. Disks, SSDs, network cards and GPUs all move data by DMA.</p>
 <p>Each device has its own registers and protocol, so the kernel talks to it through a <strong>device driver</strong>, code that knows that device and presents a standard interface (a block device that reads and writes numbered blocks, a network interface that sends packets) to the rest of the kernel. The file system of Lesson 7 doesn't know whether its blocks are on a hard disk, an SSD or a USB stick. Drivers are most of an operating system's code (more than half of the Linux kernel's source is in its <code>drivers</code> directory) and, being written for countless devices and less tested, cause a large share of its crashes.</p>
 
@@ -1234,7 +1315,7 @@ while status == BUSY: wait       # 4. wait until it is done</code></pre>
 <p>A random 4 KB read therefore takes 4 + 4.17 + 0.02 ≈ 8.19 ms, so a disk completes only about 1,000/8.19 ≈ 122 random reads a second: 122 × 4 KB ≈ 0.5 MB/s. Read 1 MB sequentially and the seek and rotation are paid once: about 5 ms of transfer at 200 MB/s. That factor of hundreds between random and sequential access drove the design of file systems for decades: keep a file's blocks together, keep inodes near their data, and reorder pending requests to shorten seeks (the kernel's <em>I/O scheduler</em>, for example the <em>elevator</em> algorithm, which serves requests in the order the arm sweeps across the disk).</p>
 
 <h3>SSDs</h3>
-<p>A solid-state drive stores bits as charge in <strong>flash memory</strong> cells, with no moving parts. A random 4 KB read takes tens of microseconds (about 100 µs including the operating system's overhead, which is what the programming problem assumes): 0.1 + 0.002 ≈ 0.102 ms, about 9,800 reads a second one at a time, and far more when many requests are in flight at once, since an SSD has many flash chips working in parallel. Flash has awkward rules. Data is read and written in <em>pages</em> (typically 4–16 KB), but a page can't be overwritten: it must first be erased, and erasing works only on a whole <em>erase block</em> of hundreds of pages, and takes milliseconds. Each block survives only a limited number of erases (thousands, for common types).</p>
+<p>A solid-state drive stores bits as charge in <strong>flash memory</strong> cells, with no moving parts. A random 4 KB read takes tens of microseconds (about 100 µs including the operating system's overhead, which is what the programming problem assumes), plus the transfer: at a typical 2,000 MB/s, 4 KB takes 0.004/2000 s = 0.002 ms. In all 0.1 + 0.002 = 0.102 ms, about 9,800 reads a second one at a time, and far more when many requests are in flight at once, since an SSD has many flash chips working in parallel. Flash has awkward rules. Data is read and written in <em>pages</em> (typically 4–16 KB), but a page can't be overwritten: it must first be erased, and erasing works only on a whole <em>erase block</em> of hundreds of pages, and takes milliseconds. Each block survives only a limited number of erases (thousands, for common types).</p>
 <p>So an SSD contains a small computer running a <strong>flash translation layer</strong> (FTL), which does to blocks what virtual memory does to pages: it maps the logical block numbers the OS uses to physical flash pages. A write goes to a fresh, already-erased page, and the map is updated; the old page is marked invalid. <em>Garbage collection</em> later copies the valid pages out of a mostly-invalid erase block and erases it. <em>Wear levelling</em> spreads erases evenly over all blocks. The extra copying means the flash does more writes than the OS asked for (<em>write amplification</em>). The OS helps by telling the drive which blocks no longer hold useful data (the <em>TRIM</em> command), so garbage collection needn't copy them. Notice that the FTL is a log-structured file system in miniature.</p>
 <table>
 <tr><th>Operation</th><th>Approximate time</th></tr>
@@ -1255,6 +1336,15 @@ while status == BUSY: wait       # 4. wait until it is done</code></pre>
 <li><strong>RAID 4 (parity):</strong> stripe data over <em>N</em> − 1 disks and store on the last disk the <strong>parity</strong> of each stripe, the XOR of its data blocks. Capacity is <em>N</em> − 1 disks.</li>
 <li><strong>RAID 5 (rotated parity):</strong> like RAID 4, but the parity block moves to a different disk in each stripe, so no single disk handles every parity update.</li>
 </ul>
+<p>In the RAID 5 layout used in this course, with disks numbered 0 to <em>N</em> − 1, stripe <em>s</em> keeps its parity on disk (<em>N</em> − 1 − <em>s</em>) mod <em>N</em>, and its data blocks fill the other disks in order. With 4 disks:</p>
+<table>
+<tr><th></th><th>Disk 0</th><th>Disk 1</th><th>Disk 2</th><th>Disk 3</th></tr>
+<tr><td>Stripe 0</td><td>D0</td><td>D1</td><td>D2</td><td>P</td></tr>
+<tr><td>Stripe 1</td><td>D3</td><td>D4</td><td>P</td><td>D5</td></tr>
+<tr><td>Stripe 2</td><td>D6</td><td>P</td><td>D7</td><td>D8</td></tr>
+<tr><td>Stripe 3</td><td>P</td><td>D9</td><td>D10</td><td>D11</td></tr>
+<tr><td>Stripe 4</td><td>D12</td><td>D13</td><td>D14</td><td>P</td></tr>
+</table>
 <p>Parity works because XOR (CS 210 Lesson 1) is its own inverse: if <em>P</em> = <em>D</em><sub>0</sub> ⊕ <em>D</em><sub>1</sub> ⊕ <em>D</em><sub>2</sub>, then XORing the survivors of any one loss gives back the missing block. For example, with one byte per block:</p>
 <pre><code>d0, d1, d2 = 0b1100_1010, 0b0110_0110, 0b1111_0000
 p = d0 ^ d1 ^ d2
