@@ -40,7 +40,7 @@ flowchart LR
 | `data/program.js` | Defines `window.CSA`: the four-year plan, the source registry, source access labels, and the registration helpers. Loads first. |
 | `data/<course>.js` | One file per course: `CSA.addCourse({...})`. |
 | `data/cs101-extras.js` | Sidebars and optional lessons for CS 101, kept separate because they are long. Other courses keep theirs in the course file. |
-| `data/cs101-code.js`, `data/cs102-code.js`, `data/cs201-code.js`, `data/cs210-code.js`, `data/math220-code.js`, `data/math230-code.js`, `data/cs220-code.js`, `data/cs230-code.js`, `data/cs240-code.js`, `data/phys250-code.js` | Auto-graded programming problems: `CSA.addCode("cs101", { unitId: [...] })`. PHYS 150 registers its few simulation problems at the end of its course file. The Year 2 files were generated from Python specs, so their strings are JSON; edit them directly. |
+| `data/cs101-code.js`, `data/cs102-code.js`, `data/cs201-code.js`, `data/cs210-code.js`, `data/math220-code.js`, `data/math230-code.js`, `data/cs220-code.js`, `data/cs230-code.js`, `data/cs240-code.js`, `data/phys250-code.js`, `data/cs310-code.js`, `data/cs320-code.js`, `data/cs340-code.js`, `data/cs350-code.js` | Auto-graded programming problems: `CSA.addCode("cs101", { unitId: [...] })`. PHYS 150 registers its few simulation problems at the end of its course file. The Year 2 files were generated from Python specs, so their strings are JSON; edit them directly. |
 | `app/code.js` | Programming problems: editor, Check/Run, results, solution and hint reveal, export script. |
 | `app/pyworker.js` | Web Worker that loads Pyodide and runs the harness. |
 | `app/harness.py` | The grader: runs student code and checks one test at a time. Also embedded in exported check scripts. |
@@ -179,7 +179,7 @@ Inside template literals, escape backslashes in code: write `"\\n"` to display `
 
 `pref` is the student's chosen language (saved in `localStorage`); `lang` is the language actually
 in use on the current page. `lang` is limited to the languages the course allows
-(`course.languages`, else `term.languages`, else Python, Java and C++). Year 1 and Year 2 set
+(`course.languages`, else `term.languages`, else Python, Java and C++). Years 1 to 3 set
 `languages: ["python"]`, so the switcher is hidden, `.multi` blocks collapse to the Python version,
 and `data-only` blocks, sidebars with `only` and quiz `langs` variants follow Python. The Java and
 C++ material for CS 101 Unit 1 stays in the files for later courses to reuse.

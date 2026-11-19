@@ -89,7 +89,7 @@ CSA.addCourse({
 <g class="hl"><rect x="165" y="120" width="130" height="40"/></g>
 <g class="text"><text x="85" y="55" text-anchor="middle">program runs</text><text x="375" y="55" text-anchor="middle">program resumes</text><text x="230" y="145" text-anchor="middle">handler runs</text>
 <text x="10" y="20" class="m">user mode</text><text x="10" y="190" class="m">kernel mode</text>
-<text x="158" y="98" class="m" text-anchor="end">ecall: save PC, switch mode</text><text x="302" y="98" class="m">sret: restore, switch back</text></g>
+<text x="10" y="112" class="m">ecall: save PC, switch mode</text><text x="450" y="112" class="m" text-anchor="end">sret: restore, switch back</text></g>
 <g class="ln"><line x1="150" y1="70" x2="180" y2="120"/><line x1="280" y1="120" x2="310" y2="70"/><line x1="10" y1="95" x2="450" y2="95"/></g>
 </svg><figcaption>A system call crosses the line between user mode and kernel mode twice. Interrupts and exceptions cross it the same way, but not at the program's request.</figcaption></figure>
 <p>A system call costs more than a function call: on a modern processor, entering and leaving the kernel takes on the order of a hundred nanoseconds to a microsecond, hundreds of cycles, plus cache and TLB disruption. That's why the C library's <code>printf</code> collects output in a buffer and makes one <code>write</code> system call for many characters (CS 210 Lesson 8's <code>fflush</code> story).</p>
