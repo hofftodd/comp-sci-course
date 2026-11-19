@@ -18,6 +18,11 @@ for (const t of D.program.terms.filter(t => t.open)) for (const cid of t.courses
   for (const u of [...c.units, ...c.optional]) {
     if (ids.has(u.id)) bad(`${cid} dup id ${u.id}`); ids.add(u.id);
     for (const q of u.quiz || []) if (!(q.answer >= 0 && q.answer < q.choices.length)) bad(`${cid}/${u.id} quiz answer ${q.q}`);
+    // Quiz text is inserted as HTML, so a "<" that starts something other than a known tag (like
+    // "<T1, X, 5, 8>") becomes an unknown element and vanishes from the page. Write &lt; instead.
+    const QUIZ_TAG = /^<\/?(em|strong|b|i|code|pre|sub|sup|br|span|a|kbd|small)\b/i;
+    for (const q of u.quiz || []) for (const s of [q.q, q.why || "", ...q.choices])
+      for (const m of s.matchAll(/<[A-Za-z\/][^>]*>?/g)) if (!QUIZ_TAG.test(m[0])) bad(`${cid}/${u.id} quiz text has an unescaped "<": ${m[0]}`);
     for (const s of [...(u.sources || []), ...(u.asides || []).flatMap(a => a.sources || [])]) if (!D.sources[s]) bad(`${cid}/${u.id} unknown source ${s}`);
     for (const m of (u.notes || "").matchAll(/id="([^"]+)"/g)) markerIds.push(m[1]);
     if (!u.minutes) bad(`${cid}/${u.id} no minutes`);
