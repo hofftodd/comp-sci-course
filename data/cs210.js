@@ -67,7 +67,7 @@ CSA.addCourse({
 <p>A <strong>bit</strong> is a 0 or a 1; a <strong>byte</strong> is 8 bits, the smallest unit of memory that has its own address. Long binary numbers are hard to read, so programmers write them in <strong>hexadecimal</strong> (base 16), with digits 0–9 and A–F (A = 10, …, F = 15). Each hex digit stands for exactly 4 bits, so converting is a matter of grouping:</p>
 <pre data-label="Example"><code>binary   1101 0110 0011 1111
 hex         D    6    3    F      written 0xD63F</code></pre>
-<p>The prefix <code>0x</code> marks a hex number, both in C and in Python: <code>0xFF</code> is 255, one byte of all ones. Python's <code>hex()</code> and <code>bin()</code> convert for you: <code>hex(255)</code> is <code>'0xff'</code>.</p>
+<p>The prefix <code>0x</code> marks a hex number, both in C and in Python: <code>0xFF</code> is 255, one byte of all ones. Likewise the prefix <code>0b</code> marks a binary number: Python accepts <code>0b11111111</code> as another way to write 255 (C compilers such as gcc accept it too). Python's <code>hex()</code> and <code>bin()</code> convert for you: <code>hex(255)</code> is <code>'0xff'</code> and <code>bin(12)</code> is <code>'0b1100'</code>.</p>
 
 <h3>Unsigned integers</h3>
 <p>With <em>w</em> bits <em>b</em><sub><em>w</em>−1</sub> … <em>b</em><sub>1</sub><em>b</em><sub>0</sub>, the <strong>unsigned</strong> interpretation is the ordinary binary value</p>
@@ -131,7 +131,7 @@ print(wrap(2**31, 32))       # -2147483648</code></pre>
 <p>Some useful tricks follow from the arithmetic. <code>x &amp; (x - 1)</code> clears the lowest 1 bit (subtracting 1 turns the lowest 1 into 0 and the 0s below it into 1s). So a positive <em>x</em> is a power of two exactly when <code>x &amp; (x - 1) == 0</code>, and repeating the trick until <em>x</em> is 0 counts the 1 bits.</p>
 
 <h3>Byte order</h3>
-<p>A 32-bit integer takes 4 bytes in memory. In which order? <strong>Little-endian</strong> machines (x86 and, in practice, ARM) store the least significant byte at the lowest address; <strong>big-endian</strong> ones store the most significant byte first, which is also the standard order for numbers sent over networks. The value 0x12345678 is stored as the bytes 78 56 34 12 on a little-endian machine. Byte order matters when data moves between machines or files, and when you look at raw memory in a debugger. Python can show both: <code>(0x12345678).to_bytes(4, "little")</code> is <code>b'xV4\\x12'</code> (the bytes 0x78, 0x56, 0x34, 0x12; Python prints bytes that are printable letters as letters).</p>
+<p>A 32-bit integer takes 4 bytes in memory. In which order? <strong>Little-endian</strong> machines (x86 and, in practice, ARM) store the least significant byte at the lowest address; <strong>big-endian</strong> ones store the most significant byte first, which is also the standard order for numbers sent over networks. The value 0x12345678 is stored as the bytes 78 56 34 12 on a little-endian machine. Byte order matters when data moves between machines or files, and when you look at raw memory in a debugger. Python can show both: <code>(0x12345678).to_bytes(4, "little")</code> is <code>b'xV4\\x12'</code>. A value written <code>b'...'</code> is a Python <strong>bytes</strong> object: a sequence of bytes, each a number from 0 to 255, rather than a string of characters. When Python prints one, a byte that is the code of a printable character (the number <code>ord</code> gives, as in CS 101; <code>ord("x")</code> is 120) is shown as that character, and any other byte is shown as <code>\\x</code> followed by two hex digits. So <code>b'xV4\\x12'</code> is the four bytes 0x78 (the code of <code>x</code>), 0x56 (<code>V</code>), 0x34 (<code>4</code>) and 0x12 (not printable, so <code>\\x12</code>). Indexing a bytes object gives the number: <code>(0x12345678).to_bytes(4, "little")[0]</code> is 120, which is 0x78.</p>
 `,
       terms: [
         ["Hexadecimal", "Base 16, with digits 0–9 and A–F; each hex digit stands for exactly 4 bits."],
@@ -405,15 +405,16 @@ int main(void) {
       ],
       practice: [
         {
-          q: `<p>Write a C program that prints the Celsius equivalents of 0, 20, 40, …, 100 °F (C = (F − 32) × 5 / 9) with one decimal place. Then explain why <code>(f - 32) * 5 / 9</code> with an <code>int f</code> gives slightly different numbers than <code>(f - 32) * 5 / 9.0</code>.</p>`,
+          q: `<p>Write a C program that prints the Celsius equivalents of 0, 20, 40, …, 100 °F (C = (F − 32) × 5 / 9) with one decimal place, using <code>(f - 32) * 5 / 9.0</code> and <code>%.1f</code>. Then add a second column computed with <code>(f - 32) * 5 / 9</code>: with an <code>int f</code> every operand is an <code>int</code>, so the result is an <code>int</code> and must be printed with <code>%d</code> (passing an <code>int</code> where <code>%f</code> expects a <code>double</code> is a bug C does not stop: <code>gcc -Wall</code> warns, and the program prints a meaningless number). Explain why the two columns differ.</p>`,
           a: `<pre data-label="C"><code>#include &lt;stdio.h&gt;
 
 int main(void) {
     for (int f = 0; f &lt;= 100; f += 20) {
-        printf("%d F = %.1f C\\n", f, (f - 32) * 5 / 9.0);
+        printf("%d F = %.1f C (int version: %d)\\n",
+               f, (f - 32) * 5 / 9.0, (f - 32) * 5 / 9);
     }
     return 0;
-}</code></pre><p>With all-<code>int</code> operands, <code>/ 9</code> is integer division truncating toward zero: for 0 °F, −160 / 9 is −17 instead of −17.8. Dividing by <code>9.0</code> makes the arithmetic happen in <code>double</code>. (<code>%.1f</code> prints one decimal place.)</p>`
+}</code></pre><p>With all-<code>int</code> operands, <code>/ 9</code> is integer division truncating toward zero: for 0 °F, −160 / 9 is −17 instead of −17.8, and for 20 °F, −60 / 9 is −6 instead of −6.7. The output starts <code>0 F = -17.8 C (int version: -17)</code>. Dividing by <code>9.0</code> makes the arithmetic happen in <code>double</code>. (<code>%.1f</code> prints one decimal place.)</p>`
         },
         {
           q: `<p>Work out by hand, without running anything, what C gives for <code>a / b</code> and <code>a % b</code>, and what Python gives for <code>a // b</code> and <code>a % b</code>, for (<em>a</em>, <em>b</em>) = (7, 2), (−7, 2), (7, −2) and (−7, −2). Check that each language's identity from the notes holds in all four cases. What rule decides the sign of the remainder in each language? (The programming problem <em>C's integer division</em> then asks you to compute C's results in Python.)</p>`,

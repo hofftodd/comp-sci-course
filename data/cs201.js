@@ -201,7 +201,7 @@ for i in range(n):
           a: `<p>T(<em>n</em>) = T(<em>n</em>/2) + <em>cn</em>. The levels do <em>cn</em>, <em>cn</em>/2, <em>cn</em>/4, …, a geometric series whose sum is less than 2<em>cn</em>. The first level alone is <em>cn</em>, so T(<em>n</em>) = Θ(<em>n</em>). Halving the input each time makes the total dominated by the first call.</p>`
         },
         {
-          q: `<p>Run the timing experiment from the notes with a Θ(<em>n</em>) function (for example <code>sum</code>) and with your own Θ(<em>n</em> log <em>n</em>) function (for example <code>sorted</code> on a shuffled list), for <em>n</em> = 10<sup>5</sup>, 2 × 10<sup>5</sup>, 4 × 10<sup>5</sup>. What ratios do you see, and why are they not exactly 2 and slightly more than 2?</p>`,
+          q: `<p>Run the timing experiment from the notes with a Θ(<em>n</em>) function (for example <code>sum</code>) and with a Θ(<em>n</em> log <em>n</em>) one, <code>sorted</code>. The notes' <code>timed</code> passes the already-sorted <code>list(range(n))</code>, on which <code>sorted</code> runs in about Θ(<em>n</em>) time (Lesson 6), so for <code>sorted</code> change <code>timed</code> to shuffle the data <em>before</em> starting the clock: add <code>import random</code> and the line <code>random.shuffle(data)</code> after <code>data = list(range(n))</code>. Measure <em>n</em> = 10<sup>5</sup>, 2 × 10<sup>5</sup>, 4 × 10<sup>5</sup>. What ratios do you see, and why are they not exactly 2 and slightly more than 2?</p>`,
           a: `<p>Expect ratios near 2 for <code>sum</code> and a little over 2 for <code>sorted</code> (since (2<em>n</em> log 2<em>n</em>)/(<em>n</em> log <em>n</em>) = 2(1 + 1/log₂ <em>n</em>), about 2.12 at <em>n</em> = 10<sup>5</sup>). Real ratios wander because of timer resolution, other programs, caches (Lesson-level detail you'll meet in CS 210), and Python's own overheads. Repeat each measurement several times and take the minimum or median.</p>`
         }
       ],
@@ -1137,7 +1137,7 @@ print(topological_order(prereqs))
 </ul>
 <p>The idea, from Bernard Galler and Michael Fischer in 1964, is to represent each set as a tree in which every item points to a parent, and the root is the representative. Find follows parent pointers to the root; union makes one root point to the other. Two simple improvements make it extraordinarily fast:</p>
 <ul>
-<li><strong>Union by size:</strong> attach the smaller tree under the root of the larger. A node's depth then increases only when its tree at least doubles in size, so no tree gets deeper than log₂ <em>n</em>.</li>
+<li><strong>Union by size:</strong> attach the smaller tree under the root of the larger. Here an item's <strong>depth</strong> is the number of parent pointers find follows from it to the root (the root has depth 0); it counts edges, not nodes like the heights of Lesson 4, because it is the number of steps find takes. A node's depth increases only when its tree at least doubles in size, and a tree of <em>n</em> items can double at most log₂ <em>n</em> times, so no item gets deeper than log₂ <em>n</em>.</li>
 <li><strong>Path compression:</strong> during find, make every node on the path point directly to the root. Later finds on those nodes take one step.</li>
 </ul>
 <pre><code>class UnionFind:
@@ -1253,7 +1253,7 @@ print(t.contains("ca"), t.contains("cat"), t.with_prefix("ca"))
       ],
       practice: [
         {
-          q: `<p>Start with items 1 to 8, each in its own set. Perform union(1, 2), union(3, 4), union(1, 3), union(5, 6), union(7, 8), union(5, 7), union(1, 5). Using union by size (ties: the first argument's root stays the root), draw the trees. How deep is the deepest item?</p>`,
+          q: `<p>Start with items 1 to 8, each in its own set. Perform union(1, 2), union(3, 4), union(1, 3), union(5, 6), union(7, 8), union(5, 7), union(1, 5). Using union by size (ties: the first argument's root stays the root), draw the trees. What is the largest depth (number of steps find takes to reach the root)?</p>`,
           a: `<p>union(1, 2): 2 → 1. union(3, 4): 4 → 3. union(1, 3): sizes 2 and 2, so 3 → 1. Similarly 6 → 5, 8 → 7, 7 → 5. union(1, 5): sizes 4 and 4, so 5 → 1. Depths: 1 at 0; 2, 3, 5 at 1; 4, 6, 7 at 2; 8 at 3 = log₂ 8. Without path compression, find(8) takes 3 steps; with it, after one find, 8 points straight to 1.</p>`
         },
         {
