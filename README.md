@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. The other three terms are planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had one. The other two terms are planned and shown on the home page.
 
 ## What's in Year 1
 
@@ -75,6 +75,22 @@ run simulated threads, Python generators under a seeded scheduler that Lesson 3 
 real SQL in the browser with Python's `sqlite3`, which the page loads on first use. CS 350 builds a
 software renderer and a small ray tracer from pixels up.
 
+### Spring
+
+| Course | Credits | Core units | Programming problems |
+|---|---|---|---|
+| CS 330 Computer Networks | 4 | 8 | 16 |
+| CS 360 Programming Languages | 4 | 8 | 16 |
+| CS 370 Introduction to AI and Machine Learning | 4 | 8 | 17 |
+| CS 380 Security Fundamentals | 4 | 8 | 16 |
+| CS 365 Compilers (elective) | 4 | 6 | 12 |
+
+Year 3 Spring grades every problem in Python too, so networks are simulated: packets are bytes,
+links and routers are objects, and real socket code is shown but not run. CS 360 grows one
+interpreter through the term; CS 365 builds a compiler from a lexer to a stack-machine VM and RISC-V
+register allocation; CS 370 uses only the standard library (no NumPy), from A* to backpropagation and
+attention; CS 380 teaches defensive security with toy cryptography and real-world case studies.
+
 Every course opens with a **rubric**: what is graded and how much it counts, the criteria with four
 performance levels, the grade scale, and policies. Each core lesson is designed for about 90 minutes:
 notes with worked examples and diagrams, key terms, 5–8 **practice problems** with optional hints and
@@ -87,12 +103,14 @@ idea is used in practice. Year 1 is taught in Python.
 
 - **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
   the student's browser.
-- **Auto-graded programming problems**: 226 in all. CS 101 has 31, two or three per lesson; CS 102
+- **Auto-graded programming problems**: 303 in all. CS 101 has 31, two or three per lesson; CS 102
   has 17 (classes, generators, writing tests that catch bugs, linked lists, trees); PHYS 150 has a
   simulation problem per lesson; Year 2 Fall has 53 (data structures, systems simulations, linear
   algebra and statistics); Year 2 Spring has 59 (algorithms, hardware simulations, software
   engineering practice and electromagnetism simulations); Year 3 Fall has 60 (operating-system
-  simulations, automata and parsers, SQL and database internals, and a software renderer). Each comes with
+  simulations, automata and parsers, SQL and database internals, and a software renderer); Year 3 Spring has 77 (protocol simulations,
+  interpreters and type checkers, search and learning algorithms, defensive security, and compiler
+  phases). Each comes with
   starter code, a hint, a reference solution and automatic tests: edge cases, hidden tests, speed
   tests that catch slow algorithms, and checks such as "don't use the built-in `max`". Students
   write real Python in the page; it runs in their browser with Pyodide (CPython compiled to
