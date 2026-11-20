@@ -142,7 +142,7 @@ R4 3 Two members graduate in December</code></pre>
 <ul>
 <li><strong>Goals:</strong> what each member wants from the project, and the grade the team is aiming for.</li>
 <li><strong>Availability:</strong> each member's hours per week, fixed commitments, and a regular meeting time.</li>
-<li><strong>Roles</strong> (Lesson 5): client contact, process lead, and so on, and when they rotate.</li>
+<li><strong>Roles</strong> (Lesson 5): client liaison, process lead, and so on, and when they rotate.</li>
 <li><strong>Communication:</strong> which channel is for what, and how quickly members reply (say, within 24 hours on weekdays).</li>
 <li><strong>Decisions:</strong> by consensus, falling back to a vote after a fixed time, with technical decisions recorded (Lesson 4).</li>
 <li><strong>Quality:</strong> the team's definition of done (reviewed, tested, merged, deployed).</li>
@@ -493,7 +493,7 @@ print(round(-recent.intercept / recent.slope, 1))      # 16.5</code></pre>
 <ul>
 <li>NFR-2: the desk keeps working through a three-hour session with no network.</li>
 <li>Maria fills shifts from home, and volunteers sign up on their own phones: some parts must be reachable over the internet.</li>
-<li>The data includes household addresses and dietary and health notes (Lesson 7).</li>
+<li>The data includes dietary and health notes, and registration handles addresses (Lesson 7).</li>
 <li>No budget beyond about $10 a month, and after handover, the maintainer is a volunteer who knows some Python.</li>
 </ul>
 
@@ -505,7 +505,7 @@ print(round(-recent.intercept / recent.slope, 1))      # 16.5</code></pre>
 <tr><td>Single-page app plus a JSON API (CS 240 Lesson 6)</td><td>Rich, fast interfaces; a public API that others will use; offline features, since code runs in the browser.</td><td>Two programs to build and keep consistent; more JavaScript; harder accessibility and testing.</td></tr>
 <tr><td>Native mobile app</td><td>Camera, location, notifications, app-store distribution.</td><td>Two platforms (or a cross-platform toolkit), store reviews, slow updates; your users must install it.</td></tr>
 <tr><td>Local desktop program with a local database</td><td>One machine, offline, sensitive data that should never leave it.</td><td>No remote access; backups and updates are manual.</td></tr>
-<tr><td>Microservices (many small services communicating over the network)</td><td>Large organizations, where many teams must deploy independently.</td><td>Distributed-systems failures (partial failure, where one service is down while the others run; retries that may repeat an operation; keeping copies of data consistent. CS 410 Distributed Systems, a required course this term, covers them), many deployments. Almost never right for a team of four.</td></tr>
+<tr><td>Microservices (many small services communicating over the network)</td><td>Large organizations, where many teams must deploy independently.</td><td>Distributed-systems failures (partial failure, where one service is down while the others run; retries that may repeat an operation; keeping copies of data consistent. CS 410 Distributed Systems, which you take alongside this course this term, covers them in depth; for this table, the definitions here are enough), many deployments. Almost never right for a team of four.</td></tr>
 </table>
 <p>Most of these can be built on a <strong>managed platform</strong> (a hosted database, a platform that runs your web app from a Git push), which transfers operations work to a provider in exchange for money, lock-in and data stored on someone else's servers.</p>
 <p>For the pantry, the team chose a server-rendered web app with a hosted database, plus one small exception: the check-in page saves visits in the browser's own storage when the network is down and sends them when it returns. That exception is where the design review should look hardest, because it introduces two copies of the data that can disagree.</p>
@@ -561,8 +561,11 @@ check-in carries a random id, so a resend is idempotent (CS 240 Lesson 6).
 - Household search offline uses a copy of the list downloaded at the
   start of the session, so it misses households registered elsewhere
   that day.
-- Two copies of the data can disagree; the server keeps the earliest
-  visit when duplicates arrive.</code></pre>
+- Two copies of the data can disagree: an offline desk can't see a
+  visit recorded elsewhere, so it can't ask for REQ-4's confirmation.
+  A queued check-in that arrives for a household already seen that
+  week is kept but flagged for Maria, who keeps or removes it. A
+  second visit confirmed at the desk (REQ-4) is recorded normally.</code></pre>
 <p>(IndexedDB is a database built into every modern browser that a web page's JavaScript can use.) Status starts as Proposed, becomes Accepted (or Rejected), and later perhaps Deprecated or "Superseded by 12" when a new record reverses it. The old record stays, because knowing what was decided and why is exactly what a newcomer, or next term's team, needs. Keep ADRs short: one page, written in an hour. A decision that took a week to make deserves an hour to record.</p>
 
 <h3>Running a design review</h3>
@@ -577,7 +580,7 @@ check-in carries a random id, so a resend is idempotent (CS 240 Lesson 6).
 <p>As an author, listen and ask clarifying questions; don't defend each decision in the room, because a defensive author makes reviewers stop raising issues. Afterwards, answer <em>every</em> comment in writing:</p>
 <table>
 <tr><th>Comment</th><th>Severity</th><th>Response</th></tr>
-<tr><td>Offline check-ins and a server-side check-in for the same household could both be recorded.</td><td>Blocking</td><td>Accepted. The server keeps the earliest visit per household per week and flags the other for Maria (ADR 7, consequences).</td></tr>
+<tr><td>Offline check-ins and a server-side check-in for the same household could both be recorded.</td><td>Blocking</td><td>Accepted. The confirmation of REQ-4 can't happen offline, so when a queued check-in arrives for a household that already has a visit that week, the server keeps both and flags the later one for Maria to keep or remove (ADR 7, consequences). Second visits confirmed at the desk aren't flagged.</td></tr>
 <tr><td>Why not a desktop app, which is offline by design?</td><td>Question</td><td>Declined: Maria and the volunteers need remote access. Added to Alternatives considered.</td></tr>
 <tr><td>The household table stores age as a number.</td><td>Minor</td><td>Accepted: store birth year, so it doesn't go stale.</td></tr>
 </table>
@@ -665,7 +668,7 @@ We will store only the birth year of the household's oldest member.
 <li><strong>Technical lead:</strong> keeps the architecture coherent, owns the ADRs (Lesson 4), and makes the call when a technical disagreement times out.</li>
 <li><strong>Quality lead:</strong> owns the test strategy and CI (Lesson 6), the charter's definition of done (Lesson 1), and the accessibility and security checks (Lesson 7).</li>
 </ul>
-<p>Rotate the roles once, at the start of CS 491, so that everyone learns two and no one becomes indispensable. A role is a responsibility to make sure something happens, not a license to do it alone.</p>
+<p>In a team of four, each member takes one role. In a team of three, one member holds two: process lead and quality lead combine well, because both are about how the work is done. In a team of five, the fifth member takes the role this project needs most, such as a design lead who owns the interface sketches and the usability tests (Lesson 8). Rotate the roles once, at the start of CS 491, so that everyone learns two and no one becomes indispensable. A role is a responsibility to make sure something happens, not a license to do it alone.</p>
 
 <h3>Communication</h3>
 <p>With <em>n</em> members there are <em>n</em>(<em>n</em> − 1)/2 pairs (CS 240 Lesson 1): 10 for a team of five. Information that travels pair by pair, in private messages, is lost. Make it public and written:</p>
@@ -765,7 +768,7 @@ We will store only the birth year of the household's oldest member.
       minutes: 90,
       summary: "Throwaway and evolutionary prototypes; starting with a walking skeleton; growing it in vertical slices; trunk-based development with feature flags and percentage rollouts; a test strategy for a real project; continuous delivery with versioned releases; and treating technical debt as a recorded, deliberate decision.",
       notes: `
-<p>The fourth milestone, in week 11, is a working prototype of the core flow, deployed and used by the client. "Working" and "deployed" are the important words. A prototype that runs only on one laptop during the demo tells the client little and gives next term nothing to build on. This lesson is about building in a way that keeps the system working, integrated and deployable every day from the second week on.</p>
+<p>The fourth milestone, in week 11, is a working prototype of the core flow, deployed and used by the client. "Working" and "deployed" are the important words. A prototype that runs only on one laptop during the demo tells the client little and gives next term nothing to build on. This lesson is about building in a way that keeps the system working, integrated and deployable every day from the first week of building (week 7, straight after the design review) to the end of the term.</p>
 
 <h3>Which prototype are you building?</h3>
 <p>There are two kinds, and confusing them causes trouble.</p>
@@ -776,7 +779,7 @@ We will store only the birth year of the household's oldest member.
 <p>The danger is a throwaway prototype that becomes the product because it "already works": code written to answer a question, with no tests or structure, now carrying real data. Decide which kind you are writing before you start, and say so in the repository.</p>
 
 <h3>Start with a walking skeleton</h3>
-<p>Alistair Cockburn called the right first build a <strong>walking skeleton</strong>: a tiny implementation of the system that performs one small function end to end, through every part of the architecture, and is deployed the way the real system will be. For the pantry, in week 7:</p>
+<p>Alistair Cockburn called the right first build a <strong>walking skeleton</strong>: a tiny implementation of the system that performs one small function end to end, through every part of the architecture, and is deployed the way the real system will be. For the pantry, in week 7, once the design review has approved the design:</p>
 <ul>
 <li>a page with one form, "record a visit for household number N", that saves a row in the hosted database;</li>
 <li>a page listing today's visits;</li>
@@ -888,7 +891,7 @@ print([u for u in users if bucket("new-checkin", u) &lt; 40])   # ['maria', 'vol
 
 <h3>A threat model for your project</h3>
 <p>CS 380 Lesson 1's four questions apply directly: what are we building and what are its assets; who might attack it and what can they do; what can go wrong; and what will we do about it. Start from the context diagram (Lesson 4), add the data stores and trust boundaries, and walk each flow across a boundary through STRIDE.</p>
-<p>For the pantry, the assets are the household records (names, addresses, household sizes, dietary and health notes), the volunteers' phone numbers, Maria's administrator account, and the service itself on Saturday morning. The adversaries are more varied than "a hacker":</p>
+<p>For the pantry, the assets are the household records (names, card numbers, household sizes, dietary and health notes), the addresses typed in at registration (checked, then discarded: see the data inventory below), the volunteers' phone numbers, Maria's administrator account, and the service itself on Saturday morning. The adversaries are more varied than "a hacker":</p>
 <ul>
 <li>a stranger on the internet probing the public sign-up pages;</li>
 <li>a volunteer, legitimately logged in, who is curious about a neighbor (an insider);</li>
@@ -900,9 +903,9 @@ print([u for u in users if bucket("new-checkin", u) &lt; 40])   # ['maria', 'vol
 <tr><th>Flow or store</th><th>Threat (STRIDE letter)</th><th>Response</th></tr>
 <tr><td>Browser to web app</td><td>Spoofing: a guessed volunteer password (S)</td><td>Use the framework's login with slow password hashing (CS 380 Lesson 3); limit how many attempts an address can make per minute (rate limiting); multi-factor sign-in for Maria's account</td></tr>
 <tr><td>Web app</td><td>A volunteer reads households they don't serve (I, E)</td><td>Server-side role checks on every request (complete mediation, CS 380 Lesson 1); desk volunteers see name, card number and last visit only; access to full records is logged</td></tr>
-<tr><td>Desk laptop's offline copy</td><td>Theft of the laptop (I)</td><td>Store only names and card numbers offline, never addresses or notes; turn on the operating system's full-disk encryption, so a stolen disk can't be read without the login password; clear the copy at the end of each session</td></tr>
+<tr><td>Desk laptop's offline copy</td><td>Theft of the laptop (I)</td><td>Store only names and card numbers offline, never notes; turn on the operating system's full-disk encryption, so a stolen disk can't be read without the login password; clear the copy at the end of each session</td></tr>
 <tr><td>Web app to SMS provider</td><td>The provider learns who uses the pantry (I)</td><td>Send reminders only to volunteers, never to households; message text without personal details</td></tr>
-<tr><td>Phone calls asking for a household's address</td><td>Social engineering (S, I)</td><td>A written policy: addresses are never given out; the system doesn't show them to desk volunteers at all</td></tr>
+<tr><td>Phone calls asking for a household's address</td><td>Social engineering (S, I)</td><td>A written policy: no information about any household is given out by phone, not even whether it is registered. The system can't leak an address, because it doesn't keep one (see the data inventory)</td></tr>
 <tr><td>Saturday morning</td><td>The hosting provider is down (D)</td><td>The offline queue (ADR 7); a printed list of the day's shifts as a fallback</td></tr>
 </table>
 <p>Notice that most responses are design decisions (what is stored, who sees it), not added security code. The cheapest data to protect is data you don't hold.</p>
@@ -913,7 +916,7 @@ print([u for u in users if bucket("new-checkin", u) &lt; 40])   # ['maria', 'vol
 <table>
 <tr><th>Field</th><th>Purpose</th><th>Who can see it</th><th>Kept for</th><th>Sensitivity</th></tr>
 <tr><td>Household name, card number</td><td>Check-in</td><td>Desk volunteers, Maria</td><td>Until 12 months after last visit</td><td>Medium</td></tr>
-<tr><td>Address</td><td>Eligibility (service area)</td><td>Maria only</td><td>Checked at registration, then reduced to "in area: yes"</td><td>High</td></tr>
+<tr><td>Address</td><td>Eligibility (service area)</td><td>Maria, at registration only</td><td>Not kept: checked at registration, then only "in area: yes" is stored</td><td>High</td></tr>
 <tr><td>Dietary and health notes</td><td>Allergy-safe food boxes</td><td>Maria, packing volunteers</td><td>While the household is active</td><td>High (health)</td></tr>
 <tr><td>Birth year of oldest member</td><td>Funder's report on seniors (ADR 9, written in Lesson 4's Practice 2)</td><td>Reports only, aggregated</td><td>Until 12 months after last visit</td><td>Low</td></tr>
 <tr><td>Volunteer phone number</td><td>Shift reminders</td><td>Maria; the SMS provider</td><td>Until the volunteer leaves</td><td>Medium</td></tr>
@@ -1165,7 +1168,7 @@ CSA.addAsides("cs490", {
     { kind: "history", title: "PERT, Polaris and the critical path", html: `<p>In the late 1950s the U.S. Navy's Special Projects Office was building the Polaris missile, to be launched from submerged submarines, with thousands of contractors and a schedule driven by the Cold War. Its planners, with the consultants Booz Allen Hamilton, developed the Program Evaluation and Review Technique (PERT) in 1958 and published it in 1959: the program as a network of events, three time estimates per activity, and the formulas in this lesson for each activity's mean and spread. At almost the same time, James Kelley of Remington Rand and Morgan Walker of DuPont developed the Critical Path Method (CPM) to schedule maintenance shutdowns of DuPont's chemical plants, using single time estimates and the forward and backward passes, and computing them on a UNIVAC. Polaris was deployed ahead of schedule, and PERT got much of the credit. Historians have been more skeptical: Harvey Sapolsky's study of the program argued that PERT's greatest value was persuading Congress and the Navy that the program was well managed, which won it money and freedom. Both readings carry a lesson for a capstone. The arithmetic is simple; what helps is being forced to list every task and dependency, and showing your stakeholders that you have.</p>`, sources: ["malcolm59", "kelley59"] }
   ],
   pj5: [
-    { kind: "ethics", title: "Who is responsible for generated code?", html: `<p>In a 2023 study at Stanford, Neil Perry, Megha Srivastava, Deepak Kumar and Dan Boneh gave 47 participants security-related programming tasks, such as encrypting a string and querying a database with user input, with or without an AI code assistant. Participants with the assistant wrote less secure code in four of the five tasks, with the clearest effects for encryption and SQL injection (CS 380 Lessons 2 and 6), and yet were <em>more</em> likely to believe their code was secure. Those who trusted the assistant less, and reworded their requests rather than accepting the first answer, produced fewer vulnerabilities. The ACM Code of Ethics (CS 100 Lesson 3) asks computing professionals to "strive to achieve high quality in both the processes and products of professional work" (principle 2.1). That duty doesn't pass to a tool. If generated code leaks a pantry household's address, the people harmed won't care which part of the code a model wrote, and neither will the client: the team that shipped it is responsible. That is why the course asks you to disclose AI use, review generated code as carefully as anyone's, and never let it write the security-critical parts unreviewed.</p>`, sources: ["perry23", "acm"] }
+    { kind: "ethics", title: "Who is responsible for generated code?", html: `<p>In a 2023 study at Stanford, Neil Perry, Megha Srivastava, Deepak Kumar and Dan Boneh gave 47 participants security-related programming tasks, such as encrypting a string and querying a database with user input, with or without an AI code assistant. Participants with the assistant wrote less secure code in four of the five tasks, with the clearest effects for encryption and SQL injection (CS 380 Lessons 2 and 6), and yet were <em>more</em> likely to believe their code was secure. Those who trusted the assistant less, and reworded their requests rather than accepting the first answer, produced fewer vulnerabilities. The ACM Code of Ethics (CS 100 Lesson 3) asks computing professionals to "strive to achieve high quality in both the processes and products of professional work" (principle 2.1). That duty doesn't pass to a tool. If generated code leaks a pantry household's health notes, the people harmed won't care which part of the code a model wrote, and neither will the client: the team that shipped it is responsible. That is why the course asks you to disclose AI use, review generated code as carefully as anyone's, and never let it write the security-critical parts unreviewed.</p>`, sources: ["perry23", "acm"] }
   ],
   pj6: [
     { kind: "practice", title: "Knight Capital: a forgotten flag", html: `<p>On 1 August 2012, Knight Capital, then one of the largest traders in U.S. stocks, deployed new software for a New York Stock Exchange program to its eight order-routing servers. According to the Securities and Exchange Commission's later order, a technician didn't copy the new code to one of the eight, and nobody checked. The new code reused a flag that had once switched on an old function called "Power Peg", which hadn't been used for years but had never been removed. On the eighth server, orders carrying the reused flag woke Power Peg up. In the first 45 minutes of trading, Knight's system sent more than 4 million orders into the market while trying to fill 212 customer orders, and the firm lost more than $460 million. Automated emails had warned of the problem before the market opened; nobody acted on them. The SEC fined Knight $12 million, and the firm, unable to survive the loss on its own, was rescued and soon taken over. Count the lessons from this lesson: dead code and a flag left in place (remove release flags), a manual deployment step without verification (automate deployment, and deploy the same way every time), and no quick way to stop (a kill switch, and a rehearsed rollback).</p>`, sources: ["knight13"] }
