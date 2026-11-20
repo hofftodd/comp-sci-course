@@ -121,7 +121,7 @@ CSA.addCourse({
 </table>
 <p>The intercontinental numbers have a floor set by physics. Light in fibre travels at about 2 × 10<sup>8</sup> m/s (CS 330 Lesson 1). London to New York is about 5,570 km in a straight line, so one way takes at least</p>
 <p class="math">5.57 × 10<sup>6</sup> m / (2 × 10<sup>8</sup> m/s) = 0.02785 s ≈ 27.9 ms,</p>
-<p>and a round trip at least 55.7 ms. Real cables don't follow a straight line and routers add queueing delay, so measured round trips are 70 ms or more. No engineering removes this floor. A design that needs three round trips between Europe and America before it can answer a request takes at least 170 ms, while one memory access takes 100 ns: a million times less. That ratio is why replicas are placed near users, and why protocols are judged by how many round trips they need.</p>
+<p>and a round trip at least 55.7 ms. Real cables don't follow a straight line and routers add queueing delay, so measured round trips are 70 ms or more. No engineering removes this floor. A design that needs three round trips between Europe and America before it can answer a request takes at least 3 × 55.7 ≈ 167 ms (over 200 ms with measured round trips), while one memory access takes 100 ns: a million times less. That ratio is why replicas are placed near users, and why protocols are judged by how many round trips they need.</p>
 
 <h3>System models</h3>
 <p>To prove anything about an algorithm we must state what it may assume: a <strong>system model</strong>. It has three parts.</p>
@@ -148,7 +148,7 @@ CSA.addCourse({
 <ul>
 <li><strong>At-most-once</strong>: send the request once and never retry. The function ran zero or one times. Safe for non-repeatable actions, but a single lost packet makes the call fail.</li>
 <li><strong>At-least-once</strong>: retry until a reply arrives. If the client eventually gets a reply, the function ran one or more times. Safe only if running it twice is harmless, that is, if it is <strong>idempotent</strong> (CS 240 Lesson 6): "set the balance to 100" is idempotent; "add 100 to the balance" is not.</li>
-<li><strong>Exactly-once</strong> delivery is impossible for the two generals' reason, but an exactly-once <em>effect</em> is achievable: retry (at-least-once), and have the server recognize retries and not act on them twice. The client gives each logical request a unique ID; the server stores, for each ID it has executed, the reply it sent, and answers a repeat from that table. This is the idempotency key of CS 240 Lesson 6, and the same idea as a TCP receiver discarding a segment it already has.</li>
+<li><strong>Exactly-once</strong> delivery is impossible for the two generals' reason: after a timeout the sender can't know whether its message arrived (any acknowledgment could itself have been lost), so it must either resend, risking a second delivery, or not, risking none. No choice guarantees exactly one transmission. What is achievable is an exactly-once <em>effect</em>: retry (at-least-once), and have the server recognize retries and not act on them twice. The client gives each logical request a unique ID; the server stores, for each ID it has executed, the reply it sent, and answers a repeat from that table. This is the idempotency key of CS 240 Lesson 6, and the same idea as a TCP receiver using sequence numbers to discard a segment it already has. (TCP's segments may also arrive twice; the receiver's bookkeeping is what hides it, and only within one connection whose state both ends still hold.)</li>
 </ul>
 <p>Here is the difference in a simulation. The network loses each request and each reply with probability 0.3, decided by a seeded random-number generator so the run is repeatable. A client makes ten deposits of 100, each with its own request ID, retrying up to ten times.</p>
 <pre><code>import random
@@ -184,7 +184,7 @@ for dedupe in (False, True):
     print(dedupe, s.balance)</code></pre>
 <pre data-label="Output"><code>False 1500
 True 1000</code></pre>
-<p>Without deduplication, five of the ten deposits had a lost reply, were retried, and were applied twice: the customer gained 500 that nobody paid. With the table, the same lost messages cost only time. (Both runs use the same seed, so they lose exactly the same messages.) A real server must also keep the table from growing forever, for example by having each client number its requests 1, 2, 3, … and promise never to retry an old one once it has sent a newer one; then the server needs only the latest number and reply per client. The table must also survive a crash, or a retry that arrives after a restart will be applied again: it belongs in the same stable storage as the balance, updated in the same atomic write.</p>
+<p>Without deduplication, the balance is 1500 for ten deposits: five extra applications, gaining the customer 500 that nobody paid. (Counting per request shows that deposits 4, 8 and 9 were applied twice and deposit 7 three times, each lost reply having caused a retry that was applied again.) With the table, the same lost messages cost only time. (Both runs use the same seed, so they lose exactly the same messages.) A real server must also keep the table from growing forever, for example by having each client number its requests 1, 2, 3, … and promise never to retry an old one once it has sent a newer one; then the server needs only the latest number and reply per client. The table must also survive a crash, or a retry that arrives after a restart will be applied again: it belongs in the same stable storage as the balance, updated in the same atomic write.</p>
 `,
       terms: [
         ["Distributed system", "Several computers that cooperate on one job and communicate only by sending messages over a network."],
@@ -467,7 +467,8 @@ print(always_overlap(5, 2, 3))   # (False, (0, 1), (2, 3, 4))</code></pre>
 <h3>Resolving conflicts</h3>
 <p>With multiple leaders or none, two replicas can accept concurrent writes to the same key. All replicas must end up with the same value, so they need a rule that gives the same answer whatever order they see the writes in.</p>
 <p><strong>Last writer wins</strong> (LWW). Attach a timestamp to each write and keep the one with the largest. Cassandra does this. It converges, but it silently discards all but one of a set of concurrent writes. Worse, with physical clocks (Lesson 2) the write with the larger timestamp may be the <em>earlier</em> one: if node A's clock is 50 ms fast, A's write at true time 10:00:00.000 is stamped .050 and beats B's write at true time 10:00:00.030, stamped .030, although B's came later. LWW is acceptable only when losing writes doesn't matter, or when each key is written once.</p>
-<p><strong>Detecting concurrency.</strong> To keep concurrent writes instead of losing them, a store can attach a <strong>version vector</strong> to each value: a vector clock (Lesson 2) with one entry per replica, counting the writes each replica has made to that key. A write that has seen the current version replaces it; two writes whose vectors are concurrent are both kept as <em>siblings</em>, and the next reader (or the application) merges them. Dynamo's shopping cart merged siblings by taking the union of their items. This loses no additions, but an item deleted on one side could reappear.</p>
+<p><strong>Detecting concurrency.</strong> To keep concurrent writes instead of losing them, a store can attach a <strong>version vector</strong> to each value: a vector clock (Lesson 2) with one entry per replica, counting the writes each replica has made to that key. A read returns the value together with its vector, the <em>context</em>. A write sends back the context it read; the replica handling the write takes that vector, sets its own entry to one more than the largest it has used for that key, and stores the result with the new value. The write replaces every stored version whose vector is ≤ its context entry by entry (versions the writer had seen) and keeps the others beside it as <em>siblings</em> (writes it hadn't seen, concurrent with it). A read that finds siblings returns them all, with the entrywise maximum of their vectors as the context, and the reader (or the application) merges them and writes the result back, which then replaces them all.</p>
+<p>For example, with replicas R1 and R2: a client writes cart = {milk} through R1 with an empty context, stored with [1, 0]. Clients X and Y both read it. X writes {milk, eggs} through R1 with context [1, 0], giving [2, 0], which replaces [1, 0]. Y writes {milk, ham} through R2 with context [1, 0], giving [1, 1]; the stored [2, 0] is not ≤ [1, 0], so both are kept. [2, 0] and [1, 1] are concurrent (neither is ≤ the other). The next reader gets both with context [2, 1], merges them to {milk, eggs, ham}, and writes through R1, giving [3, 1], which replaces both siblings. Dynamo's shopping cart merged siblings by taking the union of their items. This loses no additions, but an item deleted on one side could reappear.</p>
 <p><strong>CRDTs.</strong> A <strong>conflict-free replicated data type</strong> (CRDT) is a data type designed so that replicas can accept updates independently and merge in any order with a guaranteed common result. For a <em>state-based</em> CRDT, the merge function must be:</p>
 <ul>
 <li>commutative: merge(<em>a</em>, <em>b</em>) = merge(<em>b</em>, <em>a</em>);</li>
@@ -522,7 +523,7 @@ print(a.counts, a.value(), b.value())   # [2, 1] 3 3</code></pre>
       ],
       practice: [
         {
-          q: `<p>A leader has applied log entries 1 to 500. Followers F1, F2 and F3 have applied 497, 480 and 500. A client wrote entry 499 and then reads. (a) Which replicas can serve a read-your-writes read? (b) The client's previous read was served by F1. Which replicas can serve this read without violating monotonic reads?</p>`,
+          q: `<p>A leader has applied log entries 1 to 500. Followers F1, F2 and F3 have applied 497, 480 and 500. A client wrote entry 499 and then reads. (a) Which replicas can serve a read-your-writes read? (b) The client's previous read was served by F1, which had then applied entries up to 497, as it has now. Which replicas can serve this read without violating monotonic reads?</p>`,
           a: `<p>(a) Any replica that has applied entry 499: the leader and F3 (F1 at 497 and F2 at 480 are behind). (b) Any replica at position 497 or more: the leader, F1 and F3. F2 would show the client an older state than it has already seen. Combining both requirements: the leader or F3.</p>`
         },
         {
@@ -725,7 +726,7 @@ print(at_least_as_up_to_date(2, 1, 1, 5))   # True: a newer last term beats a lo
 </ul>
 <p><strong>Leases.</strong> A lock in a distributed system can't be held forever, because its holder might crash while holding it. So locks are <strong>leases</strong>: granted for a limited time, say 10 seconds, after which they expire unless renewed. A crashed holder stops renewing, and after 10 s someone else can take over.</p>
 <p>Leases have a trap. Client 1 acquires the lease and is about to write to a file in shared storage. It then pauses, for 15 s, for a long garbage collection. Its lease expires; client 2 acquires it and writes. Client 1 wakes up, still believing it holds the lock (it hasn't checked a clock since before the pause), and writes too, overwriting client 2's work. Checking the lease just before writing doesn't help: the pause can come between the check and the write. Something outside the client must refuse the late write.</p>
-<p>The fix is a <strong>fencing token</strong>: a number that the lock service increases every time it grants the lock (ZooKeeper's transaction id, or Raft's log index, works). The client sends its token with every write, and the storage remembers the largest token it has seen and refuses smaller ones.</p>
+<p>The fix is a <strong>fencing token</strong>: a number that the lock service increases every time it grants the lock (ZooKeeper's <em>zxid</em>, the sequence number it gives every change to its state, works, since granting the lock is such a change; so does the Raft log index of the grant). The client sends its token with every write, and the storage remembers the largest token it has seen and refuses smaller ones.</p>
 <pre><code>class Storage:
     """A storage service that checks fencing tokens."""
     def __init__(self):
@@ -819,7 +820,7 @@ def h(s):
 keys = [f"user{i}" for i in range(10000)]
 moved = sum(h(k) % 4 != h(k) % 5 for k in keys)
 print(moved / len(keys))   # 0.8036</code></pre>
-<p>(<code>int.from_bytes(b, "big")</code> reads bytes as a big-endian unsigned integer, CS 210 Lesson 1's byte order. Taking 8 bytes of SHA-256, CS 380 Lesson 3, gives a well-mixed 64-bit number; any good hash would do, since nothing here needs to resist an attacker.)</p>
+<p>(<code>int.from_bytes(b, "big")</code> reads bytes as a big-endian unsigned integer, CS 210 Lesson 1's byte order. Taking 8 bytes of SHA-256, CS 380 Lesson 3, gives a well-mixed 64-bit number; any good hash would do, since nothing here needs to resist an attacker. A fixed hash is not the randomly chosen function that hashing's proofs assume; it behaves like one only on keys not chosen against it. CS 430 Lesson 5, taken alongside this course, discusses when that is enough.)</p>
 
 <h3>Consistent hashing</h3>
 <p><strong>Consistent hashing</strong> (Karger and colleagues, 1997, for web caches) moves only the keys it must. Picture the hash values 0 to 2<sup>64</sup> − 1 arranged in a circle, the <em>ring</em>. Each node is placed on the ring at the hash of its name. A key belongs to the first node at or after the key's hash going clockwise, wrapping around from the top back to 0. When a node joins, it takes over only the keys between its predecessor on the ring and itself; when a node leaves, its keys pass to its successor. Nothing else moves.</p>
@@ -847,17 +848,19 @@ def loads(ring):
     for k in keys:
         n = ring.lookup(k)
         count[n] = count.get(n, 0) + 1
-    return sorted(count.values())
+    return dict(sorted(count.items()))
 
 nodes = ["A", "B", "C", "D"]
-print(loads(Ring(nodes)))   # [729, 1283, 3344, 4644]
-print(loads(Ring(nodes, vnodes=100)))   # [2181, 2347, 2705, 2767]
+print(loads(Ring(nodes)))   # {'A': 1283, 'B': 3344, 'C': 4644, 'D': 729}
+print(loads(Ring(nodes, vnodes=100)))   # {'A': 2705, 'B': 2767, 'C': 2181, 'D': 2347}
 for v in (1, 100):
     old, new = Ring(nodes, v), Ring(nodes + ["E"], v)
-    print(v, sum(old.lookup(k) != new.lookup(k) for k in keys) / len(keys))</code></pre>
+    print(v, sum(old.lookup(k) != new.lookup(k) for k in keys) / len(keys))
+old, new = Ring(nodes), Ring(nodes + ["E"])
+print({(old.lookup(k), new.lookup(k)) for k in keys if old.lookup(k) != new.lookup(k)})   # {('C', 'E')}</code></pre>
 <pre data-label="Output"><code>1 0.2854
 100 0.2057</code></pre>
-<p><code>bisect.bisect_left(a, x)</code>, from the standard library, does a binary search (CS 201) in the sorted list <code>a</code> and returns the position of the first element greater than or equal to <code>x</code> (its twin <code>bisect_right</code> returns the first element strictly greater); taking it mod the number of points wraps past the top of the ring. With one point per node, the busiest node has 4,644 keys and the idlest 729, a factor of six. With 100 virtual nodes each, the loads are within about 25% of each other (the ideal is 2,500). Adding a fifth node moves 20.6% of the keys, close to the ideal 1/5, all of them to the new node; with one point per node, E happened to land in the middle of C's large arc and took 28.5%, all from C. Dynamo, Cassandra and Riak use consistent hashing with virtual nodes; each key is stored on the first <em>N</em> distinct physical nodes clockwise from its hash, its <em>preference list</em>, which gives Lesson 3's <em>N</em> replicas.</p>
+<p><code>bisect.bisect_left(a, x)</code>, from the standard library, does a binary search (CS 201) in the sorted list <code>a</code> and returns the position of the first element greater than or equal to <code>x</code> (its twin <code>bisect_right</code> returns the first element strictly greater); taking it mod the number of points wraps past the top of the ring. With one point per node, the busiest node (C) has 4,644 keys and the idlest (D) 729, a factor of six. With 100 virtual nodes each, the loads are within about 25% of each other (the ideal is 2,500). Adding a fifth node moves 20.6% of the keys, close to the ideal 1/5, all of them to the new node; with one point per node, E happened to land in the middle of C's large arc and took 28.5%, all from C: the last line lists each (old owner, new owner) pair among the moved keys, and there is only one. Dynamo, Cassandra and Riak use consistent hashing with virtual nodes; each key is stored on the first <em>N</em> distinct physical nodes clockwise from its hash, its <em>preference list</em>, which gives Lesson 3's <em>N</em> replicas.</p>
 
 <h3>Rebalancing and routing</h3>
 <p>Two other common ways to rebalance:</p>
@@ -1016,7 +1019,7 @@ for j, out in enumerate(mapreduce(splits, 2)):
     print(j, out)</code></pre>
 <pre data-label="Output"><code>0 [('cat', 2), ('sat', 1), ('the', 3)]
 1 [('a', 2), ('and', 1), ('dog', 2), ('end', 1)]</code></pre>
-<p><code>zlib.crc32</code> is the CRC of CS 330 Lesson 2, used here as a fast hash that gives the same value in every process. (Python dictionaries keep keys in insertion order, so <code>groups</code> lists keys in sorted order.) Notice that "the" appears in two different splits but all three counts reached reducer 0, because the partition function sent every "the" there.</p>
+<p><code>zlib.crc32</code> is the CRC of CS 330 Lesson 2, used here as a fast hash that gives the same value in every process. It spreads ordinary keys evenly, but it is easy to find many keys with the same CRC, so a job whose keys an adversary controls would need a keyed hash instead. (Python dictionaries keep keys in insertion order, so <code>groups</code> lists keys in sorted order.) Notice that "the" appears in two different splits but all three counts reached reducer 0, because the partition function sent every "the" there.</p>
 <p>Two refinements matter in practice. Map tasks are scheduled on, or near, the machines whose disks hold their splits, since moving computation is cheaper than moving data (<strong>locality</strong>). And a <strong>combiner</strong>, a reduce run on each map task's own output before the shuffle, turns a split's thousand ("the", 1) pairs into one ("the", 1000), shrinking the shuffle. It is valid when the reduce is associative and commutative, as a sum is.</p>
 
 <h3>Failures and stragglers</h3>
@@ -1124,7 +1127,7 @@ print(avg_reduce("cs410", [(90, 1), (170, 2), (80, 1)]))   # 85.0</code></pre>
 </ul>
 <p>A timeout should be chosen from measurements, not guessed: look at the distribution of heartbeat gaps or response times and set the timeout above a high percentile (say the 99.9th), so that false suspicions are rare by design. Better still, adapt it, as TCP does with its retransmission timeout (CS 330 Lesson 6). Cassandra and Akka use the <strong>phi accrual</strong> detector (Hayashibara and colleagues, 2004), which outputs a suspicion level instead of a yes or no. It estimates the distribution of past heartbeat gaps; if the time since the last heartbeat is <em>t</em>, it reports</p>
 <p class="math">φ = −log<sub>10</sub> P(a gap at least as long as <em>t</em>)</p>
-<p>so φ = 1 means "a gap this long happens 10% of the time", φ = 3 means 0.1%. The application acts when φ crosses a threshold it picks. If gaps were exponentially distributed with mean μ (MATH 230 Lesson 3), P(gap ≥ <em>t</em>) = e<sup>−<em>t</em>/μ</sup>, so φ = <em>t</em> / (μ ln 10): with μ = 1 s, a 5-second silence gives φ = 5 / 2.303 ≈ 2.17. A node whose heartbeats normally arrive like clockwork becomes suspect after a much shorter silence than one whose heartbeats are usually irregular.</p>
+<p>so φ = 1 means "a gap this long happens 10% of the time", φ = 3 means 0.1%. The application acts when φ crosses a threshold it picks. If gaps were exponentially distributed with mean μ (MATH 230 Lesson 3), P(gap ≥ <em>t</em>) = e<sup>−<em>t</em>/μ</sup>, so φ = <em>t</em> / (μ ln 10): with μ = 1 s, a 5-second silence gives φ = 5 / 2.303 ≈ 2.17. An exponential's standard deviation always equals its mean, so this model can't tell a regular node from an erratic one. The detector of the 2004 paper instead keeps the mean μ and standard deviation σ of the last 1,000 or so gaps and fits a normal distribution (MATH 230 Lesson 3): P(gap ≥ <em>t</em>) = 1 − Φ((<em>t</em> − μ)/σ), with Φ the standard normal CDF. φ = 3 is reached at <em>t</em> = μ + 3.09σ, so with μ = 1 s a node whose heartbeats arrive like clockwork (σ = 0.1 s) becomes suspect after 1.31 s of silence, and an irregular one (σ = 0.5 s) only after 2.55 s.</p>
 
 <h3>Retries that don't make things worse</h3>
 <p>CS 240 Lesson 8's rules for a single client: retry only idempotent operations (or ones with idempotency keys, Lesson 1), only on errors that might go away, with exponential backoff and jitter so that thousands of clients don't retry in lockstep. In a system of many services there are two more dangers.</p>

@@ -505,7 +505,7 @@ print(round(-recent.intercept / recent.slope, 1))      # 16.5</code></pre>
 <tr><td>Single-page app plus a JSON API (CS 240 Lesson 6)</td><td>Rich, fast interfaces; a public API that others will use; offline features, since code runs in the browser.</td><td>Two programs to build and keep consistent; more JavaScript; harder accessibility and testing.</td></tr>
 <tr><td>Native mobile app</td><td>Camera, location, notifications, app-store distribution.</td><td>Two platforms (or a cross-platform toolkit), store reviews, slow updates; your users must install it.</td></tr>
 <tr><td>Local desktop program with a local database</td><td>One machine, offline, sensitive data that should never leave it.</td><td>No remote access; backups and updates are manual.</td></tr>
-<tr><td>Microservices (many small services communicating over the network)</td><td>Large organizations, where many teams must deploy independently.</td><td>Distributed-systems failures (partial failure, where one service is down while the others run; retries that may repeat an operation; keeping copies of data consistent. CS 410, taken alongside this course, covers them), many deployments. Almost never right for a team of four.</td></tr>
+<tr><td>Microservices (many small services communicating over the network)</td><td>Large organizations, where many teams must deploy independently.</td><td>Distributed-systems failures (partial failure, where one service is down while the others run; retries that may repeat an operation; keeping copies of data consistent. CS 410 Distributed Systems, a required course this term, covers them), many deployments. Almost never right for a team of four.</td></tr>
 </table>
 <p>Most of these can be built on a <strong>managed platform</strong> (a hosted database, a platform that runs your web app from a Git push), which transfers operations work to a provider in exchange for money, lock-in and data stored on someone else's servers.</p>
 <p>For the pantry, the team chose a server-rendered web app with a hosted database, plus one small exception: the check-in page saves visits in the browser's own storage when the network is down and sends them when it returns. That exception is where the design review should look hardest, because it introduces two copies of the data that can disagree.</p>
@@ -663,7 +663,7 @@ We will store only the birth year of the household's oldest member.
 <li><strong>Client liaison:</strong> the client's main contact; schedules meetings, sends agendas and notes, and protects the client's time.</li>
 <li><strong>Process lead:</strong> runs planning and retrospectives, keeps the board and burndown current (Lesson 3), and notices when work stalls.</li>
 <li><strong>Technical lead:</strong> keeps the architecture coherent, owns the ADRs (Lesson 4), and makes the call when a technical disagreement times out.</li>
-<li><strong>Quality lead:</strong> owns the test strategy, CI and the definition of done (Lesson 6), and the accessibility and security checks (Lesson 7).</li>
+<li><strong>Quality lead:</strong> owns the test strategy and CI (Lesson 6), the charter's definition of done (Lesson 1), and the accessibility and security checks (Lesson 7).</li>
 </ul>
 <p>Rotate the roles once, at the start of CS 491, so that everyone learns two and no one becomes indispensable. A role is a responsibility to make sure something happens, not a license to do it alone.</p>
 
@@ -941,7 +941,7 @@ print([u for u in users if bucket("new-checkin", u) &lt; 40])   # ['maria', 'vol
 <li>pointer targets at least 24 by 24 CSS pixels (new in 2.2);</li>
 <li>the page still works when text is enlarged to 200%, and on a screen 320 CSS pixels wide without scrolling sideways.</li>
 </ul>
-<p>The <strong>contrast ratio</strong> is defined from each color's <em>relative luminance</em> <em>L</em>, from 0 for black to 1 for white. Each channel's 8-bit value is divided by 255 and then <em>linearized</em>, because stored color values aren't proportional to the amount of light (a value of 128 gives only about 22% of the light of 255; the elective CS 350 explains this sRGB encoding): a value <em>c</em> becomes <em>c</em>/12.92 if <em>c</em> ≤ 0.04045, and ((<em>c</em> + 0.055)/1.055)<sup>2.4</sup> otherwise. Then <em>L</em> = 0.2126<em>R</em> + 0.7152<em>G</em> + 0.0722<em>B</em>, weighting green most because eyes are most sensitive to it, and</p>
+<p>The <strong>contrast ratio</strong> is defined from each color's <em>relative luminance</em> <em>L</em>, from 0 for black to 1 for white. Each channel's 8-bit value is divided by 255 and then <em>linearized</em>, because stored color values aren't proportional to the amount of light (a value of 128 gives only about 22% of the light of 255; CS 350 Computer Graphics Lesson 1, a Year 3 elective, explains this sRGB encoding; the formulas below are all you need): a value <em>c</em> becomes <em>c</em>/12.92 if <em>c</em> ≤ 0.04045, and ((<em>c</em> + 0.055)/1.055)<sup>2.4</sup> otherwise. Then <em>L</em> = 0.2126<em>R</em> + 0.7152<em>G</em> + 0.0722<em>B</em>, weighting green most because eyes are most sensitive to it, and</p>
 <p class="math">contrast = (<em>L</em><sub>lighter</sub> + 0.05) / (<em>L</em><sub>darker</sub> + 0.05)</p>
 <p>which runs from 1 (identical colors) to 21 (black on white).</p>
 <pre><code>def channel(v):
@@ -1024,7 +1024,7 @@ print(percentile(ms, 50), percentile(ms, 95))   # 112 310</code></pre>
       minutes: 90,
       summary: "Closing the term: a demo that shows value to the people who will use the system; usability testing with think-aloud and the System Usability Scale; measuring the prototype against its requirements and reporting honestly; running a retrospective that changes something; and writing the mid-project report and an individual reflection.",
       notes: `
-<p>The term ends with three milestones in quick succession: the prototype demo in week 11, the mid-project report in week 14, and your individual reflection. All three ask the same question from different sides: what has the team built, for whom, how well does it work, and what has the team learned about building it? This lesson is about answering with evidence.</p>
+<p>The term ends with the last two milestones and your final individual reflection in quick succession: the prototype demo in week 11, the mid-project report in week 14, and the final reflection at the end of the term. All three ask the same question from different sides: what has the team built, for whom, how well does it work, and what has the team learned about building it? This lesson is about answering with evidence.</p>
 
 <h3>Demos that show value</h3>
 <p>A demo is not a tour of the code or a list of features. It shows a user's problem being solved. Build it as a short story:</p>
