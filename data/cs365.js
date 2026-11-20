@@ -110,7 +110,7 @@ fun main(): int {
 <tr><td>num</td><td><code>0</code>, <code>42</code>, <code>007</code></td><td>one or more digits</td></tr>
 <tr><td>name</td><td><code>gcd</code>, <code>x2</code>, <code>_tmp</code></td><td>a letter or <code>_</code>, then letters, digits or <code>_</code></td></tr>
 <tr><td>keywords</td><td><code>fun var if else while return print true false int bool</code></td><td>exactly that text</td></tr>
-<tr><td>operators and punctuation</td><td><code>&lt;= &gt;= == != &amp;&amp; ||</code> and <code>+ - * / % ! &lt; &gt; = ( ) { } , ; :</code></td><td>exactly that text</td></tr>
+<tr><td>operators and punctuation</td><td>two characters: <code>&lt;= &gt;= == != &amp;&amp; ||</code>; one character: <code>+ - * / % ! &lt; &gt; = ( ) { } , ; :</code></td><td>exactly that text</td></tr>
 <tr><td>(skipped)</td><td>spaces, tabs, newlines; <code>//</code> to the end of the line</td><td></td></tr>
 </table>
 <p>For <code>if x&lt;=10 { y = y+1; }</code> the lexer produces 12 tokens: <code>if</code>, name <code>x</code>, <code>&lt;=</code>, num <code>10</code>, <code>{</code>, name <code>y</code>, <code>=</code>, name <code>y</code>, <code>+</code>, num <code>1</code>, <code>;</code>, <code>}</code>, followed by an end-of-input token, <code>eof</code>, so that the parser always has a next token to look at. Spacing made no difference: <code>x&lt;=10</code> and <code>x &lt;= 10</code> give the same tokens.</p>
@@ -1232,12 +1232,12 @@ print(g.code[5], g.code[10], len(g.code))   # ('jumpz', 11) ('jump', 17) 17</cod
 <p>The tree and the stack bytecode are both awkward to optimize. A tree hides the order of operations and the flow of control; stack code hides which value is which, because values have no names, only positions. So optimizers work on an intermediate representation designed for analysis. This lesson lowers the checked tree to that IR and optimizes it; Lesson 6 translates the result to RISC-V. Lesson 4's bytecode generator stays as it is, a separate route that doesn't use the optimizer.</p>
 
 <h3>Three-address code</h3>
-<p>In <strong>three-address code</strong> (TAC) each instruction does one operation on at most two operands and names its result: <code>t1 = a + 2</code>. Operands are variables, constants, or <strong>temporaries</strong> (<code>t1</code>, <code>t2</code>, …), new variables the compiler invents for intermediate results. Control flow uses labels and jumps. Our TAC instructions are tuples:</p>
+<p>In <strong>three-address code</strong> (TAC) each instruction does one operation on at most two operands and names its result: <code>v1 = a + 2</code>. Operands are variables, constants, or <strong>temporaries</strong> (<code>v1</code>, <code>v2</code>, …), new variables the compiler invents (named with a v, not a t, so that they can't be mixed up with RISC-V's registers t0–t6 in Lesson 6) for intermediate results. Control flow uses labels and jumps. Our TAC instructions are tuples:</p>
 <table>
 <tr><th>Tuple</th><th>Written as</th></tr>
-<tr><td><code>("add", "t1", "a", 2)</code> (and <code>sub mul div mod lt le gt ge eq ne</code>)</td><td><code>t1 = a + 2</code></td></tr>
+<tr><td><code>("add", "v1", "a", 2)</code> (and <code>sub mul div mod lt le gt ge eq ne</code>)</td><td><code>v1 = a + 2</code></td></tr>
 <tr><td><code>("copy", "x", 4)</code>; <code>("neg", "t", "a")</code>, <code>("not", "t", "a")</code></td><td><code>x = 4</code>; <code>t = -a</code>, <code>t = !a</code></td></tr>
-<tr><td><code>("label", "L1")</code>, <code>("jump", "L1")</code>, <code>("jumpz", "t1", "L2")</code></td><td><code>L1:</code>, <code>jump L1</code>, <code>jumpz t1 L2</code> (jump if <code>t1</code> is 0)</td></tr>
+<tr><td><code>("label", "L1")</code>, <code>("jump", "L1")</code>, <code>("jumpz", "v1", "L2")</code></td><td><code>L1:</code>, <code>jump L1</code>, <code>jumpz v1 L2</code> (jump if <code>v1</code> is 0)</td></tr>
 <tr><td><code>("print", "x")</code>, <code>("return", "s")</code></td><td><code>print x</code>, <code>return s</code></td></tr>
 </table>
 <p>A variable name is a string and a constant is an int, so the code can tell them apart with <code>isinstance</code>. Lowering an expression to TAC is a postorder walk again, but each node now returns the <em>name</em> of the operand that holds its value instead of leaving it on a stack:</p>
@@ -1263,7 +1263,7 @@ class Lower:
 
     def temp(self):                       # a fresh temporary
         self.count += 1
-        return f"t{self.count}"
+        return f"v{self.count}"
 
     def expr(self, e, dest=None):         # emit code for e; return the operand holding its value
         if e[0] in ("num", "var"):
@@ -1281,18 +1281,18 @@ low = Lower()
 result = low.expr(("bin", "*", ("bin", "+", ("var", "a"), ("num", 2)), ("bin", "-", ("var", "a"), ("var", "b"))))
 for ins in low.code:
     print(show(ins))
-print(result)   # t3</code></pre>
-<pre data-label="Output"><code>t1 = a + 2
-t2 = a - b
-t3 = t1 * t2
-t3</code></pre>
+print(result)   # v3</code></pre>
+<pre data-label="Output"><code>v1 = a + 2
+v2 = a - b
+v3 = v1 * v2
+v3</code></pre>
 <p>An assignment <code>x = e</code> passes <code>x</code> as the destination, <code>expr(e, "x")</code>, so the last instruction writes straight into <code>x</code> instead of a fresh temporary that would then need a copy; a constant or variable <code>e</code> becomes a copy:</p>
 <pre><code>low = Lower()
 low.expr(("num", 4), "x")
 low.expr(("bin", "*", ("var", "x"), ("num", 2)), "y")
 low.expr(("bin", "+", ("var", "s"), ("bin", "*", ("var", "y"), ("num", 3))), "s")
-print([show(ins) for ins in low.code])   # ['x = 4', 'y = x * 2', 't1 = y * 3', 's = s + t1']</code></pre>
-<p>Inner operations still get temporaries, as <code>t1</code> shows. Other statements lower as in Lesson 4, with named labels instead of addresses: <code>while</code> becomes a label, the condition, a <code>jumpz</code> out, the body and a <code>jump</code> back. (A short-circuit <code>&amp;&amp;</code> becomes jumps too; the lowering above handles only arithmetic, to keep it short.) Here is a Mini function and its TAC, the running example for the rest of the lesson:</p>
+print([show(ins) for ins in low.code])   # ['x = 4', 'y = x * 2', 'v1 = y * 3', 's = s + v1']</code></pre>
+<p>Inner operations still get temporaries, as <code>v1</code> shows. Other statements lower as in Lesson 4, with named labels instead of addresses: <code>while</code> becomes a label, the condition, a <code>jumpz</code> out, the body and a <code>jump</code> back. (A short-circuit <code>&amp;&amp;</code> becomes jumps too; the lowering above handles only arithmetic, to keep it short.) Here is a Mini function and its TAC, the running example for the rest of the lesson:</p>
 <pre data-label="Mini"><code>fun f(a: int): int {
     var x: int = 4;
     var y: int = x * 2;
@@ -1306,8 +1306,8 @@ print([show(ins) for ins in low.code])   # ['x = 4', 'y = x * 2', 't1 = y * 3', 
 <pre data-label="TAC"><code>    x = 4
     y = x * 2
     s = 0
-L1: t1 = a &gt; 0
-    jumpz t1 L2
+L1: v1 = a &gt; 0
+    jumpz v1 L2
     s = s + y
     a = a - 1
     jump L1
@@ -1321,11 +1321,11 @@ L2: return s</code></pre>
 <li>every instruction just after a <code>jump</code>, <code>jumpz</code> or <code>return</code> (control may not fall into it).</li>
 </ol>
 <p>Each block runs from a leader up to, not including, the next leader. The <strong>control-flow graph</strong> (CFG) has the blocks as vertices and an edge from <em>B</em> to <em>C</em> when control can pass directly from <em>B</em> to <em>C</em>: <em>B</em> ends in <code>jump</code> to <em>C</em>'s label; <em>B</em> ends in <code>jumpz</code>, giving edges to the label's block and to the next block (the condition may go either way); or <em>B</em> doesn't end in a jump or return and <em>C</em> follows it. A block that ends in <code>return</code> has no successors. For the example, naming each block after its label, or B plus its position if it has none:</p>
-<figure class="fig"><svg viewBox="0 0 440 250" width="440" role="img" aria-label="The control-flow graph: B0 (x = 4, y = x * 2, s = 0) leads to L1 (t1 = a > 0, jumpz t1 L2). L1 leads to B2 (s = s + y, a = a - 1, jump L1) and to L2 (return s). B2 leads back to L1.">
+<figure class="fig"><svg viewBox="0 0 440 250" width="440" role="img" aria-label="The control-flow graph: B0 (x = 4, y = x * 2, s = 0) leads to L1 (v1 = a > 0, jumpz v1 L2). L1 leads to B2 (s = s + y, a = a - 1, jump L1) and to L2 (return s). B2 leads back to L1.">
 <defs><marker id="cp5arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ln" d="M0 0 L10 5 L0 10 z"/></marker></defs>
 <g class="box"><rect x="140" y="10" width="160" height="56"/><rect x="140" y="100" width="160" height="40"/><rect x="290" y="180" width="140" height="56"/><rect x="20" y="186" width="120" height="30"/></g>
 <g class="text code"><text x="150" y="28">x = 4</text><text x="150" y="44">y = x * 2</text><text x="150" y="60">s = 0</text>
-<text x="150" y="116">t1 = a > 0</text><text x="150" y="132">jumpz t1 L2</text>
+<text x="150" y="116">v1 = a > 0</text><text x="150" y="132">jumpz v1 L2</text>
 <text x="300" y="198">s = s + y</text><text x="300" y="214">a = a - 1</text><text x="300" y="230">jump L1</text>
 <text x="30" y="206">return s</text></g>
 <g class="text m"><text x="132" y="30" text-anchor="end">B0</text><text x="132" y="120" text-anchor="end">L1</text><text x="438" y="176" text-anchor="end">B2</text><text x="20" y="180">L2</text></g>
@@ -1439,7 +1439,7 @@ def liveness(blocks, succ):
 
 blocks = {
     "B0": [("copy", "x", 4), ("mul", "y", "x", 2), ("copy", "s", 0)],
-    "L1": [("gt", "t1", "a", 0), ("jumpz", "t1", "L2")],
+    "L1": [("gt", "v1", "a", 0), ("jumpz", "v1", "L2")],
     "B2": [("add", "s", "s", "y"), ("sub", "a", "a", 1), ("jump", "L1")],
     "L2": [("return", "s")],
 }
@@ -1451,7 +1451,7 @@ for b in blocks:
 L1 ['a', 's', 'y'] ['a', 's', 'y']
 B2 ['a', 's', 'y'] ['a', 's', 'y']
 L2 ['s'] []</code></pre>
-<p>Here use and def are: B0 uses nothing and defines x, y, s; L1 uses a and defines t1; B2 uses a, s, y and defines a, s; L2 uses s. Visiting the blocks in the order B0, L1, B2, L2, the sets (in / out) after each round are:</p>
+<p>Here use and def are: B0 uses nothing and defines x, y, s; L1 uses a and defines v1; B2 uses a, s, y and defines a, s; L2 uses s. Visiting the blocks in the order B0, L1, B2, L2, the sets (in / out) after each round are:</p>
 <table>
 <tr><th>Round</th><th>B0</th><th>L1</th><th>B2</th><th>L2</th></tr>
 <tr><td>1</td><td>∅ / ∅</td><td>{a} / ∅</td><td>{a, s, y} / {a}</td><td>{s} / ∅</td></tr>
@@ -1511,30 +1511,30 @@ print([show(i) for i in remove_dead(b0, live_out["B0"])])   # ['y = 8', 's = 0']
     practice: [
       {
         q: `<p>Lower <code>(x - 1) * (x + y) / 2</code> to TAC with <code>Lower</code>, then run <code>fold_block</code> on the result after first adding <code>("copy", "x", 3)</code> at the front. What remains?</p>`,
-        a: `<p>Lowering gives <code>t1 = x - 1</code>, <code>t2 = x + y</code>, <code>t3 = t1 * t2</code>, <code>t4 = t3 / 2</code>. With x = 3: <code>t1 = 2</code> folds; <code>t2 = 3 + y</code> can't (y unknown); <code>t3 = 2 * t2</code>; <code>t4 = t3 / 2</code>. Is <code>2 * t2 / 2</code> just <code>t2</code>? For Mini's unbounded integers, yes, and an algebraic rule could simplify it. With 32-bit wrap-around arithmetic it isn't when 2 × <code>t2</code> overflows, so whether a compiler may apply such a rule depends on the language's integer semantics. (C compilers do apply it to signed integers, because C declares signed overflow undefined; see this lesson's sidebar.)</p>
+        a: `<p>Lowering gives <code>v1 = x - 1</code>, <code>v2 = x + y</code>, <code>v3 = v1 * v2</code>, <code>v4 = v3 / 2</code>. With x = 3: <code>v1 = 2</code> folds; <code>v2 = 3 + y</code> can't (y unknown); <code>v3 = 2 * v2</code>; <code>v4 = v3 / 2</code>. Is <code>2 * v2 / 2</code> just <code>v2</code>? For Mini's unbounded integers, yes, and an algebraic rule could simplify it. With 32-bit wrap-around arithmetic it isn't when 2 × <code>v2</code> overflows, so whether a compiler may apply such a rule depends on the language's integer semantics. (C compilers do apply it to signed integers, because C declares signed overflow undefined; see this lesson's sidebar.)</p>
 <pre><code>low = Lower()
 low.expr(("bin", "/", ("bin", "*", ("bin", "-", ("var", "x"), ("num", 1)), ("bin", "+", ("var", "x"), ("var", "y"))), ("num", 2)))
-print([show(i) for i in fold_block([("copy", "x", 3)] + low.code)])   # ['x = 3', 't1 = 2', 't2 = 3 + y', 't3 = 2 * t2', 't4 = t3 / 2']</code></pre>`
+print([show(i) for i in fold_block([("copy", "x", 3)] + low.code)])   # ['x = 3', 'v1 = 2', 'v2 = 3 + y', 'v3 = 2 * v2', 'v4 = v3 / 2']</code></pre>`
       },
       {
         q: `<p>Split this TAC into basic blocks and give each block's successors:</p>
 <pre data-label="TAC"><code>    i = 0
-L1: t1 = i &lt; n
-    jumpz t1 L3
-    t2 = i % 2
-    jumpz t2 L2
+L1: v1 = i &lt; n
+    jumpz v1 L3
+    v2 = i % 2
+    jumpz v2 L2
     print i
 L2: i = i + 1
     jump L1
 L3: return i</code></pre>`,
-        a: `<p>Leaders: <code>i = 0</code> (first), <code>L1</code>, <code>t2 = i % 2</code> (after a jumpz), <code>print i</code> (after a jumpz), <code>L2</code>, <code>L3</code>. Blocks: B0 = [i = 0] → L1. L1 = [t1 = i &lt; n, jumpz t1 L3] → B2 and L3. B2 = [t2 = i % 2, jumpz t2 L2] → B3 and L2. B3 = [print i] → L2 (falls through). L2 = [i = i + 1, jump L1] → L1. L3 = [return i], no successors. (Blocks without labels are named B plus their position, 0 to 5.)</p>`
+        a: `<p>Leaders: <code>i = 0</code> (first), <code>L1</code>, <code>v2 = i % 2</code> (after a jumpz), <code>print i</code> (after a jumpz), <code>L2</code>, <code>L3</code>. Blocks: B0 = [i = 0] → L1. L1 = [v1 = i &lt; n, jumpz v1 L3] → B2 and L3. B2 = [v2 = i % 2, jumpz v2 L2] → B3 and L2. B3 = [print i] → L2 (falls through). L2 = [i = i + 1, jump L1] → L1. L3 = [return i], no successors. (Blocks without labels are named B plus their position, 0 to 5.)</p>`
       },
       {
         q: `<p>Compute use, def, in and out for every block of the previous problem, with the iterative method. Which variables are live at the start of the function?</p>`,
         hint: `<p>Work backward from L3. Remember that <code>n</code> is read but never written.</p>`,
-        a: `<p>use/def: B0: ∅ / {i}; L1: {i, n} / {t1}; B2: {i} / {t2}; B3: {i} / ∅; L2: {i} / {i}; L3: {i} / ∅. Solution: in[L3] = {i}; L1's in and out sets are {i, n}, as are those of B2, B3 and L2 (n is needed on every trip back to the test); out[L3] = ∅; in[B0] = {n}, out[B0] = {i, n}. So only <code>n</code> is live at the start: it is the function's input, while <code>i</code> is written before it is read.</p>
-<pre><code>bl = {"B0": [("copy", "i", 0)], "L1": [("lt", "t1", "i", "n"), ("jumpz", "t1", "L3")],
-      "B2": [("mod", "t2", "i", 2), ("jumpz", "t2", "L2")], "B3": [("print", "i")],
+        a: `<p>use/def: B0: ∅ / {i}; L1: {i, n} / {v1}; B2: {i} / {v2}; B3: {i} / ∅; L2: {i} / {i}; L3: {i} / ∅. Solution: in[L3] = {i}; L1's in and out sets are {i, n}, as are those of B2, B3 and L2 (n is needed on every trip back to the test); out[L3] = ∅; in[B0] = {n}, out[B0] = {i, n}. So only <code>n</code> is live at the start: it is the function's input, while <code>i</code> is written before it is read.</p>
+<pre><code>bl = {"B0": [("copy", "i", 0)], "L1": [("lt", "v1", "i", "n"), ("jumpz", "v1", "L3")],
+      "B2": [("mod", "v2", "i", 2), ("jumpz", "v2", "L2")], "B3": [("print", "i")],
       "L2": [("add", "i", "i", 1), ("jump", "L1")], "L3": [("return", "i")]}
 sc = {"B0": ["L1"], "L1": ["B2", "L3"], "B2": ["B3", "L2"], "B3": ["L2"], "L2": ["L1"], "L3": []}
 li, lo = liveness(bl, sc)
@@ -1562,24 +1562,24 @@ print(len(remove_dead(blk, {"e"})))   # 5</code></pre>`
 <table>
 <tr><th>Instruction</th><th>Live just after it</th></tr>
 <tr><td>(entry)</td><td>a, b, c</td></tr>
-<tr><td><code>t1 = a + b</code></td><td>a, b, c, t1</td></tr>
-<tr><td><code>t2 = a - b</code></td><td>c, t1, t2</td></tr>
-<tr><td><code>t3 = t1 * t2</code></td><td>c, t3</td></tr>
-<tr><td><code>t4 = t3 + c</code></td><td>t4</td></tr>
-<tr><td><code>return t4</code></td><td>(none)</td></tr>
+<tr><td><code>v1 = a + b</code></td><td>a, b, c, v1</td></tr>
+<tr><td><code>v2 = a - b</code></td><td>c, v1, v2</td></tr>
+<tr><td><code>v3 = v1 * v2</code></td><td>c, v3</td></tr>
+<tr><td><code>v4 = v3 + c</code></td><td>v4</td></tr>
+<tr><td><code>return v4</code></td><td>(none)</td></tr>
 </table>
 <p>The table is computed backward, exactly as <code>remove_dead</code> walked a block in Lesson 5: start from the live-out set, and at each instruction remove the variable it defines and add the ones it reads. The <strong>interference graph</strong> has a vertex per variable and an edge between every two that interfere. It is built in the same backward walk: at each instruction that defines <em>d</em>, add an edge from <em>d</em> to every other variable live just after it. (If the instruction is a copy <code>d = s</code>, skip the edge to <em>s</em>: the two hold the same value, so sharing a register is fine, and then the copy disappears.) The variables live together on entry also interfere with each other. For the block:</p>
 <table>
 <tr><th>Variable</th><th>Interferes with</th></tr>
-<tr><td>a</td><td>b, c, t1</td></tr>
-<tr><td>b</td><td>a, c, t1</td></tr>
-<tr><td>c</td><td>a, b, t1, t2, t3</td></tr>
-<tr><td>t1</td><td>a, b, c, t2</td></tr>
-<tr><td>t2</td><td>c, t1</td></tr>
-<tr><td>t3</td><td>c</td></tr>
-<tr><td>t4</td><td>(none)</td></tr>
+<tr><td>a</td><td>b, c, v1</td></tr>
+<tr><td>b</td><td>a, c, v1</td></tr>
+<tr><td>c</td><td>a, b, v1, v2, v3</td></tr>
+<tr><td>v1</td><td>a, b, c, v2</td></tr>
+<tr><td>v2</td><td>c, v1</td></tr>
+<tr><td>v3</td><td>c</td></tr>
+<tr><td>v4</td><td>(none)</td></tr>
 </table>
-<p>Just after <code>t1 = a + b</code>, four values are live: a, b, c and t1 form a <strong>clique</strong>, four vertices all joined to each other, so they need four different registers. The largest number of values live at one point is called the <strong>register pressure</strong>, and no allocation can use fewer registers than that.</p>
+<p>Just after <code>v1 = a + b</code>, four values are live: a, b, c and v1 form a <strong>clique</strong>, four vertices all joined to each other, so they need four different registers. The largest number of values live at one point is called the <strong>register pressure</strong>, and no allocation can use fewer registers than that.</p>
 
 <h3>Allocation as graph colouring</h3>
 <p>Give each register a colour. An assignment of registers to variables in which interfering variables get different registers is exactly a <strong>colouring</strong> of the interference graph in which adjacent vertices get different colours. With <em>k</em> registers, the question "can every variable have a register?" is "is the graph <em>k</em>-colourable?", and CS 220 Lesson 8 showed that graph colouring is NP-complete. Gregory Chaitin and his colleagues at IBM made this connection practical in 1981–82, with a fast heuristic that works very well on real programs. It rests on one observation:</p>
@@ -1592,18 +1592,18 @@ print(len(remove_dead(blk, {"e"})))   # 5</code></pre>`
 <p>The spill cost of a variable estimates the memory traffic that spilling it adds: one load per use and one store per definition. Here every use or definition counts 1, and a parameter counts one definition on entry, since spilling it means storing the value it arrives with; real allocators multiply by 10 for each loop the instruction is inside, since it runs many times. Dividing the cost by the vertex's current degree favours spilling a variable that is cheap and that frees many neighbours. With <em>k</em> = 3, using cost / degree and breaking ties by name, the simplify phase runs:</p>
 <table>
 <tr><th>Step</th><th>Removed</th><th>Why</th></tr>
-<tr><td>1</td><td>t2</td><td>degree 2 &lt; 3 (t3 and t4 qualify too; take names in alphabetical order)</td></tr>
-<tr><td>2</td><td>t3</td><td>degree 1</td></tr>
-<tr><td>3</td><td>t4</td><td>degree 0</td></tr>
-<tr><td>4</td><td>c</td><td>stuck: a, b, c, t1 all have degree 3. Costs: a and b are defined on entry and used twice, 3 each; c is defined on entry and used once, 2; t1 is defined once and used once, 2. So c and t1 tie for the lowest cost / degree, 2/3, and c comes first by name</td></tr>
-<tr><td>5–7</td><td>a, b, t1</td><td>a triangle: degrees 2, 1, 0 as each is removed</td></tr>
+<tr><td>1</td><td>v2</td><td>degree 2 &lt; 3 (v3 and v4 qualify too; take names in alphabetical order)</td></tr>
+<tr><td>2</td><td>v3</td><td>degree 1</td></tr>
+<tr><td>3</td><td>v4</td><td>degree 0</td></tr>
+<tr><td>4</td><td>c</td><td>stuck: a, b, c, v1 all have degree 3. Costs: a and b are defined on entry and used twice, 3 each; c is defined on entry and used once, 2; v1 is defined once and used once, 2. So c and v1 tie for the lowest cost / degree, 2/3, and c comes first by name</td></tr>
+<tr><td>5–7</td><td>a, b, v1</td><td>a triangle: degrees 2, 1, 0 as each is removed</td></tr>
 </table>
-<p>Select pops t1, b, a and gives them colours 0, 1, 2. Then c: its neighbours a, b and t1 use all three colours, so c is spilled. t4, t3 and t2 get colours 0, 0 and 1. With <em>k</em> = 4 nothing gets stuck, and every variable gets a register.</p>
-<p>Spilling c means keeping it in a slot of the stack frame and rewriting the code: store after each definition (c is a parameter, so once on entry) and load into a fresh temporary just before each use: <code>c1 = load c</code> right before <code>t4 = t3 + c1</code>. The new temporary is live for one instruction, so register pressure drops: the largest live set is now three (a, b, t1 after the first instruction). The allocator then rebuilds the graph and colours again, and this time it succeeds with three registers. Spilling is why a variable inside a hot loop should rarely be chosen: its loads and stores would run on every iteration.</p>
+<p>Select pops v1, b, a and gives them colours 0, 1, 2. Then c: its neighbours a, b and v1 use all three colours, so c is spilled. v4, v3 and v2 get colours 0, 0 and 1. With <em>k</em> = 4 nothing gets stuck, and every variable gets a register.</p>
+<p>Spilling c means keeping it in a slot of the stack frame and rewriting the code: store after each definition (c is a parameter, so once on entry) and load into a fresh temporary just before each use: <code>c1 = load c</code> right before <code>v4 = v3 + c1</code>. The new temporary is live for one instruction, so register pressure drops: the largest live set is now three (a, b, v1 after the first instruction). The allocator then rebuilds the graph and colours again, and this time it succeeds with three registers. Spilling is why a variable inside a hot loop should rarely be chosen: its loads and stores would run on every iteration.</p>
 <p>Two refinements matter in practice. <strong>Coalescing</strong> merges the vertices of a copy <code>d = s</code> when they don't interfere, so both get the same register and the copy is deleted; much of the code that lowering produces is copies. <strong>Precolouring</strong> fixes some vertices in advance: a function's parameters arrive in particular registers and its result must leave in one, as the next section explains. Just-in-time compilers, which must allocate in microseconds, often use <strong>linear scan</strong> (Poletto and Sarkar, 1999) instead: sort the variables' live ranges by start and assign registers in one sweep, giving up a little quality for speed.</p>
 
 <h3>Instruction selection for RISC-V</h3>
-<p><strong>Instruction selection</strong> chooses machine instructions for each IR operation. For RISC-V most TAC instructions map to one instruction. Multiplication, division and remainder are in the <strong>M extension</strong> (<code>mul</code>, <code>div</code>, <code>rem</code>, which round toward zero like Mini), which nearly every RISC-V processor that runs an operating system has; the base RV32I of CS 230 has none of them. RISC-V has only one comparison that produces a value, <code>slt rd, rs1, rs2</code> ("set if less than": rd = 1 if rs1 &lt; rs2, else 0), so the others are built from it: <em>a</em> &gt; <em>b</em> is <em>b</em> &lt; <em>a</em>, and <em>a</em> ≤ <em>b</em> is "not (<em>b</em> &lt; <em>a</em>)", where <code>xori rd, rd, 1</code> flips a 0/1 value. For equality, <em>a</em> = <em>b</em> exactly when <em>a</em> − <em>b</em> = 0, and the assembler's pseudo-instructions <code>seqz rd, rs</code> and <code>snez rd, rs</code> (set if equal to zero, not equal to zero) test that. <code>beqz rs, L</code> (branch if zero) implements <code>jumpz</code>. A constant operand either goes in an instruction's 12-bit immediate (CS 230 Lesson 4), as with <code>addi</code>, or is loaded into a scratch register with <code>li</code>; this code reserves <code>t5</code> and <code>t6</code> for that, so the allocator must not use them.</p>
+<p><strong>Instruction selection</strong> chooses machine instructions for each IR operation. For RISC-V most TAC instructions map to one instruction. Multiplication, division and remainder are in the <strong>M extension</strong> (<code>mul</code>, <code>div</code>, <code>rem</code>, which round toward zero like Mini), which nearly every RISC-V processor that runs an operating system has; the base RV32I of CS 230 has none of them. RISC-V has only one comparison that produces a value, <code>slt rd, rs1, rs2</code> ("set if less than": rd = 1 if rs1 &lt; rs2, else 0), so the others are built from it: <em>a</em> &gt; <em>b</em> is <em>b</em> &lt; <em>a</em>, and <em>a</em> ≤ <em>b</em> is "not (<em>b</em> &lt; <em>a</em>)", where <code>xori rd, rd, 1</code> flips a 0/1 value. For equality, <em>a</em> = <em>b</em> exactly when <em>a</em> − <em>b</em> = 0, and the assembler's pseudo-instructions <code>seqz rd, rs</code> and <code>snez rd, rs</code> (set if equal to zero, not equal to zero) test that. <code>beqz rs, L</code> (branch if zero) implements <code>jumpz</code>. A constant operand either goes in an instruction's 12-bit immediate (CS 230 Lesson 4), as with <code>addi</code>, or is loaded into a scratch register with <code>li</code>; this code reserves <code>t5</code> and <code>t6</code> for that, so the allocator must not use them. Lesson 5 named its temporaries <code>v1</code>, <code>v2</code>, … so that they can't be confused with these registers: in this lesson every <code>t0</code>–<code>t6</code> is a register. In the register maps below, each key is a TAC name and each value a register, so <code>{"v1": "t0"}</code> puts the temporary v1 in the register t0. A TAC name reaches the machine code only through the map, so even a Mini variable that happened to be called <code>t5</code> would be safe.</p>
 <pre><code>SIMPLE = {"add": "add", "sub": "sub", "mul": "mul", "div": "div", "mod": "rem", "lt": "slt"}
 
 def select(ins, reg):
@@ -1652,7 +1652,7 @@ def select(ins, reg):
         out += [f"sub  {d}, {a}, {b}", f"snez {d}, {d}"]
     return out
 
-print(select(("le", "t1", "x", 10), {"t1": "t0", "x": "a0"}))   # ['li   t6, 10', 'slt  t0, t6, a0', 'xori t0, t0, 1']</code></pre>
+print(select(("le", "v1", "x", 10), {"v1": "t0", "x": "a0"}))   # ['li   t6, 10', 'slt  t0, t6, a0', 'xori t0, t0, 1']</code></pre>
 <p>(<code>{SIMPLE[op]:4}</code> pads the mnemonic to four characters, so the operands line up.) Pattern-matching one IR instruction at a time is the simplest kind of instruction selection. Production back ends match larger patterns: on RISC-V, <code>t = a + 8</code> followed by a load from address <code>t</code> becomes one <code>lw rd, 8(rs)</code>, where <code>rs</code> stands for the register holding <code>a</code> and <code>rd</code> for the one that receives the loaded word (not the return-address register <code>ra</code>), since loads take an offset.</p>
 
 <h3>The calling convention</h3>
@@ -1664,10 +1664,10 @@ print(select(("le", "t1", "x", 10), {"t1": "t0", "x": "a0"}))   # ['li   t6, 10'
 <li><strong>Callee-saved</strong> registers <code>s0</code>–<code>s11</code> (and <code>sp</code>) must have the same values when a function returns as when it was called; a function that uses one saves it in its frame first and restores it at the end. <strong>Caller-saved</strong> registers <code>t0</code>–<code>t6</code>, <code>a0</code>–<code>a7</code> and <code>ra</code> may be changed by any call.</li>
 </ul>
 <p>The convention shapes allocation. Parameters are precoloured: <code>a</code>, <code>b</code>, <code>c</code> arrive in <code>a0</code>, <code>a1</code>, <code>a2</code>, and the returned value must end in <code>a0</code>. A value live <em>across</em> a call can't stay in a caller-saved register, so the allocator puts it in an <code>s</code> register (paying for one save and restore per function) or spills it; values that aren't live across a call are best in <code>t</code> and <code>a</code> registers, which cost nothing to use. A function that calls nothing (a <em>leaf</em>) usually needs no stack frame at all.</p>
-<p>Colouring the example with parameters precoloured: t1 interferes with a, b and c, so it needs a fourth register, say <code>a3</code>; t2, t3 and t4 interfere only with values in other registers and can all reuse <code>a0</code>, which also puts the result where the convention wants it.</p>
-<pre><code>block = [("add", "t1", "a", "b"), ("sub", "t2", "a", "b"), ("mul", "t3", "t1", "t2"),
-         ("add", "t4", "t3", "c"), ("return", "t4")]
-reg = {"a": "a0", "b": "a1", "c": "a2", "t1": "a3", "t2": "a0", "t3": "a0", "t4": "a0"}
+<p>Colouring the example with parameters precoloured: v1 interferes with a, b and c, so it needs a fourth register, say <code>a3</code>; v2, v3 and v4 interfere only with values in other registers and can all reuse <code>a0</code>, which also puts the result where the convention wants it.</p>
+<pre><code>block = [("add", "v1", "a", "b"), ("sub", "v2", "a", "b"), ("mul", "v3", "v1", "v2"),
+         ("add", "v4", "v3", "c"), ("return", "v4")]
+reg = {"a": "a0", "b": "a1", "c": "a2", "v1": "a3", "v2": "a0", "v3": "a0", "v4": "a0"}
 for ins in block:
     for line in select(ins, reg):
         print(line)</code></pre>
@@ -1727,12 +1727,12 @@ ret</code></pre>
       ["Just-in-time (JIT) compiler", "A compiler that runs while the program runs, compiling the frequently executed parts using observed behaviour."]
     ],
     quiz: [
-      { q: "In the block t1 = x + 1; t2 = t1 * y; return t2, with x and y live on entry, which pairs interfere?", choices: ["x–y, t1–y", "x–t1, y–t2", "All pairs", "x–y only"], answer: 0, why: "x and y are live together on entry; just after t1 = x + 1, t1 and y are live (x is dead); t2 is defined when only t2 is live." },
+      { q: "In the block v1 = x + 1; v2 = v1 * y; return v2, with x and y live on entry, which pairs interfere?", choices: ["x–y, v1–y", "x–v1, y–v2", "All pairs", "x–y only"], answer: 0, why: "x and y are live together on entry; just after v1 = x + 1, v1 and y are live (x is dead); v2 is defined when only v2 is live." },
       { q: "Why can a vertex with fewer than k neighbours be removed during simplify?", choices: ["It has no value", "However its neighbours are coloured, they use at most k − 1 colours, so one is left for it", "It will be spilled anyway", "Its neighbours have more than k neighbours"], answer: 1, why: "That guarantee is why it can be coloured last." },
       { q: "If every remaining vertex has degree at least k, what does the allocator do?", choices: ["Report an error", "Choose a spill candidate, cheap to keep in memory, and remove it anyway", "Add a register", "Remove the vertex with the smallest degree"], answer: 1, why: "It may still get a colour in select; if not, it is spilled." },
       { q: "Which RISC-V instructions compute d = (a >= b), for a and b in registers?", choices: ["slt d, b, a", "slt d, a, b then xori d, d, 1", "sub d, a, b", "slt d, b, a then xori d, d, 1"], answer: 1, why: "a ≥ b is the negation of a < b." },
       { q: "A variable's value is needed after a call. Which kind of register should it be in?", choices: ["A caller-saved t register", "An a register", "A callee-saved s register (or memory)", "ra"], answer: 2, why: "The callee may overwrite t and a registers; it must preserve s registers." },
-      { q: "What is the register pressure of the block in this lesson's interference table, and what does it imply?", choices: ["3, so 3 registers suffice", "4, so at least 4 registers are needed to avoid spilling", "7, one per variable", "5, the largest degree"], answer: 1, why: "a, b, c and t1 are live together after the first instruction." }
+      { q: "What is the register pressure of the block in this lesson's interference table, and what does it imply?", choices: ["3, so 3 registers suffice", "4, so at least 4 registers are needed to avoid spilling", "7, one per variable", "5, the largest degree"], answer: 1, why: "a, b, c and v1 are live together after the first instruction." }
     ],
     practice: [
       {
@@ -1750,10 +1750,10 @@ return d</code></pre>`,
         a: `<p>Degrees: a 2, b 2, c 1, d 0, x 3. Remove c (degree 1), then d (0). Now a, b and x form a triangle, each with degree 2: stuck. Cost / degree: a 2/2, b 2/2, x 4/2; a and b tie, so a is the candidate (alphabetical). Remove a; then b (degree 1) and x (0). Select pops x (colour 0), b (1), a: its neighbours b and x use 0 and 1, so a is spilled. Then d gets 0, and c, whose only neighbour is x, gets 1. With <em>a</em> spilled, it is stored after <code>a = x * 2</code> and reloaded just before <code>c = a + b</code>.</p>`
       },
       {
-        q: `<p>Use <code>select</code> to translate this TAC with the given registers, and check each line: <code>t1 = n != 0</code>, <code>jumpz t1 L2</code>, <code>t2 = n - 1</code>, <code>L2:</code>, <code>return n</code>, with n in a0, t1 in t0 and t2 in a1.</p>`,
-        a: `<p><code>t1 = n != 0</code> becomes <code>li t6, 0</code>, <code>sub t0, a0, t6</code>, <code>snez t0, t0</code> (a peephole optimizer would notice that subtracting 0 is pointless and emit just <code>snez t0, a0</code>); <code>jumpz</code> becomes <code>beqz t0, L2</code>; <code>t2 = n - 1</code> becomes <code>addi a1, a0, -1</code>; the label stays; and <code>return n</code> is just <code>ret</code>, since n is already in a0.</p>
-<pre><code>prog = [("ne", "t1", "n", 0), ("jumpz", "t1", "L2"), ("sub", "t2", "n", 1), ("label", "L2"), ("return", "n")]
-regs = {"n": "a0", "t1": "t0", "t2": "a1"}
+        q: `<p>Use <code>select</code> to translate this TAC with the given registers, and check each line: <code>v1 = n != 0</code>, <code>jumpz v1 L2</code>, <code>v2 = n - 1</code>, <code>L2:</code>, <code>return n</code>, with the variable n in register a0, the TAC temporary v1 in register t0, and the temporary v2 in register a1 (the register map <code>{"n": "a0", "v1": "t0", "v2": "a1"}</code>).</p>`,
+        a: `<p><code>v1 = n != 0</code> becomes <code>li t6, 0</code>, <code>sub t0, a0, t6</code>, <code>snez t0, t0</code> (a peephole optimizer would notice that subtracting 0 is pointless and emit just <code>snez t0, a0</code>); <code>jumpz</code> becomes <code>beqz t0, L2</code>; <code>v2 = n - 1</code> becomes <code>addi a1, a0, -1</code>; the label stays; and <code>return n</code> is just <code>ret</code>, since n is already in a0.</p>
+<pre><code>prog = [("ne", "v1", "n", 0), ("jumpz", "v1", "L2"), ("sub", "v2", "n", 1), ("label", "L2"), ("return", "n")]
+regs = {"n": "a0", "v1": "t0", "v2": "a1"}
 print([line for ins in prog for line in select(ins, regs)])   # ['li   t6, 0', 'sub  t0, a0, t6', 'snez t0, t0', 'beqz t0, L2', 'addi a1, a0, -1', 'L2:', 'ret']</code></pre>`
       },
       {

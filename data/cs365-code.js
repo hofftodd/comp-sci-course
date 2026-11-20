@@ -585,8 +585,8 @@ CSA.addCode("cs365", {
     },
     {
      "label": "Comparisons fold to 1 and 0",
-     "call": "fold([('copy', 'a', 3), ('lt', 't1', 'a', 5), ('ge', 't2', 'a', 5), ('eq', 't3', 't1', 1), ('ne', 't4', 'a', 'a')])",
-     "expect": "[('copy', 'a', 3), ('copy', 't1', 1), ('copy', 't2', 0), ('copy', 't3', 1), ('copy', 't4', 0)]"
+     "call": "fold([('copy', 'a', 3), ('lt', 'v1', 'a', 5), ('ge', 'v2', 'a', 5), ('eq', 'v3', 'v1', 1), ('ne', 'v4', 'a', 'a')])",
+     "expect": "[('copy', 'a', 3), ('copy', 'v1', 1), ('copy', 'v2', 0), ('copy', 'v3', 1), ('copy', 'v4', 0)]"
     },
     {
      "label": "Mini's division and remainder",
@@ -657,13 +657,13 @@ CSA.addCode("cs365", {
    "tests": [
     {
      "label": "The notes' running example",
-     "call": "build_cfg([('copy', 'x', 4), ('mul', 'y', 'x', 2), ('copy', 's', 0), ('label', 'L1'), ('gt', 't1', 'a', 0), ('jumpz', 't1', 'L2'), ('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1'), ('label', 'L2'), ('return', 's')])",
-     "expect": "(['B0', 'L1', 'B2', 'L2'], {'B0': [('copy', 'x', 4), ('mul', 'y', 'x', 2), ('copy', 's', 0)], 'L1': [('gt', 't1', 'a', 0), ('jumpz', 't1', 'L2')], 'B2': [('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1')], 'L2': [('return', 's')]}, {'B0': ['L1'], 'L1': ['B2', 'L2'], 'B2': ['L1'], 'L2': []})"
+     "call": "build_cfg([('copy', 'x', 4), ('mul', 'y', 'x', 2), ('copy', 's', 0), ('label', 'L1'), ('gt', 'v1', 'a', 0), ('jumpz', 'v1', 'L2'), ('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1'), ('label', 'L2'), ('return', 's')])",
+     "expect": "(['B0', 'L1', 'B2', 'L2'], {'B0': [('copy', 'x', 4), ('mul', 'y', 'x', 2), ('copy', 's', 0)], 'L1': [('gt', 'v1', 'a', 0), ('jumpz', 'v1', 'L2')], 'B2': [('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1')], 'L2': [('return', 's')]}, {'B0': ['L1'], 'L1': ['B2', 'L2'], 'B2': ['L1'], 'L2': []})"
     },
     {
      "label": "The practice problem's loop",
-     "call": "build_cfg([('copy', 'i', 0), ('label', 'L1'), ('lt', 't1', 'i', 'n'), ('jumpz', 't1', 'L3'), ('mod', 't2', 'i', 2), ('jumpz', 't2', 'L2'), ('print', 'i'), ('label', 'L2'), ('add', 'i', 'i', 1), ('jump', 'L1'), ('label', 'L3'), ('return', 'i')])",
-     "expect": "(['B0', 'L1', 'B2', 'B3', 'L2', 'L3'], {'B0': [('copy', 'i', 0)], 'L1': [('lt', 't1', 'i', 'n'), ('jumpz', 't1', 'L3')], 'B2': [('mod', 't2', 'i', 2), ('jumpz', 't2', 'L2')], 'B3': [('print', 'i')], 'L2': [('add', 'i', 'i', 1), ('jump', 'L1')], 'L3': [('return', 'i')]}, {'B0': ['L1'], 'L1': ['B2', 'L3'], 'B2': ['B3', 'L2'], 'B3': ['L2'], 'L2': ['L1'], 'L3': []})"
+     "call": "build_cfg([('copy', 'i', 0), ('label', 'L1'), ('lt', 'v1', 'i', 'n'), ('jumpz', 'v1', 'L3'), ('mod', 'v2', 'i', 2), ('jumpz', 'v2', 'L2'), ('print', 'i'), ('label', 'L2'), ('add', 'i', 'i', 1), ('jump', 'L1'), ('label', 'L3'), ('return', 'i')])",
+     "expect": "(['B0', 'L1', 'B2', 'B3', 'L2', 'L3'], {'B0': [('copy', 'i', 0)], 'L1': [('lt', 'v1', 'i', 'n'), ('jumpz', 'v1', 'L3')], 'B2': [('mod', 'v2', 'i', 2), ('jumpz', 'v2', 'L2')], 'B3': [('print', 'i')], 'L2': [('add', 'i', 'i', 1), ('jump', 'L1')], 'L3': [('return', 'i')]}, {'B0': ['L1'], 'L1': ['B2', 'L3'], 'B2': ['B3', 'L2'], 'B3': ['L2'], 'L2': ['L1'], 'L3': []})"
     },
     {
      "label": "Unreachable code after a jump, and the last block",
@@ -682,8 +682,8 @@ CSA.addCode("cs365", {
     },
     {
      "label": "The running example after folding",
-     "call": "eliminate_dead([('copy', 'x', 4), ('copy', 'y', 8), ('copy', 's', 0), ('label', 'L1'), ('gt', 't1', 'a', 0), ('jumpz', 't1', 'L2'), ('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1'), ('label', 'L2'), ('return', 's')])",
-     "expect": "[('copy', 'y', 8), ('copy', 's', 0), ('label', 'L1'), ('gt', 't1', 'a', 0), ('jumpz', 't1', 'L2'), ('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1'), ('label', 'L2'), ('return', 's')]"
+     "call": "eliminate_dead([('copy', 'x', 4), ('copy', 'y', 8), ('copy', 's', 0), ('label', 'L1'), ('gt', 'v1', 'a', 0), ('jumpz', 'v1', 'L2'), ('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1'), ('label', 'L2'), ('return', 's')])",
+     "expect": "[('copy', 'y', 8), ('copy', 's', 0), ('label', 'L1'), ('gt', 'v1', 'a', 0), ('jumpz', 'v1', 'L2'), ('add', 's', 's', 'y'), ('sub', 'a', 'a', 1), ('jump', 'L1'), ('label', 'L2'), ('return', 's')]"
     },
     {
      "label": "Dead code that needs a second round",
@@ -692,8 +692,8 @@ CSA.addCode("cs365", {
     },
     {
      "label": "Values used around a loop stay",
-     "call": "eliminate_dead([('copy', 'i', 0), ('label', 'L1'), ('lt', 't1', 'i', 'n'), ('jumpz', 't1', 'L3'), ('mod', 't2', 'i', 2), ('jumpz', 't2', 'L2'), ('print', 'i'), ('label', 'L2'), ('add', 'i', 'i', 1), ('jump', 'L1'), ('label', 'L3'), ('return', 'i')])",
-     "expect": "[('copy', 'i', 0), ('label', 'L1'), ('lt', 't1', 'i', 'n'), ('jumpz', 't1', 'L3'), ('mod', 't2', 'i', 2), ('jumpz', 't2', 'L2'), ('print', 'i'), ('label', 'L2'), ('add', 'i', 'i', 1), ('jump', 'L1'), ('label', 'L3'), ('return', 'i')]"
+     "call": "eliminate_dead([('copy', 'i', 0), ('label', 'L1'), ('lt', 'v1', 'i', 'n'), ('jumpz', 'v1', 'L3'), ('mod', 'v2', 'i', 2), ('jumpz', 'v2', 'L2'), ('print', 'i'), ('label', 'L2'), ('add', 'i', 'i', 1), ('jump', 'L1'), ('label', 'L3'), ('return', 'i')])",
+     "expect": "[('copy', 'i', 0), ('label', 'L1'), ('lt', 'v1', 'i', 'n'), ('jumpz', 'v1', 'L3'), ('mod', 'v2', 'i', 2), ('jumpz', 'v2', 'L2'), ('print', 'i'), ('label', 'L2'), ('add', 'i', 'i', 1), ('jump', 'L1'), ('label', 'L3'), ('return', 'i')]"
     },
     {
      "label": "Divisions that might fail stay",
@@ -731,8 +731,8 @@ CSA.addCode("cs365", {
    "tests": [
     {
      "label": "The notes' example",
-     "call": "interference([('add', 't1', 'a', 'b'), ('sub', 't2', 'a', 'b'), ('mul', 't3', 't1', 't2'), ('add', 't4', 't3', 'c'), ('return', 't4')], set())",
-     "expect": "{'a': {'c', 'b', 't1'}, 'b': {'a', 'c', 't1'}, 'c': {'t1', 'a', 'b', 't2', 't3'}, 't1': {'a', 'c', 'b', 't2'}, 't2': {'c', 't1'}, 't3': {'c'}, 't4': set()}"
+     "call": "interference([('add', 'v1', 'a', 'b'), ('sub', 'v2', 'a', 'b'), ('mul', 'v3', 'v1', 'v2'), ('add', 'v4', 'v3', 'c'), ('return', 'v4')], set())",
+     "expect": "{'a': {'c', 'b', 'v1'}, 'b': {'a', 'c', 'v1'}, 'c': {'v1', 'a', 'b', 'v2', 'v3'}, 'v1': {'a', 'c', 'b', 'v2'}, 'v2': {'c', 'v1'}, 'v3': {'c'}, 'v4': set()}"
     },
     {
      "label": "The practice problem",
@@ -788,13 +788,13 @@ CSA.addCode("cs365", {
    "tests": [
     {
      "label": "The notes' example with 4 registers",
-     "call": "allocate({'t4': set(), 't3': {'c'}, 'c': {'t1', 'a', 'b', 't2', 't3'}, 't2': {'c', 't1'}, 't1': {'a', 'c', 'b', 't2'}, 'a': {'c', 'b', 't1'}, 'b': {'a', 'c', 't1'}}, 4, {'a': 3, 'b': 3, 'c': 2, 't1': 2, 't2': 2, 't3': 2, 't4': 2})",
-     "expect": "({'t4': 0, 't3': 0, 't2': 0, 't1': 1, 'c': 2, 'b': 0, 'a': 3}, set())"
+     "call": "allocate({'v4': set(), 'v3': {'c'}, 'c': {'v1', 'a', 'b', 'v2', 'v3'}, 'v2': {'c', 'v1'}, 'v1': {'a', 'c', 'b', 'v2'}, 'a': {'c', 'b', 'v1'}, 'b': {'a', 'c', 'v1'}}, 4, {'a': 3, 'b': 3, 'c': 2, 'v1': 2, 'v2': 2, 'v3': 2, 'v4': 2})",
+     "expect": "({'v4': 0, 'v3': 0, 'v2': 0, 'v1': 1, 'c': 2, 'b': 0, 'a': 3}, set())"
     },
     {
      "label": "The notes' example with 3 registers spills c",
-     "call": "allocate({'t4': set(), 't3': {'c'}, 'c': {'t1', 'a', 'b', 't2', 't3'}, 't2': {'c', 't1'}, 't1': {'a', 'c', 'b', 't2'}, 'a': {'c', 'b', 't1'}, 'b': {'a', 'c', 't1'}}, 3, {'a': 3, 'b': 3, 'c': 2, 't1': 2, 't2': 2, 't3': 2, 't4': 2})",
-     "expect": "({'t1': 0, 'b': 1, 'a': 2, 't4': 0, 't3': 0, 't2': 1}, {'c'})"
+     "call": "allocate({'v4': set(), 'v3': {'c'}, 'c': {'v1', 'a', 'b', 'v2', 'v3'}, 'v2': {'c', 'v1'}, 'v1': {'a', 'c', 'b', 'v2'}, 'a': {'c', 'b', 'v1'}, 'b': {'a', 'c', 'v1'}}, 3, {'a': 3, 'b': 3, 'c': 2, 'v1': 2, 'v2': 2, 'v3': 2, 'v4': 2})",
+     "expect": "({'v1': 0, 'b': 1, 'a': 2, 'v4': 0, 'v3': 0, 'v2': 1}, {'c'})"
     },
     {
      "label": "The practice problem with 2 registers",
