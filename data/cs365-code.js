@@ -624,6 +624,11 @@ CSA.addCode("cs365", {
      "expect": "[('copy', 't', 1), ('print', 1)]"
     },
     {
+     "label": "A unary operation forgets a constant too",
+     "call": "fold([('copy', 'x', 4), ('neg', 'x', 'y'), ('add', 'z', 'x', 1), ('copy', 'b', 2), ('not', 'b', 'c'), ('return', 'b')])",
+     "expect": "[('copy', 'x', 4), ('neg', 'x', 'y'), ('add', 'z', 'x', 1), ('copy', 'b', 2), ('not', 'b', 'c'), ('return', 'b')]"
+    },
+    {
      "label": "Redefinition forgets a constant",
      "call": "fold([('copy', 'x', 1), ('add', 'y', 'x', 1), ('add', 'x', 'x', 'n'), ('add', 'z', 'x', 1), ('copy', 'x', 7), ('return', 'x')])",
      "expect": "[('copy', 'x', 1), ('copy', 'y', 2), ('add', 'x', 1, 'n'), ('add', 'z', 'x', 1), ('copy', 'x', 7), ('return', 7)]"

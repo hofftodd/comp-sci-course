@@ -1265,12 +1265,15 @@ class Lower:
         self.count += 1
         return f"t{self.count}"
 
-    def expr(self, e):                    # emit code for e; return the operand holding its value
+    def expr(self, e, dest=None):         # emit code for e; return the operand holding its value
         if e[0] in ("num", "var"):
-            return e[1]
+            if dest is None:
+                return e[1]
+            self.code.append(("copy", dest, e[1]))   # x = 4 or x = y
+            return dest
         a = self.expr(e[2])
         b = self.expr(e[3])
-        t = self.temp()
+        t = dest or self.temp()           # the result goes into dest if one is given
         self.code.append((OPS[e[1]], t, a, b))
         return t
 
@@ -1283,7 +1286,13 @@ print(result)   # t3</code></pre>
 t2 = a - b
 t3 = t1 * t2
 t3</code></pre>
-<p>Statements lower as in Lesson 4, with named labels instead of addresses: <code>x = e</code> becomes the code for <code>e</code> and a copy into <code>x</code>, and <code>while</code> becomes a label, the condition, a <code>jumpz</code> out, the body and a <code>jump</code> back. (A short-circuit <code>&amp;&amp;</code> becomes jumps too; the lowering above handles only arithmetic, to keep it short.) Here is a Mini function and its TAC, the running example for the rest of the lesson:</p>
+<p>An assignment <code>x = e</code> passes <code>x</code> as the destination, <code>expr(e, "x")</code>, so the last instruction writes straight into <code>x</code> instead of a fresh temporary that would then need a copy; a constant or variable <code>e</code> becomes a copy:</p>
+<pre><code>low = Lower()
+low.expr(("num", 4), "x")
+low.expr(("bin", "*", ("var", "x"), ("num", 2)), "y")
+low.expr(("bin", "+", ("var", "s"), ("bin", "*", ("var", "y"), ("num", 3))), "s")
+print([show(ins) for ins in low.code])   # ['x = 4', 'y = x * 2', 't1 = y * 3', 's = s + t1']</code></pre>
+<p>Inner operations still get temporaries, as <code>t1</code> shows. Other statements lower as in Lesson 4, with named labels instead of addresses: <code>while</code> becomes a label, the condition, a <code>jumpz</code> out, the body and a <code>jump</code> back. (A short-circuit <code>&amp;&amp;</code> becomes jumps too; the lowering above handles only arithmetic, to keep it short.) Here is a Mini function and its TAC, the running example for the rest of the lesson:</p>
 <pre data-label="Mini"><code>fun f(a: int): int {
     var x: int = 4;
     var y: int = x * 2;
@@ -1346,9 +1355,15 @@ def fold_block(block):
                 ins = ("copy", d, FOLD[op](a, b))          # folded
             else:
                 ins = (op, d, a, b)                        # propagated what we could
+        elif op in ("neg", "not"):
+            a = known.get(ins[2], ins[2]) if isinstance(ins[2], str) else ins[2]
+            if isinstance(a, int):
+                ins = ("copy", ins[1], -a if op == "neg" else int(a == 0))   # folded
+            else:
+                ins = (op, ins[1], a)
         elif op == "copy" and isinstance(ins[2], str):
             ins = ("copy", ins[1], known.get(ins[2], ins[2]))
-        if op in FOLD or op == "copy":
+        if op in FOLD or op in ("copy", "neg", "not"):   # every instruction that writes a variable
             if ins[0] == "copy" and isinstance(ins[2], int):
                 known[ins[1]] = ins[2]
             else:
@@ -1368,6 +1383,8 @@ x = a
 v = x + 1
 q = 8 / 0</code></pre>
 <p>Follow the dictionary: after <code>x = 4</code> it is {x: 4}; <code>y = x * 2</code> folds to 8 and adds y; <code>z = y + a</code> becomes <code>8 + a</code>, which can't fold, so z is not known; <code>w = x - 4</code> folds to 0. Then <code>x = a</code> removes x, because x is no longer 4, so <code>v = x + 1</code> stays. Finally <code>q = y / w</code> becomes <code>8 / 0</code> and is <em>not</em> folded.</p>
+<p>Every instruction that writes a variable must update the dictionary, <code>neg</code> and <code>not</code> included (<code>!</code> gives 1 for 0 and 0 otherwise). If <code>x = -a</code> left the entry x: 4 in place, the next use of x would wrongly become 4:</p>
+<pre><code>print([show(i) for i in fold_block([("copy", "x", 4), ("neg", "x", "a"), ("add", "y", "x", 1), ("not", "z", 0)])])   # ['x = 4', 'x = -a', 'y = x + 1', 'z = 1']</code></pre>
 <p>That last line is the rule every optimization obeys: <strong>preserve the program's meaning exactly</strong>, including its errors. Folding <code>8 / 0</code> would crash the compiler, or remove a crash the program is supposed to have. Folding must also use the source language's arithmetic: <code>cdiv</code>, not Python's <code>//</code>, and in a language with 32-bit integers, wrap-around (CS 210 Lesson 1). Some rewrites that are true in mathematics are false for computers: <code>(a + b) - b</code> is <code>a</code> for integers, but not for floating point, where <code>(1e16 + 1) - 1e16</code> is 0 (CS 210 Lesson 2), so compilers never apply it to floats unless told to (GCC's <code>-ffast-math</code>).</p>
 <p><strong>Algebraic simplification</strong> uses identities that hold whatever a variable's value: <code>x + 0</code>, <code>x - 0</code>, <code>x * 1</code> and <code>x / 1</code> are just <code>x</code>, and <code>x * 0</code> is 0. A related idea, <strong>strength reduction</strong>, replaces an expensive operation by a cheaper one: <code>x * 8</code> by a shift left by 3 (CS 210 Lesson 1).</p>
 

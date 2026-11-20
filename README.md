@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had three. The other two terms are planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had four. The other two terms are planned and shown on the home page.
 
 ## What's in Year 1
 

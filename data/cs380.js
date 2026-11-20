@@ -424,7 +424,7 @@ print(forged_tag == toy_hash(secret + forged_msg))   # True</code></pre>
 <p>The server would accept <code>forged_msg</code>, which ends in <code>&amp;role=admin</code>, with <code>forged_tag</code>. The padding bytes in the middle look like garbage, but many parsers skip them or let the later <code>role</code> win.</p>
 <p><strong>HMAC</strong> (Bellare, Canetti and Krawczyk, 1996; RFC 2104) fixes this by hashing twice with two derived keys. With the key padded with zero bytes to the block size (64 bytes for SHA-256; a longer key is hashed first), ipad = 64 bytes of 0x36 and opad = 64 bytes of 0x5c:</p>
 <p class="math">HMAC(<em>k</em>, <em>m</em>) = H((<em>k</em> ⊕ opad) ‖ H((<em>k</em> ⊕ ipad) ‖ <em>m</em>))</p>
-<p>The outer hash is applied to a fixed-length input the attacker can't extend, so length extension fails; HMAC is provably a secure MAC if the compression function behaves like a PRF (a pseudorandom function, Lesson 2). Python's <code>hmac</code> module implements it:</p>
+<p>The outer hash is applied to a fixed-length input the attacker can't extend, so length extension fails; HMAC is provably a secure MAC if the compression function behaves like a PRF (a pseudorandom function, Lesson 2). Length extension comes from a digest that is the whole final state, as in SHA-256 and SHA-512. SHA-3 is built differently and outputs only part of its state, so it isn't vulnerable, and H(<em>k</em> ‖ <em>m</em>) with SHA-3 would be a sound MAC. HMAC is still the standard because it is safe with SHA-2 and SHA-3 alike. Python's <code>hmac</code> module implements it:</p>
 <pre><code>import hmac
 def my_hmac(key, msg):                  # for keys of at most 64 bytes
     key = key + bytes(64 - len(key))
@@ -433,7 +433,7 @@ def my_hmac(key, msg):                  # for keys of at most 64 bytes
 
 t = my_hmac(b"key", b"pay ana 10")
 print(t == hmac.new(b"key", b"pay ana 10", hashlib.sha256).digest())   # True</code></pre>
-<p>Two rules for using MACs. Compare tags with <code>hmac.compare_digest</code>, never <code>==</code>, for the timing reason in Lesson 7. And when combining a MAC with encryption, <em>encrypt then MAC</em>: compute the tag over the ciphertext and check it before decrypting. That is what AES-GCM does internally (SHA-3, unlike SHA-2, isn't vulnerable to length extension, but HMAC remains the standard).</p>
+<p>Two rules for using MACs. Compare tags with <code>hmac.compare_digest</code>, never <code>==</code>, for the timing reason in Lesson 7. And when combining a MAC with encryption, <em>encrypt then MAC</em>: compute the tag over the ciphertext and check it before decrypting. That is what AES-GCM does internally.</p>
 
 <h3>Storing passwords</h3>
 <p>A login server must check passwords without storing them, because databases get stolen. Storing H(password) seems enough, since the hash is one-way. It isn't, because passwords are guessable. An attacker with the stolen hashes doesn't invert anything: they hash candidate passwords and look for matches, offline, as fast as their hardware allows. A single graphics card computes billions of SHA-256 hashes a second. Suppose 10<sup>10</sup> guesses a second against passwords of 8 lowercase letters:</p>
