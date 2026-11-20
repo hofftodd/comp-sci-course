@@ -461,8 +461,8 @@ print(ac3(d))   # None</code></pre>
       ],
       practice: [
         {
-          q: `<p>Run alpha-beta on the tree <code>[[5, 6], [7, 4, 5], [3, 9]]</code> (root MAX, children MIN). Which leaves are evaluated? Then reorder the root's children to maximize pruning and say how many leaves are evaluated.</p>`,
-          a: `<p>First MIN node: 5, 6 → value 5, α = 5. Second: 7 (β = 7), 4 (β = 4 ≤ α: prune the 5). Third: 3 ≤ α: prune the 9. Evaluated: 5, 6, 7, 4, 3 (five of seven); value 5. Best order puts the best move first, and inside the other MIN nodes the smallest leaf first: <code>[[5, 6], [3, 9], [4, 7, 5]]</code> evaluates 5, 6, 3, 4: four leaves.</p>
+          q: `<p>Run alpha-beta on the tree <code>[[5, 6], [7, 4, 5], [3, 9]]</code> (root MAX, children MIN). Which leaves are evaluated? Then reorder the tree to maximize pruning (you may reorder both the root's children and the leaves inside each MIN node; the values stay the same) and say how many leaves are evaluated.</p>`,
+          a: `<p>First MIN node: 5, 6 → value 5, α = 5. Second: 7 (β = 7), 4 (β = 4 ≤ α: prune the 5). Third: 3 ≤ α: prune the 9. Evaluated: 5, 6, 7, 4, 3 (five of seven); value 5. The best move is already first, so reordering only the root's children can't help (putting <code>[7, 4, 5]</code> first even costs a leaf). The gain comes from the MIN nodes: put the smallest leaf first in each of the others, so each is cut off after one leaf. <code>[[5, 6], [3, 9], [4, 7, 5]]</code> evaluates 5, 6, 3, 4: four leaves. No order does better, because the first MIN node must be evaluated completely (2 leaves) to set α, and every other MIN node needs at least one leaf.</p>
 <pre><code>for t in ([[5, 6], [7, 4, 5], [3, 9]], [[5, 6], [3, 9], [4, 7, 5]]):
     seen = []
     print(alphabeta(t, True, seen=seen), seen)</code></pre>
@@ -1016,8 +1016,8 @@ print(round(-math.log(1 - sigmoid(3 * w + b)), 2), round(-math.log(sigmoid(2.5 *
           a: `<p>1,000 have the disease: TP = 990, FN = 10. 999,000 don't: FP = 9,990, TN = 989,010. Accuracy = (990 + 989,010)/1,000,000 = 99.0%. Recall = 99%. Precision = 990/(990 + 9,990) ≈ 9.0%. A positive result raises the probability of disease from 0.1% to about 9%: worth taking seriously and confirming with a second, independent test, but far from a diagnosis.</p>`
         },
         {
-          q: `<p>With 5-fold cross-validation on 1,000 examples, how many models are trained, and on how many examples each? You compare 4 values of λ: how many models now? After choosing λ, what do you train the final model on, and what number do you report?</p>`,
-          a: `<p>5 models, each on 800 examples (validated on the other 200). With 4 values of λ, 20 models. Choose the λ with the best average validation score, then train once more on all the training data with that λ. Report its score on a separate test set that played no part in any of this; the cross-validation score of the chosen λ is slightly optimistic, because it was the best of four.</p>`
+          q: `<p>A separate test set has been set aside and not looked at. With 5-fold cross-validation on the remaining 1,000 training examples, how many models are trained, and on how many examples each? You compare 4 values of λ: how many models now? After choosing λ, what do you train the final model on, and what number do you report?</p>`,
+          a: `<p>5 models, each on 800 examples (validated on the other 200). With 4 values of λ, 20 models. Choose the λ with the best average validation score, then train once more on all the training data with that λ. Report its score on a separate test set that played no part in any of this; the cross-validation score of the chosen λ is slightly optimistic, because it was the best of four. (Had all the data gone into cross-validation, there would be no honest number to report: the fix is to hold out a test set before choosing anything.)</p>`
         }
       ],
       sources: ["isl", "aima", "goodfellow", "obermeyer19"]
@@ -1544,7 +1544,7 @@ print([round(sum(w * v[c] for w, v in zip(weights, values)), 3) for c in range(2
 <h3>How large language models are trained</h3>
 <ol>
 <li><strong>Pretraining.</strong> The model, with billions of parameters, is trained to predict the next token of a huge text collection: web pages, books, code, typically trillions of tokens. The loss is Lesson 5's cross-entropy, the gradients come from backpropagation, and the optimizer is a variant of mini-batch gradient descent (usually Adam, which adapts the step for each parameter) run on thousands of GPUs for weeks or months. Studies of <em>scaling laws</em> found that the loss falls smoothly and predictably as parameters, data and computation grow together; one influential result (Hoffmann and colleagues, 2022) found that for a fixed budget of computation, models had been too large for their data, and recommended roughly 20 training tokens per parameter.</li>
-<li><strong>Fine-tuning.</strong> A pretrained model continues text; it doesn't follow instructions or decline harmful requests. It is then trained further on examples of the desired behaviour (<em>instruction tuning</em>: prompts paired with good responses written by people), and often with <em>reinforcement learning from human feedback</em> (RLHF): people rank several responses to the same prompt, a separate model is trained to predict their rankings, and the language model is adjusted to produce responses that this <em>reward model</em> scores highly.</li>
+<li><strong>Fine-tuning.</strong> A pretrained model continues text; it doesn't follow instructions or decline harmful requests. It is then trained further on examples of the desired behaviour (<em>instruction tuning</em>: prompts paired with good responses written by people), and often with <em>reinforcement learning from human feedback</em> (RLHF): people rank several responses to the same prompt, a separate model is trained to predict their rankings, and the language model is adjusted to produce responses that this <em>reward model</em> scores highly. That adjustment is <em>reinforcement learning</em>: learning from a numerical reward for what the model did, rather than from a known correct answer. The model samples a response, the reward model scores it, and a gradient step raises the log-probability of that response's tokens if its score is above average (lowers it if below), so high-scoring responses become more likely. A penalty for drifting far from the original model's probabilities is usually added, so the model doesn't wander into odd text that happens to fool the reward model.</li>
 <li><strong>Use.</strong> Given a prompt, the model generates one token at a time, sampling from the softmax (with some temperature), each new token appended to the context.</li>
 </ol>
 
@@ -1574,6 +1574,7 @@ print([round(sum(w * v[c] for w, v in zip(weights, values)), 3) for c in range(2
         ["Transformer", "A network of stacked blocks of multi-head attention and per-position layers, with residual connections and normalization."],
         ["Pretraining", "Training a model on a large general corpus, here to predict the next token, before adapting it to tasks."],
         ["RLHF", "Reinforcement learning from human feedback: tuning a model toward responses a reward model, trained on human rankings, prefers."],
+        ["Reinforcement learning", "Learning from a numerical reward for the actions a model takes, rather than from known correct answers."],
         ["Hallucination", "Fluent output that is false, a consequence of training for probable rather than true text."]
       ],
       quiz: [

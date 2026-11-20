@@ -164,7 +164,7 @@ print(describe([]))              # something else</code></pre>
 <ul>
 <li>A <strong>literal</strong> such as <code>0</code> or <code>"+"</code> matches a value equal to it.</li>
 <li>A <strong>capture pattern</strong>, a bare name such as <code>left</code>, matches anything and binds the name to it. The name <code>_</code> is a <strong>wildcard</strong>: it matches anything and binds nothing.</li>
-<li>A <strong>sequence pattern</strong> in square brackets matches a list or tuple (never a string) with exactly that many elements, each matching its sub-pattern. <code>*rest</code> collects any remaining elements into a list, so <code>[first, *rest]</code> matches any non-empty list.</li>
+<li>A <strong>sequence pattern</strong> in square brackets matches a list or tuple (never a string) with exactly that many elements, each matching its sub-pattern. <code>*rest</code> collects any remaining elements into a list, so <code>[first, *rest]</code> matches any non-empty list. Round parentheses mean exactly the same: <code>("lam", x, body)</code> is also a sequence pattern and matches a list or a tuple, so the bracket shape in a pattern never restricts the type.</li>
 <li>A <strong>class pattern</strong> <code>int(n)</code> matches a value for which <code>isinstance(value, int)</code> is true and binds <code>n</code> to it; <code>str()</code> just checks the type.</li>
 <li>A <strong>guard</strong>, <code>if</code> and a condition after the pattern, must also be true for the case to match.</li>
 </ul>
@@ -640,7 +640,7 @@ print(run("((lambda (x y) (* x y)) 6 7)"))   # 42
 print(run("(lambda (x) x)"))                 # &lt;closure with parameters ['x']&gt;</code></pre>
 <p>Two lines carry the idea. Evaluating a <code>lambda</code> doesn't run anything: it packages the parameters and body with the <em>current</em> environment. Applying a closure evaluates its body in the closure's <em>saved</em> environment extended with the parameters, and the caller's environment plays no part. That is lexical scope, now for functions created anywhere. Lesson 2's test, rewritten with <code>lambda</code>, gives the lexical answer:</p>
 <pre><code>print(run("(let (x 1) (let (f (lambda (y) (+ x y))) (let (x 100) (f 0))))"))   # 1</code></pre>
-<p>Had we evaluated the body in the caller's environment instead (dynamic scope), <code>(add5 10)</code> would have raised <code>NameError: unbound variable n</code>, because no binding of <code>n</code> is in effect when <code>add5</code> runs. Early Lisp ran into exactly this, under the name of the <em>funarg problem</em>; this lesson's sidebar tells the story.</p>
+<p>Had we evaluated the body in the caller's environment instead (dynamic scope), <code>(add5 10)</code> would have raised <code>NameError: unbound variable n</code>, because no binding of <code>n</code> is in effect when <code>add5</code> runs. Early Lisp ran into exactly this, under the name of the <em>funarg problem</em>; Lesson 2's sidebar, "Lisp's accidental dynamic scope", tells the story.</p>
 <p>Python's functions are closures too, and you can look inside one:</p>
 <pre><code>def make_adder(n):
     def add(x):
