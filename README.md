@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had five. Year 4 Fall is written and has had two. Year 4 Spring is planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had five. Year 4 Fall is written and has had two. Year 4 Spring is written and has had one, so all four years are now on the site.
 
 ## What's in Year 1
 
@@ -110,6 +110,24 @@ contrast checks). CS 430 covers amortized, randomized, approximation, LP, stream
 algorithms; CS 470 builds tensors, autograd, CNNs, LSTMs and attention from the standard library.
 The free elective is chosen from outside the major and isn't part of this site.
 
+### Spring
+
+| Course | Credits | Core units | Programming problems |
+|---|---|---|---|
+| CS 491 Capstone Project II | 4 | 8 | 16 |
+| CS 480 Ethics, Law and Policy of Computing | 4 | 8 | 16 |
+| CS 450 Formal Methods and Verification (elective) | 4 | 6 | 13 |
+
+CS 491 finishes the capstone begun in CS 490: replanning, usability rounds, load testing, operating with
+SLOs and incident response, maintenance, evaluation with controlled comparisons, and handover. A
+student may instead write an individual research thesis on parallel milestones. CS 480 is a seminar on
+how law and policy meet real systems (intellectual property and licenses, privacy law and differential
+privacy, fairness and anti-discrimination law, safety and liability, security law, platform regulation
+and AI governance), with legal claims stated as of November 2026; it teaches about the law and is not
+legal advice. CS 450 builds a property-based tester, a SAT solver, a symbolic executor, a model checker
+and a weakest-precondition calculator, and shows TLA+, Dafny and Lean. Free electives are chosen from
+outside the major and aren't part of this site.
+
 Every course opens with a **rubric**: what is graded and how much it counts, the criteria with four
 performance levels, the grade scale, and policies. Each core lesson is designed for about 90 minutes:
 notes with worked examples and diagrams, key terms, 5–8 **practice problems** with optional hints and
@@ -122,7 +140,7 @@ idea is used in practice. Year 1 is taught in Python.
 
 - **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
   the student's browser.
-- **Auto-graded programming problems**: 362 in all. CS 101 has 31, two or three per lesson; CS 102
+- **Auto-graded programming problems**: 407 in all. CS 101 has 31, two or three per lesson; CS 102
   has 17 (classes, generators, writing tests that catch bugs, linked lists, trees); PHYS 150 has a
   simulation problem per lesson; Year 2 Fall has 53 (data structures, systems simulations, linear
   algebra and statistics); Year 2 Spring has 59 (algorithms, hardware simulations, software
@@ -130,7 +148,8 @@ idea is used in practice. Year 1 is taught in Python.
   simulations, automata and parsers, SQL and database internals, and a software renderer); Year 3 Spring has 77 (protocol simulations,
   interpreters and type checkers, search and learning algorithms, defensive security, and compiler
   phases); Year 4 Fall has 59 (distributed-systems simulations, project tools, advanced algorithms and
-  deep-learning building blocks). Each comes with
+  deep-learning building blocks); Year 4 Spring has 45 (capstone tools, privacy, fairness and policy
+  computations, and solvers and checkers for formal verification). Each comes with
   starter code, a hint, a reference solution and automatic tests: edge cases, hidden tests, speed
   tests that catch slow algorithms, and checks such as "don't use the built-in `max`". Students
   write real Python in the page; it runs in their browser with Pyodide (CPython compiled to
