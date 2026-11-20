@@ -142,7 +142,7 @@ CSA.addCode("cs365", {
   {
    "id": "precedence_climbing",
    "title": "Precedence climbing with any operator table",
-   "prompt": "<p>Write <code>parse_expression(text, binary)</code>, a precedence-climbing parser for expressions whose binary operators are given by a table: <code>binary</code> maps each operator to <code>(precedence, associativity)</code>, where a larger precedence binds tighter and associativity is <code>\"left\"</code> or <code>\"right\"</code>. For Mini, <code>binary</code> would be <code>{\"||\": (1, \"left\"), \"&amp;&amp;\": (2, \"left\"), ..., \"%\": (6, \"left\")}</code>. Return the AST as nested tuples, in Lesson 2's format:</p>\n<ul>\n<li><code>(\"num\", 42)</code> for a number (an int), <code>(\"var\", \"x\")</code> for a name;</li>\n<li><code>(\"call\", \"f\", [args])</code> for a name followed by <code>(</code>, with zero or more comma-separated argument expressions;</li>\n<li><code>(\"unary\", op, e)</code> for a prefix <code>-</code> or <code>!</code>, which binds tighter than every binary operator (so <code>-2 ^ 2</code> is <code>(-2) ^ 2</code>);</li>\n<li><code>(\"bin\", op, left, right)</code>, and parentheses for grouping.</li>\n</ul>\n<p>The starter's <code>tokenize</code> turns the text into tokens <code>(kind, text, line, col)</code>. A token whose text isn't in <code>binary</code> is not a binary operator here, even if it is <code>*</code>. Raise <code>ParseError</code> (defined in the starter) for anything malformed, with a message beginning <code>1:col:</code> where <code>col</code> is the column of the offending token: a missing operand, a missing <code>)</code>, or tokens left over after a complete expression (as in <code>1 2</code>, or <code>1 * 2</code> when <code>*</code> isn't in the table).</p>",
+   "prompt": "<p>Write <code>parse_expression(text, binary)</code>, a precedence-climbing parser for expressions whose binary operators are given by a table: <code>binary</code> maps each operator to <code>(precedence, associativity)</code>, where a larger precedence binds tighter and associativity is <code>\"left\"</code> or <code>\"right\"</code>. For Mini, <code>binary</code> would be <code>{\"||\": (1, \"left\"), \"&amp;&amp;\": (2, \"left\"), ..., \"%\": (6, \"left\")}</code>. Return the AST as nested tuples, in Lesson 2's format:</p>\n<ul>\n<li><code>(\"num\", 42)</code> for a number (an int), <code>(\"var\", \"x\")</code> for a name;</li>\n<li><code>(\"call\", \"f\", [args])</code> for a name followed by <code>(</code>, with zero or more comma-separated argument expressions;</li>\n<li><code>(\"unary\", op, e)</code> for a prefix <code>-</code> or <code>!</code>, which binds tighter than every binary operator (so <code>-2 ^ 2</code> is <code>(-2) ^ 2</code>);</li>\n<li><code>(\"bin\", op, left, right)</code>, and parentheses for grouping.</li>\n</ul>\n<p>The starter's <code>tokenize</code> turns the text into tokens <code>(kind, text, line, col)</code>. Besides numbers and names, it accepts more operators than Mini has, so that your tables can use them: <code>** &lt;= &gt;= == != &amp;&amp; ||</code> and the single characters <code>- + * / % ^ &lt; &gt; ! ( ) ,</code>. (Mini has no <code>^</code> or <code>**</code>; here they are just names for operators you give a table entry, such as <code>{\"^\": (7, \"right\")}</code>.) A token whose text isn't in <code>binary</code> is not a binary operator here, even if it is <code>*</code>. Raise <code>ParseError</code> (defined in the starter) for anything malformed, with a message beginning <code>1:col:</code> where <code>col</code> is the column of the offending token: a missing operand, a missing <code>)</code>, or tokens left over after a complete expression (as in <code>1 2</code>, or <code>1 * 2</code> when <code>*</code> isn't in the table).</p>",
    "starter": "import re\n\nclass ParseError(Exception):\n    pass\n\nTOKEN = re.compile(r\"\\s*(?:([0-9]+)|([A-Za-z_][A-Za-z0-9_]*)|(\\*\\*|<=|>=|==|!=|&&|\\|\\||[-+*/%^<>!(),]))\")\n\ndef tokenize(text):\n    \"\"\"Tokens (kind, text, line, col); kind is \"num\", \"name\", the operator itself, or \"eof\".\"\"\"\n    tokens, i = [], 0\n    while True:\n        m = TOKEN.match(text, i)\n        if m is None or m.end() == i:\n            rest = text[i:].lstrip()\n            col = len(text) - len(rest) + 1\n            if rest:\n                raise ParseError(f\"1:{col}: unexpected character {rest[0]!r}\")\n            tokens.append((\"eof\", \"\", 1, col))\n            return tokens\n        num, name, op = m.groups()\n        start = m.start(m.lastindex) + 1\n        if num is not None:\n            tokens.append((\"num\", num, 1, start))\n        elif name is not None:\n            tokens.append((\"name\", name, 1, start))\n        else:\n            tokens.append((op, op, 1, start))\n        i = m.end()\n\ndef parse_expression(text, binary):\n    pass\n",
    "hint": "<p>Copy the structure of the notes' <code>Parser</code>: a position into the token list, <code>peek</code>, <code>advance</code> and <code>expect</code>. In <code>expr(min_prec)</code>, loop while the next token's text is in <code>binary</code> with precedence at least <code>min_prec</code>; parse the right operand with <code>expr(p + 1)</code> for a left-associative operator and <code>expr(p)</code> for a right-associative one. After parsing, the next token must be <code>eof</code>.</p>",
    "solution": "import re\n\nclass ParseError(Exception):\n    pass\n\nTOKEN = re.compile(r\"\\s*(?:([0-9]+)|([A-Za-z_][A-Za-z0-9_]*)|(\\*\\*|<=|>=|==|!=|&&|\\|\\||[-+*/%^<>!(),]))\")\n\ndef tokenize(text):\n    \"\"\"Tokens (kind, text, line, col); kind is \"num\", \"name\", the operator itself, or \"eof\".\"\"\"\n    tokens, i = [], 0\n    while True:\n        m = TOKEN.match(text, i)\n        if m is None or m.end() == i:\n            rest = text[i:].lstrip()\n            col = len(text) - len(rest) + 1\n            if rest:\n                raise ParseError(f\"1:{col}: unexpected character {rest[0]!r}\")\n            tokens.append((\"eof\", \"\", 1, col))\n            return tokens\n        num, name, op = m.groups()\n        start = m.start(m.lastindex) + 1\n        if num is not None:\n            tokens.append((\"num\", num, 1, start))\n        elif name is not None:\n            tokens.append((\"name\", name, 1, start))\n        else:\n            tokens.append((op, op, 1, start))\n        i = m.end()\n\ndef parse_expression(text, binary):\n    tokens, pos = tokenize(text), [0]\n    lowest = min([p for p, _ in binary.values()], default=0)\n\n    def peek():\n        return tokens[pos[0]]\n\n    def advance():\n        tok = tokens[pos[0]]\n        if tok[0] != \"eof\":\n            pos[0] += 1\n        return tok\n\n    def fail(tok, what):\n        found = \"end of input\" if tok[0] == \"eof\" else repr(tok[1])\n        raise ParseError(f\"{tok[2]}:{tok[3]}: expected {what} but found {found}\")\n\n    def expect(kind):\n        if peek()[0] != kind:\n            fail(peek(), repr(kind))\n        return advance()\n\n    def expr(min_prec):\n        left = unary()\n        while peek()[1] in binary and binary[peek()[1]][0] >= min_prec:\n            op = advance()[1]\n            prec, assoc = binary[op]\n            right = expr(prec + 1 if assoc == \"left\" else prec)\n            left = (\"bin\", op, left, right)\n        return left\n\n    def unary():\n        if peek()[0] in (\"-\", \"!\"):\n            op = advance()[0]\n            return (\"unary\", op, unary())\n        return primary()\n\n    def primary():\n        tok = peek()\n        if tok[0] == \"num\":\n            advance()\n            return (\"num\", int(tok[1]))\n        if tok[0] == \"name\":\n            advance()\n            if peek()[0] == \"(\":\n                advance()\n                args = []\n                if peek()[0] != \")\":\n                    args.append(expr(lowest))\n                    while peek()[0] == \",\":\n                        advance()\n                        args.append(expr(lowest))\n                expect(\")\")\n                return (\"call\", tok[1], args)\n            return (\"var\", tok[1])\n        if tok[0] == \"(\":\n            advance()\n            e = expr(lowest)\n            expect(\")\")\n            return e\n        fail(tok, \"an expression\")\n\n    e = expr(lowest)\n    if peek()[0] != \"eof\":\n        fail(peek(), \"an operator or the end\")\n    return e\n",
@@ -727,17 +727,17 @@ CSA.addCode("cs365", {
     {
      "label": "The notes' example",
      "call": "interference([('add', 't1', 'a', 'b'), ('sub', 't2', 'a', 'b'), ('mul', 't3', 't1', 't2'), ('add', 't4', 't3', 'c'), ('return', 't4')], set())",
-     "expect": "{'a': {'b', 'c', 't1'}, 'b': {'c', 't1', 'a'}, 'c': {'b', 't2', 't1', 't3', 'a'}, 't1': {'b', 't2', 'c', 'a'}, 't2': {'c', 't1'}, 't3': {'c'}, 't4': set()}"
+     "expect": "{'a': {'c', 'b', 't1'}, 'b': {'a', 'c', 't1'}, 'c': {'t1', 'a', 'b', 't2', 't3'}, 't1': {'a', 'c', 'b', 't2'}, 't2': {'c', 't1'}, 't3': {'c'}, 't4': set()}"
     },
     {
      "label": "The practice problem",
      "call": "interference([('mul', 'a', 'x', 2), ('add', 'b', 'x', 1), ('add', 'c', 'a', 'b'), ('mul', 'd', 'c', 'x'), ('return', 'd')], set())",
-     "expect": "{'a': {'b', 'x'}, 'b': {'x', 'a'}, 'c': {'x'}, 'd': set(), 'x': {'b', 'c', 'a'}}"
+     "expect": "{'a': {'x', 'b'}, 'b': {'a', 'x'}, 'c': {'x'}, 'd': set(), 'x': {'a', 'c', 'b'}}"
     },
     {
      "label": "Live out of the block",
      "call": "interference([('add', 't', 'x', 1), ('mul', 'y', 't', 't')], {'x', 'y'})",
-     "expect": "{'t': {'x'}, 'x': {'y', 't'}, 'y': {'x'}}"
+     "expect": "{'t': {'x'}, 'x': {'t', 'y'}, 'y': {'x'}}"
     },
     {
      "label": "A copy doesn't make its two sides interfere",
@@ -747,7 +747,7 @@ CSA.addCode("cs365", {
     {
      "label": "A copy's destination still interferes with other live values",
      "call": "interference([('copy', 'b', 'a'), ('add', 'c', 'b', 'x'), ('return', 'c')], set())",
-     "expect": "{'a': {'x'}, 'b': {'x'}, 'c': set(), 'x': {'b', 'a'}}"
+     "expect": "{'a': {'x'}, 'b': {'x'}, 'c': set(), 'x': {'a', 'b'}}"
     },
     {
      "label": "A dead definition still interferes",
@@ -757,11 +757,11 @@ CSA.addCode("cs365", {
     {
      "label": "Variables live on entry interfere with each other",
      "call": "interference([('print', 'p'), ('print', 'q'), ('print', 'r')], set())",
-     "expect": "{'p': {'q', 'r'}, 'q': {'p', 'r'}, 'r': {'p', 'q'}}"
+     "expect": "{'p': {'r', 'q'}, 'q': {'p', 'r'}, 'r': {'p', 'q'}}"
     },
     {
      "label": "An empty block",
-     "call": "interference([], {'m', 'n'})",
+     "call": "interference([], {'n', 'm'})",
      "expect": "{'m': {'n'}, 'n': {'m'}}",
      "hidden": true
     },
@@ -783,37 +783,37 @@ CSA.addCode("cs365", {
    "tests": [
     {
      "label": "The notes' example with 4 registers",
-     "call": "allocate({'t4': set(), 'c': {'b', 't2', 't1', 't3', 'a'}, 't3': {'c'}, 't2': {'c', 't1'}, 't1': {'b', 't2', 'c', 'a'}, 'b': {'c', 't1', 'a'}, 'a': {'b', 'c', 't1'}}, 4, {'a': 2, 'b': 2, 'c': 1, 't1': 2, 't2': 2, 't3': 2, 't4': 2})",
+     "call": "allocate({'t4': set(), 't3': {'c'}, 'c': {'t1', 'a', 'b', 't2', 't3'}, 't2': {'c', 't1'}, 't1': {'a', 'c', 'b', 't2'}, 'a': {'c', 'b', 't1'}, 'b': {'a', 'c', 't1'}}, 4, {'a': 3, 'b': 3, 'c': 2, 't1': 2, 't2': 2, 't3': 2, 't4': 2})",
      "expect": "({'t4': 0, 't3': 0, 't2': 0, 't1': 1, 'c': 2, 'b': 0, 'a': 3}, set())"
     },
     {
      "label": "The notes' example with 3 registers spills c",
-     "call": "allocate({'t4': set(), 'c': {'b', 't2', 't1', 't3', 'a'}, 't3': {'c'}, 't2': {'c', 't1'}, 't1': {'b', 't2', 'c', 'a'}, 'b': {'c', 't1', 'a'}, 'a': {'b', 'c', 't1'}}, 3, {'a': 2, 'b': 2, 'c': 1, 't1': 2, 't2': 2, 't3': 2, 't4': 2})",
+     "call": "allocate({'t4': set(), 't3': {'c'}, 'c': {'t1', 'a', 'b', 't2', 't3'}, 't2': {'c', 't1'}, 't1': {'a', 'c', 'b', 't2'}, 'a': {'c', 'b', 't1'}, 'b': {'a', 'c', 't1'}}, 3, {'a': 3, 'b': 3, 'c': 2, 't1': 2, 't2': 2, 't3': 2, 't4': 2})",
      "expect": "({'t1': 0, 'b': 1, 'a': 2, 't4': 0, 't3': 0, 't2': 1}, {'c'})"
     },
     {
      "label": "The practice problem with 2 registers",
-     "call": "allocate({'a': {'b', 'x'}, 'b': {'x', 'a'}, 'c': {'x'}, 'd': set(), 'x': {'b', 'c', 'a'}}, 2, {'x': 3, 'a': 2, 'b': 2, 'c': 2, 'd': 2})",
+     "call": "allocate({'a': {'x', 'b'}, 'b': {'a', 'x'}, 'c': {'x'}, 'd': set(), 'x': {'a', 'c', 'b'}}, 2, {'x': 4, 'a': 2, 'b': 2, 'c': 2, 'd': 2})",
      "expect": "({'x': 0, 'b': 1, 'd': 0, 'c': 1}, {'a'})"
     },
     {
      "label": "A square needs only 2 colours: optimism pays",
-     "call": "allocate({'v0': {'v3', 'v1'}, 'v1': {'v0', 'v2'}, 'v2': {'v1', 'v3'}, 'v3': {'v0', 'v2'}}, 2, {'v0': 1, 'v1': 1, 'v2': 1, 'v3': 1})",
+     "call": "allocate({'v0': {'v3', 'v1'}, 'v1': {'v0', 'v2'}, 'v2': {'v3', 'v1'}, 'v3': {'v0', 'v2'}}, 2, {'v0': 1, 'v1': 1, 'v2': 1, 'v3': 1})",
      "expect": "({'v3': 0, 'v2': 1, 'v1': 0, 'v0': 1}, set())"
     },
     {
      "label": "A 5-cycle with 2 colours must spill",
-     "call": "allocate({'v0': {'v1', 'v4'}, 'v1': {'v0', 'v2'}, 'v2': {'v1', 'v3'}, 'v3': {'v2', 'v4'}, 'v4': {'v0', 'v3'}}, 2, {'v0': 1, 'v1': 1, 'v2': 1, 'v3': 1, 'v4': 1})",
+     "call": "allocate({'v0': {'v1', 'v4'}, 'v1': {'v0', 'v2'}, 'v2': {'v3', 'v1'}, 'v3': {'v4', 'v2'}, 'v4': {'v3', 'v0'}}, 2, {'v0': 1, 'v1': 1, 'v2': 1, 'v3': 1, 'v4': 1})",
      "expect": "({'v4': 0, 'v3': 1, 'v2': 0, 'v1': 1}, {'v0'})"
     },
     {
      "label": "A 5-cycle with 3 colours",
-     "call": "allocate({'v0': {'v1', 'v4'}, 'v1': {'v0', 'v2'}, 'v2': {'v1', 'v3'}, 'v3': {'v2', 'v4'}, 'v4': {'v0', 'v3'}}, 3, {'v0': 1, 'v1': 1, 'v2': 1, 'v3': 1, 'v4': 1})",
+     "call": "allocate({'v0': {'v1', 'v4'}, 'v1': {'v0', 'v2'}, 'v2': {'v3', 'v1'}, 'v3': {'v4', 'v2'}, 'v4': {'v3', 'v0'}}, 3, {'v0': 1, 'v1': 1, 'v2': 1, 'v3': 1, 'v4': 1})",
      "expect": "({'v4': 0, 'v3': 1, 'v2': 0, 'v1': 1, 'v0': 2}, set())"
     },
     {
      "label": "Cost decides the spill",
-     "call": "allocate({'hot': {'b', 'a'}, 'a': {'b', 'hot'}, 'b': {'hot', 'a'}}, 2, {'hot': 50, 'a': 3, 'b': 4})",
+     "call": "allocate({'hot': {'a', 'b'}, 'a': {'b', 'hot'}, 'b': {'a', 'hot'}}, 2, {'hot': 50, 'a': 3, 'b': 4})",
      "expect": "({'hot': 0, 'b': 1}, {'a'})"
     },
     {
@@ -834,7 +834,7 @@ CSA.addCode("cs365", {
     },
     {
      "label": "A clique of 5 with 4 registers",
-     "call": "allocate({'a': {'b', 'e', 'c', 'd'}, 'b': {'c', 'e', 'd', 'a'}, 'c': {'b', 'e', 'd', 'a'}, 'd': {'b', 'e', 'c', 'a'}, 'e': {'b', 'c', 'd', 'a'}}, 4, {'a': 5, 'b': 1, 'c': 3, 'd': 1, 'e': 2})",
+     "call": "allocate({'a': {'c', 'b', 'd', 'e'}, 'b': {'a', 'c', 'd', 'e'}, 'c': {'a', 'b', 'd', 'e'}, 'd': {'a', 'c', 'b', 'e'}, 'e': {'a', 'c', 'b', 'd'}}, 4, {'a': 5, 'b': 1, 'c': 3, 'd': 1, 'e': 2})",
      "expect": "({'e': 0, 'd': 1, 'c': 2, 'a': 3}, {'b'})",
      "hidden": true
     }

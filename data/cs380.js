@@ -296,8 +296,11 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 aes_key = AESGCM.generate_key(bit_length=256)
 aead = AESGCM(aes_key)
 n12 = os.urandom(12)                            # a 12-byte nonce: never reuse one with this key
+# arguments: nonce, plaintext, associated data (authenticated, not encrypted)
 sealed = aead.encrypt(n12, b"pay ana $100", b"msg 17")
+# sealed is the 12-byte ciphertext followed by the 16-byte tag: 28 bytes
 opened = aead.decrypt(n12, sealed, b"msg 17")   # raises InvalidTag if anything was changed</code></pre>
+<p>The third argument is the associated data: here a message number, sent in the clear beside the ciphertext, which the tag covers so it can't be altered either. The nonce isn't secret and is sent with the message too.</p>
 <p>The library chooses the mode, the tag and the checks. What remains your job: generating keys with a secure random source, keeping them secret, and never reusing a nonce.</p>
 <p class="note">Why it matters: almost every real break of symmetric encryption is a misuse (ECB, a reused nonce or key, no integrity check), not a break of AES itself.</p>
 `,
@@ -377,7 +380,7 @@ print(hashlib.sha256(b"hellp").hexdigest()[:16])   # fdd7585e08c4e2af</code></pr
 <p>The standard choices are SHA-256 and SHA-512 (the SHA-2 family, 2001) and SHA-3 (2015). MD5 and SHA-1 are broken for collisions: MD5 collisions were first published in 2004 and by 2006 took under a minute on a laptop, and in 2017 researchers published two different PDF files with the same SHA-1 digest. Git has been moving from SHA-1 to SHA-256 for this reason.</p>
 
 <h3>The birthday bound</h3>
-<p>How hard should finding a collision be? MATH 121 Lesson 6 showed that among <em>m</em> equally likely values, a repeat is expected after about √(π<em>m</em>/2) random draws: about 23 people for a shared birthday. For an <em>n</em>-bit digest, <em>m</em> = 2<sup><em>n</em></sup>, so a brute-force collision search takes about 2<sup><em>n</em>/2</sup> hashes, not 2<sup><em>n</em></sup>. A small experiment with SHA-256 cut to 24 bits (3 bytes):</p>
+<p>How hard should finding a collision be? MATH 121 Lesson 6 showed that among <em>m</em> equally likely values, the chance of a repeat passes 50% after about √(2 ln 2 · <em>m</em>) ≈ 1.18√<em>m</em> random draws (23 people for a shared birthday), and the average number of draws until the first repeat is a little more, √(π<em>m</em>/2) ≈ 1.25√<em>m</em> (about 24). Either way it is a constant times √<em>m</em>. For an <em>n</em>-bit digest, <em>m</em> = 2<sup><em>n</em></sup>, so a brute-force collision search takes about 2<sup><em>n</em>/2</sup> hashes, not 2<sup><em>n</em></sup>. A small experiment with SHA-256 cut to 24 bits (3 bytes):</p>
 <pre><code>import math
 
 def h24(data):
@@ -1002,12 +1005,14 @@ print(stat.filemode(0o104755))   # -rwsr-xr-x</code></pre>
 <h3>Timing side channels</h3>
 <p>A <strong>side channel</strong> is information leaked by how a computation runs rather than by what it outputs: its time, power use, cache footprint or even sound. The simplest is timing. Comparing a secret with a guess byte by byte, stopping at the first mismatch, takes longer the more leading bytes are right:</p>
 <pre><code>def leaky_equal(a, b):
+    if len(a) != len(b):
+        return False, 0               # lengths differ: no bytes compared
     steps = 0
     for x, y in zip(a, b):
         steps += 1
         if x != y:
             return False, steps
-    return len(a) == len(b), steps
+    return True, steps
 
 secret = b"k9QzT2"
 print(leaky_equal(secret, b"aaaaaa"))   # (False, 1)
@@ -1103,7 +1108,7 @@ print(ipaddress.ip_address("10.20.7.9") in net, ipaddress.ip_address("10.21.0.1"
 <li><strong>Code review</strong> (CS 240 Lesson 7) with security questions: where does this input come from, is it validated at the boundary, does every path check authorization, are queries parameterized and output encoded, are errors failing safe, are secrets kept out of logs and code?</li>
 <li><strong>Static analysis</strong> tools that track untrusted data from sources (request parameters) to dangerous sinks (SQL execution, HTML output), plus compiler warnings and sanitizers for C and C++.</li>
 <li><strong>Fuzzing</strong>: feed a program huge numbers of automatically generated, malformed inputs and watch for crashes, hangs and sanitizer reports. <em>Coverage-guided</em> fuzzers such as AFL++ and libFuzzer keep any input that reaches new code and mutate it further, so they work their way deep into parsers. Fuzzing found Heartbleed-class bugs by the thousand; Google's OSS-Fuzz service runs it continuously on over a thousand open-source projects. The programming problem builds a tiny fuzzer.</li>
-<li><strong>Dependencies</strong>: a typical application runs far more code from libraries than its team wrote, and each library's vulnerabilities are yours. Pin exact versions in a lockfile, so a build is reproducible and an update is a reviewed change; track known vulnerabilities with an advisory scanner; update promptly (Equifax's breach used a bug patched two months earlier); and be wary of the supply chain itself. In 2024 a maintainer of the widely used compression library xz, who had built trust over about two years, slipped a backdoor targeting SSH servers into its release files; it was caught by chance, by an engineer who noticed logins taking half a second longer than usual.</li>
+<li><strong>Dependencies</strong>: a typical application runs far more code from libraries than its team wrote, and each library's vulnerabilities are yours. Pin exact versions in a lockfile, so a build is reproducible and an update is a reviewed change; track known vulnerabilities with an advisory scanner (an <em>advisory</em> is a published notice naming the affected versions, such as "below 2.4.3"; versions are usually written major.minor.patch, numbers separated by dots, and the scanner compares yours with the range part by part, as numbers); update promptly (Equifax's breach used a bug patched two months earlier); and be wary of the supply chain itself. In 2024 a maintainer of the widely used compression library xz, who had built trust over about two years, slipped a backdoor targeting SSH servers into its release files; it was caught by chance, by an engineer who noticed logins taking half a second longer than usual.</li>
 <li><strong>Secrets management</strong> (CS 240 Lesson 8): keys in a secrets manager, never in the repository; rotated when people leave or anything leaks.</li>
 </ul>
 
