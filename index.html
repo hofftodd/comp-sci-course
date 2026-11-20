@@ -65,7 +65,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--f-body); fon
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
 a { color: var(--accent); }
 a:focus-visible, button:focus-visible, input:focus-visible + span, summary:focus-visible, select:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
-code { font-family: var(--f-mono); font-size: 0.88em; background: var(--code-bg); padding: 0.08em 0.3em; border-radius: 3px; }
+code { font-family: var(--f-mono); font-variant-ligatures: none; font-size: 0.88em; background: var(--code-bg); padding: 0.08em 0.3em; border-radius: 3px; }
 h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.2; margin: 0; }
 
 /* Top bar */
@@ -292,7 +292,7 @@ pre code { background: none; padding: 0; font-size: inherit; }
 .cp-head h3 { font-size: 1.15rem; }
 .cp-prompt > * + * { margin-top: var(--s-2); }
 .cp-prompt p { margin: 0; }
-.cp-ed, .cp-in textarea { font-family: var(--f-mono); font-size: 0.86rem; line-height: 1.5; width: 100%; padding: var(--s-2) var(--s-3); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--code-bg); color: var(--ink); tab-size: 4; resize: vertical; white-space: pre; overflow-x: auto; }
+.cp-ed, .cp-in textarea { font-family: var(--f-mono); font-variant-ligatures: none; font-size: 0.86rem; line-height: 1.5; width: 100%; padding: var(--s-2) var(--s-3); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--code-bg); color: var(--ink); tab-size: 4; resize: vertical; white-space: pre; overflow-x: auto; }
 .cp-ed:focus, .cp-in textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .cp-in summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
 .cp-in { display: grid; gap: var(--s-1); }
