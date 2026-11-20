@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had five. The other two terms are planned and shown on the home page.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had five. Year 4 Fall is written and has had one. Year 4 Spring is planned and shown on the home page.
 
 ## What's in Year 1
 
@@ -91,6 +91,25 @@ interpreter through the term; CS 365 builds a compiler from a lexer to a stack-m
 register allocation; CS 370 uses only the standard library (no NumPy), from A* to backpropagation and
 attention; CS 380 teaches defensive security with toy cryptography and real-world case studies.
 
+## What's in Year 4
+
+### Fall
+
+| Course | Credits | Core units | Programming problems |
+|---|---|---|---|
+| CS 410 Distributed Systems | 4 | 8 | 16 |
+| CS 490 Capstone Project I | 4 | 8 | 17 |
+| CS 430 Advanced Algorithms (elective) | 4 | 6 | 14 |
+| CS 470 Deep Learning (elective) | 4 | 6 | 12 |
+
+CS 410 simulates distributed systems deterministically: messages, delays, crashes and partitions
+run under a seeded scheduler, so Raft, quorums, two-phase commit and gossip can be graded in the
+browser. CS 490 is the first half of a two-term team project for a real user; its grade comes mostly
+from project milestones, and its problems are tools a team uses (critical paths, changelogs,
+contrast checks). CS 430 covers amortized, randomized, approximation, LP, streaming and online
+algorithms; CS 470 builds tensors, autograd, CNNs, LSTMs and attention from the standard library.
+The free elective is chosen from outside the major and isn't part of this site.
+
 Every course opens with a **rubric**: what is graded and how much it counts, the criteria with four
 performance levels, the grade scale, and policies. Each core lesson is designed for about 90 minutes:
 notes with worked examples and diagrams, key terms, 5–8 **practice problems** with optional hints and
@@ -103,14 +122,15 @@ idea is used in practice. Year 1 is taught in Python.
 
 - **Lessons and quizzes**: per-lesson progress, "mark complete", and best quiz scores, saved in
   the student's browser.
-- **Auto-graded programming problems**: 303 in all. CS 101 has 31, two or three per lesson; CS 102
+- **Auto-graded programming problems**: 362 in all. CS 101 has 31, two or three per lesson; CS 102
   has 17 (classes, generators, writing tests that catch bugs, linked lists, trees); PHYS 150 has a
   simulation problem per lesson; Year 2 Fall has 53 (data structures, systems simulations, linear
   algebra and statistics); Year 2 Spring has 59 (algorithms, hardware simulations, software
   engineering practice and electromagnetism simulations); Year 3 Fall has 60 (operating-system
   simulations, automata and parsers, SQL and database internals, and a software renderer); Year 3 Spring has 77 (protocol simulations,
   interpreters and type checkers, search and learning algorithms, defensive security, and compiler
-  phases). Each comes with
+  phases); Year 4 Fall has 59 (distributed-systems simulations, project tools, advanced algorithms and
+  deep-learning building blocks). Each comes with
   starter code, a hint, a reference solution and automatic tests: edge cases, hidden tests, speed
   tests that catch slow algorithms, and checks such as "don't use the built-in `max`". Students
   write real Python in the page; it runs in their browser with Pyodide (CPython compiled to
