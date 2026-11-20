@@ -433,7 +433,7 @@ print(len(pairs), len(wrong), wrong[0], mid1(*wrong[0]), mid2(*wrong[0]))   # 32
 <p>Half the pairs with <em>lo</em> ≤ <em>hi</em> give a wrong midpoint: every pair whose sum reaches 256. Exhaustive search works at 8 bits (32,896 pairs) and is hopeless at 32 or 64; a bit-vector solver answers at any width.</p>
 
 <h3>Symbolic execution</h3>
-<p>To apply a solver to a program we need formulas that describe the program's runs. Take a tiny imperative language, written as nested lists like CS 360's: expressions are integers, booleans, variable names, <code>[op, a, b]</code> and <code>["not", a]</code>; statements are <code>["set", x, e]</code>, <code>["if", c, then, else]</code>, <code>["while", c, body]</code> and <code>["assert", c]</code>; a program is a list of statements. Lesson 5 uses the same language.</p>
+<p>To apply a solver to a program we need formulas that describe the program's runs. Take a tiny imperative language, written as nested lists like CS 360's: expressions are integers, booleans, variable names, <code>[op, a, b]</code> and <code>["not", a]</code>; statements are <code>["set", x, e]</code>, <code>["if", c, then, else]</code>, <code>["while", c, body]</code> and <code>["assert", c]</code>; a program is a list of statements. Lesson 5 uses the same language with one change: there a loop carries its invariant, <code>["while", c, inv, body]</code> (and, in its last programming problem, a variant as well), because a proof needs it.</p>
 <pre><code>import itertools
 import random
 
@@ -565,7 +565,7 @@ ok {'x': -30, 'y': -30}</code></pre>
 <p>The obstacle is <strong>path explosion</strong>: <em>n</em> <code>if</code>s in a row can give 2<sup><em>n</em></sup> paths, and a loop whose bound depends on the input gives a path for every iteration count. Real tools prune infeasible paths early, merge similar states, and use heuristics to explore the paths most likely to reach new code.</p>
 
 <h3>Bounded model checking</h3>
-<p><code>symex</code> stops a path after <em>k</em> loop iterations in total, with outcome <code>"cut"</code>. Exploring every path up to that bound and asking whether any failing path is feasible is <strong>bounded model checking</strong> (BMC). Tools such as CBMC, for C, unroll each loop <em>k</em> times, encode all paths together as one formula, and ask a SAT or SMT solver whether an assertion can fail. Here the program sums 0 + 1 + ⋯ + (<em>n</em> − 1) and asserts the sum is never 10:</p>
+<p><code>symex</code> stops a path after <em>k</em> loop iterations in total, with outcome <code>"cut"</code>. Exploring every path up to that bound and asking whether any failing path is feasible is <strong>bounded model checking</strong> (BMC). Tools such as CBMC, for C, unroll each loop <em>k</em> times, encode all paths together as one formula, and ask a SAT or SMT solver whether an assertion can fail. The two bounds differ for a program with several loops: <code>symex</code> allows <em>k</em> iterations along a path over all its loops together, CBMC <em>k</em> for each loop. For a program with one loop, like the one below, they are the same. In this lesson's questions and problems, "bound <em>k</em>" means <code>symex</code>'s: at most <em>k</em> iterations in total. Here the program sums 0 + 1 + ⋯ + (<em>n</em> − 1) and asserts the sum is never 10:</p>
 <pre><code>S = [["set", "i", 0], ["set", "s", 0],
      ["while", ["&lt;", "i", "n"], [["set", "s", ["+", "s", "i"]], ["set", "i", ["+", "i", 1]]]],
      ["assert", ["!=", "s", 10]]]
@@ -615,11 +615,17 @@ for k in range(8):
 (check-sat)</code></pre><p>Adding the equations gives 2<em>a</em> = 13, so <em>a</em> = 6.5, not an integer: the answer is <code>unsat</code>. Declared as <code>Real</code> instead, the answer would be <code>sat</code> with <em>a</em> = 13/2 and <em>b</em> = 7/2. The theory matters.</p>`
         },
         {
-          q: `<p>Symbolically execute this program by hand, with inputs <em>a</em> and <em>b</em>, and list each path's condition and final value of <em>m</em>:</p><pre data-label="Python"><code>m = a
+          q: `<p>Symbolically execute this program by hand, with inputs <em>a</em> and <em>b</em>, and list each path's condition and final value of <em>m</em>. It is written in Python for readability; working by hand, you needn't translate it. (To run it with the notes' <code>symex</code>, write it in the list form, with <em>x</em> ≥ <em>y</em> as <code>["&lt;=", y, x]</code>, since <code>OPS</code> has no <code>&gt;=</code> or <code>&gt;</code>.)</p><pre data-label="Python"><code>m = a
 if m &lt; b:
     m = b
 assert m &gt;= a and m &gt;= b</code></pre>`,
-          a: `<p>Path 1: condition <em>a</em> &lt; <em>b</em>; <em>m</em> = <em>b</em>; the assertion is <em>b</em> ≥ <em>a</em> ∧ <em>b</em> ≥ <em>b</em>, which follows from the path condition, so the failing branch (<em>a</em> &lt; <em>b</em> ∧ ¬(<em>b</em> ≥ <em>a</em> ∧ <em>b</em> ≥ <em>b</em>)) is unsatisfiable. Path 2: condition ¬(<em>a</em> &lt; <em>b</em>), that is <em>a</em> ≥ <em>b</em>; <em>m</em> = <em>a</em>; the assertion <em>a</em> ≥ <em>a</em> ∧ <em>a</em> ≥ <em>b</em> follows. Both failing paths are infeasible, so no input fails the assertion, for all integers, not just a range: a solver would report unsat for each failing path condition.</p>`
+          a: `<p>Path 1: condition <em>a</em> &lt; <em>b</em>; <em>m</em> = <em>b</em>; the assertion is <em>b</em> ≥ <em>a</em> ∧ <em>b</em> ≥ <em>b</em>, which follows from the path condition, so the failing branch (<em>a</em> &lt; <em>b</em> ∧ ¬(<em>b</em> ≥ <em>a</em> ∧ <em>b</em> ≥ <em>b</em>)) is unsatisfiable. Path 2: condition ¬(<em>a</em> &lt; <em>b</em>), that is <em>a</em> ≥ <em>b</em>; <em>m</em> = <em>a</em>; the assertion <em>a</em> ≥ <em>a</em> ∧ <em>a</em> ≥ <em>b</em> follows. Both failing paths are infeasible, so no input fails the assertion, for all integers, not just a range: a solver would report unsat for each failing path condition. In the notes' language, <code>symex</code> finds the same four paths, and the brute-force <code>solve</code> finds no input from −20 to 20 for either failing one:</p>
+<pre><code>M = [["set", "m", "a"],
+     ["if", ["&lt;", "m", "b"], [["set", "m", "b"]], []],
+     ["assert", ["and", ["&lt;=", "a", "m"], ["&lt;=", "b", "m"]]]]
+paths = list(symex(M, {"a": "a", "b": "b"}, [], 0))
+print([(outcome, st["m"]) for pc, st, outcome in paths])   # [('fail', 'b'), ('ok', 'b'), ('fail', 'a'), ('ok', 'a')]
+print([solve(pc, ["a", "b"], -20, 20) for pc, st, outcome in paths if outcome == "fail"])   # [None, None]</code></pre>`
         },
         {
           q: `<p>A function has 30 independent <code>if</code> statements in sequence and no loops. How many paths can it have? If a symbolic executor checks 10,000 paths a second, how long would all of them take?</p>`,
