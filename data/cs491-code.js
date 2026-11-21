@@ -478,10 +478,10 @@ CSA.addCode("cs491", {
   {
    "id": "semver_resolve",
    "title": "Resolving version constraints",
-   "prompt": "<p>Extend CS 240's <code>satisfies</code> to the constraint language in the notes. Versions are <code>MAJOR.MINOR.PATCH</code> with whole numbers (no pre-release tags). A constraint is one or more comparators separated by commas, all of which must hold: <code>&gt;=V</code>, <code>&gt;V</code>, <code>&lt;=V</code>, <code>&lt;V</code>, <code>=V</code> or a bare <code>V</code> (exactly V), <code>*</code> (anything), <code>^V</code> (npm's caret: at least V, and below the next increase of V's left-most non-zero part, so ^1.2.3 is below 2.0.0, ^0.2.3 below 0.3.0 and ^0.0.3 below 0.0.4; if all three parts are 0, the patch counts, so ^0.0.0 is below 0.0.1 and allows only 0.0.0) and <code>~V</code> (at least V and below the next minor version: ~1.2.3 is below 1.3.0). Spaces around comparators are allowed. Write:</p>\n<ul>\n<li><code>parse_version(v)</code>: a tuple of three ints; <code>ValueError</code> if malformed.</li>\n<li><code>satisfies(version, constraint)</code>: <code>True</code> or <code>False</code>.</li>\n<li><code>resolve(available, constraints)</code>: <code>constraints</code> maps each dependent to its constraint string. Return the highest version in <code>available</code> that satisfies every constraint, or <code>None</code>.</li>\n<li><code>conflicts(available, constraints)</code>: the sorted list of pairs <code>(a, b)</code> of dependents, with a &lt; b, such that no available version satisfies both a's and b's constraints.</li>\n</ul>",
+   "prompt": "<p>Extend CS 240's <code>satisfies</code> to the constraint language in the notes. Versions are <code>MAJOR.MINOR.PATCH</code> with whole numbers (no pre-release tags). A constraint is one or more comparators separated by commas, all of which must hold: <code>&gt;=V</code>, <code>&gt;V</code>, <code>&lt;=V</code>, <code>&lt;V</code>, <code>==V</code>, <code>=V</code> or a bare <code>V</code> (exactly V), <code>*</code> (anything), <code>^V</code> (npm's caret: at least V, and below the next increase of V's left-most non-zero part, so ^1.2.3 is below 2.0.0, ^0.2.3 below 0.3.0 and ^0.0.3 below 0.0.4; if all three parts are 0, the patch counts, so ^0.0.0 is below 0.0.1 and allows only 0.0.0) and <code>~V</code> or Python's <code>~=V</code> (at least V and below the next minor version: ~1.2.3 and ~=1.2.3 are below 1.3.0). Every V has three parts, so the notes' two-part form <code>~=1.4</code> is malformed here. Spaces around comparators are allowed. Write:</p>\n<ul>\n<li><code>parse_version(v)</code>: a tuple of three ints; <code>ValueError</code> if malformed.</li>\n<li><code>satisfies(version, constraint)</code>: <code>True</code> or <code>False</code>.</li>\n<li><code>resolve(available, constraints)</code>: <code>constraints</code> maps each dependent to its constraint string. Return the highest version in <code>available</code> that satisfies every constraint, or <code>None</code>.</li>\n<li><code>conflicts(available, constraints)</code>: the sorted list of pairs <code>(a, b)</code> of dependents, with a &lt; b, such that no available version satisfies both a's and b's constraints.</li>\n</ul>",
    "starter": "def parse_version(v):\n    pass\n\ndef satisfies(version, constraint):\n    pass\n\ndef resolve(available, constraints):\n    pass\n\ndef conflicts(available, constraints):\n    pass\n",
    "hint": "<p>Translate each comparator into a list of (operator, version tuple) pairs: a caret or tilde becomes a <code>&gt;=</code> and a <code>&lt;</code>. Python compares tuples element by element, which is exactly version order. Check the two-character operators before the one-character ones.</p>",
-   "solution": "def parse_version(v):\n    parts = v.split(\".\")\n    if len(parts) != 3 or not all(p.isdigit() for p in parts):\n        raise ValueError(\"not a version: \" + v)\n    return tuple(int(p) for p in parts)\n\ndef _comparators(c):\n    c = c.strip()\n    if c in (\"*\", \"\"):\n        return []\n    if c.startswith(\"^\"):\n        lo = parse_version(c[1:])\n        if lo[0] > 0:\n            hi = (lo[0] + 1, 0, 0)\n        elif lo[1] > 0:\n            hi = (0, lo[1] + 1, 0)\n        else:\n            hi = (0, 0, lo[2] + 1)\n        return [(\">=\", lo), (\"<\", hi)]\n    if c.startswith(\"~\"):\n        lo = parse_version(c[1:])\n        return [(\">=\", lo), (\"<\", (lo[0], lo[1] + 1, 0))]\n    for op in (\">=\", \"<=\", \">\", \"<\", \"=\"):\n        if c.startswith(op):\n            return [(op, parse_version(c[len(op):].strip()))]\n    return [(\"=\", parse_version(c))]\n\ndef satisfies(version, constraint):\n    v = parse_version(version)\n    tests = {\">=\": lambda a, b: a >= b, \"<=\": lambda a, b: a <= b, \">\": lambda a, b: a > b,\n             \"<\": lambda a, b: a < b, \"=\": lambda a, b: a == b}\n    for part in constraint.split(\",\"):\n        for op, bound in _comparators(part):\n            if not tests[op](v, bound):\n                return False\n    return True\n\ndef resolve(available, constraints):\n    ok = [v for v in available if all(satisfies(v, c) for c in constraints.values())]\n    return max(ok, key=parse_version) if ok else None\n\ndef conflicts(available, constraints):\n    names = sorted(constraints)\n    out = []\n    for i, a in enumerate(names):\n        for b in names[i + 1:]:\n            if not any(satisfies(v, constraints[a]) and satisfies(v, constraints[b]) for v in available):\n                out.append((a, b))\n    return out\n",
+   "solution": "def parse_version(v):\n    parts = v.split(\".\")\n    if len(parts) != 3 or not all(p.isdigit() for p in parts):\n        raise ValueError(\"not a version: \" + v)\n    return tuple(int(p) for p in parts)\n\ndef _comparators(c):\n    c = c.strip()\n    if c in (\"*\", \"\"):\n        return []\n    if c.startswith(\"^\"):\n        lo = parse_version(c[1:])\n        if lo[0] > 0:\n            hi = (lo[0] + 1, 0, 0)\n        elif lo[1] > 0:\n            hi = (0, lo[1] + 1, 0)\n        else:\n            hi = (0, 0, lo[2] + 1)\n        return [(\">=\", lo), (\"<\", hi)]\n    if c.startswith(\"~\"):                     # ~V, or Python's ~=V (the same range for three-part V)\n        lo = parse_version(c[2:] if c.startswith(\"~=\") else c[1:])\n        return [(\">=\", lo), (\"<\", (lo[0], lo[1] + 1, 0))]\n    if c.startswith(\"==\"):\n        return [(\"=\", parse_version(c[2:].strip()))]\n    for op in (\">=\", \"<=\", \">\", \"<\", \"=\"):\n        if c.startswith(op):\n            return [(op, parse_version(c[len(op):].strip()))]\n    return [(\"=\", parse_version(c))]\n\ndef satisfies(version, constraint):\n    v = parse_version(version)\n    tests = {\">=\": lambda a, b: a >= b, \"<=\": lambda a, b: a <= b, \">\": lambda a, b: a > b,\n             \"<\": lambda a, b: a < b, \"=\": lambda a, b: a == b}\n    for part in constraint.split(\",\"):\n        for op, bound in _comparators(part):\n            if not tests[op](v, bound):\n                return False\n    return True\n\ndef resolve(available, constraints):\n    ok = [v for v in available if all(satisfies(v, c) for c in constraints.values())]\n    return max(ok, key=parse_version) if ok else None\n\ndef conflicts(available, constraints):\n    names = sorted(constraints)\n    out = []\n    for i, a in enumerate(names):\n        for b in names[i + 1:]:\n            if not any(satisfies(v, constraints[a]) and satisfies(v, constraints[b]) for v in available):\n                out.append((a, b))\n    return out\n",
    "tests": [
     {
      "label": "Carets and tildes",
@@ -507,6 +507,11 @@ CSA.addCode("cs491", {
      "label": "Finding the conflicting pair",
      "call": "conflicts(['1.2.0', '1.4.2', '1.9.0', '1.10.1', '2.0.0', '2.1.3'], {'app': '^1.4.0', 'export': '>=2.0.0', 'any': '*'})",
      "expect": "[('app', 'export')]"
+    },
+    {
+     "label": "Python's == and ~= forms",
+     "call": "[satisfies('1.4.2', '==1.4.2'), satisfies('1.4.3', '==1.4.2'), satisfies('1.4.9', '~=1.4.2'), satisfies('1.5.0', '~=1.4.2'), satisfies('1.4.1', '~=1.4.2'), satisfies('1.10.1', '>=1.9.0, ~=1.10.0')]",
+     "expect": "[True, False, True, False, False, True]"
     },
     {
      "label": "A caret on 0.0.0 allows only 0.0.0",
@@ -537,6 +542,20 @@ CSA.addCode("cs491", {
      "label": "A malformed constraint",
      "type": "raises",
      "call": "satisfies('1.2.3', '^1.x.0')",
+     "error": "ValueError",
+     "hidden": true
+    },
+    {
+     "label": "A two-part compatible release",
+     "type": "raises",
+     "call": "satisfies('1.4.2', '~=1.4')",
+     "error": "ValueError",
+     "hidden": true
+    },
+    {
+     "label": "A triple equals sign",
+     "type": "raises",
+     "call": "satisfies('1.4.2', '===1.4.2')",
      "error": "ValueError",
      "hidden": true
     }
