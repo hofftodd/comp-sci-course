@@ -267,7 +267,7 @@ print(ntp(100.000, 100.130, 100.131, 100.041))   # (0.11, 0.04)</code></pre>
 <li>if <em>a</em> is the sending of a message and <em>b</em> its receipt, then <em>a</em> → <em>b</em>;</li>
 <li>if <em>a</em> → <em>b</em> and <em>b</em> → <em>c</em>, then <em>a</em> → <em>c</em> (it is transitive).</li>
 </ol>
-<p>If neither <em>a</em> → <em>b</em> nor <em>b</em> → <em>a</em>, the events are <strong>concurrent</strong>, written <em>a</em> ∥ <em>b</em>: neither could have known about the other. In the terms of MATH 120 Lesson 5, happens-before is a strict partial order: irreflexive and transitive, with some pairs incomparable. <em>a</em> → <em>b</em> means there is a path from <em>a</em> to <em>b</em> moving forward along process lines and along message arrows, in a diagram like this one:</p>
+<p>If neither <em>a</em> → <em>b</em> nor <em>b</em> → <em>a</em>, the events are <strong>concurrent</strong>, written <em>a</em> ∥ <em>b</em>: neither could have known about the other. In the terms of MATH 120 Lesson 5, happens-before is a strict partial order: irreflexive, antisymmetric and transitive (the antisymmetry follows from the other two), with some pairs incomparable. <em>a</em> → <em>b</em> means there is a path from <em>a</em> to <em>b</em> moving forward along process lines and along message arrows, in a diagram like this one:</p>
 <figure class="fig"><svg viewBox="0 0 480 220" width="480" role="img" aria-label="A space-time diagram with three processes. P0 has events a, b, h; P1 has c, d, e; P2 has f, g. A message m1 goes from b on P0 to d on P1; a message m2 goes from e on P1 to g on P2.">
 <defs><marker id="arr-di2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="dot"/></marker></defs>
 <g class="ln"><line x1="50" y1="40" x2="460" y2="40"/><line x1="50" y1="110" x2="460" y2="110"/><line x1="50" y1="180" x2="460" y2="180"/></g>
@@ -820,7 +820,7 @@ def h(s):
 keys = [f"user{i}" for i in range(10000)]
 moved = sum(h(k) % 4 != h(k) % 5 for k in keys)
 print(moved / len(keys))   # 0.8036</code></pre>
-<p>(<code>int.from_bytes(b, "big")</code> reads bytes as a big-endian unsigned integer, CS 210 Lesson 1's byte order. Taking 8 bytes of SHA-256, CS 380 Lesson 3, gives a well-mixed 64-bit number; any good hash would do, since nothing here needs to resist an attacker. A fixed hash is not the randomly chosen function that hashing's proofs assume; it behaves like one only on keys not chosen against it, and CS 201 Lesson 3's hash flooding showed what happens when keys are chosen against it. If you want more, CS 430, taken alongside this course, shows that every fixed hash has such bad inputs (its Lesson 2) and discusses when a fixed hash is good enough anyway (its Lesson 5); nothing here depends on either.)</p>
+<p>(<code>int.from_bytes(b, "big")</code> reads bytes as a big-endian unsigned integer, CS 210 Lesson 1's byte order. Taking 8 bytes of SHA-256, CS 380 Lesson 3, gives a well-mixed 64-bit number; any good hash would do, since nothing here needs to resist an attacker. A fixed hash is not the randomly chosen function that hashing's proofs assume; it behaves like one only on keys not chosen against it, and CS 201 Lesson 3's hash flooding showed what happens when keys are chosen against it. If you want more, CS 430, the Year 4 elective taught this term, shows that every fixed hash has such bad inputs (its Lesson 2) and discusses when a fixed hash is good enough anyway (its Lesson 5); nothing here depends on either.)</p>
 
 <h3>Consistent hashing</h3>
 <p><strong>Consistent hashing</strong> (Karger and colleagues, 1997, for web caches) moves only the keys it must. Picture the hash values 0 to 2<sup>64</sup> − 1 arranged in a circle, the <em>ring</em>. Each node is placed on the ring at the hash of its name. A key belongs to the first node at or after the key's hash going clockwise, wrapping around from the top back to 0. When a node joins, it takes over only the keys between its predecessor on the ring and itself; when a node leaves, its keys pass to its successor. Nothing else moves.</p>
@@ -1139,7 +1139,8 @@ print(avg_reduce("cs410", [(90, 1), (170, 2), (80, 1)]))   # 85.0</code></pre>
 <p>Users notice slow requests, not average ones, so services track latency <strong>percentiles</strong>: the 99th percentile (p99) latency is the time within which 99% of requests finish (CS 240 Lesson 8). The slowest requests, the <strong>tail</strong>, matter more in a distributed system than their 1% suggests, because of fan-out. A search query may be sent to 100 index servers, each holding one partition (Lesson 6), and can't answer until all have replied. If each server is slow (say over a second) 1% of the time, independently, the query is slow unless all 100 are fast:</p>
 <p class="math">P(query slow) = 1 − 0.99<sup>100</sup> ≈ 0.634</p>
 <p>Almost two-thirds of queries hit at least one slow server. Jeffrey Dean and Luiz André Barroso's 2013 paper "The Tail at Scale" used exactly this arithmetic to argue that large services must be designed to tolerate slow components, not merely failed ones. One of their techniques is the <strong>hedged request</strong>: send the request to one replica, and if it hasn't answered within about the 95th-percentile latency, send it to a second replica too and use whichever reply comes first. Most of the time the first replica answers in time and no extra work is done. A simulation, with response times that are usually about 12 ms but over a second 2% of the time:</p>
-<pre><code>import random
+<pre><code>import math
+import random
 
 def latency(rng):
     """One server's response time in ms: usually about 12, but 2% of the time over a second."""
@@ -1149,8 +1150,9 @@ def latency(rng):
     return t
 
 def percentile(xs, p):
+    """Nearest rank (CS 490 Lesson 7): the value at position ceil(p * n / 100), counting from 1."""
     xs = sorted(xs)
-    return xs[min(len(xs) - 1, int(p / 100 * len(xs)))]
+    return xs[max(0, math.ceil(p * len(xs) / 100) - 1)]
 
 rng = random.Random(7)
 plain, hedged, extra = [], [], 0
@@ -1167,7 +1169,7 @@ for p in (50, 99, 99.9):
 print(extra / 100000)   # 0.06847</code></pre>
 <pre data-label="Output"><code>50 10.8 10.8
 99 1010.7 31.5
-99.9 1020.4 42.0
+99.9 1020.4 41.7
 0.06847</code></pre>
 <p>(<code>rng.expovariate(λ)</code> draws from the exponential distribution with rate λ, so mean 1/λ.) In this model 20 ms is about the 93rd percentile of one server's latency. Hedging after 20 ms sends a second request for 6.8% of requests, and cuts the p99 from about a second to 31.5 ms. The median doesn't change. In a real system the gain is smaller when slowness is correlated (both replicas share an overloaded switch), and a hedge must be safe to duplicate, so it is used for reads and idempotent operations. MapReduce's backup tasks (Lesson 7) are the same idea for whole tasks.</p>
 

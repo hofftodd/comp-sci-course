@@ -475,7 +475,7 @@ printf("%d\\n", p[1]);                  /* 20: p[1] means *(p + 1) */</code></pr
 <p>A running C program keeps its data in several regions of memory:</p>
 <ul>
 <li>The <strong>stack</strong> holds each active function call's local variables. They are created when the function is called and destroyed when it returns, automatically. Lesson 6 looks at the stack in detail.</li>
-<li>The <strong>heap</strong> holds memory the program requests explicitly, which lives until the program explicitly gives it back. It's needed when data must outlive the function that creates it, or when its size is only known while the program runs.</li>
+<li>The <strong>heap</strong> holds memory the program requests explicitly, which lives until the program explicitly gives it back. It's needed when data must outlive the function that creates it, or when its size is only known while the program runs. (No relation to CS 201's binary heap: this "heap" just means a pool of memory, with no ordering.)</li>
 <li>Global variables and the program's code live in their own fixed regions.</li>
 </ul>
 <p>Heap memory is managed with two functions from <code>&lt;stdlib.h&gt;</code>. <code>malloc(n)</code> reserves <em>n</em> bytes and returns a pointer to them (or <code>NULL</code> if it can't). <code>free(p)</code> returns them.</p>

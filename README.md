@@ -6,7 +6,7 @@ with quizzes, and ask an AI professor questions in plain language. The lessons i
 the platform notices where students struggle, drafts clearer explanations or questions, and an
 instructor approves each change before students see it.
 
-**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had five. Year 4 Fall is written and has had five. Year 4 Spring is written and has had six, so all four years are now on the site.
+**Status:** Year 1 (Fall and Spring) is written, including the WRIT 100 elective. Year 2 Fall is written and has had five rounds of student review; Year 2 Spring is written and has had four. Year 3 Fall is written and has had four rounds of student review. Year 3 Spring is written and has had five. Year 4 Fall is written and has had five. Year 4 Spring is written and has had six, so all four years are now on the site. A consistency pass over the whole degree then checked every reference from one course to another (docs/reviews/degree-consistency-audit.md).
 
 ## What's in Year 1
 

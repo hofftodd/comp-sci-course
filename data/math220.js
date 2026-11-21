@@ -62,7 +62,7 @@ CSA.addCourse({
       minutes: 90,
       summary: "Vectors as lists of numbers and as arrows, adding and scaling them, linear combinations and span, and the dot product with its geometry: length, angle, orthogonality, and cosine similarity for comparing documents.",
       notes: `
-<p>MATH 131 and PHYS 150 used vectors in two and three dimensions: positions, velocities, gradients. Linear algebra takes the same idea to any number of dimensions. A <strong>vector</strong> in ℝ<sup><em>n</em></sup> is an ordered list of <em>n</em> real numbers, its <strong>components</strong>. We write vectors in bold: <b>v</b> = (3, −1, 2) is a vector in ℝ³. A vector can be pictured as an arrow from the origin to the point with those coordinates, but it needn't be geometric at all: a customer's ratings of 5,000 movies, the pixel brightnesses of an image, and the word counts of a document are all vectors.</p>
+<p>MATH 131 used vectors in two dimensions, for gradients (as does the elective PHYS 150, for positions and velocities). Linear algebra takes the same idea to any number of dimensions. A <strong>vector</strong> in ℝ<sup><em>n</em></sup> is an ordered list of <em>n</em> real numbers, its <strong>components</strong>. We write vectors in bold: <b>v</b> = (3, −1, 2) is a vector in ℝ³. A vector can be pictured as an arrow from the origin to the point with those coordinates, but it needn't be geometric at all: a customer's ratings of 5,000 movies, the pixel brightnesses of an image, and the word counts of a document are all vectors.</p>
 
 <h3>Adding and scaling</h3>
 <p>Vectors of the same size are added component by component, and multiplied by a number (a <strong>scalar</strong>) component by component:</p>
@@ -93,7 +93,7 @@ print(add([1, 2], [3, -1]), scale(3, [1, 2]))   # [4, 1] [3, 6]</code></pre>
 <p class="math"><b>u</b> · <b>v</b> = u<sub>1</sub>v<sub>1</sub> + u<sub>2</sub>v<sub>2</sub> + … + u<sub>n</sub>v<sub>n</sub></p>
 <p>For example, (1, 2, 2) · (3, 0, −1) = 3 + 0 − 2 = 1. The result is a number, not a vector. The dot product connects algebra to geometry in three ways:</p>
 <ul>
-<li><strong>Length.</strong> The length (or <strong>norm</strong>) of <b>v</b> is ‖<b>v</b>‖ = √(<b>v</b> · <b>v</b>), the Pythagorean theorem in <em>n</em> dimensions. ‖(1, 2, 2)‖ = √(1 + 4 + 4) = 3. A vector of length 1 is a <strong>unit vector</strong>; dividing any nonzero vector by its length gives one.</li>
+<li><strong>Length.</strong> The length (or <strong>norm</strong>) of <b>v</b> is ‖<b>v</b>‖ = √(<b>v</b> · <b>v</b>), the Pythagorean theorem in <em>n</em> dimensions. (MATH 131 and the physics courses write |<b>v</b>|; it is the same length. The double bars avoid confusion with absolute value and are standard in linear algebra.) ‖(1, 2, 2)‖ = √(1 + 4 + 4) = 3. A vector of length 1 is a <strong>unit vector</strong>; dividing any nonzero vector by its length gives one.</li>
 <li><strong>Angle.</strong> For nonzero vectors, <b>u</b> · <b>v</b> = ‖<b>u</b>‖ ‖<b>v</b>‖ cos θ, where θ is the angle between them. (In two dimensions this follows from the law of cosines; in <em>n</em> dimensions it is how we <em>define</em> the angle.) For example, (1, 0) · (1, 1) = 1 = 1 · √2 · cos θ, so cos θ = 1/√2 and θ = 45°.</li>
 <li><strong>Perpendicularity.</strong> <b>u</b> and <b>v</b> are <strong>orthogonal</strong> (perpendicular) exactly when <b>u</b> · <b>v</b> = 0.</li>
 </ul>
@@ -470,7 +470,7 @@ print(matmul(S, R))        # [[0, -2], [1, 0]]: rotate, then stretch</code></pre
 <p>For <em>B</em> = [2 1 0; 1 3 1; 0 1 2]: 2(6 − 1) − 1(2 − 0) + 0 = 10 − 2 = 8. Cofactor expansion generalizes to <em>n</em> × <em>n</em>, but it then involves <em>n</em>! terms, hopeless for large <em>n</em>: 20! is about 2.4 × 10<sup>18</sup>. Elimination needs about 5,000 operations for <em>n</em> = 20.</p>
 
 <h3>Why determinants matter</h3>
-<p>Beyond deciding invertibility, determinants measure how transformations change size. In MATH 131's double integrals, changing variables (for example to polar coordinates) multiplies the area element by the absolute value of a determinant, the <em>Jacobian</em>, which is where the extra <em>r</em> in <em>r</em> <em>dr</em> <em>dθ</em> comes from. In Lesson 7, determinants find eigenvalues. In computational geometry, the sign of a 2 × 2 determinant tells whether three points turn left or right, the basic test in algorithms for convex hulls and polygon intersection.</p>
+<p>Beyond deciding invertibility, determinants measure how transformations change size. In multivariable calculus (beyond MATH 131's double integrals over rectangles), changing variables (for example to polar coordinates) multiplies the area element by the absolute value of a determinant, the <em>Jacobian</em>, which is where the extra <em>r</em> in polar coordinates' area element <em>r</em> <em>dr</em> <em>dθ</em> comes from. In Lesson 7, determinants find eigenvalues. In computational geometry, the sign of a 2 × 2 determinant tells whether three points turn left or right, the basic test in algorithms for convex hulls and polygon intersection.</p>
 `,
       terms: [
         ["Inverse", "A⁻¹, the matrix with A⁻¹A = AA⁻¹ = I; undoes the transformation A."],

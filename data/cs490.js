@@ -6,7 +6,7 @@ CSA.addCourse({
   kind: "required",
   term: "y4f",
   summary: "The first half of a two-term capstone. Teams of three to five build a substantial software system for a real user. This term takes a team from an idea to a working prototype in that user's hands: choosing a problem and a stakeholder, discovering requirements, planning and estimating, choosing an architecture and defending it in a design review, working as a team (including with AI assistants), building in thin vertical slices, making the system secure, private, accessible and fast enough, and demonstrating and reflecting on it. Most of the grade comes from the project's milestones; the lessons teach what a team needs at each stage, and every programming problem is a tool a team can use on its own project. CS 491 Capstone Project II continues the same project next term.",
-  prereqs: ["CS 240 Software Engineering I", "WRIT 100 Writing for Technical Audiences", "CS 340 Databases", "CS 380 Security Fundamentals"],
+  prereqs: ["CS 240 Software Engineering I", "WRIT 100 Writing for Technical Audiences (elective, recommended)", "CS 340 Databases", "CS 380 Security Fundamentals"],
   outcomes: [
     "Find a real problem and a stakeholder who will work with the team, and scope a project the team can finish in two terms",
     "Discover requirements by interviewing and observing users, and write them as testable stories and measurable non-functional targets",
@@ -101,7 +101,7 @@ writing = 0.15 * total                 # proposal, requirements, design, reports
 build = total - meetings - writing
 print(round(build))                    # 728</code></pre>
 <p>About 730 hours of design, code and testing, for the whole project, both terms. That sounds like a lot until you price features: a login system done properly, with password reset and roles, can take a team 60 hours; a reliable import from a messy spreadsheet, 40. And Lesson 3 shows that first estimates usually come out low. A proposal whose features add up to all 730 hours is already late. Aim for a <strong>core</strong>, the smallest system that does the user's main task end to end (CS 240's minimum viable product), of about a third of the budget, so that it can be in the user's hands by week 11 of this term, and list everything else as ordered extensions for CS 491.</p>
-<p>Write the scope as goals and <strong>non-goals</strong> (WRIT 100 Lesson 7). For the pantry: "Goal: a volunteer at the desk can check in a returning household in under 30 seconds. Goal: Maria can fill next Saturday's shifts without texting anyone. Non-goal: managing donations from grocery stores. Non-goal: a mobile app (the desk has a laptop; volunteers have phone browsers)."</p>
+<p>Write the scope as goals and <strong>non-goals</strong>, the things the project deliberately won't do, stated so that nobody expects them (WRIT 100 Lesson 7 covered this; WRIT 100 is the Year 1 elective, so this course restates each point it uses). For the pantry: "Goal: a volunteer at the desk can check in a returning household in under 30 seconds. Goal: Maria can fill next Saturday's shifts without texting anyone. Non-goal: managing donations from grocery stores. Non-goal: a mobile app (the desk has a laptop; volunteers have phone browsers)."</p>
 
 <h3>Risk</h3>
 <p>A <strong>risk</strong> is something that may happen and would hurt the project. CS 380 Lesson 1 ranked security threats by probability times cost; project risks are ranked the same way, usually with rough ratings from 1 to 5 because the real numbers are unknowable. Capstone risks fall into four groups:</p>
@@ -127,7 +127,7 @@ R4 3 Two members graduate in December</code></pre>
 <p>(Python's sort is stable, so R2 and R3, which tie, keep their original order.) The technical risks at the top are best retired early with a <strong>spike</strong>: a short, time-boxed experiment whose only output is knowledge. Two people spending one afternoon getting a cheap USB scanner to type a card number into a web form turns R2's likelihood from 4 to 1, or tells you in week 3, not week 10, that you need another approach. R3 is answered by design (Lesson 4: the desk must keep working offline). R1 is reduced by having a second contact at the pantry. Revisit the register at every planning meeting: risks change, and new ones appear.</p>
 
 <h3>The proposal</h3>
-<p>The proposal is the first milestone. It asks the instructor and the client to approve the project, so it follows WRIT 100 Lesson 7's rules: the request first, the problem in the reader's terms, evidence, and honest risks. Two to three pages:</p>
+<p>The proposal is the first milestone. It asks the instructor and the client to approve the project, so it follows the usual rules for a proposal (WRIT 100 Lesson 7): the request first, the problem in the reader's terms, evidence, and honest risks. Two to three pages:</p>
 <ol>
 <li><strong>Summary.</strong> One paragraph: the user, the problem, what you'll build, and what "done" looks like at the end of each term.</li>
 <li><strong>The problem and the evidence.</strong> Who has it, how they cope now, and how you know: a first conversation, a look at their spreadsheet, numbers ("about 120 households a week; check-in queues reach 25 minutes").</li>
@@ -485,7 +485,7 @@ print(round(-recent.intercept / recent.slope, 1))      # 16.5</code></pre>
       minutes: 90,
       summary: "Architecture as the decisions that are expensive to change; finding the requirements that drive it; common architectural styles and what each costs; choosing boring technology; context diagrams; what a capstone design document contains; architecture decision records; and how to run, take part in and respond to a design review.",
       notes: `
-<p>CS 240 Lessons 4 and 5 were about design inside a program: cohesion, coupling, patterns. WRIT 100 Lesson 7 showed how to write a design document. This lesson is about the decisions above the code: how the system is divided into parts, where they run, and how they talk. These decisions are made early, with the least information, and are the most expensive to change, so they deserve the most scrutiny. That is what the design review, the third milestone, is for.</p>
+<p>CS 240 Lessons 4 and 5 were about design inside a program: cohesion, coupling, patterns. WRIT 100 Lesson 7, the Year 1 elective, covered writing a design document; the outline is given again below. This lesson is about the decisions above the code: how the system is divided into parts, where they run, and how they talk. These decisions are made early, with the least information, and are the most expensive to change, so they deserve the most scrutiny. That is what the design review, the third milestone, is for.</p>
 
 <h3>What architecture is</h3>
 <p>Every system has an architecture, whether or not anyone chose it. A useful working definition: the architecture is the set of decisions that would be expensive to change later. The choice between a web app and a phone app, the database, what runs on the user's device versus a server, how the system talks to other systems, and how it is deployed are architectural. The name of a function, or which sorting algorithm it uses, usually isn't.</p>
@@ -527,7 +527,7 @@ print(round(-recent.intercept / recent.slope, 1))      # 16.5</code></pre>
 </svg><figcaption>A context diagram: people (rounded) and external systems (square) around the system being built. Each arrow crossing the system's edge is also a place to look for threats (Lesson 7).</figcaption></figure>
 
 <h3>The design document</h3>
-<p>Use WRIT 100 Lesson 7's outline (context, goals and non-goals, the design, alternatives, cross-cutting concerns, open questions). For a capstone, the design section should cover:</p>
+<p>Use the standard outline (WRIT 100 Lesson 7): context, goals and non-goals, the design, alternatives, cross-cutting concerns, open questions. For a capstone, the design section should cover:</p>
 <ul>
 <li><strong>Structure:</strong> the context and container diagrams, and the main modules inside each container with their responsibilities and allowed dependencies (for example, interface → services → storage, never the reverse).</li>
 <li><strong>Data model:</strong> the tables, keys and constraints (CS 340 Lesson 4), with the reasoning for anything denormalized.</li>
@@ -654,7 +654,7 @@ We will store only the birth year of the household's oldest member.
       minutes: 90,
       summary: "What makes teams effective; roles in a capstone team; communication and meetings that work; a review culture that spreads knowledge, measured by the bus factor; handling conflict and uneven contribution; inclusive practice and glue work; and working with an AI coding assistant responsibly.",
       notes: `
-<p>Capstone teams rarely fail for technical reasons. They fail because one person does most of the work and resents it, because a disagreement festers until week 10, because the client hears nothing for a month, or because everyone assumed someone else was handling the deployment. This lesson is about the practices that prevent those failures. They build on CS 240's processes and on the charter from Lesson 1.</p>
+<p>Capstone teams rarely fail for technical reasons. They fail because one person does most of the work and resents it, because a disagreement festers until week 10, because the client hears nothing for a month, or because everyone assumed someone else was handling the deployment. This lesson is about the practices that prevent those failures. They build on CS 240's processes and on the team charter from this course's Lesson 1.</p>
 
 <h3>What makes teams effective</h3>
 <p>In a two-year study it called Project Aristotle, reported in 2015, Google interviewed hundreds of employees and examined more than 180 of its own teams, looking for what distinguished effective ones. Who was on the team (seniority, skills, personalities) mattered less than how the team worked together. The strongest factor was <strong>psychological safety</strong>: whether members believe they can take risks, such as admitting a mistake, asking a basic question or disagreeing, without being embarrassed or punished. The others were dependability (people do what they say, on time), structure and clarity (roles, plans and goals are clear), meaning and impact. The idea of psychological safety comes from Amy Edmondson's research on hospital and manufacturing teams in the 1990s, which found, surprisingly, that better teams <em>reported</em> more errors: not because they made more, but because they felt safe to talk about them.</p>

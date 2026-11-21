@@ -1252,7 +1252,7 @@ CSA.addAsides("math130", {
   ],
   u3: [
     { kind: "history", title: "Newton versus Leibniz", html: `<p>Isaac Newton developed his "method of fluxions" in the 1660s but published little of it. Gottfried Leibniz developed calculus independently and published first, in 1684. A bitter priority dispute followed, and the Royal Society, with Newton as its president, ruled for Newton. Historians now agree they worked independently. Leibniz's notation, dy/dx and ∫, was easier to work with and is the one used today.</p>`, sources: ["mactutorcalc"] },
-    { kind: "practice", title: "Floating point strikes again", html: `<p>Numerical derivatives show the trade-off from CS 101's floating-point sidebar. A large h gives a poor approximation; a tiny h gives rounding noise. Error analysis like this is the subject of numerical analysis, an elective in the Computational Science track.</p>` }
+    { kind: "practice", title: "Floating point strikes again", html: `<p>Numerical derivatives show the trade-off from "Floats are approximate" in CS 101, Values, types and expressions. A large h gives a poor approximation; a tiny h gives rounding noise. Error analysis like this is the subject of numerical analysis, an elective in the Computational Science track.</p>` }
   ],
   chain: [
     { kind: "practice", title: "Automatic differentiation", html: `<p>Machine learning libraries such as PyTorch and JAX compute exact derivatives of programs, not by symbolic algebra and not by small-h approximation, but by applying the chain rule to every operation as the program runs. This technique, automatic differentiation, is why you can train a model without ever writing a derivative by hand.</p>` }

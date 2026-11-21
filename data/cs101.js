@@ -2585,7 +2585,7 @@ def has_duplicate_fast(xs):     # O(n): one pass with a set
     <tr><td>Slot</td><td>4</td><td>7</td><td>1</td><td>4: already taken by 12</td></tr>
   </tbody>
 </table>
-<p>Two keys landing in the same slot is called a <strong>collision</strong>. One simple fix is to let each slot hold a short list: slot 4 holds <code>[12, 20]</code>. To check <code>20 in table</code>, compute 20 % 8 = 4 and look only through slot 4's two keys, never the rest. When the table fills up, it doubles its number of slots and reinserts everything, which keeps the lists short. That's why lookups are O(1) <em>on average</em>: a few steps, however many keys there are. (Python's real tables resolve collisions a little differently, by trying another slot, but the idea is the same.) You'll build hash tables yourself in CS 102 and Data Structures. You can see the difference in speed yourself:</p>
+<p>Two keys landing in the same slot is called a <strong>collision</strong>. One simple fix is to let each slot hold a short list: slot 4 holds <code>[12, 20]</code>. To check <code>20 in table</code>, compute 20 % 8 = 4 and look only through slot 4's two keys, never the rest. When the table fills up, it doubles its number of slots and reinserts everything, which keeps the lists short. That's why lookups are O(1) <em>on average</em>: a few steps, however many keys there are. (Python's real tables resolve collisions a little differently, by trying another slot, but the idea is the same.) You'll build hash tables yourself in Data Structures (CS 201). You can see the difference in speed yourself:</p>
 <pre><code>import time
 
 n = 1_000_000

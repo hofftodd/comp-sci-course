@@ -499,7 +499,7 @@ for seed in range(1000):
     run([increment(5), increment(5)], seed=seed)
     lost += shared["count"] != 10
 print(lost)   # 975</code></pre>
-<p>How many interleavings are there? If two threads take <em>m</em> and <em>n</em> atomic steps, an interleaving is a choice of which <em>m</em> of the <em>m</em> + <em>n</em> positions belong to the first thread: C(<em>m</em> + <em>n</em>, <em>m</em>) of them (MATH 120's binomial coefficient). Two threads of 3 steps have C(6, 3) = 20; two of 10 steps have C(20, 10) = 184,756. Testing them all is possible only for tiny programs; that is why concurrent code must be correct by design, with every shared access protected, rather than "tested until it seems to work".</p>
+<p>How many interleavings are there? If two threads take <em>m</em> and <em>n</em> atomic steps, an interleaving is a choice of which <em>m</em> of the <em>m</em> + <em>n</em> positions belong to the first thread: C(<em>m</em> + <em>n</em>, <em>m</em>) of them (MATH 121 Lesson 2's binomial coefficient). Two threads of 3 steps have C(6, 3) = 20; two of 10 steps have C(20, 10) = 184,756. Testing them all is possible only for tiny programs; that is why concurrent code must be correct by design, with every shared access protected, rather than "tested until it seems to work".</p>
 
 <h3>A lock for simulated threads</h3>
 <p>The programming problems use this lock with the simulator:</p>
