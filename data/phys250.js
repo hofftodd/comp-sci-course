@@ -276,12 +276,11 @@ print(round(ex, 3), round(K * 1e-9 / 0.5**2, 3))   # 35.96 35.96</code></pre>
         grid = new
     return grid
 
-# a 1 cm square box, 21 x 21 grid: the top edge at 10 V, the other three edges at 0 V
+# a 1 cm square box, 21 x 21 grid: row 0 (the top edge, both corners included) at 10 V,
+# every other boundary point at 0 V. No interior average uses a corner, so the corners'
+# values don't affect the answer.
 n = 21
 grid = [[10.0 if i == 0 else 0.0 for j in range(n)] for i in range(n)]
-for j in (0, n - 1):
-    for i in range(1, n):
-        grid[i][j] = 0.0
 fixed = {(i, j) for i in range(n) for j in range(n) if i in (0, n - 1) or j in (0, n - 1)}
 v = relax(grid, fixed, 2000)
 print(round(v[n // 2][n // 2], 3))   # 2.5</code></pre>

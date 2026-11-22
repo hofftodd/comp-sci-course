@@ -1038,7 +1038,7 @@ print(handle("GET", "/books/99"))                           # (404, {'error': 'n
 <p>Every mistake is cheapest to fix right after it's made (Lesson 1). This lesson is about systems that catch mistakes within minutes: machines that check every change automatically, and colleagues who read it.</p>
 
 <h3>Continuous integration</h3>
-<p><strong>Continuous integration</strong> (CI) means that everyone merges their work into the shared main branch often, at least daily, and that every change is automatically built and tested on a clean machine before it's merged. A CI service (GitHub Actions, GitLab CI and others) watches the repository; on every push or pull request it starts a fresh <strong>virtual machine</strong> (a complete simulated computer, with its own operating system and disk, run as a program on a real server; it has nothing to do with CS 230's virtual memory except the idea of a convincing imitation), so every run begins from the same clean state. It checks out the code, installs the dependencies and runs a <strong>pipeline</strong> of checks. The result appears on the pull request as a green tick or a red cross, and a protected main branch accepts only green changes.</p>
+<p><strong>Continuous integration</strong> (CI) means that everyone merges their work into the shared main branch often, at least daily, and that every change is automatically built and tested on a clean machine before it's merged. A CI service (GitHub Actions, GitLab CI and others) watches the repository; on every push or pull request it starts a fresh <strong>virtual machine</strong> (a complete simulated computer, with its own operating system and disk, run as a program on a real server; it has nothing to do with CS 230's virtual memory except the idea of a convincing imitation), so every run begins from the same clean state. It checks out the code, installs the dependencies and runs a <strong>pipeline</strong> of checks: steps run in order, and a failing step stops the rest. (The word is borrowed loosely; CS 230's processor pipeline overlaps its stages on different instructions, while a CI pipeline runs its steps one after another.) The result appears on the pull request as a green tick or a red cross, and a protected main branch accepts only green changes.</p>
 <p>A pipeline is configured in a file in the repository, usually in YAML. This GitHub Actions workflow runs the checks on every push and pull request:</p>
 <pre data-label=".github/workflows/ci.yml"><code>name: CI
 on: [push, pull_request]
@@ -1118,7 +1118,7 @@ for line, msg in lint(SOURCE):
 <p>As an <strong>author</strong>:</p>
 <ul>
 <li>Keep changes small. Reviewers find a much larger share of the problems in a 100-line change than in a 1,000-line one, which tends to get skimmed and approved.</li>
-<li>Describe what the change does and why, and how you tested it (Lesson 2).</li>
+<li>Describe what the change does and why (as in a commit message, Lesson 2), and how you tested it.</li>
 <li>Review your own diff first. Make sure CI is green before asking for review.</li>
 <li>Treat comments as being about the code. If you disagree, explain; if a discussion goes in circles, talk in person.</li>
 </ul>
