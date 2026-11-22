@@ -638,17 +638,17 @@ print(boots[250], boots[9749])    # 1.05 1.35: the middle 95% of the bootstrap m
 random.seed(1)
 visitors = [1] * 225 + [0] * 1775          # 1 = bought, pooled over A and B
 observed = 125 / 1000 - 100 / 1000
-extreme, trials = 0, 20_000
+extreme, trials = 0, 5_000
 for _ in range(trials):
     random.shuffle(visitors)
     diff = sum(visitors[1000:]) / 1000 - sum(visitors[:1000]) / 1000
     if abs(diff) &gt;= observed - 1e-12:      # small tolerance for float rounding
         extreme += 1
-print(extreme / trials)    # about 0.087</code></pre>
-<p>About 9% of random shuffles produce a gap of 2.5 points or more. So a difference this size happens fairly often by chance alone, and by the 0.05 convention this test is <em>not</em> significant. That doesn't show B is no better; the experiment was too small to tell.</p>
+print(extreme / trials)    # about 0.085</code></pre>
+<p>About 8.5% of random shuffles produce a gap of 2.5 points or more. So a difference this size happens fairly often by chance alone, and by the 0.05 convention this test is <em>not</em> significant. That doesn't show B is no better; the experiment was too small to tell.</p>
 
 <h3>The z-test for two proportions</h3>
-<p>The CLT gives the same answer without simulation. Under <em>H</em><sub>0</sub>, both groups share the pooled rate <em>p</em> = 225/2000 = 0.1125, and the difference of two proportions has standard error √(<em>p</em>(1 − <em>p</em>)(1/1000 + 1/1000)) ≈ 0.0141. The observed difference is 0.025/0.0141 ≈ 1.77 standard errors, and a standard normal is at least that far from 0 with probability about 0.077. The two methods agree roughly (0.077 versus 0.087); the permutation test makes fewer assumptions.</p>
+<p>The CLT gives the same answer without simulation. Under <em>H</em><sub>0</sub>, both groups share the pooled rate <em>p</em> = 225/2000 = 0.1125, and the difference of two proportions has standard error √(<em>p</em>(1 − <em>p</em>)(1/1000 + 1/1000)) ≈ 0.0141. The observed difference is 0.025/0.0141 ≈ 1.77 standard errors, and a standard normal is at least that far from 0 with probability about 0.077. The two methods agree roughly (0.077 versus 0.085); the permutation test makes fewer assumptions.</p>
 <p><strong>Two-sided and one-sided tests.</strong> Both p-values above are <strong>two-sided</strong>: they count results at least as extreme in <em>either</em> direction, B ahead of A by 2.5 points or more, or A ahead of B by as much. That is the right choice when a difference either way would matter, and it is the usual default. A <strong>one-sided</strong> test counts only one direction, which must be chosen before seeing the data (for example, only "B ahead"). When the distribution under <em>H</em><sub>0</sub> is symmetric, as here, the one-sided p-value is half the two-sided one: about 0.038 for the z-test. Picking the direction after seeing which way the data went would halve the p-value for free, which is a form of p-hacking (below). This course uses two-sided tests.</p>
 
 <h3>Two kinds of error, and power</h3>

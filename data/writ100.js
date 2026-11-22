@@ -804,7 +804,7 @@ all of them; three tries keeps the worst case under 10 seconds.</code></pre>
 <ol>
 <li><strong>Purpose and reader.</strong> Does the draft do what it's for, for the reader it's for (Lesson 1)? Is anything they need missing? Is anything there they don't need?</li>
 <li><strong>Structure.</strong> Is the main point first? Make a reverse outline (Lesson 3). Do sections and paragraphs follow a logic? Does each paragraph have a point?</li>
-<li><strong>Paragraphs and sentences.</strong> Topic sentences, transitions, actors and actions, needless words, precise terms (Lesson 2).</li>
+<li><strong>Paragraphs and sentences.</strong> Topic sentences and transitions (Lesson 3); actors and actions, needless words, precise terms (Lesson 2).</li>
 <li><strong>Proofreading.</strong> Spelling, punctuation, consistent formatting, correct names and numbers, working links, code that runs.</li>
 </ol>
 <p>Two habits make every pass work better. <strong>Let the draft rest</strong>: even a few hours away lets you read what you wrote rather than what you meant. And <strong>read it aloud</strong>, or have your computer read it to you: your ear catches clumsy sentences, missing words and repetition that your eye skips.</p>

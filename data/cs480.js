@@ -361,7 +361,7 @@ print(round(math.exp(eps), 4))          # 1.6487</code></pre>
 <p>"High risk" means the same thing in both groups (48/80 = 12/20 = 60% reoffended), and so does "low risk" (2/20 = 8/80 = 10%). But among people who did not reoffend, 32 of A's 50 were labeled high risk (64%) against 8 of B's 80 (10%). CS 370 Lesson 5 defined the confusion matrix, precision and recall. This lesson turns the example into a theorem, and then asks what the law says about unequal outcomes.</p>
 
 <h3>Fairness metrics</h3>
-<p>Fix a classifier that labels each person positive (approve, hire, flag) or negative, and split the test set by group. Each group gets its own confusion matrix (TP, FP, FN, TN), and each common fairness definition asks that one rate be equal across groups:</p>
+<p>Fix a classifier that labels each person positive (approve, hire, flag) or negative, and split the test set by group (a disaggregated evaluation). Each group gets its own confusion matrix (TP, FP, FN, TN), and each common fairness definition asks that one rate be equal across groups:</p>
 <table>
 <tr><th>Definition</th><th>Equal across groups</th><th>Formula</th></tr>
 <tr><td>Demographic parity</td><td>Selection rate</td><td>(TP + FP)/<em>n</em></td></tr>
